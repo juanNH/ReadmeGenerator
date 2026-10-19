@@ -1,0 +1,112 @@
+{
+  "Metadata": {
+    "title": "GitHub Profile Generator",
+    "description": "A visual way to tell your story on GitHub. Showcase your knowledge, education, projects and contributions with optional profile sections."
+  },
+  "Navigation": {
+    "home": "GitHub Profile Generator home",
+    "main": "Main navigation",
+    "modules": "Modules",
+    "howItWorks": "How it works",
+    "designSystem": "Design system",
+    "skip": "Skip to content"
+  },
+  "Controls": {
+    "theme": "Toggle dark mode",
+    "language": "Language",
+    "changingLanguage": "Changing language…"
+  },
+  "Home": {
+    "eyebrow": "Your experience, thoughtfully presented",
+    "title": "A GitHub profile.",
+    "titleAccent": "On your terms.",
+    "description": "Bring your knowledge, learning and work together. Choose the sections that tell your story, wherever you are in your journey.",
+    "primary": "Explore the modules",
+    "secondary": "Explore the design system",
+    "note": "Explore the building blocks in this early preview. The profile editor is coming next.",
+    "previewLabel": "Example profile",
+    "previewName": "Alex Rivera",
+    "previewRole": "Full stack developer · Argentina",
+    "previewBio": "I build thoughtful experiences for the web and mobile. Always curious about what comes next.",
+    "previewKnowledge": "What I can help with",
+    "previewCapabilityOne": "Building accessible interfaces",
+    "previewCapabilityTwo": "Creating mobile experiences",
+    "previewTechnologies": "Tools I work with",
+    "previewLearning": "Currently exploring",
+    "previewEducation": "Education & learning",
+    "previewEducationValue": "Software development · In progress",
+    "previewCaption": "One possible composition. Every section is a choice.",
+    "principlesLabel": "A place for every kind of developer",
+    "principleOne": "Knowledge has its own space",
+    "principleTwo": "Every module is optional",
+    "principleThree": "Your story can grow with you",
+    "modulesEyebrow": "The building blocks",
+    "modulesTitle": "Make room for what matters to you.",
+    "modulesDescription": "Start with a small introduction or give your work more context. These nine sections adapt to what you want to share.",
+    "optional": "Optional",
+    "modules": {
+      "presentation": {
+        "title": "A little about you",
+        "description": "Your name, interests and a short introduction in your own words."
+      },
+      "knowledge": {
+        "title": "What you know",
+        "description": "Describe the things you can do and the problems you like solving."
+      },
+      "technologies": {
+        "title": "Technologies & tools",
+        "description": "Group your tools and add context about how you use them."
+      },
+      "education": {
+        "title": "Education & training",
+        "description": "Make space for your degree, ongoing studies, courses and certifications."
+      },
+      "current": {
+        "title": "Right now",
+        "description": "Share what you are learning, building or looking to collaborate on."
+      },
+      "projects": {
+        "title": "Selected projects",
+        "description": "Show your work, explain your role and share what you learned."
+      },
+      "contributions": {
+        "title": "Contributions",
+        "description": "Highlight meaningful improvements, reviews and collaborations."
+      },
+      "metrics": {
+        "title": "GitHub activity",
+        "description": "Choose the public activity and statistics you want to include."
+      },
+      "contact": {
+        "title": "Let's connect",
+        "description": "Bring your portfolio, professional networks and contact links together."
+      }
+    },
+    "processEyebrow": "One choice at a time",
+    "processTitle": "A clear path to a profile that feels like you.",
+    "steps": {
+      "choose": {
+        "title": "Choose your focus",
+        "description": "Knowledge, projects, contributions — pick what you want to highlight."
+      },
+      "compose": {
+        "title": "Tell your story",
+        "description": "Add the sections you need and complete them at your own pace."
+      },
+      "personalize": {
+        "title": "Make it yours",
+        "description": "Find an order and style that make your story easy to read."
+      }
+    },
+    "closingTitle": "A little space. A better first impression.",
+    "closingDescription": "Clear content, purposeful details and a design that leaves room for you.",
+    "closingAction": "See the visual foundations",
+    "footer": "Built around people, at every stage.",
+    "footerNote": "Independent project. Not affiliated with GitHub."
+  },
+  "NotFound": {
+    "title": "This page isn't here.",
+    "description": "The address may have changed. You can return to the home page and continue from there.",
+    "action": "Back to home"
+  }
+}

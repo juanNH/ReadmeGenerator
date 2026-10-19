@@ -1,0 +1,112 @@
+{
+  "Metadata": {
+    "title": "GitHub Profile Generator",
+    "description": "Una forma visual de contar tu historia en GitHub. Mostrá tus conocimientos, estudios, proyectos y contribuciones con secciones opcionales."
+  },
+  "Navigation": {
+    "home": "Inicio de GitHub Profile Generator",
+    "main": "Navegación principal",
+    "modules": "Módulos",
+    "howItWorks": "Cómo funciona",
+    "designSystem": "Sistema de diseño",
+    "skip": "Saltar al contenido"
+  },
+  "Controls": {
+    "theme": "Activar o desactivar el modo oscuro",
+    "language": "Idioma",
+    "changingLanguage": "Cambiando de idioma…"
+  },
+  "Home": {
+    "eyebrow": "Tu experiencia, bien presentada",
+    "title": "Tu perfil de GitHub.",
+    "titleAccent": "A tu manera.",
+    "description": "Reuní tus conocimientos, aprendizajes y trabajo. Elegí las secciones que cuentan tu historia, en cualquier etapa de tu recorrido.",
+    "primary": "Explorar los módulos",
+    "secondary": "Explorar el sistema de diseño",
+    "note": "Explorá las piezas de tu perfil en esta vista inicial. El editor llega en las próximas etapas.",
+    "previewLabel": "Perfil de ejemplo",
+    "previewName": "Alex Rivera",
+    "previewRole": "Desarrollo full stack · Argentina",
+    "previewBio": "Creo experiencias cuidadas para web y dispositivos móviles. Siempre con curiosidad por lo que viene.",
+    "previewKnowledge": "En qué puedo ayudarte",
+    "previewCapabilityOne": "Construcción de interfaces accesibles",
+    "previewCapabilityTwo": "Desarrollo de experiencias móviles",
+    "previewTechnologies": "Herramientas que utilizo",
+    "previewLearning": "Estoy explorando",
+    "previewEducation": "Estudios y formación",
+    "previewEducationValue": "Desarrollo de software · En curso",
+    "previewCaption": "Una composición posible. Cada sección es una elección.",
+    "principlesLabel": "Un lugar para cada perfil de desarrollo",
+    "principleOne": "Tus conocimientos tienen su espacio",
+    "principleTwo": "Todos los módulos son opcionales",
+    "principleThree": "Tu historia puede crecer con vos",
+    "modulesEyebrow": "Las piezas de tu perfil",
+    "modulesTitle": "Dale lugar a lo que te importa.",
+    "modulesDescription": "Empezá con una presentación breve o contá más sobre tu trabajo. Estas nueve secciones se adaptan a lo que querés compartir.",
+    "optional": "Opcional",
+    "modules": {
+      "presentation": {
+        "title": "Un poco sobre vos",
+        "description": "Tu nombre, intereses y una presentación breve con tus propias palabras."
+      },
+      "knowledge": {
+        "title": "Lo que sabés",
+        "description": "Contá qué podés hacer y qué problemas te gusta resolver."
+      },
+      "technologies": {
+        "title": "Tecnologías y herramientas",
+        "description": "Agrupá tus herramientas y explicá cómo las utilizás."
+      },
+      "education": {
+        "title": "Estudios y formación",
+        "description": "Dale lugar a tu carrera, estudios en curso, capacitaciones y certificaciones."
+      },
+      "current": {
+        "title": "Actualmente",
+        "description": "Compartí qué estás aprendiendo, construyendo o buscando para colaborar."
+      },
+      "projects": {
+        "title": "Proyectos elegidos",
+        "description": "Mostrá tu trabajo, explicá tu participación y compartí lo que aprendiste."
+      },
+      "contributions": {
+        "title": "Contribuciones",
+        "description": "Destacá mejoras, revisiones y colaboraciones que te representan."
+      },
+      "metrics": {
+        "title": "Actividad en GitHub",
+        "description": "Elegí qué actividad pública y estadísticas querés incluir."
+      },
+      "contact": {
+        "title": "Conectemos",
+        "description": "Reuní tu portfolio, redes profesionales y enlaces de contacto."
+      }
+    },
+    "processEyebrow": "Una elección a la vez",
+    "processTitle": "Un camino claro hacia un perfil que te represente.",
+    "steps": {
+      "choose": {
+        "title": "Elegí tu enfoque",
+        "description": "Conocimientos, proyectos, contribuciones: elegí qué querés destacar."
+      },
+      "compose": {
+        "title": "Contá tu historia",
+        "description": "Agregá las secciones que necesitás y completalas a tu ritmo."
+      },
+      "personalize": {
+        "title": "Dale tu estilo",
+        "description": "Encontrá un orden y un estilo que hagan tu historia fácil de leer."
+      }
+    },
+    "closingTitle": "Un pequeño espacio. Una mejor presentación.",
+    "closingDescription": "Contenido claro, detalles cuidados y un diseño que te da lugar.",
+    "closingAction": "Ver las bases visuales",
+    "footer": "Pensado para personas, en cada etapa.",
+    "footerNote": "Proyecto independiente. Sin afiliación con GitHub."
+  },
+  "NotFound": {
+    "title": "Esta página no está acá.",
+    "description": "La dirección puede haber cambiado. Podés volver al inicio y continuar desde ahí.",
+    "action": "Volver al inicio"
+  }
+}

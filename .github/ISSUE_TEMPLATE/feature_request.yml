@@ -1,0 +1,35 @@
+name: Proponer una mejora
+description: Presentar una necesidad y un resultado observable.
+title: "[Propuesta]: "
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: Necesidad de la persona
+      description: ¿Quién necesita la mejora y qué quiere lograr?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Propuesta
+      description: Describí el comportamiento que imaginás sin exigir una solución técnica específica.
+    validations:
+      required: true
+  - type: textarea
+    id: success
+    attributes:
+      label: Criterio de éxito
+      description: ¿Qué tendría que poder hacer la persona para considerar resuelta la necesidad?
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Relación con el producto
+      description: Módulo o paso del recorrido relacionado y alternativas que consideraste. No adjuntes planificación interna.
+  - type: textarea
+    id: accessibility
+    attributes:
+      label: Interfaz y accesibilidad
+      description: Consideraciones para teclado, lectura, pantallas angostas o comprensión, cuando corresponda.

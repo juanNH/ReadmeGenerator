@@ -1,0 +1,48 @@
+name: Informar un error
+description: Describir un problema reproducible en el alcance disponible.
+title: "[Error]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Indicá qué ocurrió y cómo reproducirlo. Usá ejemplos ficticios y evitá incluir credenciales o información privada.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problema
+      description: ¿Qué estabas intentando hacer y qué sucedió?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Pasos para reproducir
+      placeholder: |
+        1. Abrir la ruta...
+        2. Activar el control...
+        3. Observar...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Resultado esperado
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Resultado actual
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Entorno
+      description: Navegador, sistema y tamaño de pantalla; versión o commit si se conoce.
+      placeholder: "Navegador y versión, sistema, ruta afectada"
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidencia y contexto adicional
+      description: Capturas, errores o detalles de teclado y accesibilidad que ayuden a reproducir el problema.

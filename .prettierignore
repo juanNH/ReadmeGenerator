@@ -1,0 +1,13 @@
+node_modules
+.next
+out
+build
+coverage
+work
+.private
+pnpm-lock.yaml
+next-env.d.ts
+playwright-report
+test-results
+blob-report
+*.tsbuildinfo
