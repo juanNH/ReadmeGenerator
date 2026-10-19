@@ -1,5 +1,4 @@
 import {
-  ArrowDown,
   ArrowRight,
   ArrowUpRight,
   AtSign,
@@ -58,10 +57,10 @@ export async function HomePage() {
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <Button asChild size="lg">
-                <a href="#modules">
+                <Link href="/editor">
                   {t("primary")}
-                  <ArrowDown aria-hidden="true" />
-                </a>
+                  <ArrowRight aria-hidden="true" />
+                </Link>
               </Button>
               <Button asChild variant="ghost">
                 <Link href="/design-system">

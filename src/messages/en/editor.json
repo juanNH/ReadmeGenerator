@@ -1,0 +1,102 @@
+{
+  "metaTitle": "Profile editor",
+  "metaDescription": "Create your GitHub profile README with optional sections, a live preview and a draft saved in your browser.",
+  "pageEyebrow": "Your profile, your story",
+  "pageTitle": "Build a profile that feels like you.",
+  "pageDescription": "Start with a short introduction or a way to connect. Every section is optional, and you can change your mind along the way.",
+  "workspaceTitle": "Make it yours",
+  "workspaceDescription": "Choose what you want to share. A few words are enough to start.",
+  "sectionsTitle": "1. Choose your sections",
+  "sectionsDescription": "Pick either section, both, or keep exploring. No GitHub activity is required.",
+  "sectionHelp": {
+    "presentation": "Introduce yourself, your interests or what you enjoy building.",
+    "contact": "Share a portfolio, social profile or email address."
+  },
+  "hiddenHelp": "Unchecking a section hides it from your README and keeps everything you wrote.",
+  "contentLanguage": "README language",
+  "contentLanguageHelp": "Changes generated headings, such as Contact. Your writing stays as you entered it, even when you switch the app language.",
+  "languageOptions": {
+    "en": "English",
+    "es": "Español"
+  },
+  "presentation": {
+    "description": "2. Tell your story. Fill in what feels useful and leave the rest blank.",
+    "displayName": "Display name",
+    "displayNameHelp": "The name you would like people to see.",
+    "displayNamePlaceholder": "Alex Rivera",
+    "headline": "Headline",
+    "headlineHelp": "A short description of what you do or want to explore.",
+    "headlinePlaceholder": "Developer who enjoys accessible web experiences",
+    "bio": "About you",
+    "bioHelp": "Write a few lines in your own words. Text is kept as text, so no Markdown or HTML is needed.",
+    "bioPlaceholder": "I enjoy turning ideas into useful tools. Currently learning more about design and the web.",
+    "location": "Location",
+    "locationHelp": "A city, country or time zone, only if you want to share it.",
+    "locationPlaceholder": "Argentina"
+  },
+  "contact": {
+    "description": "2. Make it easy to connect. Add only the links you want to share publicly.",
+    "empty": "A portfolio, LinkedIn profile or email is a good place to start. You can also leave this section empty.",
+    "entry": "Link {number}",
+    "label": "Link label",
+    "labelHelp": "For example, Portfolio or LinkedIn. Leave it blank to show the address.",
+    "labelPlaceholder": "Portfolio",
+    "url": "URL",
+    "urlHelp": "Use a full https:// or http:// address, or mailto:hello@example.com for email.",
+    "urlPlaceholder": "https://example.com",
+    "invalidUrl": "Enter a full http:// or https:// address, or a valid mailto: email link. You can also clear both fields or remove the link.",
+    "add": "Add link",
+    "remove": "Remove link {number}",
+    "removeVisible": "Remove link"
+  },
+  "storage": {
+    "loading": "Opening your draft…",
+    "loadingHelp": "Please wait while we check for a saved draft. Editing will be available in a moment.",
+    "new": "New draft",
+    "restored": "Draft restored",
+    "saving": "Saving on this browser…",
+    "saved": "Saved on this browser",
+    "invalid": "Saved draft needs attention",
+    "unavailable": "Editing without local saving",
+    "invalidTitle": "We could not open the saved draft",
+    "invalidHelp": "The original saved data has been kept. You can create and export a profile here, but changes will stay in memory until you choose to start a new saved draft.",
+    "unavailableTitle": "This browser could not save your draft",
+    "unavailableHelp": "You can keep editing and export your README. Your changes stay in memory while you switch app languages, but will be lost if you reload or close this page. Existing saved data will not be replaced automatically.",
+    "writeFailureTitle": "Recent changes could not be saved",
+    "writeFailureHelp": "Your changes are still here, including when you switch app languages, but this browser could not save them. Download your README before reloading or closing this page to keep your work.",
+    "startNew": "Start a new saved draft",
+    "resetConfirmation": "Start a new saved draft? This clears the profile currently on screen and replaces any previous draft saved by this app in this browser. Download your README first if you want to keep it.",
+    "privacy": "Your draft is stored in this browser only. It is not synced to other devices, and clearing browser data removes it. Export before leaving if saving is unavailable."
+  },
+  "preview": {
+    "title": "3. Preview & export",
+    "description": "The same content goes into your copied and downloaded README. GitHub may display spacing and typography differently.",
+    "fileLabel": "Live preview",
+    "documentLabel": "README preview",
+    "loading": "Loading the README preview",
+    "emptyTitle": "A little about you goes a long way",
+    "emptyDescription": "Choose a section and add some text or a link. Your README will appear here.",
+    "reviewTitle": "Your draft is safe here",
+    "reviewDescription": "Review the message below to prepare your README for export."
+  },
+  "export": {
+    "empty": "Choose a section and add at least some text or a link to enable copy and download.",
+    "unsupported": "This draft includes a visible section this editor cannot export yet. The saved content has been kept, but export is unavailable for this draft.",
+    "invalidLinks": "Check the highlighted contact links before copying or downloading. No content has been removed.",
+    "ready": "Ready when you are. Copy the Markdown or download your README.md file.",
+    "copy": "Copy README",
+    "copying": "Copying…",
+    "download": "Download README",
+    "feedback": {
+      "copied": "README copied to your clipboard.",
+      "copyError": "We could not copy to your clipboard. Try downloading the README instead.",
+      "downloaded": "README download started.",
+      "downloadError": "The download could not start. Try copying your README instead."
+    }
+  },
+  "publish": {
+    "title": "Bring it to your GitHub profile",
+    "instructions": "In a public repository named exactly like your GitHub username, place README.md at the root. Paste your copied text or upload the downloaded file. Review it before publishing.",
+    "guide": "Read GitHub’s profile README guide"
+  }
+}

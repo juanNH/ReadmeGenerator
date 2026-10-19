@@ -9,6 +9,7 @@
     "modules": "Módulos",
     "howItWorks": "Cómo funciona",
     "designSystem": "Sistema de diseño",
+    "editor": "Crear tu perfil",
     "skip": "Saltar al contenido"
   },
   "Controls": {
@@ -16,14 +17,25 @@
     "language": "Idioma",
     "changingLanguage": "Cambiando de idioma…"
   },
+  "Modules": {
+    "presentation": "Presentación",
+    "knowledge": "Conocimientos",
+    "technologies": "Tecnologías y herramientas",
+    "education": "Formación",
+    "current": "Actualidad",
+    "projects": "Proyectos",
+    "contributions": "Contribuciones",
+    "metrics": "Actividad de GitHub",
+    "contact": "Contacto"
+  },
   "Home": {
     "eyebrow": "Tu experiencia, bien presentada",
     "title": "Tu perfil de GitHub.",
     "titleAccent": "A tu manera.",
     "description": "Reuní tus conocimientos, aprendizajes y trabajo. Elegí las secciones que cuentan tu historia, en cualquier etapa de tu recorrido.",
-    "primary": "Explorar los módulos",
+    "primary": "Crear tu perfil",
     "secondary": "Explorar el sistema de diseño",
-    "note": "Explorá las piezas de tu perfil en esta vista inicial. El editor llega en las próximas etapas.",
+    "note": "Empezá con una presentación y enlaces de contacto. Sin crear una cuenta. Tu borrador queda en este navegador.",
     "previewLabel": "Perfil de ejemplo",
     "previewName": "Alex Rivera",
     "previewRole": "Desarrollo full stack · Argentina",
@@ -42,7 +54,7 @@
     "principleThree": "Tu historia puede crecer con vos",
     "modulesEyebrow": "Las piezas de tu perfil",
     "modulesTitle": "Dale lugar a lo que te importa.",
-    "modulesDescription": "Empezá con una presentación breve o contá más sobre tu trabajo. Estas nueve secciones se adaptan a lo que querés compartir.",
+    "modulesDescription": "Conocé las nueve piezas del perfil. El editor incluye presentación y contacto; las otras secciones forman parte de la propuesta del producto.",
     "optional": "Opcional",
     "modules": {
       "presentation": {

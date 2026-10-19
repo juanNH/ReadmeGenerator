@@ -3,6 +3,8 @@ import english from "@/messages/en.json";
 import spanish from "@/messages/es.json";
 import englishDesign from "@/messages/en/design-system.json";
 import spanishDesign from "@/messages/es/design-system.json";
+import englishEditor from "@/messages/en/editor.json";
+import spanishEditor from "@/messages/es/editor.json";
 
 function messageEntries(value: object, prefix = ""): Array<[string, string]> {
   return Object.entries(value).flatMap(([key, message]) => {
@@ -19,6 +21,7 @@ describe("translation contracts", () => {
   it.each([
     ["shared interface", english, spanish],
     ["design system", englishDesign, spanishDesign],
+    ["profile editor", englishEditor, spanishEditor],
   ])("keeps complete English and Spanish messages for %s", (_name, en, es) => {
     const englishEntries = messageEntries(en);
     const spanishEntries = new Map(messageEntries(es));

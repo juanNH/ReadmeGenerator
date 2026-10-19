@@ -9,6 +9,7 @@
     "modules": "Modules",
     "howItWorks": "How it works",
     "designSystem": "Design system",
+    "editor": "Create your profile",
     "skip": "Skip to content"
   },
   "Controls": {
@@ -16,14 +17,25 @@
     "language": "Language",
     "changingLanguage": "Changing language…"
   },
+  "Modules": {
+    "presentation": "About you",
+    "knowledge": "Knowledge",
+    "technologies": "Technologies & tools",
+    "education": "Education & training",
+    "current": "Right now",
+    "projects": "Projects",
+    "contributions": "Contributions",
+    "metrics": "GitHub activity",
+    "contact": "Contact"
+  },
   "Home": {
     "eyebrow": "Your experience, thoughtfully presented",
     "title": "A GitHub profile.",
     "titleAccent": "On your terms.",
     "description": "Bring your knowledge, learning and work together. Choose the sections that tell your story, wherever you are in your journey.",
-    "primary": "Explore the modules",
+    "primary": "Create your profile",
     "secondary": "Explore the design system",
-    "note": "Explore the building blocks in this early preview. The profile editor is coming next.",
+    "note": "Start with an introduction and contact links. No account needed. Your draft stays in this browser.",
     "previewLabel": "Example profile",
     "previewName": "Alex Rivera",
     "previewRole": "Full stack developer · Argentina",
@@ -42,7 +54,7 @@
     "principleThree": "Your story can grow with you",
     "modulesEyebrow": "The building blocks",
     "modulesTitle": "Make room for what matters to you.",
-    "modulesDescription": "Start with a small introduction or give your work more context. These nine sections adapt to what you want to share.",
+    "modulesDescription": "Explore the nine building blocks. The editor currently includes your introduction and contact links; the other sections are part of the product vision.",
     "optional": "Optional",
     "modules": {
       "presentation": {

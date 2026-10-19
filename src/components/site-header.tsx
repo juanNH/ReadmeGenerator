@@ -33,10 +33,10 @@ export async function SiteHeader() {
             {t("modules")}
           </Link>
           <Link
-            href="/#how-it-works"
-            className="flex min-h-11 items-center text-muted-foreground transition-colors hover:text-foreground"
+            href="/editor"
+            className="flex min-h-11 items-center font-medium text-accent transition-colors hover:text-foreground"
           >
-            {t("howItWorks")}
+            {t("editor")}
           </Link>
           <Link href="/design-system" className="flex min-h-11 items-center gap-1.5 font-medium">
             {t("designSystem")}

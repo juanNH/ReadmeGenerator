@@ -1,0 +1,102 @@
+{
+  "metaTitle": "Editor de perfil",
+  "metaDescription": "Creá el README de tu perfil de GitHub con secciones opcionales, vista previa y un borrador guardado en tu navegador.",
+  "pageEyebrow": "Tu perfil, tu historia",
+  "pageTitle": "Creá un perfil que te represente.",
+  "pageDescription": "Empezá con una presentación breve o una forma de contacto. Todas las secciones son opcionales y podés cambiar de idea durante el proceso.",
+  "workspaceTitle": "Dale tu toque",
+  "workspaceDescription": "Elegí qué querés compartir. Unas pocas palabras alcanzan para empezar.",
+  "sectionsTitle": "1. Elegí tus secciones",
+  "sectionsDescription": "Podés elegir una sección, ambas o seguir explorando. No necesitás actividad en GitHub.",
+  "sectionHelp": {
+    "presentation": "Presentate, contá tus intereses o qué disfrutás crear.",
+    "contact": "Compartí un portfolio, un perfil social o un correo."
+  },
+  "hiddenHelp": "Desmarcar una sección la oculta del README y conserva todo lo que escribiste.",
+  "contentLanguage": "Idioma del README",
+  "contentLanguageHelp": "Cambia los títulos generados, como Contacto. Tus textos se conservan tal como los escribiste, incluso si cambiás el idioma de la aplicación.",
+  "languageOptions": {
+    "en": "English",
+    "es": "Español"
+  },
+  "presentation": {
+    "description": "2. Contá tu historia. Completá lo que te resulte útil y dejá el resto vacío.",
+    "displayName": "Nombre para mostrar",
+    "displayNameHelp": "El nombre con el que querés que te conozcan.",
+    "displayNamePlaceholder": "Alex Rivera",
+    "headline": "Titular",
+    "headlineHelp": "Una descripción breve de lo que hacés o querés explorar.",
+    "headlinePlaceholder": "Desarrollador que disfruta crear experiencias web accesibles",
+    "bio": "Sobre vos",
+    "bioHelp": "Escribí unas líneas con tus palabras. El texto se conserva como texto; no necesitás Markdown ni HTML.",
+    "bioPlaceholder": "Disfruto convertir ideas en herramientas útiles. Estoy aprendiendo más sobre diseño y la web.",
+    "location": "Ubicación",
+    "locationHelp": "Una ciudad, un país o tu zona horaria, solo si querés compartirlos.",
+    "locationPlaceholder": "Argentina"
+  },
+  "contact": {
+    "description": "2. Facilitá el contacto. Agregá solo los enlaces que quieras compartir públicamente.",
+    "empty": "Podés empezar con tu portfolio, LinkedIn o correo. También podés dejar esta sección vacía.",
+    "entry": "Enlace {number}",
+    "label": "Nombre del enlace",
+    "labelHelp": "Por ejemplo, Portfolio o LinkedIn. Dejalo vacío para mostrar la dirección.",
+    "labelPlaceholder": "Portfolio",
+    "url": "URL",
+    "urlHelp": "Usá una dirección completa con https:// o http://, o mailto:hola@example.com para un correo.",
+    "urlPlaceholder": "https://example.com",
+    "invalidUrl": "Ingresá una dirección completa con http:// o https://, o un correo válido con mailto:. También podés vaciar ambos campos o quitar el enlace.",
+    "add": "Agregar enlace",
+    "remove": "Quitar enlace {number}",
+    "removeVisible": "Quitar enlace"
+  },
+  "storage": {
+    "loading": "Abriendo tu borrador…",
+    "loadingHelp": "Esperá mientras buscamos un borrador guardado. Vas a poder editar en un momento.",
+    "new": "Borrador nuevo",
+    "restored": "Borrador recuperado",
+    "saving": "Guardando en este navegador…",
+    "saved": "Guardado en este navegador",
+    "invalid": "El borrador guardado necesita revisión",
+    "unavailable": "Editando sin guardado local",
+    "invalidTitle": "No pudimos abrir el borrador guardado",
+    "invalidHelp": "Conservamos los datos originales. Podés crear y exportar un perfil acá, pero los cambios quedarán en memoria hasta que elijas empezar un nuevo borrador guardado.",
+    "unavailableTitle": "Este navegador no pudo guardar tu borrador",
+    "unavailableHelp": "Podés seguir editando y exportar el README. Tus cambios se conservan en memoria al cambiar el idioma de la aplicación, pero se pierden si recargás o cerrás esta página. Los datos guardados no se reemplazarán automáticamente.",
+    "writeFailureTitle": "No se pudieron guardar los últimos cambios",
+    "writeFailureHelp": "Tus cambios siguen acá, incluso al cambiar el idioma de la aplicación, pero este navegador no pudo guardarlos. Descargá el README antes de recargar o cerrar esta página para conservar tu trabajo.",
+    "startNew": "Empezar un nuevo borrador guardado",
+    "resetConfirmation": "¿Querés empezar un nuevo borrador guardado? Se vaciará el perfil que ves en pantalla y se reemplazará cualquier borrador anterior de esta aplicación en este navegador. Descargá el README antes si querés conservarlo.",
+    "privacy": "Tu borrador se guarda solo en este navegador. No se sincroniza entre dispositivos y se elimina si borrás los datos del navegador. Exportalo antes de salir si no se puede guardar."
+  },
+  "preview": {
+    "title": "3. Revisá y exportá",
+    "description": "Se copia y descarga el mismo contenido que ves acá. GitHub puede mostrar los espacios y la tipografía de otra manera.",
+    "fileLabel": "Vista previa",
+    "documentLabel": "Vista previa del README",
+    "loading": "Cargando la vista previa del README",
+    "emptyTitle": "Un poco sobre vos puede contar mucho",
+    "emptyDescription": "Elegí una sección y agregá texto o un enlace. Tu README aparecerá acá.",
+    "reviewTitle": "Tu borrador sigue acá",
+    "reviewDescription": "Revisá el mensaje de abajo para preparar tu README para exportar."
+  },
+  "export": {
+    "empty": "Elegí una sección y agregá algo de texto o un enlace para habilitar la copia y descarga.",
+    "unsupported": "Este borrador tiene una sección visible que el editor todavía no puede exportar. El contenido guardado se conserva, pero la exportación no está disponible para este borrador.",
+    "invalidLinks": "Revisá los enlaces de contacto marcados antes de copiar o descargar. No se eliminó contenido.",
+    "ready": "Todo listo. Copiá el Markdown o descargá tu archivo README.md.",
+    "copy": "Copiar README",
+    "copying": "Copiando…",
+    "download": "Descargar README",
+    "feedback": {
+      "copied": "README copiado al portapapeles.",
+      "copyError": "No pudimos copiar al portapapeles. Probá descargar el README.",
+      "downloaded": "Se inició la descarga del README.",
+      "downloadError": "No pudimos iniciar la descarga. Probá copiar el README."
+    }
+  },
+  "publish": {
+    "title": "Llevalo a tu perfil de GitHub",
+    "instructions": "En un repositorio público con el mismo nombre que tu usuario de GitHub, colocá README.md en la raíz. Pegá el texto copiado o subí el archivo descargado. Revisalo antes de publicarlo.",
+    "guide": "Ver la guía de README de perfil de GitHub"
+  }
+}

@@ -24,7 +24,7 @@ Todas comparten el mismo editor y catálogo de módulos. La composición inicial
 
 ## Módulos del MVP
 
-Los identificadores de la tabla son nombres de producto y de contrato propuestos. El contenido y su generación todavía están planificados.
+Los identificadores de la tabla existen en el contrato y el registro de módulos. Presentación y contacto disponen de formularios, vista previa y exportación de README. Los otros siete módulos admiten datos en el contrato, sin formularios ni generación de contenido. La tabla describe la intención de producto; no implica que todo su comportamiento esté disponible.
 
 | Módulo         | Identificador   | Contenido previsto                                                                   | Comportamiento del MVP                                                             |
 | -------------- | --------------- | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------- |
@@ -65,6 +65,10 @@ Una etapa posterior podrá proponer mejoras de redacción o de organización. La
 
 ## Alcance disponible hoy
 
-El repositorio incluye el scaffold con Next.js `16.4.2`, React `19.3.1`, TypeScript, Tailwind CSS 4 y un kit visual. La base usa mensajes separados por idioma y un selector funcional entre inglés y español. Las rutas iniciales son `/en`, `/es`, `/en/design-system` y `/es/design-system`; `/` redirige a inglés.
+La aplicación usa Next.js `16.4.2`, React `19.3.1`, TypeScript, Tailwind CSS 4 y un kit visual. Incluye interfaz en inglés y español. Las rutas de entrada son `/en` y `/es`, con páginas `/editor` y `/design-system`; `/` redirige a inglés.
 
-Todavía no incluye el editor, el modelo de perfil, el registro funcional de módulos, la generación de README, las consultas de GitHub, las tarjetas de métricas ni la asistencia con IA. Las capacidades descritas como futuras expresan la propuesta de producto; no constituyen funciones disponibles ni un calendario público de desarrollo.
+El núcleo incluye [un documento de perfil versión 1](profile-model.md), el registro de los nueve módulos y funciones para crear y validar borradores, cambiar su visibilidad y ordenar las secciones. Todos los módulos pueden permanecer ocultos y vacíos. Los conocimientos no se condicionan a actividad pública, y ocultar una sección conserva sus datos.
+
+El [editor](editor.md) permite completar presentación y contacto como texto plano, ocultarlos sin perder información, revisar la salida y copiar o descargar `README.md`. El idioma de la interfaz y el de las etiquetas del README se eligen por separado. El borrador se recupera y guarda localmente; los valores incompatibles no se reemplazan sin confirmación. Si el navegador impide guardar, se puede seguir editando en memoria y exportando un README válido.
+
+No incluye formularios de los otros siete módulos, personalización del diseño del README, reordenamiento visual, portabilidad de configuración, consultas de GitHub, tarjetas de métricas ni asistencia con IA. La validación del documento admite contenido incompleto; el generador aplica por separado sus controles de salida. Un módulo visible sin soporte bloquea la exportación y conserva su contenido. Las capacidades descritas como futuras expresan la propuesta de producto; no constituyen funciones disponibles ni un calendario público de desarrollo.
