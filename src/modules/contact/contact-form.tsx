@@ -19,22 +19,21 @@ export function ContactForm({ value, errors, onChange }: ContactFormProps) {
   const t = useTranslations("Editor.contact");
   const providersT = useTranslations("ContactProviders");
   const baseId = useId();
-  const [selectedProvider, setSelectedProvider] = useState("custom");
   const [providerHints, setProviderHints] = useState(new Map<string, string>());
+  const selectorRefs = useRef(new Map<string, HTMLSelectElement>());
   const inputRefs = useRef(new Map<string, HTMLInputElement>());
   const addButtonRef = useRef<HTMLButtonElement>(null);
   const pendingFocusId = useRef<string | null>(null);
 
   useEffect(() => {
     if (pendingFocusId.current !== null) {
-      inputRefs.current.get(pendingFocusId.current)?.focus();
+      selectorRefs.current.get(pendingFocusId.current)?.focus();
       pendingFocusId.current = null;
     }
   }, [value.links]);
 
-  function addLink(provider = selectedProvider) {
+  function addLink() {
     const id = crypto.randomUUID();
-    setProviderHints((hints) => new Map(hints).set(id, provider));
     pendingFocusId.current = id;
     onChange({ links: [...value.links, { id, label: "", url: "" }] });
   }
@@ -59,31 +58,7 @@ export function ContactForm({ value, errors, onChange }: ContactFormProps) {
 
   return (
     <div className="space-y-5">
-      <div className="space-y-3 rounded-lg border border-border bg-surface-raised/40 p-4">
-        <Field
-          htmlFor={`${baseId}-provider`}
-          label={providersT("provider")}
-          description={providersT("providerHelp")}
-        >
-          <select
-            value={selectedProvider}
-            onChange={(event) => setSelectedProvider(event.target.value)}
-            className="min-h-11 w-full min-w-0 rounded-md border border-border-strong bg-surface px-3 py-2 text-base text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/20 focus-visible:outline-none sm:text-sm"
-          >
-            <option value="custom">{providersT("custom")}</option>
-            <option value="email">{providersT("email")}</option>
-            {contactProviders.map((provider) => (
-              <option key={provider.id} value={provider.id}>
-                {provider.name}
-              </option>
-            ))}
-          </select>
-        </Field>
-        <Button ref={addButtonRef} variant="outline" onClick={() => addLink()}>
-          <Plus aria-hidden="true" />
-          {t("add")}
-        </Button>
-      </div>
+      <p className="text-sm leading-6 text-muted-foreground">{providersT("providerHelp")}</p>
       {value.links.length === 0 && (
         <p className="rounded-md border border-dashed border-border bg-surface-raised/40 px-4 py-5 text-sm leading-6 text-muted-foreground">
           {t("empty")}
@@ -92,12 +67,16 @@ export function ContactForm({ value, errors, onChange }: ContactFormProps) {
       {value.links.map((link, index) => {
         const controlId = `${baseId}-link-${index}`;
         const provider = findContactProvider(link.url);
-        const hint = providerHints.get(link.id);
-        const hintedProvider = contactProviders.find((entry) => entry.id === hint);
-        const email = /^mailto:/i.test(link.url) || (!link.url && hint === "email");
-        const placeholder = email
-          ? "mailto:hello@example.com"
-          : (hintedProvider?.placeholder ?? t("urlPlaceholder"));
+        const email = /^mailto:/i.test(link.url);
+        const selectedProvider =
+          providerHints.get(link.id) ??
+          provider?.id ??
+          (email ? "email" : link.url ? "custom" : "");
+        const hintedProvider = contactProviders.find((entry) => entry.id === selectedProvider);
+        const placeholder =
+          selectedProvider === "email"
+            ? "mailto:hello@example.com"
+            : (hintedProvider?.placeholder ?? t("urlPlaceholder"));
         const hasUrlError = errors.some(
           (error) =>
             error.code === "invalid_url" &&
@@ -128,6 +107,31 @@ export function ContactForm({ value, errors, onChange }: ContactFormProps) {
                 {provider && <span className="text-muted-foreground">· {provider.name}</span>}
               </span>
             </legend>
+            <Field htmlFor={`${controlId}-provider`} label={providersT("provider")}>
+              <select
+                ref={(selector) => {
+                  if (selector) selectorRefs.current.set(link.id, selector);
+                  else selectorRefs.current.delete(link.id);
+                }}
+                value={selectedProvider}
+                onChange={(event) => {
+                  const providerId = event.target.value;
+                  setProviderHints((hints) => new Map(hints).set(link.id, providerId));
+                }}
+                className="min-h-11 w-full min-w-0 rounded-md border border-border-strong bg-surface px-3 py-2 text-base text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/20 focus-visible:outline-none sm:text-sm"
+              >
+                <option value="" disabled>
+                  {providersT("choose")}
+                </option>
+                {contactProviders.map((entry) => (
+                  <option key={entry.id} value={entry.id}>
+                    {entry.name}
+                  </option>
+                ))}
+                <option value="custom">{providersT("custom")}</option>
+                <option value="email">{providersT("email")}</option>
+              </select>
+            </Field>
             <Field
               htmlFor={`${controlId}-url`}
               label={t("url")}
@@ -176,17 +180,10 @@ export function ContactForm({ value, errors, onChange }: ContactFormProps) {
           </fieldset>
         );
       })}
-      {value.links.length > 0 && (
-        <div className="space-y-2">
-          <Button variant="outline" onClick={() => addLink("custom")}>
-            <Plus aria-hidden="true" />
-            {providersT("addWebsite")}
-          </Button>
-          <p className="text-xs leading-5 text-muted-foreground">
-            {providersT("multipleWebsites")}
-          </p>
-        </div>
-      )}
+      <Button ref={addButtonRef} variant="outline" onClick={addLink}>
+        <Plus aria-hidden="true" />
+        {t("add")}
+      </Button>
     </div>
   );
 }

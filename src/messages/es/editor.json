@@ -63,7 +63,10 @@
     "bioHelp": "Lo que disfrutás, lo que creás o lo que estás aprendiendo. Todo en un mismo lugar.",
     "bioPlaceholder": "Disfruto convertir ideas en herramientas útiles. Estoy aprendiendo más sobre diseño y la web.",
     "location": "Ubicación",
-    "locationHelp": "Una ciudad, un país o tu zona horaria, solo si querés compartirlos.",
+    "locationHelp": "Escribí un país y elegilo para agregar su bandera, o dejá tu propia ubicación. Compartirla es opcional.",
+    "countrySuggestions": "Sugerencias de países",
+    "countrySelected": "Seleccionaste {name}. Su bandera aparecerá en tu README.",
+    "countryNoResults": "No hay países que coincidan. Podés dejar este texto como tu ubicación.",
     "locationPlaceholder": "Argentina"
   },
   "contact": {
@@ -77,7 +80,7 @@
     "urlHelp": "Usá una dirección completa con https:// o http://, o mailto:hola@example.com para un correo.",
     "urlPlaceholder": "https://example.com",
     "invalidUrl": "Ingresá una dirección completa con http:// o https://, o un correo válido con mailto:. También podés vaciar ambos campos o quitar el enlace.",
-    "add": "Agregar enlace",
+    "add": "Agregar red social",
     "remove": "Quitar enlace {number}",
     "removeVisible": "Quitar enlace"
   },

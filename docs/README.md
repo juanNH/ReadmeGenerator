@@ -22,7 +22,8 @@ La documentación de GitHub Profile Generator describe el producto, el estado di
 | [Cinco secciones](decisions/0008-focused-profile.md)               | Retiro de módulos de trayectoria y conservación interna compatible con v1.     |
 | [Iconos del perfil](decisions/0009-profile-icons.md)               | Catálogos ampliados, contacto por dominio e imágenes generadas permitidas.     |
 | [Actividad de GitHub](decisions/0010-github-activity.md)           | Cinco secciones, tarjetas propias, límites públicos y exportación configurada. |
-| [Recursos de terceros](../THIRD_PARTY_NOTICES.md)                  | Procedencia y licencia de los SVG de Devicon, Simple Icons y Lobe Icons.       |
+| [Países y contactos](decisions/0011-country-and-contact-inputs.md) | Países opcionales con bandera y redes sociales configuradas por entrada.       |
+| [Recursos de terceros](../THIRD_PARTY_NOTICES.md)                  | Procedencia y licencias de iconos y banderas locales.                          |
 | [Contribuir](../CONTRIBUTING.md)                                   | Flujo de trabajo, expectativas para cambios y pull requests.                   |
 
 Para conocer la propuesta, empezá por producto. Para trabajar en el código, seguí desarrollo, revisá la arquitectura y acordá un objetivo de contribución concreto.

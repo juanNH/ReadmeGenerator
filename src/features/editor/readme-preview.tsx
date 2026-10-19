@@ -7,6 +7,7 @@ import type { ContentLocale } from "@/core/profile/profile-schema";
 import { findTechnology } from "@/core/technologies";
 import { findContactProviderByIconUrl } from "@/core/contact";
 import { parseActivityCardUrl } from "@/core/activity";
+import { findCountryByIconUrl } from "@/core/location";
 import { remarkProfileIcons } from "./remark-profile-icons";
 
 type ReadmePreviewProps = {
@@ -65,6 +66,19 @@ export function ReadmePreview({
                       height={260}
                       unoptimized
                       className="block h-auto w-full max-w-full rounded-lg border border-border bg-white"
+                    />
+                  );
+                const country = typeof src === "string" ? findCountryByIconUrl(src) : undefined;
+                if (country && alt === "")
+                  return (
+                    <Image
+                      src={country.iconPath}
+                      alt=""
+                      aria-hidden="true"
+                      width={20}
+                      height={15}
+                      unoptimized
+                      className="inline-block h-[15px] w-5 shrink-0 rounded-[2px] align-middle"
                     />
                   );
                 const technology = findTechnology(alt ?? "");

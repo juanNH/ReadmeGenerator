@@ -10,9 +10,8 @@ const draftKey = "github-profile-generator.profile.v1";
 const copy = {
   en: {
     contact: "Contact",
-    provider: "Add a place to find you",
-    add: "Add link",
-    addWebsite: "Add another website",
+    provider: "Social network or website",
+    add: "Add social network",
     remove: "Remove link",
     entry: "Link",
     label: "Link label",
@@ -24,9 +23,8 @@ const copy = {
   },
   es: {
     contact: "Contacto",
-    provider: "Agregá dónde encontrarte",
-    add: "Agregar enlace",
-    addWebsite: "Agregar otra web",
+    provider: "Red social o sitio web",
+    add: "Agregar red social",
     remove: "Quitar enlace",
     entry: "Enlace",
     label: "Nombre del enlace",
@@ -76,11 +74,14 @@ async function addContact(
   index: number,
   locale: Locale = "en",
 ) {
-  await page
-    .getByRole("combobox", { name: copy[locale].provider, exact: true })
-    .selectOption(provider);
   await page.getByRole("button", { name: copy[locale].add, exact: true }).click();
   const entry = entryAt(page, index, locale);
+  const selector = entry.getByRole("combobox", { name: copy[locale].provider, exact: true });
+  await expect(selector).toBeFocused();
+  await expect(selector).toHaveValue("");
+  await selector.selectOption(provider);
+  await expect(selector).toBeFocused();
+  await selector.press("Tab");
   const input = entry.getByRole("textbox", { name: "URL", exact: true });
   await expect(input).toBeFocused();
   await input.fill(url);
@@ -138,6 +139,9 @@ for (const locale of ["en", "es"] as const) {
   }) => {
     await page.setViewportSize({ width: locale === "es" ? 360 : 1440, height: 1000 });
     await openContact(page, locale);
+    await expect(
+      page.getByRole("combobox", { name: copy[locale].provider, exact: true }),
+    ).toHaveCount(0);
     const websites = [
       { label: "My portfolio", url: "https://alex.example/portfolio" },
       { label: "My blog", url: "https://blog.alex.example/" },
@@ -146,17 +150,10 @@ for (const locale of ["en", "es"] as const) {
     const first = await addContact(page, "custom", websites[0].url, 0, locale);
     await customizeLabel(first, websites[0].label, locale);
 
-    // A known service stays selected; the shortcut still creates an independent website.
-    await page
-      .getByRole("combobox", { name: copy[locale].provider, exact: true })
-      .selectOption("linkedin");
     for (const [offset, website] of websites.slice(1).entries()) {
-      await page.getByRole("button", { name: copy[locale].addWebsite, exact: true }).click();
-      const entry = entryAt(page, offset + 1, locale);
+      const entry = await addContact(page, "custom", website.url, offset + 1, locale);
       const url = entry.getByRole("textbox", { name: "URL", exact: true });
-      await expect(url).toBeFocused();
       await expect(url).toHaveAttribute("placeholder", "https://example.com");
-      await url.fill(website.url);
       await customizeLabel(entry, website.label, locale);
     }
     const profiles = [
@@ -192,6 +189,12 @@ for (const locale of ["en", "es"] as const) {
       await expect(
         entryAt(page, index, locale).getByRole("textbox", { name: "URL", exact: true }),
       ).toHaveValue(link.url);
+      await expect(
+        entryAt(page, index, locale).getByRole("combobox", {
+          name: copy[locale].provider,
+          exact: true,
+        }),
+      ).toHaveValue(link.url.includes("linkedin.com") ? "linkedin" : "custom");
     }
     const markdown = await downloadReadme(page, locale);
     for (const link of expected) {
@@ -212,12 +215,12 @@ for (const locale of ["en", "es"] as const) {
   }) => {
     await page.setViewportSize({ width: 1440, height: 1000 });
     await openContact(page, locale);
-    const selector = page.getByRole("combobox", { name: copy[locale].provider, exact: true });
     for (const [index, provider] of brandedContacts.entries()) {
+      const entry = await addContact(page, provider.id, provider.url, index, locale);
+      const selector = entry.getByRole("combobox", { name: copy[locale].provider, exact: true });
       await expect(
         selector.getByRole("option", { name: provider.name, exact: true }),
       ).toBeAttached();
-      await addContact(page, provider.id, provider.url, index, locale);
     }
     const portfolio = await addContact(page, "custom", "https://alex.example/portfolio", 6, locale);
     await customizeLabel(portfolio, "My small corner of the web", locale);
@@ -247,6 +250,47 @@ for (const locale of ["en", "es"] as const) {
       "https://alex.example/portfolio",
       "mailto:hello@alex.example",
     ]);
+  });
+
+  test(`${locale} changing a contact service preserves its URL and label while icons follow the URL`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    await openContact(page, locale);
+    const entry = await addContact(page, "custom", "https://alex.example/", 0, locale);
+    await customizeLabel(entry, "My corner of the web", locale);
+    await expect
+      .poll(async () => (await storedProfile(page)).data.contact.links[0]?.label)
+      .toBe("My corner of the web");
+    const original = (await storedProfile(page)).data.contact.links[0];
+    if (!original) throw new Error("The added contact must remain in the saved profile.");
+    const selector = entry.getByRole("combobox", { name: copy[locale].provider, exact: true });
+    await selector.focus();
+    await selector.selectOption("linkedin");
+    await expect(selector).toBeFocused();
+    await selector.press("Tab");
+    const url = entry.getByRole("textbox", { name: "URL", exact: true });
+    await expect(url).toBeFocused();
+    await expect(url).toHaveValue(original.url);
+    await expect(url).toHaveAttribute("placeholder", "https://www.linkedin.com/in/your-name");
+    await expect(entry.locator("img")).toHaveCount(0);
+    expect((await storedProfile(page)).data.contact.links[0]).toEqual(original);
+
+    await url.fill(brandedContacts[3].url);
+    await expect(entry.locator('img[src="/contact-icons/youtube.svg"]')).toBeVisible();
+    await expect(entry.locator('img[src="/contact-icons/linkedin.svg"]')).toHaveCount(0);
+    await expect
+      .poll(async () => (await storedProfile(page)).data.contact.links[0]?.url)
+      .toBe(brandedContacts[3].url);
+    await page.reload();
+    await openContact(page, locale);
+    await expect(
+      entryAt(page, 0, locale).getByRole("combobox", { name: copy[locale].provider, exact: true }),
+    ).toHaveValue("youtube");
+    expect((await storedProfile(page)).data.contact.links[0]).toEqual({
+      ...original,
+      url: brandedContacts[3].url,
+    });
   });
 }
 
@@ -337,6 +381,12 @@ test("restored contacts preserve custom labels, opaque IDs and unrelated data af
   await seedProfile(page, profile, "es");
   await openContact(page, "es");
   const first = entryAt(page, 0, "es");
+  await expect(first.getByRole("combobox", { name: copy.es.provider, exact: true })).toHaveValue(
+    "linkedin",
+  );
+  await expect(
+    entryAt(page, 1, "es").getByRole("combobox", { name: copy.es.provider, exact: true }),
+  ).toHaveValue("custom");
   const label = await customizeLabel(first, "Mi perfil y mis proyectos", "es");
   await expect(label).toBeFocused();
   await expect
@@ -363,7 +413,28 @@ test("restored contacts preserve custom labels, opaque IDs and unrelated data af
   });
 });
 
-test("adding and removing contacts keeps keyboard focus on the relevant URL or add button", async ({
+test("contact service arrows keep focus in the selector until Tab advances to the URL", async ({
+  page,
+}) => {
+  await openContact(page);
+  await page.getByRole("button", { name: copy.en.add, exact: true }).click();
+  const entry = entryAt(page, 0);
+  const selector = entry.getByRole("combobox", { name: copy.en.provider, exact: true });
+  await expect(selector).toBeFocused();
+  await selector.press("ArrowDown");
+  await expect(selector).toHaveValue("linkedin");
+  await expect(selector).toBeFocused();
+  await selector.press("ArrowDown");
+  await expect(selector).toHaveValue("leetcode");
+  await expect(selector).toBeFocused();
+  await selector.press("ArrowUp");
+  await expect(selector).toHaveValue("linkedin");
+  await expect(selector).toBeFocused();
+  await selector.press("Tab");
+  await expect(entry.getByRole("textbox", { name: "URL", exact: true })).toBeFocused();
+});
+
+test("adding and removing contacts keeps keyboard focus on the selector, URL or add button", async ({
   page,
 }) => {
   await openContact(page);
@@ -378,7 +449,7 @@ test("adding and removing contacts keeps keyboard focus on the relevant URL or a
   await page.getByRole("button", { name: "Remove link 2", exact: true }).click();
   await expect(entryAt(page, 0).getByRole("textbox", { name: "URL", exact: true })).toBeFocused();
   await page.getByRole("button", { name: "Remove link 1", exact: true }).click();
-  await expect(page.getByRole("button", { name: "Add link", exact: true })).toBeFocused();
+  await expect(page.getByRole("button", { name: copy.en.add, exact: true })).toBeFocused();
 });
 
 for (const locale of ["en", "es"] as const) {

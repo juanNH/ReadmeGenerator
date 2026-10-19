@@ -1,5 +1,13 @@
 # Recursos de terceros
 
+## Banderas de países y territorios · flag-icons
+
+Los 249 SVG de `public/country-flags/` proceden de [flag-icons 7.3.2](https://github.com/lipis/flag-icons/tree/fe15c16e7463d0c66d6c5730e9d0e832438d98e1), fijado al commit `fe15c16e7463d0c66d6c5730e9d0e832438d98e1`. Se copian sin modificaciones desde `flags/4x3/{code}.svg`, para las entradas de dos letras con `iso: true` del [catálogo de origen](https://github.com/lipis/flag-icons/blob/fe15c16e7463d0c66d6c5730e9d0e832438d98e1/country.json). Los códigos representan países y territorios; la selección no infiere nacionalidad ni ubicación y no usa geolocalización.
+
+La colección se distribuye bajo licencia MIT, copyright (c) 2013 Panayiotis Lipiridis. La licencia íntegra se conserva en [public/country-flags/LICENSE.txt](public/country-flags/LICENSE.txt).
+
+Los nombres en inglés y español se generaron una sola vez mediante `Intl.DisplayNames` de Node.js 24.21.0, ICU 78.3 y CLDR 48.0. Se guardan como datos estáticos en `src/core/location/country-names.ts`; el editor no descarga catálogos ni depende de los nombres regionales del navegador durante el uso. El README utiliza únicamente las URLs de banderas fijadas al mismo commit; la vista previa usa sus equivalentes locales. Las banderas se muestran como imágenes para que su presentación no dependa del soporte de emoji del sistema.
+
 ## Iconos de contacto · Simple Icons
 
 Los 13 SVG de `public/contact-icons/` proceden de [Simple Icons 11.15.0](https://github.com/simple-icons/simple-icons/tree/0af835e2949a9222965522780e5e0810d3c53382), fijados al commit `0af835e2949a9222965522780e5e0810d3c53382`. Se conserva su licencia CC0-1.0 en [public/contact-icons/LICENSE.txt](public/contact-icons/LICENSE.txt). Los nombres y las marcas pertenecen a sus respectivos titulares; la inclusión permite identificarlos y no implica respaldo.

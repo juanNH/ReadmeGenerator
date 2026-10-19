@@ -1,4 +1,6 @@
 import type { ProfileDocument } from "../profile/profile-schema";
+import { parseCountryLocation } from "../location";
+import { countryFlagMarkup } from "./country-flags";
 import { escapeInlineText, escapeParagraphText } from "./escape-markdown";
 import { readmeLabels } from "./readme-labels";
 import type { ReadmeIssue, ReadmeResult } from "./readme-result";
@@ -12,12 +14,16 @@ function renderPresentation(document: ProfileDocument): string {
   const nameText = escapeInlineText(displayName);
   const headlineText = escapeInlineText(headline);
   const bioText = escapeParagraphText(bio);
-  const locationText = escapeInlineText(location);
+  const countryLocation = parseCountryLocation(location);
+  const locationText = escapeInlineText(countryLocation?.text ?? location);
+  const locationContent = countryLocation
+    ? `${countryFlagMarkup(countryLocation.country)} ${locationText}`
+    : locationText;
   return [
     nameText && `# ${nameText}`,
     headlineText && `## ${headlineText}`,
     bioText,
-    locationText && `${readmeLabels[document.contentLocale].location}: ${locationText}`,
+    locationText && `${readmeLabels[document.contentLocale].location}: ${locationContent}`,
   ]
     .filter(Boolean)
     .join("\n\n");

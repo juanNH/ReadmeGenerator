@@ -63,7 +63,10 @@ async function addContact(page: Page, label = "Portfolio", url = "https://exampl
   await showSections(page);
   await page.getByRole("checkbox", { name: "Contact", exact: true }).check();
   await openSection(page, "Contact");
-  await page.getByRole("button", { name: "Add link", exact: true }).click();
+  await page.getByRole("button", { name: "Add social network", exact: true }).click();
+  await expect(
+    page.getByRole("combobox", { name: "Social network or website", exact: true }).last(),
+  ).toBeFocused();
   await page.getByText("Customize label (optional)", { exact: true }).last().click();
   await page.getByRole("textbox", { name: "Link label", exact: true }).last().fill(label);
   await page.getByRole("textbox", { name: "URL", exact: true }).last().fill(url);
@@ -196,8 +199,16 @@ test("contact alone supports adding, editing and removing stable links with usab
 }) => {
   await openEditor(page);
   await addContact(page);
-  await page.getByRole("button", { name: "Add link", exact: true }).click();
+  await page.getByRole("button", { name: "Add social network", exact: true }).click();
   const urls = page.getByRole("textbox", { name: "URL", exact: true });
+  const providers = page.getByRole("combobox", {
+    name: "Social network or website",
+    exact: true,
+  });
+  await expect(providers.last()).toBeFocused();
+  await providers.last().selectOption("email");
+  await expect(providers.last()).toBeFocused();
+  await providers.last().press("Tab");
   await expect(urls.last()).toBeFocused();
   await page.getByText("Customize label (optional)", { exact: true }).last().click();
   const labels = page.getByRole("textbox", { name: "Link label", exact: true });
@@ -218,7 +229,7 @@ test("contact alone supports adding, editing and removing stable links with usab
   );
   await expect(preview.getByRole("link", { name: "Portfolio", exact: true })).toHaveCount(0);
   await page.getByRole("button", { name: "Remove link 1", exact: true }).click();
-  await expect(page.getByRole("button", { name: "Add link", exact: true })).toBeFocused();
+  await expect(page.getByRole("button", { name: "Add social network", exact: true })).toBeFocused();
   await expect(page.getByRole("button", { name: "Copy README", exact: true })).toBeDisabled();
 });
 
@@ -302,7 +313,7 @@ test("UI locale changes preserve the latest unsaved text and keep README languag
 }) => {
   await openEditor(page);
   await introduceYourself(page);
-  await page.getByRole("textbox", { name: "Location", exact: true }).fill("Example City");
+  await page.getByRole("combobox", { name: "Location", exact: true }).fill("Example City");
   await addContact(page);
   await openSection(page, "About you");
   await page
@@ -581,7 +592,7 @@ for (const locale of ["en", "es"] as const) {
         .fill("Sol Ejemplo");
       await page.getByRole("checkbox", { name: "Contacto", exact: true }).check();
       await openSection(page, "Contacto");
-      await page.getByRole("button", { name: "Agregar enlace", exact: true }).click();
+      await page.getByRole("button", { name: "Agregar red social", exact: true }).click();
       await page
         .getByRole("textbox", { name: "URL", exact: true })
         .fill("https://example.com/profile");

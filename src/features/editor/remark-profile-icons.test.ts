@@ -6,9 +6,26 @@ import { findTechnology } from "@/core/technologies";
 import { technologyIconMarkup } from "@/core/readme/technology-icons";
 import { contactIconMarkup } from "@/core/readme/contact-icons";
 import { contactProviders } from "@/core/contact";
+import { countryCatalog } from "@/core/location";
+import { countryFlagMarkup } from "@/core/readme/country-flags";
 import { remarkProfileIcons } from "./remark-profile-icons";
 
 describe("controlled profile icon preview", () => {
+  it("keeps a decorative country flag inline beside escaped location text", () => {
+    const country = countryCatalog.find((entry) => entry.code === "AR")!;
+    const html = renderToStaticMarkup(
+      createElement(
+        ReactMarkdown,
+        {
+          skipHtml: true,
+          remarkPlugins: [remarkProfileIcons],
+        },
+        `Location: ${countryFlagMarkup(country)} Argentina`,
+      ),
+    );
+    expect(html).toContain(`<p>Location: <img src="${country.iconUrl}" alt=""/> Argentina</p>`);
+    expect(html.match(/<p>/g)).toHaveLength(1);
+  });
   it("converts an exact catalog row to safe image nodes", () => {
     const react = findTechnology("React")!;
     const tree = { type: "root", children: [{ type: "html", value: technologyIconMarkup(react) }] };

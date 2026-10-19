@@ -48,8 +48,15 @@ La configuración del proyecto está en [.codex/config.toml](../.codex/config.to
 | `explorer`  | Hace falta localizar propietarios, recorridos y archivos relevantes.    | Mapa breve de archivos, símbolos y dependencias con evidencia.               |
 | `frontend`  | Existe una tarea de interfaz acotada y archivos propietarios asignados. | Implementación, verificaciones pertinentes y resumen del diff.               |
 | `reviewer`  | Hay cambios concretos para revisar antes de integrar.                   | Hallazgos de corrección, accesibilidad, rendimiento y cobertura, sin editar. |
+| `release`   | El usuario autorizó crear commits y hacer push de un alcance concreto.  | Commit y remoto verificados, sin publicar planes, temporales o secretos.     |
 
-El proyecto habilita agentes y limita a tres los subagentes concurrentes por sesión, además del principal. Los roles omiten modelo y esfuerzo para heredar la elección de la sesión; no fijan proveedores, servidores MCP, sandbox ni políticas de aprobación. Los roles de sólo lectura son instrucciones de conducta, no un sandbox separado. La configuración no obliga a delegar tareas que resulten más claras de manera secuencial.
+El proyecto habilita agentes y limita a tres los subagentes concurrentes por sesión, además del principal. Los roles de análisis, implementación y revisión heredan modelo y esfuerzo de la sesión. El rol `release` tiene una excepción explícita solicitada por el usuario: **GPT-5.6 Luna** (`gpt-5.6-luna`) y esfuerzo `medium`. Ningún rol fija proveedores, servidores MCP, sandbox ni políticas de aprobación. Los roles de sólo lectura son instrucciones de conducta, no un sandbox separado.
+
+### Commit y push con Luna 5.6
+
+El rol [.codex/agents/release.toml](../.codex/agents/release.toml) conserva esta preferencia mediante `model` y `model_reasoning_effort`, según la [documentación oficial de OpenAI sobre subagentes](https://learn.chatgpt.com/docs/agent-configuration/subagents). Si el cliente no carga el rol y la herramienta permite elegir modelo, el principal debe pedirlo expresamente al delegar. La disponibilidad depende de la sesión; si el modelo no está disponible, se informa antes de sustituirlo.
+
+El principal delimita los archivos y confirma la evidencia de validación. El agente de publicación revisa rama, remoto, contenido preparado y exclusiones; crea el commit convencional autorizado, hace un push normal y verifica el hash remoto. No incluye planes privados ni modifica el producto. Una divergencia, una verificación fallida o un alcance ambiguo se devuelve al principal. Este rol no introduce autorización permanente para publicar ni permite reescribir el historial o desplegar.
 
 Los archivos TOML usan el formato de agentes independientes documentado por [OpenAI Docs: Subagents](https://learn.chatgpt.com/docs/agent-configuration/subagents). El rol local `explorer` especializa al rol integrado del mismo nombre para este repositorio. Confirmar el soporte del cliente instalado al diagnosticar carga de configuración; la existencia del archivo no demuestra que una sesión ya lo haya cargado.
 

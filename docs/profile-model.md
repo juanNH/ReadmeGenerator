@@ -78,6 +78,8 @@ El autocompletado de tecnologías utiliza un catálogo puro de nombres y alias, 
 
 El catálogo de contacto deriva el proveedor desde `url` después de normalizarla y comparar su hostname con dominios explícitos. No interpreta la etiqueta como proveedor ni agrega un campo persistido para guardar la selección sugerida del formulario. Cada contacto sigue teniendo únicamente `id`, `label` y `url`. Webs propias, portfolios y correos continúan siendo válidos sin pertenecer a un servicio conocido.
 
+Ubicación conserva `presentation.location` como string libre. Una selección explícita del catálogo de países guarda, por ejemplo, `"🇦🇷 Argentina"`. Solo bandera y nombre exacto EN/ES del mismo país permiten generar un SVG decorativo fijo de 20 × 15 junto al nombre escapado; no se incorporan URLs ni campos nuevos al documento. El formulario muestra el nombre con la bandera local y buscar reconoce ambos idiomas y códigos ISO. Escribir otra ubicación quita el prefijo de la elección anterior. Los demás valores, como `"Argentina"`, `"Buenos Aires, Argentina"` o `"🇦🇷 Remote"`, siguen siendo texto íntegro y no se reescriben ni traducen automáticamente. Ver [ADR 0011](decisions/0011-country-and-contact-inputs.md).
+
 La validación interna conserva las elecciones anulables v1: `education.kind` = `degree`, `course`, `certification`, `other` o `null`; `education.status` = `in-progress`, `completed`, `paused` o `null`; `current.kind` = `work`, `learning`, `interests`, `collaboration` o `null`. Los campos de fecha retirados siguen siendo strings, sin reinterpretarlos. No tienen formulario ni generación. Las cinco secciones activas usan el esquema existente y la clave `github-profile-generator.profile.v1`; no hay migración para recuperar borradores anteriores.
 
 ## API y resultados
@@ -143,6 +145,8 @@ Las tarjetas visibles y seleccionadas necesitan un usuario normalizable de GitHu
 Los iconos tecnológicos exportados son etiquetas `img` de 32 × 32 con `src` y `alt` construidos exclusivamente desde los metadatos de [tecnologías](../src/core/technologies/index.ts). Sus 259 entradas referencian Devicon, Simple Icons y Lobe Icons fijados a commits. No hay URLs de imagen personalizadas ni niveles de habilidad; algunos productos comparten una marca de familia documentada.
 
 Contacto agrega iconos decorativos de 20 × 20 con `alt=""` desde sus 13 proveedores de [contacto](../src/core/contact/index.ts). La marca depende de una URL admitida y un hostname explícito; no se asigna a dominios parecidos, subdominios arbitrarios o puertos no estándar. La etiqueta escapada conserva el nombre accesible del enlace. Una dirección propia o un correo sin proveedor se exporta como texto enlazado, sin imagen externa elegida por la persona.
+
+Una ubicación que coincide con una selección del [catálogo de países](../src/core/location/index.ts) agrega una bandera decorativa de 20 × 15 con `alt=""` junto al nombre escapado. Su URL está fijada en el catálogo, sin atributos provenientes de campos personales. Cualquier otro valor conserva su salida de texto.
 
 Los campos personales nunca se interpolan como atributos HTML. La vista previa reconoce únicamente tokens exactos del marcado generado y comprueba nombre/URL de tecnología o URL permitida/alternativa vacía de contacto para usar el SVG local equivalente. Las filas tecnológicas se adaptan al ancho disponible; ese estilo de interfaz no se incrusta en el README. El resto del HTML sigue descartado con `skipHtml`, sin `rehypeRaw`. Las licencias y procedencia están en [recursos de terceros](../THIRD_PARTY_NOTICES.md).
 

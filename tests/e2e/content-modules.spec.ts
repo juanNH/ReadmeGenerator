@@ -282,7 +282,7 @@ test("contribution web links and contact email links follow their own validation
   await link.fill("mailto:group@example.com");
   await expect(link).toHaveAttribute("aria-invalid", "true");
   await enableSection(page, "Contact");
-  await page.getByRole("button", { name: "Add link", exact: true }).click();
+  await page.getByRole("button", { name: "Add social network", exact: true }).click();
   await page.getByText("Customize label (optional)", { exact: true }).click();
   await page.getByRole("textbox", { name: "Link label", exact: true }).fill("Email");
   await page.getByRole("textbox", { name: "URL", exact: true }).fill("mailto:group@example.com");

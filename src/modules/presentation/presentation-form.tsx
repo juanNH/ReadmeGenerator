@@ -3,6 +3,7 @@ import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import type { ProfileModuleData } from "@/core/profile/module-content";
+import { LocationField } from "./location-field";
 
 type PresentationFormProps = {
   value: ProfileModuleData["presentation"];
@@ -42,14 +43,10 @@ export function PresentationForm({ value, onChange }: PresentationFormProps) {
               onChange={(event) => onChange({ ...value, headline: event.target.value })}
             />
           </Field>
-          <Field htmlFor="profile-location" label={t("location")}>
-            <Input
-              autoComplete="off"
-              value={value.location}
-              placeholder={t("locationPlaceholder")}
-              onChange={(event) => onChange({ ...value, location: event.target.value })}
-            />
-          </Field>
+          <LocationField
+            value={value.location}
+            onChange={(location) => onChange({ ...value, location })}
+          />
         </div>
       </details>
     </div>

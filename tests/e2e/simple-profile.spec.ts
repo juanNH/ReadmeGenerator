@@ -74,7 +74,7 @@ test("a fresh profile offers five optional sections and a short introduction wit
   const bio = "I enjoy building useful interfaces and learning Docker";
   await page.getByRole("textbox", { name: "About you", exact: true }).fill(bio);
   await expect(page.getByRole("textbox", { name: "Headline", exact: true })).toHaveCount(0);
-  await expect(page.getByRole("textbox", { name: "Location", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("combobox", { name: "Location", exact: true })).toHaveCount(0);
   const preview = page.getByRole("article", { name: "README preview", exact: true });
   await expect(preview).toContainText("Alex Example");
   await expect(preview).toContainText(bio);
