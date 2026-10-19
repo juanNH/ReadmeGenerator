@@ -1,0 +1,72 @@
+{
+  "description": "Elegí actividad de GitHub o contá un aporte con tus palabras.",
+  "help": "Elegí qué compartir. La actividad de GitHub es opcional y podés agregar un aporte sin conectar una cuenta.",
+  "highlightsTitle": "Aportes destacados",
+  "highlightsHelp": "Una mejora, una revisión, documentación o ayudar a una comunidad también cuentan. Alcanza con un título, un enlace o una nota breve.",
+  "activity": {
+    "title": "Actividad de GitHub (opcional)",
+    "help": "Agregá un calendario, un resumen o los lenguajes de tus repositorios. La actividad pública no mide lo que sabés.",
+    "username": "Usuario de GitHub",
+    "usernameHelp": "Solo el nombre de usuario, con o sin @. Consultamos GitHub cuando vos lo elegís.",
+    "usernamePlaceholder": "tu-usuario",
+    "query": "Consultar actividad de GitHub",
+    "refresh": "Actualizar actividad de GitHub",
+    "retry": "Reintentar en GitHub",
+    "loadingButton": "Consultando GitHub…",
+    "loading": "Buscando la actividad disponible en GitHub…",
+    "queryFirst": "Consultá tu usuario para habilitar las tarjetas opcionales. No seleccionamos ninguna automáticamente.",
+    "choose": "¿Qué te gustaría incluir?",
+    "cards": {
+      "calendar": {
+        "label": "Calendario de contribuciones",
+        "help": "Contribuciones del último año, sin rachas ni rankings."
+      },
+      "summary": {
+        "label": "Resumen de actividad",
+        "help": "Commits, pull requests, issues y revisiones del mismo período."
+      },
+      "languages": {
+        "label": "Lenguajes de repositorios",
+        "help": "Lenguajes por tamaño del código en tus repositorios públicos propios, sin forks. No mide tus conocimientos."
+      }
+    },
+    "scope": "Las tarjetas usan la actividad que GitHub permite consultar. Podés dejarlas afuera o quitarlas cuando quieras.",
+    "loaded": "Consultamos @{username} el {date}.",
+    "period": "Período: {from} – {to}.",
+    "counts": "{commits} commits · {pullRequests} pull requests · {issues} issues · {reviews} revisiones",
+    "empty": "No encontramos contribuciones en este período. Podés compartir tecnologías, proyectos o aportes con tus palabras.",
+    "stale": "Mostramos los últimos datos disponibles. Pueden haber cambiado en GitHub.",
+    "privateCounts": "El calendario incluye cantidades anónimas de contribuciones privadas. No se muestran detalles privados.",
+    "languageLimit": "Los lenguajes cubren {analyzed} de {total} repositorios por el límite de la consulta.",
+    "retryAfter": "Podés reintentar después del {date}.",
+    "suggestions": "Elegir entre aportes recientes de GitHub",
+    "kinds": { "pull-request": "Pull request", "issue": "Issue" },
+    "add": "Destacar este aporte",
+    "added": "Agregado",
+    "addSuggested": "Destacar aporte: {title}",
+    "alreadyAdded": "Aporte ya agregado: {title}",
+    "errors": {
+      "invalid_username": "Ingresá un usuario de GitHub válido, con o sin @, de hasta 39 caracteres. Usá letras, números o guiones simples entre ellos.",
+      "not_found": "No encontramos esa cuenta de GitHub. Revisá el usuario y volvé a intentar.",
+      "not_configured": "La actividad de GitHub todavía no está habilitada en esta instancia. Podés agregar tus aportes destacados más abajo.",
+      "rate_limited": "Se alcanzó el límite de consultas de GitHub. Reintentá más tarde; podés seguir editando tu perfil.",
+      "unavailable": "No pudimos cargar la actividad de GitHub. Volvé a intentar; podés seguir editando tu perfil."
+    }
+  },
+  "empty": "Agregá una forma en la que ayudaste a un proyecto, a una persona o a una comunidad.",
+  "entry": "Contribución {number}",
+  "title": "Título de la contribución",
+  "titleHelp": "Nombrá tu aporte, o dejá este campo vacío y describilo abajo.",
+  "titlePlaceholder": "Mejoras en la documentación",
+  "descriptionLabel": "Cómo contribuiste",
+  "descriptionHelp": "Opcional. Alcanza con una nota breve sobre tu aporte.",
+  "descriptionPlaceholder": "Revisé instrucciones de instalación y ayudé a personas que estaban empezando.",
+  "url": "Enlace de la contribución",
+  "urlHelp": "Opcional. Usá una dirección completa http:// o https://, sin espacios ni credenciales de acceso.",
+  "urlPlaceholder": "https://example.com/guia-comunitaria",
+  "invalidUrl": "Ingresá una dirección válida http:// o https:// sin espacios ni credenciales de acceso, o dejá este campo vacío.",
+  "add": "Agregar contribución",
+  "remove": "Quitar contribución {number}",
+  "removeVisible": "Quitar contribución",
+  "removeHelp": "Quitar esta entrada elimina su título, descripción y enlace del borrador. Para conservarlos, ocultá la sección."
+}

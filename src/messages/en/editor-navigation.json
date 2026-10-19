@@ -1,0 +1,19 @@
+{
+  "title": "Your sections",
+  "description": "Choose a section to configure it. Drag included sections into the order you want to share them.",
+  "count": "{total, plural, =0 {No sections included yet} one {# section included} other {# sections included}}",
+  "editing": "Editing now",
+  "included": "Included in README",
+  "available": "Not included · select to add",
+  "addAndEdit": "Add and edit {module}",
+  "help": "Selecting a section that is not included adds it and opens its settings. Checkboxes include or hide sections and keep your writing. Drag handles or the up and down buttons change the README order.",
+  "dragHandle": "Drag {module} to reorder",
+  "draggableRole": "draggable section",
+  "dragInstructions": "To pick up this section, press Space or Enter. Use the up and down arrow keys to move it. Press Space or Enter again to drop it, or Escape to cancel. You can also use the Move up and Move down buttons.",
+  "announcements": {
+    "pickedUp": "Picked up {module}, position {position} of {total}. Use arrow keys to move, Space or Enter to drop, or Escape to cancel.",
+    "moved": "{module} is at position {position} of {total}.",
+    "dropped": "{module} placed at position {position} of {total}.",
+    "canceled": "Reordering {module} canceled. The original order has been kept."
+  }
+}

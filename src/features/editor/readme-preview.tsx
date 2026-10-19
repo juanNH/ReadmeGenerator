@@ -1,17 +1,29 @@
 import ReactMarkdown from "react-markdown";
+import Image from "next/image";
 import { FileText, PenLine } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { ContentLocale } from "@/core/profile/profile-schema";
+import { findTechnology } from "@/core/technologies";
+import { findContactProviderByIconUrl } from "@/core/contact";
+import { parseActivityCardUrl } from "@/core/activity";
+import { remarkProfileIcons } from "./remark-profile-icons";
 
 type ReadmePreviewProps = {
   markdown: string | null;
   contentLocale: ContentLocale;
   loading: boolean;
   hasErrors: boolean;
+  activityCardBaseUrl?: string;
 };
 
-export function ReadmePreview({ markdown, contentLocale, loading, hasErrors }: ReadmePreviewProps) {
+export function ReadmePreview({
+  markdown,
+  contentLocale,
+  loading,
+  hasErrors,
+  activityCardBaseUrl,
+}: ReadmePreviewProps) {
   const t = useTranslations("Editor.preview");
 
   return (
@@ -38,8 +50,66 @@ export function ReadmePreview({ markdown, contentLocale, loading, hasErrors }: R
         >
           <ReactMarkdown
             skipHtml
-            allowedElements={["h1", "h2", "h3", "p", "ul", "li", "a", "strong", "em", "br"]}
+            remarkPlugins={[remarkProfileIcons]}
+            allowedElements={["h1", "h2", "h3", "p", "ul", "li", "a", "strong", "em", "br", "img"]}
             components={{
+              img: ({ src, alt }) => {
+                const card =
+                  typeof src === "string" ? parseActivityCardUrl(src, activityCardBaseUrl) : null;
+                if (card)
+                  return (
+                    <Image
+                      src={card.localUrl}
+                      alt={alt ?? ""}
+                      width={700}
+                      height={260}
+                      unoptimized
+                      className="block h-auto w-full max-w-full rounded-lg border border-border bg-white"
+                    />
+                  );
+                const technology = findTechnology(alt ?? "");
+                const provider =
+                  typeof src === "string" ? findContactProviderByIconUrl(src) : undefined;
+                const entry =
+                  technology?.iconUrl === src
+                    ? technology
+                    : provider && alt === ""
+                      ? provider
+                      : undefined;
+                const size = entry === technology ? 32 : 20;
+                return entry ? (
+                  <Image
+                    src={entry.iconPath}
+                    alt={size === 32 ? entry.name : ""}
+                    aria-hidden={size === 20 ? true : undefined}
+                    width={size}
+                    height={size}
+                    unoptimized
+                    title={entry.name}
+                    className={
+                      size === 32
+                        ? "inline-block size-8 shrink-0 rounded bg-white object-contain p-0.5 align-middle"
+                        : "inline-block size-5 shrink-0 rounded bg-white object-contain p-0.5 align-middle"
+                    }
+                  />
+                ) : null;
+              },
+              p: ({ node, children }) => {
+                const isIconRow =
+                  node?.children.some(
+                    (child) => child.type === "element" && child.tagName === "img",
+                  ) &&
+                  node.children.every(
+                    (child) =>
+                      (child.type === "element" && child.tagName === "img") ||
+                      (child.type === "text" && !child.value.trim()),
+                  );
+                return (
+                  <p className={isIconRow ? "flex flex-wrap items-center gap-3" : undefined}>
+                    {children}
+                  </p>
+                );
+              },
               h1: ({ children }) => (
                 <h3 className="mt-1 mb-5 border-b border-border pb-4 text-2xl leading-tight font-semibold tracking-tight">
                   {children}

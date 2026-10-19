@@ -10,7 +10,7 @@ type ModuleRegistry = {
   };
 };
 
-// labelKey resolves in the UI's Modules namespace; core never resolves translations.
+// Active label keys resolve in the UI's Modules namespace; retired IDs remain only for v1 data.
 export const moduleRegistry = Object.freeze({
   presentation: {
     id: "presentation",

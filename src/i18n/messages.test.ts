@@ -5,6 +5,16 @@ import englishDesign from "@/messages/en/design-system.json";
 import spanishDesign from "@/messages/es/design-system.json";
 import englishEditor from "@/messages/en/editor.json";
 import spanishEditor from "@/messages/es/editor.json";
+import englishNavigation from "@/messages/en/editor-navigation.json";
+import spanishNavigation from "@/messages/es/editor-navigation.json";
+import englishContactProviders from "@/messages/en/contact-providers.json";
+import spanishContactProviders from "@/messages/es/contact-providers.json";
+import englishContributions from "@/messages/en/modules/contributions.json";
+import spanishContributions from "@/messages/es/modules/contributions.json";
+import englishTechnologies from "@/messages/en/modules/technologies.json";
+import spanishTechnologies from "@/messages/es/modules/technologies.json";
+import englishProjects from "@/messages/en/modules/projects.json";
+import spanishProjects from "@/messages/es/modules/projects.json";
 
 function messageEntries(value: object, prefix = ""): Array<[string, string]> {
   return Object.entries(value).flatMap(([key, message]) => {
@@ -22,6 +32,11 @@ describe("translation contracts", () => {
     ["shared interface", english, spanish],
     ["design system", englishDesign, spanishDesign],
     ["profile editor", englishEditor, spanishEditor],
+    ["editor navigation", englishNavigation, spanishNavigation],
+    ["contact providers", englishContactProviders, spanishContactProviders],
+    ["contributions", englishContributions, spanishContributions],
+    ["technologies", englishTechnologies, spanishTechnologies],
+    ["projects", englishProjects, spanishProjects],
   ])("keeps complete English and Spanish messages for %s", (_name, en, es) => {
     const englishEntries = messageEntries(en);
     const spanishEntries = new Map(messageEntries(es));

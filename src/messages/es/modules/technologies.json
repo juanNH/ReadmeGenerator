@@ -1,0 +1,23 @@
+{
+  "description": "Tus herramientas favoritas, de un vistazo.",
+  "searchLabel": "Agregar tecnologías",
+  "searchPlaceholder": "Buscá React, Python, Docker…",
+  "searchHelp": "Buscá y elegí una herramienta, o agregá un nombre propio. Usá las flechas y Enter para elegir.",
+  "suggestions": "Sugerencias de tecnologías",
+  "addCustom": "Agregar “{name}”",
+  "duplicate": "{name} ya está en tu lista.",
+  "added": "Se agregó {name}.",
+  "removed": "Se quitó {name}.",
+  "empty": "Tus herramientas van a aparecer acá. Agregá las que quieras.",
+  "selected": "Tecnologías elegidas",
+  "remove": "Quitar {name}",
+  "untitled": "Tecnología sin nombre",
+  "savedDetails": "Detalles guardados",
+  "savedDetailsHelp": "Estos grupos y notas vienen de tu borrador guardado. Podés conservarlos o editarlos.",
+  "groupName": "Nombre del grupo",
+  "savedName": "Nombre de la tecnología {number}",
+  "savedNote": "Nota de {name}",
+  "removeGroup": "Quitar grupo de tecnologías {number}",
+  "removeGroupVisible": "Quitar grupo",
+  "removeGroupHelp": "Quitar este grupo lo borra junto con todas sus tecnologías de este borrador."
+}

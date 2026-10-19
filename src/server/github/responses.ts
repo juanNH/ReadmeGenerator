@@ -1,0 +1,76 @@
+import "server-only";
+
+import { normalizeGitHubUsername } from "@/core/activity";
+import type { ActivityResult } from "@/core/activity/activity-types";
+import { metricCardIds, type MetricCardId } from "@/core/profile/module-content";
+
+export function parseActivityRequest(url: URL): string | null {
+  if (
+    [...url.searchParams.keys()].some((key) => key !== "username") ||
+    url.searchParams.getAll("username").length !== 1
+  ) {
+    return null;
+  }
+  return normalizeGitHubUsername(url.searchParams.get("username") ?? "");
+}
+
+export function parseCardRequest(
+  username: string,
+  cardFilename: string,
+  url: URL,
+): { username: string; card: MetricCardId; locale: "en" | "es" } | null {
+  const normalizedUsername = normalizeGitHubUsername(username);
+  const locale = url.searchParams.get("locale") ?? "en";
+  const card = metricCardIds.find((id) => `${id}.svg` === cardFilename);
+  if (
+    !normalizedUsername ||
+    !card ||
+    !["en", "es"].includes(locale) ||
+    url.searchParams.getAll("locale").length > 1 ||
+    [...url.searchParams.keys()].some((key) => key !== "locale")
+  ) {
+    return null;
+  }
+  return { username: normalizedUsername, card, locale: locale as "en" | "es" };
+}
+
+export function activityJsonResponse(result: ActivityResult): Response {
+  const status = result.success
+    ? 200
+    : result.code === "invalid_username"
+      ? 400
+      : result.code === "not_found"
+        ? 404
+        : result.code === "rate_limited"
+          ? 429
+          : 503;
+  const headers: Record<string, string> = {
+    "Cache-Control": result.success
+      ? result.stale
+        ? "public, max-age=60, s-maxage=60"
+        : "public, max-age=300, s-maxage=1800, stale-if-error=86400"
+      : "no-store",
+    "X-Content-Type-Options": "nosniff",
+  };
+  if (!result.success && result.retryAt) {
+    headers["Retry-After"] = new Date(result.retryAt).toUTCString();
+  }
+  return Response.json(result, { status, headers });
+}
+
+export function activitySvgResponse(svg: string, ready: boolean, stale: boolean): Response {
+  return new Response(svg, {
+    status: 200,
+    headers: {
+      "Content-Type": "image/svg+xml; charset=utf-8",
+      "Cache-Control": ready
+        ? stale
+          ? "public, max-age=60, s-maxage=60"
+          : "public, max-age=300, s-maxage=1800, stale-if-error=86400"
+        : "public, max-age=60, s-maxage=60",
+      "Content-Security-Policy": "default-src 'none'; style-src 'none'; sandbox",
+      "X-Content-Type-Options": "nosniff",
+      "X-Activity-State": ready ? (stale ? "stale" : "ready") : "unavailable",
+    },
+  });
+}

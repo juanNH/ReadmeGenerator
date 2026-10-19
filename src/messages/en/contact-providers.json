@@ -1,0 +1,10 @@
+{
+  "provider": "Add a place to find you",
+  "providerHelp": "Add as many links as you like, including multiple profiles on the same service. Icons follow the URL you enter.",
+  "custom": "Portfolio / website",
+  "email": "Email",
+  "addWebsite": "Add another website",
+  "multipleWebsites": "Share your portfolio, blog or any other website. Each link can have its own label.",
+  "details": "Customize label (optional)",
+  "labelHelp": "Optional. Known services show their name automatically; websites show the address."
+}

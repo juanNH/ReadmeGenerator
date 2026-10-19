@@ -1,0 +1,87 @@
+import { describe, expect, it } from "vitest";
+import { createEmptyProfile } from "../profile/profile-operations";
+import { generateReadme } from "./generate-readme";
+
+function activityProfile() {
+  const profile = createEmptyProfile("en");
+  profile.visibility.metrics = true;
+  profile.data.metrics = { username: "@Alex-Example", cards: ["calendar", "summary", "languages"] };
+  return profile;
+}
+
+describe("one optional activity and contributions section", () => {
+  it("renders a metrics-only saved profile at the contributions slot once", () => {
+    const profile = activityProfile();
+    profile.visibility.contact = true;
+    profile.data.contact.links = [{ id: "mail", label: "Email", url: "mailto:alex@example.com" }];
+    profile.moduleOrder = ["metrics", ...profile.moduleOrder.filter((id) => id !== "metrics")];
+    const original = structuredClone(profile);
+    const result = generateReadme(profile, { activityCardBaseUrl: "https://profiles.example.com" });
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.exportIssues).toBeUndefined();
+    expect(result.markdown.match(/^## Activity & contributions$/gm)).toHaveLength(1);
+    expect(result.markdown.match(/!\[/g)).toHaveLength(3);
+    expect(result.markdown).toContain(
+      "https://profiles.example.com/cards/github/alex-example/calendar.svg?locale=en",
+    );
+    expect(result.markdown.indexOf("## Activity")).toBeLessThan(
+      result.markdown.indexOf("## Contact"),
+    );
+    expect(profile).toEqual(original);
+  });
+
+  it("allows local preview but explicitly prevents publishing local card URLs", () => {
+    const result = generateReadme(activityProfile());
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.markdown).toContain("](/cards/github/alex-example/calendar.svg?locale=en)");
+    expect(result.exportIssues).toEqual([
+      { code: "activity_not_configured", path: ["data", "metrics"] },
+    ]);
+  });
+
+  it("keeps manual content exportable after excluding cards without deleting choices", () => {
+    const profile = activityProfile();
+    profile.visibility.metrics = false;
+    profile.visibility.contributions = true;
+    profile.data.contributions.items = [
+      { id: "own", title: "A clearer guide", description: "Helped others get started", url: "" },
+    ];
+    const result = generateReadme(profile);
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.exportIssues).toBeUndefined();
+    expect(result.markdown).toContain("A clearer guide");
+    expect(result.markdown).not.toContain("cards/github");
+    expect(profile.data.metrics.cards).toHaveLength(3);
+  });
+
+  it("combines cards and highlights, preserving private hidden manual entries", () => {
+    const profile = activityProfile();
+    profile.data.contributions.items = [
+      { id: "saved", title: "My own contribution", description: "", url: "" },
+    ];
+    const hidden = generateReadme(profile);
+    expect(hidden.success && hidden.markdown).not.toContain("My own contribution");
+    profile.visibility.contributions = true;
+    profile.contentLocale = "es";
+    const shown = generateReadme(profile);
+    expect(shown.success && shown.markdown).toContain("### Aportes destacados");
+    expect(shown.success && shown.markdown).toContain("?locale=es");
+  });
+
+  it("validates a username only for selected visible cards", () => {
+    const profile = activityProfile();
+    profile.data.metrics.username = "https://example.com/";
+    expect(generateReadme(profile)).toEqual({
+      success: false,
+      errors: [{ code: "invalid_username", path: ["data", "metrics", "username"] }],
+    });
+    profile.visibility.metrics = false;
+    expect(generateReadme(profile)).toEqual({
+      success: false,
+      errors: [{ code: "empty_profile", path: [] }],
+    });
+  });
+});

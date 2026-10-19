@@ -3,17 +3,14 @@ import {
   ArrowUpRight,
   AtSign,
   BookOpen,
-  Check,
   CodeXml,
   Compass,
   FileText,
   FolderGit2,
   GitPullRequest,
-  GraduationCap,
   Layers3,
   Sprout,
   Terminal,
-  TrendingUp,
 } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { SiteHeader } from "@/components/site-header";
@@ -24,13 +21,9 @@ import { Link } from "@/i18n/navigation";
 
 const modules = [
   { key: "presentation", icon: Compass },
-  { key: "knowledge", icon: BookOpen },
   { key: "technologies", icon: CodeXml },
-  { key: "education", icon: GraduationCap },
-  { key: "current", icon: Sprout },
   { key: "projects", icon: FolderGit2 },
   { key: "contributions", icon: GitPullRequest },
-  { key: "metrics", icon: TrendingUp },
   { key: "contact", icon: AtSign },
 ] as const;
 
@@ -97,19 +90,6 @@ export async function HomePage() {
                   </div>
                 </div>
                 <p className="mt-5 text-sm leading-6 text-muted-foreground">{t("previewBio")}</p>
-                <div className="mt-6 border-t border-border pt-5">
-                  <h3 className="text-xs font-semibold">{t("previewKnowledge")}</h3>
-                  <ul className="mt-3 space-y-2.5 text-xs leading-5 text-muted-foreground">
-                    <li className="flex items-center gap-2">
-                      <Check className="size-3.5 shrink-0 text-accent" aria-hidden="true" />
-                      {t("previewCapabilityOne")}
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="size-3.5 shrink-0 text-accent" aria-hidden="true" />
-                      {t("previewCapabilityTwo")}
-                    </li>
-                  </ul>
-                </div>
                 <div className="mt-5">
                   <h3 className="text-xs font-semibold">{t("previewTechnologies")}</h3>
                   <div className="mt-3 flex flex-wrap gap-2">
@@ -118,23 +98,6 @@ export async function HomePage() {
                         {technology}
                       </Badge>
                     ))}
-                  </div>
-                </div>
-                <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs">
-                  <span className="text-muted-foreground">{t("previewLearning")}</span>
-                  <Badge variant="accent">Docker</Badge>
-                  <Badge variant="accent">Jest</Badge>
-                </div>
-                <div className="mt-5 flex items-start gap-2.5 rounded-md bg-surface-raised px-3 py-3">
-                  <GraduationCap
-                    className="mt-0.5 size-4 shrink-0 text-muted-foreground"
-                    aria-hidden="true"
-                  />
-                  <div>
-                    <h3 className="text-xs font-medium">{t("previewEducation")}</h3>
-                    <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                      {t("previewEducationValue")}
-                    </p>
                   </div>
                 </div>
               </div>

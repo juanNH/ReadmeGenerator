@@ -5,7 +5,7 @@ import { defaultModuleOrder, isModuleId, moduleIds } from "./module-ids";
 import { moduleRegistry } from "./module-registry";
 
 describe("profile module registry", () => {
-  it("exposes exactly the nine independent product sections", () => {
+  it("preserves exactly the nine version-one document slots", () => {
     const expectedIds = [
       "presentation",
       "knowledge",
@@ -23,20 +23,31 @@ describe("profile module registry", () => {
     expect(defaultModuleOrder).toEqual(expectedIds);
   });
 
-  it.each(moduleIds)(
-    "associates %s with valid fresh draft data and English/Spanish labels",
-    (id) => {
-      const definition = moduleRegistry[id];
-      const data = definition.createEmptyData();
-      expect(definition.id).toBe(id);
-      expect(definition.schema.safeParse(data).success).toBe(true);
-      expect(definition.createEmptyData()).toEqual(data);
-      expect(definition.createEmptyData()).not.toBe(data);
-      expect(en.Modules[definition.labelKey].trim().length).toBeGreaterThan(0);
-      expect(es.Modules[definition.labelKey].trim().length).toBeGreaterThan(0);
-      expect(isModuleId(id)).toBe(true);
-    },
-  );
+  it.each(moduleIds)("associates %s with valid fresh draft data", (id) => {
+    const definition = moduleRegistry[id];
+    const data = definition.createEmptyData();
+    expect(definition.id).toBe(id);
+    expect(definition.schema.safeParse(data).success).toBe(true);
+    expect(definition.createEmptyData()).toEqual(data);
+    expect(definition.createEmptyData()).not.toBe(data);
+    expect(isModuleId(id)).toBe(true);
+  });
+
+  it("keeps English and Spanish labels only for active or pending modules", () => {
+    const expectedIds = [
+      "presentation",
+      "technologies",
+      "projects",
+      "contributions",
+      "metrics",
+      "contact",
+    ];
+    expect(Object.keys(en.Modules)).toEqual(expectedIds);
+    expect(Object.keys(es.Modules)).toEqual(expectedIds);
+    for (const label of [...Object.values(en.Modules), ...Object.values(es.Modules)]) {
+      expect(label.trim().length).toBeGreaterThan(0);
+    }
+  });
 
   it.each(["", "unknown", "__proto__", "constructor", null, undefined, {}, 1])(
     "does not accept an unknown identifier %j",

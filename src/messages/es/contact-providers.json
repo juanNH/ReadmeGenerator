@@ -1,0 +1,10 @@
+{
+  "provider": "Agregá dónde encontrarte",
+  "providerHelp": "Agregá todos los enlaces que quieras, incluso varios perfiles del mismo servicio. Los iconos corresponden a la URL que ingreses.",
+  "custom": "Portfolio / sitio web",
+  "email": "Correo electrónico",
+  "addWebsite": "Agregar otra web",
+  "multipleWebsites": "Compartí tu portfolio, blog o cualquier otro sitio. Cada enlace puede tener su propio nombre.",
+  "details": "Personalizar etiqueta (opcional)",
+  "labelHelp": "Opcional. Los servicios conocidos muestran su nombre; las webs muestran la dirección."
+}

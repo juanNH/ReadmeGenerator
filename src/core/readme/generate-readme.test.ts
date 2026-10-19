@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { moduleIds } from "../modules/module-ids";
 import { createEmptyProfile } from "../profile/profile-operations";
-import type { ProfileDocument } from "../profile/profile-schema";
+import type { ContentLocale, ProfileDocument } from "../profile/profile-schema";
 import { generateReadme, type ReadmeResult } from "./index";
 
 function markdown(result: ReadmeResult): string {
@@ -25,6 +24,38 @@ function contactProfile(url = "https://example.com", label = "Website"): Profile
   const profile = createEmptyProfile("en");
   profile.visibility.contact = true;
   profile.data.contact.links = [{ id: "website", label, url }];
+  return profile;
+}
+
+function retiredSectionsProfile(locale: ContentLocale = "en"): ProfileDocument {
+  const profile = createEmptyProfile(locale);
+  profile.visibility.knowledge = true;
+  profile.visibility.education = true;
+  profile.visibility.current = true;
+  profile.data.knowledge.items = [
+    { id: "\ud800", title: "Retired knowledge", description: "Existing personal text" },
+  ];
+  profile.data.education.items = [
+    {
+      id: "saved-study",
+      kind: "certification",
+      title: "Retired education",
+      institution: "Saved institution",
+      status: "in-progress",
+      startDate: "Saved start",
+      endDate: "Saved end",
+      description: "Saved study details",
+      url: "javascript:alert(1)",
+    },
+  ];
+  profile.data.current.items = [
+    {
+      id: "saved-activity",
+      kind: "learning",
+      description: "Retired current activity",
+      url: "mailto:alex@example.com",
+    },
+  ];
   return profile;
 }
 
@@ -109,25 +140,20 @@ describe("README sections and export readiness", () => {
     });
   });
 
-  it.each(moduleIds.filter((id) => id !== "presentation" && id !== "contact"))(
-    "rejects visible %s explicitly even when it is empty",
-    (moduleId) => {
-      const profile = presentationProfile();
-      profile.visibility[moduleId] = true;
-      expect(generateReadme(profile)).toEqual({
-        success: false,
-        errors: [{ code: "unsupported_module", path: ["visibility", moduleId] }],
-      });
-    },
-  );
+  it("omits visible metrics when no cards have been selected", () => {
+    const profile = presentationProfile();
+    profile.visibility.metrics = true;
+    expect(generateReadme(profile)).toEqual(generateReadme(presentationProfile()));
+  });
 
   it("collects failures deterministically without returning partial Markdown", () => {
     const profile = contactProfile("javascript:alert(1)");
-    profile.visibility.education = true;
+    profile.visibility.metrics = true;
+    profile.data.metrics = { username: "not a username", cards: ["summary"] };
     expect(generateReadme(profile)).toEqual({
       success: false,
       errors: [
-        { code: "unsupported_module", path: ["visibility", "education"] },
+        { code: "invalid_username", path: ["data", "metrics", "username"] },
         { code: "invalid_url", path: ["data", "contact", "links", 0, "url"] },
       ],
     });
@@ -138,6 +164,53 @@ describe("README sections and export readiness", () => {
     const original = JSON.stringify(profile);
     expect(generateReadme(profile)).toEqual(generateReadme(profile));
     expect(JSON.stringify(profile)).toBe(original);
+  });
+});
+
+describe("retired sections remain stored without participating in output", () => {
+  it.each(["en", "es"] as const)(
+    "ignores all visible retired content and its invalid URLs in %s without changing the document",
+    (locale) => {
+      const profile = retiredSectionsProfile(locale);
+      profile.visibility.presentation = true;
+      profile.data.presentation.bio = "A brief personal introduction";
+      const expected = createEmptyProfile(locale);
+      expected.visibility.presentation = true;
+      expected.data.presentation.bio = profile.data.presentation.bio;
+      const before = structuredClone(profile);
+
+      expect(generateReadme(freezeDeep(profile))).toEqual(generateReadme(expected));
+      expect(markdown(generateReadme(profile))).toBe("A brief personal introduction\n");
+      expect(profile).toEqual(before);
+      expect(profile.schemaVersion).toBe(1);
+      expect(profile.moduleOrder).toHaveLength(9);
+    },
+  );
+
+  it.each(["knowledge", "education", "current"] as const)(
+    "reports empty output when only retired %s is visible despite saved content",
+    (moduleId) => {
+      const profile = retiredSectionsProfile();
+      for (const id of profile.moduleOrder) profile.visibility[id] = id === moduleId;
+      const before = structuredClone(profile);
+
+      expect(generateReadme(freezeDeep(profile))).toEqual({
+        success: false,
+        errors: [{ code: "empty_profile", path: [] }],
+      });
+      expect(profile).toEqual(before);
+      expect(profile.visibility[moduleId]).toBe(true);
+    },
+  );
+
+  it("reports only empty_profile when all three retired sections contain visible content", () => {
+    const profile = freezeDeep(retiredSectionsProfile());
+    const before = JSON.stringify(profile);
+    expect(generateReadme(profile)).toEqual({
+      success: false,
+      errors: [{ code: "empty_profile", path: [] }],
+    });
+    expect(JSON.stringify(profile)).toBe(before);
   });
 });
 

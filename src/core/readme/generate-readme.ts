@@ -1,12 +1,11 @@
 import type { ProfileDocument } from "../profile/profile-schema";
-import { escapeLinkDestination, normalizeContactUrl } from "./contact-url";
 import { escapeInlineText, escapeParagraphText } from "./escape-markdown";
+import { readmeLabels } from "./readme-labels";
 import type { ReadmeIssue, ReadmeResult } from "./readme-result";
-
-const labels = {
-  en: { location: "Location", contact: "Contact" },
-  es: { location: "Ubicación", contact: "Contacto" },
-} as const;
+import { renderActivity } from "./render-activity";
+import { renderContact } from "./render-contact";
+import { renderProjects } from "./render-projects";
+import { renderTechnologies } from "./render-technologies";
 
 function renderPresentation(document: ProfileDocument): string {
   const { displayName, headline, bio, location } = document.data.presentation;
@@ -18,47 +17,60 @@ function renderPresentation(document: ProfileDocument): string {
     nameText && `# ${nameText}`,
     headlineText && `## ${headlineText}`,
     bioText,
-    locationText && `${labels[document.contentLocale].location}: ${locationText}`,
+    locationText && `${readmeLabels[document.contentLocale].location}: ${locationText}`,
   ]
     .filter(Boolean)
     .join("\n\n");
 }
 
-function renderContact(document: ProfileDocument, errors: ReadmeIssue[]): string {
-  const links: string[] = [];
-  for (const [index, link] of document.data.contact.links.entries()) {
-    if (!link.label.trim() && !link.url.trim()) continue;
-    const url = normalizeContactUrl(link.url);
-    if (url === null) {
-      errors.push({ code: "invalid_url", path: ["data", "contact", "links", index, "url"] });
-      continue;
-    }
-    const label = escapeInlineText(link.label) || escapeInlineText(link.url);
-    links.push(`- [${label}](${escapeLinkDestination(url)})`);
-  }
-  return links.length > 0
-    ? `## ${labels[document.contentLocale].contact}\n\n${links.join("\n")}`
-    : "";
-}
-
 /**
  * document must be structurally valid (from the factory, parser or domain operations).
  * Hidden data is preserved in the document and has no effect on export validation.
+ * Retired sections keep their v1 data but never participate in output or validation.
  */
-export function generateReadme(document: ProfileDocument): ReadmeResult {
+export function generateReadme(
+  document: ProfileDocument,
+  options: { readonly activityCardBaseUrl?: string } = {},
+): ReadmeResult {
   const sections: string[] = [];
   const errors: ReadmeIssue[] = [];
+  const exportIssues: ReadmeIssue[] = [];
+  const labels = readmeLabels[document.contentLocale];
 
   for (const moduleId of document.moduleOrder) {
-    if (!document.visibility[moduleId]) continue;
+    if (moduleId === "metrics") continue;
+    if (moduleId === "contributions") {
+      if (!document.visibility.contributions && !document.visibility.metrics) continue;
+    } else if (!document.visibility[moduleId]) continue;
 
-    if (moduleId !== "presentation" && moduleId !== "contact") {
-      errors.push({ code: "unsupported_module", path: ["visibility", moduleId] });
-      continue;
+    let content: string;
+    switch (moduleId) {
+      case "presentation":
+        content = renderPresentation(document);
+        break;
+      case "knowledge":
+      case "education":
+      case "current":
+        continue;
+      case "technologies":
+        content = renderTechnologies(document.data.technologies, labels);
+        break;
+      case "projects":
+        content = renderProjects(document.data.projects, labels, errors);
+        break;
+      case "contributions":
+        content = renderActivity(
+          document,
+          labels,
+          errors,
+          exportIssues,
+          options.activityCardBaseUrl,
+        );
+        break;
+      case "contact":
+        content = renderContact(document.data.contact, labels, errors);
+        break;
     }
-
-    const content =
-      moduleId === "presentation" ? renderPresentation(document) : renderContact(document, errors);
     if (content) sections.push(content);
   }
 
@@ -66,5 +78,9 @@ export function generateReadme(document: ProfileDocument): ReadmeResult {
   if (sections.length === 0) {
     return { success: false, errors: [{ code: "empty_profile", path: [] }] };
   }
-  return { success: true, markdown: `${sections.join("\n\n")}\n` };
+  return {
+    success: true,
+    markdown: `${sections.join("\n\n")}\n`,
+    ...(exportIssues.length > 0 ? { exportIssues } : {}),
+  };
 }

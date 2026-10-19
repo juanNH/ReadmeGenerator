@@ -12,19 +12,59 @@ async function openEditor(page: Page, locale: "en" | "es" = "en") {
     page.getByRole("checkbox", {
       name: locale === "en" ? "About you" : "Presentación",
       exact: true,
+      includeHidden: true,
     }),
   ).toBeEnabled();
 }
 
+async function openSection(page: Page, name: string) {
+  await showSections(page);
+  const choice = page.getByRole("button", { name, exact: true, includeHidden: true });
+  await choice.click();
+  await expect(choice).toHaveAttribute("aria-current", "step");
+  await expect(page.locator("#editor-section-title")).toHaveText(name);
+  if (name === "About you" || name === "Presentación") {
+    const details = page.locator("details").filter({
+      has: page.getByText(name === "About you" ? "Extra details" : "Detalles opcionales", {
+        exact: true,
+      }),
+    });
+    if (!(await details.evaluate((node) => (node as HTMLDetailsElement).open)))
+      await details.locator("summary").click();
+  }
+  if (name === "Contact" || name === "Contacto") {
+    for (const summary of await page.locator("details:not([open]) > summary").all())
+      await summary.click();
+  }
+}
+
+async function showSections(page: Page) {
+  const sections = page.getByRole("button", { name: /^(Sections|Secciones)$/, exact: true });
+  if ((await sections.isVisible()) && (await sections.getAttribute("aria-expanded")) !== "true")
+    await sections.click();
+}
+
+async function showPreview(page: Page, locale: "en" | "es" = "en") {
+  const preview = page.getByRole("button", {
+    name: locale === "en" ? "Preview" : "Vista previa",
+    exact: true,
+  });
+  if (await preview.isVisible()) await preview.click();
+}
+
 async function introduceYourself(page: Page, name = "Sam Example") {
+  await showSections(page);
   await page.getByRole("checkbox", { name: "About you", exact: true }).check();
+  await openSection(page, "About you");
   await page.getByRole("textbox", { name: "Display name", exact: true }).fill(name);
-  await expect(page.getByRole("button", { name: "Download README", exact: true })).toBeEnabled();
 }
 
 async function addContact(page: Page, label = "Portfolio", url = "https://example.com/profile") {
+  await showSections(page);
   await page.getByRole("checkbox", { name: "Contact", exact: true }).check();
+  await openSection(page, "Contact");
   await page.getByRole("button", { name: "Add link", exact: true }).click();
+  await page.getByText("Customize label (optional)", { exact: true }).last().click();
   await page.getByRole("textbox", { name: "Link label", exact: true }).last().fill(label);
   await page.getByRole("textbox", { name: "URL", exact: true }).last().fill(url);
 }
@@ -37,6 +77,7 @@ async function downloadText(download: Download): Promise<string> {
 }
 
 async function downloadReadme(page: Page): Promise<string> {
+  await showPreview(page);
   const event = page.waitForEvent("download");
   await page.getByRole("button", { name: "Download README", exact: true }).click();
   return downloadText(await event);
@@ -67,12 +108,14 @@ async function assertMemoryLocaleRoundTrip(
 
   await page.getByRole("combobox", { name: "Language", exact: true }).selectOption("es");
   await expect(page).toHaveURL(/\/es\/editor$/);
+  await openSection(page, "Presentación");
   await expect(page.getByRole("textbox", { name: "Nombre para mostrar", exact: true })).toHaveValue(
     name,
   );
   await expect(page.getByRole("textbox", { name: "Titular", exact: true })).toHaveValue(
     memoryHeadline,
   );
+  await openSection(page, "Contacto");
   await expect(page.getByRole("textbox", { name: "URL", exact: true })).toHaveValue(
     memoryContactUrl,
   );
@@ -90,10 +133,12 @@ async function assertMemoryLocaleRoundTrip(
 
   await page.getByRole("combobox", { name: "Idioma", exact: true }).selectOption("en");
   await expect(page).toHaveURL(/\/en\/editor$/);
+  await openSection(page, "About you");
   await expect(page.getByRole("textbox", { name: "Display name", exact: true })).toHaveValue(name);
   await expect(page.getByRole("textbox", { name: "Headline", exact: true })).toHaveValue(
     memoryHeadline,
   );
+  await openSection(page, "Contact");
   await expect(page.getByRole("textbox", { name: "URL", exact: true })).toHaveValue(
     memoryContactUrl,
   );
@@ -137,13 +182,13 @@ test("presentation alone can be completed with keyboard and no required identity
   await about.focus();
   await page.keyboard.press("Space");
   await page
-    .getByRole("textbox", { name: "Headline", exact: true })
+    .getByRole("textbox", { name: "About you", exact: true })
     .fill("Learning accessible interfaces");
   const preview = page.getByRole("article", { name: "README preview", exact: true });
   await expect(preview).toContainText("Learning accessible interfaces");
   await expect(page.getByRole("textbox", { name: "Display name", exact: true })).toHaveValue("");
   await expect(page.getByRole("checkbox", { name: "Contact", exact: true })).not.toBeChecked();
-  expect(await downloadReadme(page)).toBe("## Learning accessible interfaces\n");
+  expect(await downloadReadme(page)).toBe("Learning accessible interfaces\n");
 });
 
 test("contact alone supports adding, editing and removing stable links with usable focus", async ({
@@ -152,8 +197,10 @@ test("contact alone supports adding, editing and removing stable links with usab
   await openEditor(page);
   await addContact(page);
   await page.getByRole("button", { name: "Add link", exact: true }).click();
+  const urls = page.getByRole("textbox", { name: "URL", exact: true });
+  await expect(urls.last()).toBeFocused();
+  await page.getByText("Customize label (optional)", { exact: true }).last().click();
   const labels = page.getByRole("textbox", { name: "Link label", exact: true });
-  await expect(labels.last()).toBeFocused();
   await labels.last().fill("Email");
   await page
     .getByRole("textbox", { name: "URL", exact: true })
@@ -162,7 +209,7 @@ test("contact alone supports adding, editing and removing stable links with usab
   await page.getByRole("button", { name: "Remove link 1", exact: true }).click();
   await expect(labels).toHaveCount(1);
   await expect(labels).toHaveValue("Email");
-  await expect(labels).toBeFocused();
+  await expect(urls).toBeFocused();
   await expect(page.getByRole("checkbox", { name: "About you", exact: true })).not.toBeChecked();
   const preview = page.getByRole("article", { name: "README preview", exact: true });
   await expect(preview.getByRole("link", { name: "Email", exact: true })).toHaveAttribute(
@@ -193,9 +240,11 @@ test("hiding and restoring a section preserves its draft, order and opaque IDs a
     value: JSON.stringify(profile),
   });
   await openEditor(page);
+  await openSection(page, "About you");
   await expect(page.getByRole("textbox", { name: "Display name", exact: true })).toHaveValue(
     "Sam Example",
   );
+  await openSection(page, "Contact");
   await page.getByRole("textbox", { name: "Link label", exact: true }).fill("Updated portfolio");
   await page.getByRole("checkbox", { name: "About you", exact: true }).uncheck();
   await expect(
@@ -205,6 +254,7 @@ test("hiding and restoring a section preserves its draft, order and opaque IDs a
   await page.reload();
   await expect(page.getByRole("checkbox", { name: "About you", exact: true })).toBeEnabled();
   await expect(page.getByRole("checkbox", { name: "About you", exact: true })).not.toBeChecked();
+  await openSection(page, "Contact");
   await expect(page.getByRole("textbox", { name: "Link label", exact: true })).toHaveValue(
     "Updated portfolio",
   );
@@ -212,6 +262,7 @@ test("hiding and restoring a section preserves its draft, order and opaque IDs a
     "es",
   );
   await page.getByRole("checkbox", { name: "About you", exact: true }).check();
+  await openSection(page, "About you");
   await expect(page.getByRole("textbox", { name: "Display name", exact: true })).toHaveValue(
     "Sam Example",
   );
@@ -239,6 +290,7 @@ test("invalid contact URLs explain the error and block export only while that se
   await page.getByRole("checkbox", { name: "Contact", exact: true }).uncheck();
   await expect(page.getByRole("button", { name: "Download README", exact: true })).toBeEnabled();
   await page.getByRole("checkbox", { name: "Contact", exact: true }).check();
+  await openSection(page, "Contact");
   await expect(url).toHaveValue("javascript:alert(1)");
   await url.fill("https://example.com/profile");
   await expect(url).not.toHaveAttribute("aria-invalid", "true");
@@ -252,6 +304,7 @@ test("UI locale changes preserve the latest unsaved text and keep README languag
   await introduceYourself(page);
   await page.getByRole("textbox", { name: "Location", exact: true }).fill("Example City");
   await addContact(page);
+  await openSection(page, "About you");
   await page
     .getByRole("textbox", { name: "About you", exact: true })
     .fill("My latest words before navigation");
@@ -259,6 +312,7 @@ test("UI locale changes preserve the latest unsaved text and keep README languag
   await page.getByRole("combobox", { name: "Language", exact: true }).selectOption("es");
   await expect(page).toHaveURL(/\/es\/editor$/);
   await expect(page.locator("html")).toHaveAttribute("lang", "es");
+  await openSection(page, "Presentación");
   await expect(page.getByRole("textbox", { name: "Sobre vos", exact: true })).toHaveValue(
     "My latest words before navigation",
   );
@@ -274,6 +328,7 @@ test("UI locale changes preserve the latest unsaved text and keep README languag
   await expect(preview).toContainText("Ubicación: Example City");
   await page.getByRole("combobox", { name: "Idioma", exact: true }).selectOption("en");
   await expect(page).toHaveURL(/\/en\/editor$/);
+  await openSection(page, "About you");
   await expect(page.getByRole("combobox", { name: "README language", exact: true })).toHaveValue(
     "es",
   );
@@ -377,6 +432,7 @@ for (const [name, saved] of [
     page.once("dialog", (dialog) => dialog.dismiss());
     await page.getByRole("button", { name: "Start a new saved draft", exact: true }).click();
     expect(await page.evaluate((key) => localStorage.getItem(key), draftKey)).toBe(saved);
+    await openSection(page, "About you");
     await expect(page.getByRole("textbox", { name: "Display name", exact: true })).toHaveValue(
       "In-memory profile",
     );
@@ -462,6 +518,7 @@ test("a failed flush before the save debounce preserves pending edits across bot
     { key: draftKey, original },
   );
   await openEditor(page);
+  await openSection(page, "About you");
   await page
     .getByRole("textbox", { name: "Display name", exact: true })
     .fill("Latest pending profile");
@@ -523,6 +580,7 @@ for (const locale of ["en", "es"] as const) {
         .getByRole("textbox", { name: "Nombre para mostrar", exact: true })
         .fill("Sol Ejemplo");
       await page.getByRole("checkbox", { name: "Contacto", exact: true }).check();
+      await openSection(page, "Contacto");
       await page.getByRole("button", { name: "Agregar enlace", exact: true }).click();
       await page
         .getByRole("textbox", { name: "URL", exact: true })
@@ -546,6 +604,7 @@ test("accessibility: dark editor fits 360px and supports the skip link with a po
     "A long portfolio label that should wrap",
     "https://example.com/a-long-reference-path-for-a-small-mobile-screen",
   );
+  await showPreview(page);
   await page.getByRole("button", { name: "Toggle dark mode", exact: true }).click();
   await expect(page.locator("html")).toHaveClass(/dark/);
   expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)).toBe(

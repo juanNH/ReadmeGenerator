@@ -1,0 +1,19 @@
+{
+  "title": "Tus secciones",
+  "description": "Elegí una sección para configurarla. Arrastrá las incluidas al orden en que querés mostrarlas.",
+  "count": "{total, plural, =0 {Todavía no incluiste secciones} one {# sección incluida} other {# secciones incluidas}}",
+  "editing": "Configurando ahora",
+  "included": "Incluida en el README",
+  "available": "Sin incluir · elegila para agregar",
+  "addAndEdit": "Agregar y editar {module}",
+  "help": "Elegir una sección sin incluir la agrega y abre su configuración. Las casillas incluyen u ocultan secciones y conservan tus textos. Los tiradores y los botones de subir y bajar cambian el orden del README.",
+  "dragHandle": "Arrastrar {module} para ordenar",
+  "draggableRole": "sección arrastrable",
+  "dragInstructions": "Para tomar esta sección, presioná Espacio o Enter. Usá las flechas arriba y abajo para moverla. Presioná Espacio o Enter otra vez para soltarla, o Escape para cancelar. También podés usar los botones de subir y bajar.",
+  "announcements": {
+    "pickedUp": "Tomaste {module}, en la posición {position} de {total}. Usá las flechas para moverla, Espacio o Enter para soltarla, o Escape para cancelar.",
+    "moved": "{module} está en la posición {position} de {total}.",
+    "dropped": "{module} quedó en la posición {position} de {total}.",
+    "canceled": "Se canceló el ordenamiento de {module}. Se conservó el orden original."
+  }
+}

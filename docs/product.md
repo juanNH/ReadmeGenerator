@@ -1,74 +1,55 @@
 # Producto
 
-GitHub Profile Generator es una herramienta visual para crear README de perfiles de GitHub. Permitirá elegir qué mostrar, completar información, ordenar módulos, personalizar su presentación y obtener un archivo listo para usar.
+GitHub Profile Generator permite crear un README personal breve para GitHub: escribir una presentación, elegir tecnologías y compartir proyectos, aportes o enlaces. El recorrido acepta un perfil informal y corto, sin exigir una estructura de CV.
 
-## Personas y necesidades
+## Personas y principios
 
-- Una persona con conocimientos y poca actividad pública necesita explicar qué sabe hacer, qué conoce y qué está aprendiendo.
-- Una persona con experiencia en repositorios privados necesita presentar su trabajo y sus capacidades sin depender de estadísticas públicas.
-- Una persona que participa activamente en GitHub necesita destacar proyectos, colaboraciones y actividad de forma seleccionada.
+El mismo editor sirve a quienes tienen poca actividad pública, trabajan en repositorios privados o contribuyen de forma habitual. No asigna puntuaciones al perfil ni infiere habilidades a partir de commits, estrellas o lenguajes detectados.
 
-Todas comparten el mismo editor y catálogo de módulos. La composición inicial cambia según lo que quieran destacar; no se asignan categorías de valor ni puntuaciones al perfil.
+Todas las secciones son opcionales. El recorrido manual funciona sin cuenta ni conexión a GitHub. Una introducción puede contar intereses, aprendizaje o actividad actual sin repetirlos en otros formularios. Agregar una tecnología no exige explicar su uso. Ocultar una sección conserva los datos; quitar una entrada los borra mediante una acción explícita.
 
-## Principios
+Un perfil breve puede considerarse terminado. No se muestra un porcentaje de completitud ni se exige empleo, proyectos, métricas o contacto. La interfaz ofrece inglés inicial y español, controles reconocibles y alternativas de teclado al arrastre.
 
-- Todos los módulos son opcionales, incluidas las métricas.
-- El recorrido manual funciona sin crear una cuenta ni conectar GitHub.
-- Ocultar un módulo conserva su contenido; eliminar datos requiere una acción distinta y explícita.
-- Los campos sin completar no generan títulos, íconos ni espacios vacíos en el README.
-- Los conocimientos declarados y la actividad pública se presentan con contexto propio.
-- Los cambios se pueden revisar antes de exportar.
-- La vista previa representa las posibilidades y límites del README de GitHub.
-- La interfaz incluye inglés como idioma predeterminado y español, con un selector funcional desde la base.
-- Los controles son reconocibles y las opciones avanzadas se muestran cuando hacen falta, manteniendo una interacción accesible.
+## Las cinco secciones
 
-## Módulos del MVP
+| Sección                    | Contenido                                                                                             |
+| -------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Presentación               | Nombre opcional y texto libre; frase de encabezado y ubicación en detalles secundarios.               |
+| Tecnologías                | Búsqueda por nombre o alias, selección con iconos, chips para quitar y texto propio como alternativa. |
+| Proyectos                  | Nombre, descripción, participación personal, tecnologías y enlaces opcionales; no exige GitHub.       |
+| Actividad y contribuciones | Aportes manuales con título/enlace opcionales; consulta pública y tarjetas de GitHub elegibles.       |
+| Contacto                   | Proveedores conocidos con icono según URL, portfolio o web propia y correo; etiqueta opcional.        |
 
-Los identificadores de la tabla existen en el contrato y el registro de módulos. Presentación y contacto disponen de formularios, vista previa y exportación de README. Los otros siete módulos admiten datos en el contrato, sin formularios ni generación de contenido. La tabla describe la intención de producto; no implica que todo su comportamiento esté disponible.
+El catálogo local contiene 259 tecnologías con iconos de Devicon, Simple Icons y Lobe Icons. Incluye lenguajes, frameworks, bases de datos, mensajería, infraestructura, herramientas de desarrollo y de IA. No consulta servicios externos para buscar ni exige cuentas de esas herramientas. La vista previa dispone los iconos en filas que se adaptan al ancho; la exportación referencia originales fijados a commits y el editor usa sus copias SVG locales. Los nombres propios siguen disponibles como texto. Grupos y contextos tecnológicos de borradores anteriores permanecen editables como detalles secundarios. La selección no representa un nivel de conocimiento ni un ranking del mercado.
 
-| Módulo         | Identificador   | Contenido previsto                                                                   | Comportamiento del MVP                                                             |
-| -------------- | --------------- | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------- |
-| Presentación   | `presentation`  | Nombre, rol, descripción breve y ubicación opcional.                                 | Ayuda a abrir el perfil; ningún dato se publica por omisión.                       |
-| Conocimientos  | `knowledge`     | Capacidades concretas, por ejemplo construir interfaces o diseñar una base de datos. | Texto manual; permite explicar qué puede hacer la persona.                         |
-| Tecnologías    | `technologies`  | Lenguajes y herramientas agrupados por área, con contexto de uso opcional.           | Selección visual y etiquetas editables; no hay porcentajes automáticos de dominio. |
-| Formación      | `education`     | Estudios, cursos y certificaciones seleccionados.                                    | Entradas manuales; institución, fechas y enlace opcionales.                        |
-| Actualidad     | `current`       | Trabajo actual, aprendizaje, intereses y disposición a colaborar.                    | Cada elemento es opcional y se puede editar por separado.                          |
-| Proyectos      | `projects`      | Nombre, descripción, participación personal, tecnologías y enlaces.                  | Admite proyectos manuales y trabajos que no estén alojados en GitHub.              |
-| Contribuciones | `contributions` | Colaboraciones, revisiones y aportes seleccionados.                                  | Se puede explicar el aporte y agregar un enlace público de referencia.             |
-| Métricas       | `metrics`       | Tres tarjetas elegibles con información pública de GitHub.                           | Se incorporan en una etapa posterior; cada tarjeta se activa por separado.         |
-| Contacto       | `contact`       | Portfolio, redes y medios de contacto elegidos por la persona.                       | Permite seleccionar enlaces y ordenar cuáles aparecen.                             |
+Contacto ofrece LinkedIn, LeetCode, HackerRank, YouTube, Facebook, Instagram, GitHub, X, Bluesky, DEV Community, Medium, Twitch y Stack Overflow, además de portfolio/web propia o correo. Elegir un servicio facilita agregar el enlace; el dominio validado de la URL determina el icono. Una dirección propia mantiene un icono genérico en el formulario y un enlace de texto en el README. La etiqueta es opcional y puede personalizarse sin cambiar la marca detectada.
 
-El contenido manual no requiere un repositorio público como prueba. Vincular un conocimiento o una tecnología con un proyecto será una forma opcional de aportar contexto.
+Actividad y contribuciones puede usarse solo para contar un aporte de documentación, revisión o comunidad. El grupo de GitHub es plegable y opcional: ingresar usuario, pulsar la consulta pública y elegir qué mostrar. Sus tres tarjetas empiezan desactivadas: calendario del período, resumen de commits/PR/issues/revisiones y lenguajes por bytes de repositorios públicos propios analizados, excluyendo forks. Los lenguajes reflejan el código actual, sin limitarse al período del calendario ni medir conocimientos.
 
-## Recorrido del usuario
+Las sugerencias públicas de PR e issues se agregan únicamente al seleccionarlas; después son aportes editables con una nota propia opcional. No hay mínimos de actividad, rachas, rankings ni mensajes que penalicen un resultado vacío. Cero actividad, usuario inexistente, servicio no configurado, cuota agotada e indisponibilidad se explican como situaciones distintas. Un fallo mantiene la edición manual disponible y puede mostrar el último resultado válido con su fecha.
 
-1. **Entrar y entender la propuesta.** Ver ejemplos breves con enfoques en conocimientos, proyectos y comunidad. El llamado principal invita a crear un perfil.
-2. **Elegir qué destacar.** Seleccionar intereses como conocimientos, formación, proyectos o contribuciones. La herramienta propone módulos y permite cambiar la selección.
-3. **Completar una base.** Cargar información manual sin cuenta. GitHub público será una ayuda opcional cuando se incorpore esa etapa.
-4. **Editar módulos.** Completar una sección a la vez con ejemplos breves, agregar módulos, ocultarlos conservando sus datos y cambiar el orden.
-5. **Personalizar.** Elegir una presentación visual coherente, densidad, alineación y estilo de íconos dentro de las opciones compatibles con el README.
-6. **Revisar.** Ver la composición final, corregir enlaces o campos y comprobar que solo se exporta lo elegido. Los datos de ejemplo deben distinguirse de los propios.
-7. **Generar y usar.** Copiar el contenido o descargar `README.md`, con instrucciones para ubicarlo en el repositorio de perfil de GitHub.
-8. **Continuar después.** Exportar y recuperar la configuración del perfil mediante un documento versionado cuando se complete la etapa de portabilidad.
+Conocimientos, formación y actualidad están retirados de la navegación, los formularios y la salida, también en borradores anteriores. Sus estructuras internas v1 permanecen guardadas sin borrarlas o fusionarlas. No reaparecen por tener contenido o visibilidad y sus enlaces no bloquean la exportación. La [compatibilidad del documento](profile-model.md) no amplía las cinco secciones del producto.
 
-Una composición breve puede considerarse terminada. No se mostrará un porcentaje de completitud que presione a agregar proyectos, métricas o información de contacto.
+## Recorrido
 
-## GitHub y métricas
+1. Abrir el editor en inglés o español, sin crear cuenta.
+2. Elegir qué compartir y configurar una sección por vez. Ninguna está preseleccionada.
+3. Incluir u ocultar con la casilla y ordenar las incluidas con el tirador, teclado o Subir/Bajar.
+4. Elegir el idioma de las etiquetas del README, sin traducir el texto personal ni cambiar el idioma de interfaz.
+5. Revisar la vista previa, corregir los enlaces señalados y copiar o descargar `README.md`.
 
-La integración futura usará información pública por nombre de usuario. La selección de proyectos y contribuciones seguirá bajo control de la persona. Las métricas se obtendrán a través del backend de la aplicación Next.js y se ofrecerán como tres tarjetas públicas opcionales, cuya definición final se cerrará antes de implementar esa etapa.
+Si se eligieron tarjetas, su exportación requiere que la aplicación tenga un origen HTTPS público configurado para alojarlas. En un entorno local se revisan las mismas imágenes mediante rutas locales y se muestra el requisito antes de copiar o descargar; desmarcarlas permite terminar un perfil manual. No se solicitan tokens ni tareas de despliegue dentro del recorrido de creación del perfil.
 
-La presentación de cada tarjeta explicará qué representa, el período cuando corresponda y su disponibilidad. Los lenguajes detectados en repositorios no equivalen a habilidades verificadas y los contadores de actividad no determinan el valor del perfil. Un dato que no se pueda obtener no debe reemplazarse por un cero que sugiera inactividad.
+En pantallas amplias, navegación, configuración y vista previa ocupan tres paneles. En pantallas angostas se despliega la navegación y se alterna Editar/Vista previa. La sección en edición está identificada. La aplicación muestra instrucciones para usar el archivo en GitHub; no publica por la persona.
 
-## Asistencia con IA posterior
+El borrador se guarda en el navegador. Si el almacenamiento falla, el aviso permite distinguir que se continúa en memoria y exportar un README válido. Los datos incompatibles no se reemplazan automáticamente. Ver [editor](editor.md).
 
-Una etapa posterior podrá proponer mejoras de redacción o de organización. Las sugerencias deberán respetar un esquema definido, mostrar qué cambia y requerir revisión antes de aplicarse. No inventarán experiencia, conocimientos ni logros. El bootstrap no incluye un endpoint de IA ni respuestas simuladas que aparenten esa función.
+## Alcance y límites
 
-## Alcance disponible hoy
+La aplicación incluye Next.js App Router, TypeScript, un kit visual bilingüe y `ProfileDocument` versión 1. Vista previa, copia y descarga consumen el mismo Markdown generado. Los textos personales se escapan y solo el catálogo permitido genera iconos; no hay HTML libre.
 
-La aplicación usa Next.js `16.4.2`, React `19.3.1`, TypeScript, Tailwind CSS 4 y un kit visual. Incluye interfaz en inglés y español. Las rutas de entrada son `/en` y `/es`, con páginas `/editor` y `/design-system`; `/` redirige a inglés.
+La consulta opcional de GitHub requiere configuración del servidor con credenciales públicas verificables; un entorno sin ella conserva toda la creación manual. Las tarjetas SVG están alojadas por esta aplicación y se actualizan según caché; no se guarda una captura del gráfico en el borrador. No hay asistencia con IA: mostrar una herramienta de IA en el catálogo no incorpora una integración. Tampoco hay sincronización remota, importación/exportación de configuración ni personalización libre del diseño del README.
 
-El núcleo incluye [un documento de perfil versión 1](profile-model.md), el registro de los nueve módulos y funciones para crear y validar borradores, cambiar su visibilidad y ordenar las secciones. Todos los módulos pueden permanecer ocultos y vacíos. Los conocimientos no se condicionan a actividad pública, y ocultar una sección conserva sus datos.
+La única sección de actividad integra los antiguos campos de contribuciones y métricas sin agregar una sexta opción ni migrar v1. Ocultarla apaga ambos flags y conserva datos; volver a mostrarla incluye aportes y las tarjetas que sigan seleccionadas. Los snapshots remotos son efímeros; solo se guardan usuario, selección de tarjetas y aportes elegidos. La consulta del formulario es explícita y no ocurre al abrir o escribir; las imágenes ya seleccionadas pueden actualizarse al mostrarse.
 
-El [editor](editor.md) permite completar presentación y contacto como texto plano, ocultarlos sin perder información, revisar la salida y copiar o descargar `README.md`. El idioma de la interfaz y el de las etiquetas del README se eligen por separado. El borrador se recupera y guarda localmente; los valores incompatibles no se reemplazan sin confirmación. Si el navegador impide guardar, se puede seguir editando en memoria y exportando un README válido.
-
-No incluye formularios de los otros siete módulos, personalización del diseño del README, reordenamiento visual, portabilidad de configuración, consultas de GitHub, tarjetas de métricas ni asistencia con IA. La validación del documento admite contenido incompleto; el generador aplica por separado sus controles de salida. Un módulo visible sin soporte bloquea la exportación y conserva su contenido. Las capacidades descritas como futuras expresan la propuesta de producto; no constituyen funciones disponibles ni un calendario público de desarrollo.
+La validación estructural de un documento admite contenido incompleto y no demuestra que sea exportable. El generador aplica sus controles sobre las cinco secciones activas. Los campos retirados se conservan únicamente por compatibilidad interna, según [ADR 0008](decisions/0008-focused-profile.md). Las fuentes de iconos y la presentación de contacto se registran en [ADR 0009](decisions/0009-profile-icons.md); la consulta pública y el alojamiento de tarjetas, en [ADR 0010](decisions/0010-github-activity.md).

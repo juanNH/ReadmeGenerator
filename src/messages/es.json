@@ -1,7 +1,7 @@
 {
   "Metadata": {
     "title": "GitHub Profile Generator",
-    "description": "Una forma visual de contar tu historia en GitHub. Mostrá tus conocimientos, estudios, proyectos y contribuciones con secciones opcionales."
+    "description": "Dale tu toque a tu perfil de GitHub. Una intro breve, tus herramientas y lo que tengas ganas de compartir."
   },
   "Navigation": {
     "home": "Inicio de GitHub Profile Generator",
@@ -19,71 +19,50 @@
   },
   "Modules": {
     "presentation": "Presentación",
-    "knowledge": "Conocimientos",
     "technologies": "Tecnologías y herramientas",
-    "education": "Formación",
-    "current": "Actualidad",
     "projects": "Proyectos",
-    "contributions": "Contribuciones",
+    "contributions": "Actividad y contribuciones",
     "metrics": "Actividad de GitHub",
     "contact": "Contacto"
   },
   "Home": {
-    "eyebrow": "Tu experiencia, bien presentada",
+    "eyebrow": "Un poco más vos",
     "title": "Tu perfil de GitHub.",
     "titleAccent": "A tu manera.",
-    "description": "Reuní tus conocimientos, aprendizajes y trabajo. Elegí las secciones que cuentan tu historia, en cualquier etapa de tu recorrido.",
+    "description": "Presentate, elegí tus herramientas y compartí lo que disfrutás crear. Unas pocas líneas pueden decir mucho.",
     "primary": "Crear tu perfil",
     "secondary": "Explorar el sistema de diseño",
-    "note": "Empezá con una presentación y enlaces de contacto. Sin crear una cuenta. Tu borrador queda en este navegador.",
+    "note": "Sin crear una cuenta. Elegí qué querés compartir y dejá el resto afuera.",
     "previewLabel": "Perfil de ejemplo",
     "previewName": "Alex Rivera",
     "previewRole": "Desarrollo full stack · Argentina",
-    "previewBio": "Creo experiencias cuidadas para web y dispositivos móviles. Siempre con curiosidad por lo que viene.",
-    "previewKnowledge": "En qué puedo ayudarte",
-    "previewCapabilityOne": "Construcción de interfaces accesibles",
-    "previewCapabilityTwo": "Desarrollo de experiencias móviles",
+    "previewBio": "Me gusta convertir ideas en pequeñas cosas para la web. Ahora estoy explorando Docker y compartiendo lo que aprendo.",
     "previewTechnologies": "Herramientas que utilizo",
-    "previewLearning": "Estoy explorando",
-    "previewEducation": "Estudios y formación",
-    "previewEducationValue": "Desarrollo de software · En curso",
     "previewCaption": "Una composición posible. Cada sección es una elección.",
     "principlesLabel": "Un lugar para cada perfil de desarrollo",
-    "principleOne": "Tus conocimientos tienen su espacio",
+    "principleOne": "Unas pocas palabras alcanzan",
     "principleTwo": "Todos los módulos son opcionales",
     "principleThree": "Tu historia puede crecer con vos",
     "modulesEyebrow": "Las piezas de tu perfil",
     "modulesTitle": "Dale lugar a lo que te importa.",
-    "modulesDescription": "Conocé las nueve piezas del perfil. El editor incluye presentación y contacto; las otras secciones forman parte de la propuesta del producto.",
+    "modulesDescription": "Cinco secciones simples. Una intro, tus herramientas y lo que quieras compartir.",
     "optional": "Opcional",
     "modules": {
       "presentation": {
         "title": "Un poco sobre vos",
         "description": "Tu nombre, intereses y una presentación breve con tus propias palabras."
       },
-      "knowledge": {
-        "title": "Lo que sabés",
-        "description": "Contá qué podés hacer y qué problemas te gusta resolver."
-      },
       "technologies": {
         "title": "Tecnologías y herramientas",
-        "description": "Agrupá tus herramientas y explicá cómo las utilizás."
-      },
-      "education": {
-        "title": "Estudios y formación",
-        "description": "Dale lugar a tu carrera, estudios en curso, capacitaciones y certificaciones."
-      },
-      "current": {
-        "title": "Actualmente",
-        "description": "Compartí qué estás aprendiendo, construyendo o buscando para colaborar."
+        "description": "Buscá, elegí y mostrá tus herramientas con sus iconos."
       },
       "projects": {
         "title": "Proyectos elegidos",
         "description": "Mostrá tu trabajo, explicá tu participación y compartí lo que aprendiste."
       },
       "contributions": {
-        "title": "Contribuciones",
-        "description": "Destacá mejoras, revisiones y colaboraciones que te representan."
+        "title": "Actividad y contribuciones",
+        "description": "Elegí tarjetas de actividad de GitHub o compartí algunos aportes con tus palabras."
       },
       "metrics": {
         "title": "Actividad en GitHub",
@@ -99,7 +78,7 @@
     "steps": {
       "choose": {
         "title": "Elegí tu enfoque",
-        "description": "Conocimientos, proyectos, contribuciones: elegí qué querés destacar."
+        "description": "Una intro, tus herramientas, un pequeño proyecto: elegí lo que tengas ganas de compartir."
       },
       "compose": {
         "title": "Contá tu historia",

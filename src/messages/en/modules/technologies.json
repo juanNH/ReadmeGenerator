@@ -1,0 +1,23 @@
+{
+  "description": "Your favorite tools, at a glance.",
+  "searchLabel": "Add technologies",
+  "searchPlaceholder": "Search React, Python, Docker…",
+  "searchHelp": "Search and select a tool, or add your own name. Use the arrow keys and Enter to choose.",
+  "suggestions": "Technology suggestions",
+  "addCustom": "Add “{name}”",
+  "duplicate": "{name} is already in your list.",
+  "added": "Added {name}.",
+  "removed": "Removed {name}.",
+  "empty": "Your tools will appear here. Add as many or as few as you like.",
+  "selected": "Selected technologies",
+  "remove": "Remove {name}",
+  "untitled": "Untitled technology",
+  "savedDetails": "Saved details",
+  "savedDetailsHelp": "These groups and notes came from your saved draft. You can keep or edit them.",
+  "groupName": "Group name",
+  "savedName": "Technology {number} name",
+  "savedNote": "Note for {name}",
+  "removeGroup": "Remove technology group {number}",
+  "removeGroupVisible": "Remove group",
+  "removeGroupHelp": "Removing this group deletes it and all its technologies from this draft."
+}

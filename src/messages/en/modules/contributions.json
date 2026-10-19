@@ -1,0 +1,72 @@
+{
+  "description": "Choose GitHub activity or share a contribution in your own words.",
+  "help": "Choose what to share. GitHub activity is optional, and you can add a contribution without connecting an account.",
+  "highlightsTitle": "Featured contributions",
+  "highlightsHelp": "A small improvement, a review, documentation, or helping a community all count. A title, a link, or a short note is enough.",
+  "activity": {
+    "title": "GitHub activity (optional)",
+    "help": "Add an optional calendar, summary, or repository languages. Your public activity does not measure what you know.",
+    "username": "GitHub username",
+    "usernameHelp": "Only the username, with or without @. We query GitHub when you choose to.",
+    "usernamePlaceholder": "your-username",
+    "query": "Check GitHub activity",
+    "refresh": "Refresh GitHub activity",
+    "retry": "Try GitHub again",
+    "loadingButton": "Checking GitHub…",
+    "loading": "Loading available GitHub activity…",
+    "queryFirst": "Check your username to enable the optional cards. Nothing is selected automatically.",
+    "choose": "What would you like to include?",
+    "cards": {
+      "calendar": {
+        "label": "Contribution calendar",
+        "help": "Contributions over the last year, without streaks or rankings."
+      },
+      "summary": {
+        "label": "Activity summary",
+        "help": "Commits, pull requests, issues, and reviews for the same period."
+      },
+      "languages": {
+        "label": "Repository languages",
+        "help": "Languages by code size in your public, non-fork repositories. This is not a skills assessment."
+      }
+    },
+    "scope": "Cards use the activity GitHub makes available. They can be left out or removed at any time.",
+    "loaded": "Checked @{username} on {date}.",
+    "period": "Period: {from} – {to}.",
+    "counts": "{commits} commits · {pullRequests} pull requests · {issues} issues · {reviews} reviews",
+    "empty": "No contributions were found for this period. You can still share technologies, projects, or contributions in your own words.",
+    "stale": "Showing the last available data. It may have changed on GitHub.",
+    "privateCounts": "The calendar includes anonymous counts of private contributions. Private details are not shown.",
+    "languageLimit": "Languages cover {analyzed} of {total} repositories because of the query limit.",
+    "retryAfter": "You can try again after {date}.",
+    "suggestions": "Choose from recent GitHub contributions",
+    "kinds": { "pull-request": "Pull request", "issue": "Issue" },
+    "add": "Feature this contribution",
+    "added": "Added",
+    "addSuggested": "Feature contribution: {title}",
+    "alreadyAdded": "Contribution already added: {title}",
+    "errors": {
+      "invalid_username": "Enter a valid GitHub username, with or without @, up to 39 characters. Use letters, numbers, or single hyphens between them.",
+      "not_found": "We could not find that GitHub account. Check the username and try again.",
+      "not_configured": "GitHub activity is not enabled on this instance yet. You can still add your featured contributions below.",
+      "rate_limited": "GitHub's request limit was reached. Try again later; you can keep editing your profile.",
+      "unavailable": "GitHub activity could not be loaded. Try again; you can keep editing your profile."
+    }
+  },
+  "empty": "Add a way you have helped a project, a person, or a community.",
+  "entry": "Contribution {number}",
+  "title": "Contribution title",
+  "titleHelp": "Name your contribution, or leave this empty and describe it below.",
+  "titlePlaceholder": "Documentation improvements",
+  "descriptionLabel": "How you contributed",
+  "descriptionHelp": "Optional. A short note about your contribution is enough.",
+  "descriptionPlaceholder": "Reviewed setup instructions and helped new learners get started.",
+  "url": "Contribution link",
+  "urlHelp": "Optional. Use a full http:// or https:// address, without spaces or sign-in credentials.",
+  "urlPlaceholder": "https://example.com/community-guide",
+  "invalidUrl": "Enter a valid http:// or https:// address without spaces or sign-in credentials, or leave this field empty.",
+  "add": "Add contribution",
+  "remove": "Remove contribution {number}",
+  "removeVisible": "Remove contribution",
+  "removeHelp": "Removing this entry deletes its title, description, and link from your draft. Hide the section instead to keep them."
+}

@@ -2,17 +2,48 @@
   "metaTitle": "Profile editor",
   "metaDescription": "Create your GitHub profile README with optional sections, a live preview and a draft saved in your browser.",
   "pageEyebrow": "Your profile, your story",
-  "pageTitle": "Build a profile that feels like you.",
-  "pageDescription": "Start with a short introduction or a way to connect. Every section is optional, and you can change your mind along the way.",
+  "pageTitle": "Your GitHub profile",
+  "pageDescription": "Choose a section, shape your story and drag to set the order. Every section is optional.",
   "workspaceTitle": "Make it yours",
   "workspaceDescription": "Choose what you want to share. A few words are enough to start.",
   "sectionsTitle": "1. Choose your sections",
-  "sectionsDescription": "Pick either section, both, or keep exploring. No GitHub activity is required.",
+  "sectionsDescription": "Start with one section or choose a few. No GitHub activity is required.",
   "sectionHelp": {
     "presentation": "Introduce yourself, your interests or what you enjoy building.",
+    "technologies": "Group your tools and describe how you use them.",
+    "projects": "Describe your work and the part you played.",
+    "contributions": "Highlight code, documentation, reviews or community work.",
     "contact": "Share a portfolio, social profile or email address."
   },
   "hiddenHelp": "Unchecking a section hides it from your README and keeps everything you wrote.",
+  "settings": {
+    "sections": "Sections",
+    "viewLabel": "Workspace view",
+    "edit": "Edit",
+    "preview": "Preview",
+    "configuring": "Now configuring",
+    "nowEditing": "Editing: {module}",
+    "position": "{position} of {total, plural, one {# included section} other {# included sections}}",
+    "notIncluded": "Not included in README",
+    "chooseTitle": "Choose a section to start",
+    "chooseHelp": "Choose a section and make it yours. A few lines are enough to start.",
+    "languageHelp": "Changes generated headings. Your writing and the app language stay unchanged.",
+    "sectionHidden": "{module} is hidden from the README. Its settings and writing are still available here."
+  },
+  "composition": {
+    "moveUp": "Move {module} up",
+    "moveDown": "Move {module} down",
+    "moved": "{module} moved to position {position} of {total}.",
+    "errorSummary": "Some fields need your attention.",
+    "review": "Review fields",
+    "reviewNamed": "Review fields in {module}"
+  },
+  "metrics": {
+    "title": "These cards are for local preview",
+    "help": "Publishing cards needs a public address for this app. That address has not been configured yet. You can exclude the cards and export your writing and highlights.",
+    "hide": "Exclude GitHub cards and keep their settings",
+    "hidden": "GitHub cards are excluded. Their saved settings have been kept."
+  },
   "contentLanguage": "README language",
   "contentLanguageHelp": "Changes generated headings, such as Contact. Your writing stays as you entered it, even when you switch the app language.",
   "languageOptions": {
@@ -20,7 +51,8 @@
     "es": "Español"
   },
   "presentation": {
-    "description": "2. Tell your story. Fill in what feels useful and leave the rest blank.",
+    "description": "A few words, in your own voice.",
+    "details": "Extra details",
     "displayName": "Display name",
     "displayNameHelp": "The name you would like people to see.",
     "displayNamePlaceholder": "Alex Rivera",
@@ -28,14 +60,14 @@
     "headlineHelp": "A short description of what you do or want to explore.",
     "headlinePlaceholder": "Developer who enjoys accessible web experiences",
     "bio": "About you",
-    "bioHelp": "Write a few lines in your own words. Text is kept as text, so no Markdown or HTML is needed.",
+    "bioHelp": "What you enjoy, what you make, or what you are learning. All in one place.",
     "bioPlaceholder": "I enjoy turning ideas into useful tools. Currently learning more about design and the web.",
     "location": "Location",
     "locationHelp": "A city, country or time zone, only if you want to share it.",
     "locationPlaceholder": "Argentina"
   },
   "contact": {
-    "description": "2. Make it easy to connect. Add only the links you want to share publicly.",
+    "description": "Add only the links you want to share publicly.",
     "empty": "A portfolio, LinkedIn profile or email is a good place to start. You can also leave this section empty.",
     "entry": "Link {number}",
     "label": "Link label",
@@ -69,7 +101,7 @@
     "privacy": "Your draft is stored in this browser only. It is not synced to other devices, and clearing browser data removes it. Export before leaving if saving is unavailable."
   },
   "preview": {
-    "title": "3. Preview & export",
+    "title": "Preview & export",
     "description": "The same content goes into your copied and downloaded README. GitHub may display spacing and typography differently.",
     "fileLabel": "Live preview",
     "documentLabel": "README preview",
@@ -82,7 +114,9 @@
   "export": {
     "empty": "Choose a section and add at least some text or a link to enable copy and download.",
     "unsupported": "This draft includes a visible section this editor cannot export yet. The saved content has been kept, but export is unavailable for this draft.",
-    "invalidLinks": "Check the highlighted contact links before copying or downloading. No content has been removed.",
+    "invalidLinks": "Check the highlighted links before copying or downloading. Use Review fields in your sections to open the affected settings. No content has been removed.",
+    "invalidUsername": "Check the GitHub username in Activity & contributions, or exclude the GitHub cards to export your writing.",
+    "localCards": "You can review these cards locally. Exporting them needs this app's public address. Exclude the cards to export your writing now.",
     "ready": "Ready when you are. Copy the Markdown or download your README.md file.",
     "copy": "Copy README",
     "copying": "Copying…",

@@ -6,20 +6,70 @@ import { routing } from "./routing";
 
 const loadMessages = {
   en: async () => {
-    const [common, designSystem, editor] = await Promise.all([
+    const [
+      common,
+      designSystem,
+      editor,
+      contributions,
+      technologies,
+      projects,
+      editorNavigation,
+      contactProviders,
+    ] = await Promise.all([
       import("@/messages/en.json"),
       import("@/messages/en/design-system.json"),
       import("@/messages/en/editor.json"),
+      import("@/messages/en/modules/contributions.json"),
+      import("@/messages/en/modules/technologies.json"),
+      import("@/messages/en/modules/projects.json"),
+      import("@/messages/en/editor-navigation.json"),
+      import("@/messages/en/contact-providers.json"),
     ]);
-    return { ...common.default, DesignSystem: designSystem.default, Editor: editor.default };
+    return {
+      ...common.default,
+      DesignSystem: designSystem.default,
+      Editor: editor.default,
+      EditorNavigation: editorNavigation.default,
+      ContactProviders: contactProviders.default,
+      EditorModules: {
+        contributions: contributions.default,
+        technologies: technologies.default,
+        projects: projects.default,
+      },
+    };
   },
   es: async () => {
-    const [common, designSystem, editor] = await Promise.all([
+    const [
+      common,
+      designSystem,
+      editor,
+      contributions,
+      technologies,
+      projects,
+      editorNavigation,
+      contactProviders,
+    ] = await Promise.all([
       import("@/messages/es.json"),
       import("@/messages/es/design-system.json"),
       import("@/messages/es/editor.json"),
+      import("@/messages/es/modules/contributions.json"),
+      import("@/messages/es/modules/technologies.json"),
+      import("@/messages/es/modules/projects.json"),
+      import("@/messages/es/editor-navigation.json"),
+      import("@/messages/es/contact-providers.json"),
     ]);
-    return { ...common.default, DesignSystem: designSystem.default, Editor: editor.default };
+    return {
+      ...common.default,
+      DesignSystem: designSystem.default,
+      Editor: editor.default,
+      EditorNavigation: editorNavigation.default,
+      ContactProviders: contactProviders.default,
+      EditorModules: {
+        contributions: contributions.default,
+        technologies: technologies.default,
+        projects: projects.default,
+      },
+    };
   },
 };
 
