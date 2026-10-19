@@ -23,6 +23,7 @@ La documentación de GitHub Profile Generator describe el producto, el estado di
 | [Iconos del perfil](decisions/0009-profile-icons.md)               | Catálogos ampliados, contacto por dominio e imágenes generadas permitidas.     |
 | [Actividad de GitHub](decisions/0010-github-activity.md)           | Cinco secciones, tarjetas propias, límites públicos y exportación configurada. |
 | [Países y contactos](decisions/0011-country-and-contact-inputs.md) | Países opcionales con bandera y redes sociales configuradas por entrada.       |
+| [Categorías tecnológicas](decisions/0012-technology-categories.md) | Catálogo de 358 herramientas, categorías editables e iconos con nombre.        |
 | [Recursos de terceros](../THIRD_PARTY_NOTICES.md)                  | Procedencia y licencias de iconos y banderas locales.                          |
 | [Contribuir](../CONTRIBUTING.md)                                   | Flujo de trabajo, expectativas para cambios y pull requests.                   |
 

@@ -54,7 +54,7 @@ async function openTools(page: Page, locale: "en" | "es") {
   return preview;
 }
 
-test("technology icons share a compact row and exported images keep their fixed dimensions", async ({
+test("named technology icons share a compact row and export readable labels with fixed dimensions", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
@@ -65,14 +65,29 @@ test("technology icons share a compact row and exported images keep their fixed 
   if (!first || !second) throw new Error("Technology icons must be visible.");
   expect(Math.abs(first.y - second.y)).toBeLessThan(1);
   expect(second.x).toBeGreaterThan(first.x + first.width);
-  await expect(preview.locator("p:has(> img)")).toHaveCount(1);
+  expect(first.width).toBe(20);
+  expect(first.height).toBe(20);
+  expect(second.width).toBe(20);
+  expect(second.height).toBe(20);
+  for (const name of toolNames) await expect(preview).toContainText(name);
+  for (let index = 0; index < toolNames.length; index += 1) {
+    await expect(icons.nth(index)).toHaveAttribute("alt", "");
+    await expect(icons.nth(index)).toHaveAttribute("aria-hidden", "true");
+  }
+  await expect(preview.locator("p:has(img)")).toHaveCount(1);
   await expect(preview.locator("p p")).toHaveCount(0);
   const downloadPromise = page.waitForEvent("download");
   await page.getByRole("button", { name: "Download README", exact: true }).click();
   const path = await (await downloadPromise).path();
   if (!path) throw new Error("The exported README must be available.");
   const markdown = await readFile(path, "utf8");
-  expect(markdown.match(/<img width="32" height="32"/g)).toHaveLength(toolNames.length);
+  expect(markdown.match(/<img width="20" height="20"[^>]+alt=""/g)).toHaveLength(toolNames.length);
+  expect(markdown).not.toContain('width="32"');
+  for (const name of ["React", "Docker", "PostgreSQL", "LangGraph", "Claude", "Codex"]) {
+    expect(markdown).toContain(`&nbsp;${name}`);
+  }
+  expect(markdown).toContain("&nbsp;Node\\.js");
+  expect(markdown).toContain(" · ");
   await page.screenshot({
     path: "work/previews/expanded-technologies-desktop.png",
     fullPage: true,
@@ -80,7 +95,7 @@ test("technology icons share a compact row and exported images keep their fixed 
 });
 
 for (const locale of ["en", "es"] as const) {
-  test(`accessibility: ${locale} technology icons wrap into compact rows at 360px in both themes`, async ({
+  test(`accessibility: ${locale} named technology icons wrap into compact rows at 360px in both themes`, async ({
     page,
   }) => {
     await page.setViewportSize({ width: 360, height: 900 });
@@ -102,9 +117,21 @@ for (const locale of ["en", "es"] as const) {
       expect(Math.abs(first.y - second.y)).toBeLessThan(1);
       expect(last.y).toBeGreaterThan(first.y);
       for (const dimensions of [first, second, last]) {
-        expect(dimensions.width).toBe(32);
-        expect(dimensions.height).toBe(32);
+        expect(dimensions.width).toBe(20);
+        expect(dimensions.height).toBe(20);
       }
+      for (const name of toolNames) await expect(preview).toContainText(name);
+      // An inline group keeps the compact icon and its readable name together.
+      const namedRows = await preview.locator("img").evaluateAll((icons) =>
+        icons.map((icon) => {
+          const name = icon.nextElementSibling;
+          if (name?.tagName !== "SPAN" || !name.textContent) return false;
+          const label = name.getBoundingClientRect();
+          const image = icon.getBoundingClientRect();
+          return Math.abs(label.y - image.y) < 6 && label.height < image.height * 1.5;
+        }),
+      );
+      expect(namedRows).toEqual(toolNames.map(() => true));
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
         true,
       );

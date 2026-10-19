@@ -4,6 +4,7 @@
 - Fecha: 2026-10-19.
 - Producto: GitHub Profile Generator.
 - Actualiza las fuentes y la presentación de iconos de [ADR 0007](0007-simple-profile.md), conservadas por [ADR 0008](0008-focused-profile.md). Sustituye su restricción a Devicon; mantiene las cinco secciones, el retiro de conocimientos/formación/actualidad y la compatibilidad v1.
+- La ampliación posterior y la presentación tecnológica con nombre visible están en [ADR 0012](0012-technology-categories.md); el resto de esta decisión conserva su vigencia.
 
 ## Contexto
 

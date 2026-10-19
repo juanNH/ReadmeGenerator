@@ -3,7 +3,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import ReactMarkdown from "react-markdown";
 import { findTechnology } from "@/core/technologies";
-import { technologyIconMarkup } from "@/core/readme/technology-icons";
+import { namedTechnologyIconMarkup, technologyIconMarkup } from "@/core/readme/technology-icons";
 import { contactIconMarkup } from "@/core/readme/contact-icons";
 import { contactProviders } from "@/core/contact";
 import { countryCatalog } from "@/core/location";
@@ -35,6 +35,27 @@ describe("controlled profile icon preview", () => {
     ]);
   });
 
+  it("keeps the visible name next to a decorative named icon in the same paragraph", () => {
+    const react = findTechnology("React")!;
+    const tree = {
+      type: "root",
+      children: [
+        {
+          type: "paragraph",
+          children: [
+            { type: "html", value: namedTechnologyIconMarkup(react) },
+            { type: "text", value: " React" },
+          ],
+        },
+      ],
+    };
+    remarkProfileIcons()(tree);
+    expect(tree.children[0]?.children).toEqual([
+      { type: "image", url: react.iconUrl, alt: "" },
+      { type: "text", value: " React" },
+    ]);
+  });
+
   it("leaves other HTML and escaped user text for the normal skipHtml policy", () => {
     const tree = {
       type: "root",
@@ -43,7 +64,17 @@ describe("controlled profile icon preview", () => {
         { type: "html", value: "<script>doSomething()</script>" },
         {
           type: "paragraph",
-          children: [{ type: "text", value: technologyIconMarkup(findTechnology("React")!) }],
+          children: [
+            { type: "text", value: technologyIconMarkup(findTechnology("React")!) },
+            { type: "text", value: namedTechnologyIconMarkup(findTechnology("React")!) },
+          ],
+        },
+        {
+          type: "html",
+          value: namedTechnologyIconMarkup(findTechnology("React")!).replace(
+            " />",
+            ' onerror="run()" />',
+          ),
         },
       ],
     };
@@ -83,6 +114,31 @@ describe("controlled profile icon preview", () => {
     );
     expect(html.match(/<p>/g)).toHaveLength(1);
     expect(html.match(/<img /g)).toHaveLength(3);
+    expect(html).not.toContain("<p><p>");
+  });
+
+  it("renders each visible tool name once when decorative icons share a family asset", () => {
+    const tools = ["React Native", "SvelteKit", "TanStack Query", "TanStack Router"].map((name) =>
+      findTechnology(name)!,
+    );
+    const html = renderToStaticMarkup(
+      createElement(
+        ReactMarkdown,
+        {
+          skipHtml: true,
+          remarkPlugins: [remarkProfileIcons],
+        },
+        tools.map((tool) => `${namedTechnologyIconMarkup(tool)}&nbsp;${tool.name}`).join(" · "),
+      ),
+    );
+    expect(html.match(/<p>/g)).toHaveLength(1);
+    expect(html.match(/<img /g)).toHaveLength(tools.length);
+    expect(html.match(/alt=""/g)).toHaveLength(tools.length);
+    for (const tool of tools) {
+      expect(html).toContain(`<img src="${tool.iconUrl}" alt=""/>`);
+      expect(html.split(tool.name)).toHaveLength(2);
+    }
+    expect(html).toContain(" · ");
     expect(html).not.toContain("<p><p>");
   });
 

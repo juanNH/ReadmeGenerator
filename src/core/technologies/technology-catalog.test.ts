@@ -5,7 +5,7 @@ import { findTechnology, findTechnologyByIconUrl, technologyCatalog } from "./in
 
 describe("curated technology catalog", () => {
   it("provides a broad catalog with unique identities and unambiguous aliases", () => {
-    expect(technologyCatalog.length).toBeGreaterThanOrEqual(200);
+    expect(technologyCatalog.length).toBeGreaterThanOrEqual(350);
     expect(new Set(technologyCatalog.map((entry) => entry.id)).size).toBe(technologyCatalog.length);
     expect(new Set(technologyCatalog.map((entry) => entry.name.toLowerCase())).size).toBe(
       technologyCatalog.length,
@@ -14,6 +14,33 @@ describe("curated technology catalog", () => {
       expect(entry.id).toMatch(/^[a-z0-9-]+$/);
       expect(findTechnology(` ${entry.name.toUpperCase()} `)).toBe(entry);
       for (const alias of entry.aliases) expect(findTechnology(alias)).toBe(entry);
+    }
+  });
+
+  it("resolves ORMs, modern frameworks, authentication and data platforms by familiar aliases", () => {
+    for (const [name, id] of [
+      ["drizzle-orm", "drizzle"],
+      ["type orm", "typeorm"],
+      ["knex", "knex"],
+      ["Doctrine", "doctrine"],
+      ["EF Core", "entity-framework"],
+      ["honojs", "hono"],
+      ["svelte kit", "sveltekit"],
+      ["React Query", "tanstack-query"],
+      ["TanStack Router", "tanstack-router"],
+      ["shadcn", "shadcn-ui"],
+      ["better-auth", "better-auth"],
+      ["Keycloak", "keycloak"],
+      ["Pydantic", "pydantic"],
+      ["Qdrant", "qdrant"],
+      ["neon postgres", "neon"],
+      ["OpenRouter", "openrouter"],
+      ["vLLM", "vllm"],
+      ["fire crawl", "firecrawl"],
+      ["wandb", "weights-biases"],
+      ["open tofu", "opentofu"],
+    ] as const) {
+      expect(findTechnology(name)?.id).toBe(id);
     }
   });
 

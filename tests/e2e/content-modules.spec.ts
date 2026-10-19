@@ -235,14 +235,15 @@ test("saved technology groups retain their names and context while offering simp
   const preview = page.getByRole("article", { name: "README preview", exact: true });
   await expect(preview).toContainText("Practicing typed functions.");
   await expect(preview).toContainText("Exploring relationships.");
-  const details = page.getByText("Saved details", { exact: true });
+  const details = page.getByText("Edit category and arrange tools", { exact: true });
   await expect(details).toHaveCount(2);
   await details.first().click();
   await details.last().click();
-  const groups = page.getByRole("textbox", { name: "Group name", exact: true });
+  const groups = page.getByRole("textbox", { name: "Category name", exact: true });
   await expect(groups.first()).toHaveValue("Learning languages");
   await expect(groups.last()).toHaveValue("Data experiments");
   await groups.first().fill("Language practice");
+  await page.getByText("Name and optional note for TypeScript", { exact: true }).click();
   await page
     .getByRole("textbox", { name: "Note for TypeScript", exact: true })
     .fill("Writing typed functions.");

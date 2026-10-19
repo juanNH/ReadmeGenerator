@@ -1,4 +1,7 @@
-import { parseTechnologyIconRow } from "@/core/readme/technology-icons";
+import {
+  parseNamedTechnologyIconRow,
+  parseTechnologyIconRow,
+} from "@/core/readme/technology-icons";
 import { parseContactIconRow } from "@/core/readme/contact-icons";
 import { parseCountryFlagRow } from "@/core/readme/country-flags";
 
@@ -17,14 +20,20 @@ export function remarkProfileIcons() {
       if (!Array.isArray(node.children)) return;
       node.children = node.children.flatMap((child) => {
         if (child.type === "html" && typeof child.value === "string") {
+          const named = parseNamedTechnologyIconRow(child.value);
           const entries =
+            named ??
             parseTechnologyIconRow(child.value) ??
             parseContactIconRow(child.value) ??
             parseCountryFlagRow(child.value);
           if (entries) {
             const images = entries.flatMap((entry, index) => [
               ...(index > 0 ? [{ type: "text", value: " " }] : []),
-              { type: "image", url: entry.iconUrl, alt: "aliases" in entry ? entry.name : "" },
+              {
+                type: "image",
+                url: entry.iconUrl,
+                alt: !named && "aliases" in entry ? entry.name : "",
+              },
             ]);
             return node.type === "paragraph" || node.type === "link"
               ? images

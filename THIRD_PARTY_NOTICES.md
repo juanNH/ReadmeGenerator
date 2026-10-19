@@ -14,7 +14,7 @@ Los 13 SVG de `public/contact-icons/` proceden de [Simple Icons 11.15.0](https:/
 
 ## Devicon
 
-223 SVG de `public/technology-icons/` proceden de [Devicon](https://github.com/devicons/devicon), fijado al [commit 6a37858047b0e8d9c9c0e68f4a071fc410652e89](https://github.com/devicons/devicon/commit/6a37858047b0e8d9c9c0e68f4a071fc410652e89). React y React Native comparten el original de React. Los nombres locales cambian, pero los contenidos SVG se conservan.
+248 SVG de `public/technology-icons/` proceden de [Devicon](https://github.com/devicons/devicon), fijado al [commit 6a37858047b0e8d9c9c0e68f4a071fc410652e89](https://github.com/devicons/devicon/commit/6a37858047b0e8d9c9c0e68f4a071fc410652e89). React y React Native comparten el original de React; SvelteKit utiliza la marca de su familia Svelte. Los nombres locales cambian, pero los contenidos SVG se conservan.
 
 El catálogo de `src/core/technologies/index.ts` relaciona cada archivo local con su URL pública fijada al mismo commit. No se consulta Devicon para buscar o seleccionar herramientas durante el uso del editor.
 
@@ -50,7 +50,7 @@ SOFTWARE.
 
 ## Simple Icons: tecnologías y herramientas de IA
 
-15 SVG del catálogo de tecnologías proceden de [Simple Icons](https://github.com/simple-icons/simple-icons), fijado al [commit c71c69e3a27e4436936b831c72643e6513b9f49b](https://github.com/simple-icons/simple-icons/commit/c71c69e3a27e4436936b831c72643e6513b9f49b). Son `anthropic`, `claude`, `claude-code`, `cursor`, `gemini`, `github-copilot`, `hugging-face`, `jetbrains-ai`, `langchain`, `langgraph`, `mistral`, `mlflow`, `n8n`, `ollama` y `perplexity`.
+82 SVG del catálogo de tecnologías proceden de [Simple Icons](https://github.com/simple-icons/simple-icons), fijado al [commit c71c69e3a27e4436936b831c72643e6513b9f49b](https://github.com/simple-icons/simple-icons/commit/c71c69e3a27e4436936b831c72643e6513b9f49b). Incluyen herramientas de IA, ORMs, interfaces, autenticación, datos, infraestructura, calidad y diseño. Las entradas de TanStack Query, Router, Table, Form y Start comparten la marca TanStack; no se presentan como logotipos exclusivos de cada biblioteca. Actix Web utiliza la marca Actix y los alias Oxlint/Oxfmt remiten a la familia Oxc.
 
 Los contenidos se copian sin modificaciones desde `icons/{slug}.svg`; los nombres locales se relacionan con los originales mediante `src/core/technologies/index.ts`. JetBrains AI utiliza la marca de su familia JetBrains; no se presenta como un logotipo exclusivo del asistente. Los SVG monocromos conservan el color original de la colección y se muestran sobre un fondo claro en el editor.
 
@@ -58,10 +58,16 @@ Simple Icons publica la colección bajo CC0 1.0 Universal. La copia completa se 
 
 ## Lobe Icons: herramientas de IA
 
-21 SVG del catálogo de tecnologías proceden de [Lobe Icons](https://github.com/lobehub/lobe-icons), fijado al [commit 8a1b2821bb768c484fe8da20c5e1838b6bf551a9](https://github.com/lobehub/lobe-icons/commit/8a1b2821bb768c484fe8da20c5e1838b6bf551a9). Son `antigravity`, `chatgpt`, `cline`, `codex`, `crewai`, `deepseek`, `dify`, `gemini-cli`, `groq`, `junie`, `langfuse`, `langsmith`, `llamaindex`, `lm-studio`, `mastra`, `mcp`, `openai`, `qwen`, `roo-code`, `v0` y `windsurf`.
+28 SVG del catálogo de tecnologías proceden de [Lobe Icons](https://github.com/lobehub/lobe-icons), fijado al [commit 8a1b2821bb768c484fe8da20c5e1838b6bf551a9](https://github.com/lobehub/lobe-icons/commit/8a1b2821bb768c484fe8da20c5e1838b6bf551a9). Son `antigravity`, `cerebras`, `chatgpt`, `cline`, `codex`, `cohere`, `crewai`, `deepseek`, `dify`, `firecrawl`, `fireworks`, `gemini-cli`, `groq`, `junie`, `langfuse`, `langsmith`, `llamaindex`, `lm-studio`, `mastra`, `mcp`, `openai`, `openrouter`, `qwen`, `replicate`, `roo-code`, `v0`, `vllm` y `windsurf`.
 
 Los contenidos se copian sin modificaciones desde `packages/static-svg/icons/{asset}.svg`. ChatGPT y OpenAI comparten la marca de OpenAI; Codex utiliza su propio SVG de Codex. Las correspondencias y URLs fijadas están en `src/core/technologies/index.ts`. Los nombres de productos, marcas y logotipos pertenecen a sus titulares; su presencia identifica una herramienta y no implica respaldo ni integración con ella.
 
 Lobe Icons se distribuye bajo licencia MIT, copyright (c) 2023 LobeHub. La copia completa con el aviso de copyright se conserva en [public/technology-icons/LICENSE-LOBE-ICONS.txt](public/technology-icons/LICENSE-LOBE-ICONS.txt).
 
-En total, el catálogo de tecnologías incluye 259 entradas y 259 SVG locales. Buscar y seleccionar herramientas no consulta a estos proveedores ni carga un paquete de iconos remoto. El README exportado referencia únicamente las URLs fijadas de esas entradas.
+En total, el catálogo de tecnologías incluye 358 entradas y 358 SVG locales. Buscar y seleccionar herramientas no consulta a estos proveedores ni carga un paquete de iconos remoto. El README exportado referencia únicamente las URLs fijadas de esas entradas.
+
+### Criterio de ampliación del catálogo
+
+La ampliación incorpora frameworks, bibliotecas, ORMs, autenticación, plataformas de datos, infraestructura y herramientas de IA con identidades verificables en las colecciones fijadas. La clasificación es una sugerencia editorial modificable; no representa un ranking de uso, una recomendación técnica ni un nivel de habilidad.
+
+Las familias y funciones se contrastaron con documentación primaria, entre ellas [Drizzle ORM](https://orm.drizzle.team/docs/overview), [TypeORM](https://typeorm.io/docs/getting-started/), [Knex.js](https://knexjs.org/), [TanStack](https://tanstack.com/), [Hono](https://hono.dev/), [Pydantic](https://docs.pydantic.dev/latest/), [Better Auth](https://better-auth.com/docs/introduction), [Qdrant](https://qdrant.tech/documentation/) y [Temporal](https://docs.temporal.io/). El catálogo mantiene las rutas y contenidos de los iconos existentes. No se inventan logotipos para herramientas ausentes de las fuentes admitidas; siguen disponibles como texto propio.

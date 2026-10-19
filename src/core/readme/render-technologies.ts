@@ -3,7 +3,7 @@ import { findTechnology } from "../technologies";
 import { escapeInlineText } from "./escape-markdown";
 import { joinBlocks, renderList, renderSection, renderTitledDescription } from "./render-helpers";
 import type { ReadmeLabels } from "./readme-labels";
-import { technologyIconMarkup } from "./technology-icons";
+import { namedTechnologyIconMarkup } from "./technology-icons";
 
 export function renderTechnologies(
   data: ProfileModuleData["technologies"],
@@ -13,16 +13,21 @@ export function renderTechnologies(
     const blocks: string[] = [];
     let icons: string[] = [];
     function flushIcons() {
-      if (icons.length > 0) blocks.push(icons.join(" "));
+      if (icons.length > 0) blocks.push(icons.join(" · "));
       icons = [];
     }
     for (const item of group.items) {
       const technology = findTechnology(item.name);
-      if (technology && !item.context.trim()) icons.push(technologyIconMarkup(technology));
-      else {
+      if (!item.context.trim() && item.name.trim()) {
+        const name = escapeInlineText(technology?.name ?? item.name);
+        icons.push(technology ? `${namedTechnologyIconMarkup(technology)}&nbsp;${name}` : name);
+      } else {
         flushIcons();
         const text = renderTitledDescription(item.name, item.context);
-        if (text) blocks.push(renderList([text]));
+        if (text)
+          blocks.push(
+            renderList([technology ? `${namedTechnologyIconMarkup(technology)} ${text}` : text]),
+          );
       }
     }
     flushIcons();

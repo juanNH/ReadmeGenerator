@@ -5,7 +5,7 @@ import type { ContentLocale, ProfileDocument } from "../profile/profile-schema";
 import { findTechnology } from "../technologies";
 import { normalizeContactUrl } from "./contact-url";
 import { generateReadme, type ReadmeResult } from "./index";
-import { technologyIconMarkup } from "./technology-icons";
+import { namedTechnologyIconMarkup } from "./technology-icons";
 import { normalizeWebUrl } from "./web-url";
 
 type ContentModule = "technologies" | "projects" | "contributions";
@@ -167,7 +167,7 @@ describe("technology text and saved groups", () => {
       ],
     });
     expect(markdown(generateReadme(profile))).toBe(
-      `## Technologies\n\n- Tools for testing\n\n### Daily \\[tools\\]\n\n- **TypeScript**: Personal projects\n\n${technologyIconMarkup(findTechnology("Git")!)}\n`,
+      `## Technologies\n\n- Tools for testing\n\n### Daily \\[tools\\]\n\n- ${namedTechnologyIconMarkup(findTechnology("TypeScript")!)} **TypeScript**: Personal projects\n\n${namedTechnologyIconMarkup(findTechnology("Git")!)}&nbsp;Git\n`,
     );
   });
 
@@ -194,6 +194,7 @@ describe("technology text and saved groups", () => {
       expect(output).toContain(`## ${heading}\n`);
       expect(output).toContain("### Own group");
       expect(output).toContain("**Git**: Texto propio");
+      expect(output).toContain(namedTechnologyIconMarkup(findTechnology("Git")!));
     },
   );
 });

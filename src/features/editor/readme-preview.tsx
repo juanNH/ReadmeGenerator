@@ -4,11 +4,12 @@ import { FileText, PenLine } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { ContentLocale } from "@/core/profile/profile-schema";
-import { findTechnology } from "@/core/technologies";
+import { findTechnology, findTechnologyByIconUrl } from "@/core/technologies";
 import { findContactProviderByIconUrl } from "@/core/contact";
 import { parseActivityCardUrl } from "@/core/activity";
 import { findCountryByIconUrl } from "@/core/location";
 import { remarkProfileIcons } from "./remark-profile-icons";
+import { wrapNamedTechnologyLabels } from "./named-technology-labels";
 
 type ReadmePreviewProps = {
   markdown: string | null;
@@ -81,7 +82,10 @@ export function ReadmePreview({
                       className="inline-block h-[15px] w-5 shrink-0 rounded-[2px] align-middle"
                     />
                   );
-                const technology = findTechnology(alt ?? "");
+                const technology =
+                  alt === "" && typeof src === "string"
+                    ? findTechnologyByIconUrl(src)
+                    : findTechnology(alt ?? "");
                 const provider =
                   typeof src === "string" ? findContactProviderByIconUrl(src) : undefined;
                 const entry =
@@ -90,7 +94,7 @@ export function ReadmePreview({
                     : provider && alt === ""
                       ? provider
                       : undefined;
-                const size = entry === technology ? 32 : 20;
+                const size = entry === technology && alt !== "" ? 32 : 20;
                 return entry ? (
                   <Image
                     src={entry.iconPath}
@@ -99,7 +103,7 @@ export function ReadmePreview({
                     width={size}
                     height={size}
                     unoptimized
-                    title={entry.name}
+                    title={entry === technology && size === 20 ? undefined : entry.name}
                     className={
                       size === 32
                         ? "inline-block size-8 shrink-0 rounded bg-white object-contain p-0.5 align-middle"
@@ -120,7 +124,7 @@ export function ReadmePreview({
                   );
                 return (
                   <p className={isIconRow ? "flex flex-wrap items-center gap-3" : undefined}>
-                    {children}
+                    {wrapNamedTechnologyLabels(children)}
                   </p>
                 );
               },

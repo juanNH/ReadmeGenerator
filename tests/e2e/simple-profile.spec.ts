@@ -134,20 +134,29 @@ test("technologies autocomplete with local icons, accept custom names and avoid 
     page.getByRole("button", { name: "Remove My small toolkit", exact: true }),
   ).toBeVisible();
   await expect(page.getByRole("textbox", { name: "How you use it", exact: true })).toHaveCount(0);
-  await expect(page.getByRole("textbox", { name: "Group name", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("textbox", { name: "Category name", exact: true })).toHaveCount(0);
   const stored = await storedProfile(page);
-  expect(stored.data.technologies.groups).toHaveLength(1);
-  expect(stored.data.technologies.groups[0]?.items.map((item) => item.name)).toEqual([
-    "React",
-    "My small toolkit",
+  expect(stored.data.technologies.groups).toHaveLength(2);
+  expect(
+    stored.data.technologies.groups.map((group) => ({
+      name: group.name,
+      tools: group.items.map((item) => item.name),
+    })),
+  ).toEqual([
+    { name: "Frontend", tools: ["React"] },
+    { name: "", tools: ["My small toolkit"] },
   ]);
-  expect(stored.data.technologies.groups[0]?.items.every((item) => item.context === "")).toBe(true);
+  expect(
+    stored.data.technologies.groups.every((group) =>
+      group.items.every((item) => item.context === ""),
+    ),
+  ).toBe(true);
   await page.screenshot({ path: "work/previews/simple-technologies-desktop.png", fullPage: true });
   const markdown = await downloadReadme(page);
   expect(markdown).toMatch(
-    /<img width="32" height="32" src="https:\/\/raw\.githubusercontent\.com\/devicons\/devicon\/[a-f0-9]{40}\/icons\/react\/react-original\.svg" alt="React" \/>/,
+    /<img width="20" height="20" src="https:\/\/raw\.githubusercontent\.com\/devicons\/devicon\/[a-f0-9]{40}\/icons\/react\/react-original\.svg" alt="" \/>/,
   );
-  expect(markdown.match(/alt="React"/g)).toHaveLength(1);
+  expect(markdown).toContain("&nbsp;React");
   expect(markdown).toContain("My small toolkit");
   await page.reload();
   await expect(page.getByRole("button", { name: "Remove React", exact: true })).toBeVisible();
@@ -262,7 +271,12 @@ test("accessibility: the simple Spanish editor fits 360px with autocomplete, pro
   const preview = page.getByRole("article", { name: "Vista previa del README", exact: true });
   await expect(preview).toContainText("Sol Ejemplo");
   await expect(preview).toContainText("Un cuaderno para ideas pequeñas");
-  await expect(preview.getByRole("img", { name: "React", exact: true })).toBeVisible();
+  await expect(preview.locator('img[src="/technology-icons/react.svg"]')).toBeVisible();
+  await expect(preview.locator('img[src="/technology-icons/react.svg"]')).toHaveAttribute(
+    "width",
+    "20",
+  );
+  await expect(preview).toContainText("React");
   expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)).toBe(
     false,
   );

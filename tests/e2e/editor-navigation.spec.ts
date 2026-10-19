@@ -464,7 +464,10 @@ for (const locale of ["en", "es"] as const) {
     const previewDocument = page.getByRole("article", { name: labels.document, exact: true });
     await expect(previewDocument).toBeVisible();
     await expect(previewDocument).toContainText("A notebook for community ideas");
-    await expect(previewDocument.getByRole("img", { name: "React", exact: true })).toBeVisible();
+    const reactIcon = previewDocument.locator('img[src="/technology-icons/react.svg"]');
+    await expect(reactIcon).toBeVisible();
+    await expect(reactIcon).toHaveAttribute("alt", "");
+    await expect(previewDocument).toContainText("React");
     const previewResult = await new AxeBuilder({ page })
       .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
       .analyze();
