@@ -166,6 +166,65 @@
       "kind": "upstream-context"
     },
     {
+      "id": "sharp-libvips-1.3.4-gpl-3.0",
+      "file": "public/licenses/supplemental/sharp-libvips-1.3.4-gpl-3.0.txt",
+      "url": "https://www.gnu.org/licenses/gpl-3.0.txt",
+      "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+      "kind": "reference-license"
+    },
+    {
+      "id": "sharp-libvips-1.3.4-lgpl-3.0",
+      "file": "public/licenses/supplemental/sharp-libvips-1.3.4-lgpl-3.0.txt",
+      "url": "https://www.gnu.org/licenses/lgpl-3.0.txt",
+      "sha256": "e3a994d82e644b03a792a930f574002658412f62407f5fee083f2555c5f23118",
+      "kind": "reference-license"
+    },
+    {
+      "id": "sharp-libvips-1.3.4-third-party",
+      "file": "public/licenses/supplemental/sharp-libvips-1.3.4-third-party.txt",
+      "url": "https://raw.githubusercontent.com/lovell/sharp-libvips/ebb95f8add54eee8bed840e3fb587e4cbec857d7/THIRD-PARTY-NOTICES.md",
+      "sha256": "6f0d5086e3bcbee12bcdacf5878b31d1104002aeecaeb241d3fff466108082fe",
+      "kind": "upstream-notice"
+    },
+    {
+      "id": "sharp-libvips-1.3.4-vips-8.18.7-license",
+      "file": "public/licenses/supplemental/sharp-libvips-1.3.4-vips-8.18.7-license.txt",
+      "url": "https://raw.githubusercontent.com/libvips/libvips/24ad4d042940e6bf99a68871ba886ca8847c9c82/LICENSE",
+      "sha256": "dc626520dcd53a22f727af3ee42c770e56c97a64fe3adb063799d8ab032fe551",
+      "kind": "upstream-notice"
+    },
+    {
+      "id": "sharp-libvips-1.3.4-vips-8.18.7-readme",
+      "file": "public/licenses/supplemental/sharp-libvips-1.3.4-vips-8.18.7-readme.txt",
+      "url": "https://raw.githubusercontent.com/libvips/libvips/24ad4d042940e6bf99a68871ba886ca8847c9c82/README.md",
+      "sha256": "e173c8181f47e84df8ae2b7932030d059b73862747bd069fd5cb9e17810466fc",
+      "kind": "upstream-context"
+    },
+    {
+      "id": "sharp-libvips-linux-x64-1.3.4-package-json",
+      "file": "public/licenses/supplemental/sharp-libvips-linux-x64-1.3.4-package-json.txt",
+      "url": "https://registry.npmjs.org/@img/sharp-libvips-linux-x64/-/sharp-libvips-linux-x64-1.3.4.tgz",
+      "sha256": "2c5f6f9abf74c1492622d5dc4e4da056ab0712fd71de61e03a687c88b8cdab4e",
+      "kind": "upstream-context",
+      "upstreamFile": "package/package.json"
+    },
+    {
+      "id": "sharp-libvips-linux-x64-1.3.4-readme",
+      "file": "public/licenses/supplemental/sharp-libvips-linux-x64-1.3.4-readme.txt",
+      "url": "https://registry.npmjs.org/@img/sharp-libvips-linux-x64/-/sharp-libvips-linux-x64-1.3.4.tgz",
+      "sha256": "b4fb1a9f5909cfd58edb4177c2028ce3033cf8651aef740a554c1dc58b3c5ee3",
+      "kind": "upstream-context",
+      "upstreamFile": "package/README.md"
+    },
+    {
+      "id": "sharp-libvips-linux-x64-1.3.4-versions",
+      "file": "public/licenses/supplemental/sharp-libvips-linux-x64-1.3.4-versions.txt",
+      "url": "https://registry.npmjs.org/@img/sharp-libvips-linux-x64/-/sharp-libvips-linux-x64-1.3.4.tgz",
+      "sha256": "e2611d5d854815a8b33c8a3d2ec649511a9596ccf16844e8eae7cf81e79881c4",
+      "kind": "upstream-context",
+      "upstreamFile": "package/versions.json"
+    },
+    {
       "id": "spdx-mit-reference",
       "file": "public/licenses/supplemental/spdx-mit-reference.txt",
       "url": "https://raw.githubusercontent.com/spdx/license-list-data/31ba1a50e5397e00a304dbadc76531740e89ee48/text/MIT.txt",
@@ -222,6 +281,43 @@
         }
       ],
       "archiveSha256": "3c2942da7ba321f6ba27255a5faceee76eae502403129d8aa50d2dc8400a94d5"
+    },
+    {
+      "name": "@img/sharp-libvips-linux-x64",
+      "version": "1.3.4",
+      "license": "LGPL-3.0-or-later",
+      "registry": {
+        "url": "https://registry.npmjs.org/@img%2fsharp-libvips-linux-x64/1.3.4",
+        "integrity": "sha512-GJ//SSXbnwSDes02umB3nDJLFcQzw8a18V8fyhqr6tV515tOEMdImjjxj1AoafMRz56F3PHgftnj1QEKSU1zkw==",
+        "gitHead": "ebb95f8add54eee8bed840e3fb587e4cbec857d7"
+      },
+      "notices": [
+        "sharp-libvips-linux-x64-1.3.4-package-json",
+        "sharp-libvips-linux-x64-1.3.4-readme",
+        "sharp-libvips-linux-x64-1.3.4-versions",
+        "sharp-libvips-1.3.4-third-party",
+        "sharp-libvips-1.3.4-vips-8.18.7-license",
+        "sharp-libvips-1.3.4-vips-8.18.7-readme",
+        "sharp-libvips-1.3.4-lgpl-3.0",
+        "sharp-libvips-1.3.4-gpl-3.0"
+      ],
+      "revision": "ebb95f8add54eee8bed840e3fb587e4cbec857d7",
+      "note": "The exact official Linux x64 glibc npm archive declares LGPL-3.0-or-later and omits a root notice. Its complete generated README and component versions are retained with the packaging project's third-party notice at the published gitHead. libvips 8.18.7's source LICENSE and README identify LGPL-2.1-or-later; the packaging notice explicitly uses the later-version clause for LGPLv3. Complete official LGPLv3 and incorporated GPLv3 terms are supplied without inventing package copyright notices. This companion review preserves the declared conditions and component matrix; it does not certify full native binary component closure, exact corresponding source availability, relinking, modifications or other artifact-specific redistribution obligations.",
+      "verifyFiles": [
+        {
+          "file": "package.json",
+          "sha256": "2c5f6f9abf74c1492622d5dc4e4da056ab0712fd71de61e03a687c88b8cdab4e"
+        },
+        {
+          "file": "README.md",
+          "sha256": "b4fb1a9f5909cfd58edb4177c2028ce3033cf8651aef740a554c1dc58b3c5ee3"
+        },
+        {
+          "file": "versions.json",
+          "sha256": "e2611d5d854815a8b33c8a3d2ec649511a9596ccf16844e8eae7cf81e79881c4"
+        }
+      ],
+      "archiveSha256": "e371cb713fc8822c96a0d3fb60a3d092799d0aefab6d7f1fb3b72d8d75f1d109"
     },
     {
       "name": "@next/env",
