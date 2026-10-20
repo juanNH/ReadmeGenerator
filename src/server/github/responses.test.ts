@@ -25,7 +25,7 @@ describe("public activity routes", () => {
     ).toBe("octocat");
   });
 
-  it("accepts only the three local SVG variants and supported locales", () => {
+  it("accepts only local SVG variants and supported locales", () => {
     expect(
       parseCardRequest("Octocat", "calendar.svg", new URL("https://app.example.com?locale=es")),
     ).toEqual({ username: "octocat", card: "calendar", locale: "es" });
@@ -41,6 +41,26 @@ describe("public activity routes", () => {
     expect(
       parseCardRequest("octocat", "calendar.svg", new URL("https://app.example.com?color=red")),
     ).toBeNull();
+  });
+
+  it.each([
+    ["summary.svg", "stats"],
+    ["calendar.svg", "languages"],
+    ["extended-stats.svg", "languages"],
+    ["extended-languages.svg", "stats"],
+  ])("rejects %s options for another card family: %s", (filename, key) => {
+    const url = new URL("https://app.example.com");
+    url.searchParams.set(key, "{}");
+    expect(parseCardRequest("octocat", filename, url)).toBeNull();
+  });
+
+  it.each([
+    ["extended-stats.svg", "stats"],
+    ["extended-languages.svg", "languages"],
+  ])("accepts %s options for its own family: %s", (filename, key) => {
+    const url = new URL("https://app.example.com");
+    url.searchParams.set(key, "{}");
+    expect(parseCardRequest("octocat", filename, url)?.extended).toEqual({ [key]: {} });
   });
 
   it.each([

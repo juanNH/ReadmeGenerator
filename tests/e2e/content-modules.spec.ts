@@ -225,6 +225,16 @@ test("active sections share the same preview, copied and downloaded Markdown wit
   ).toBe(generated.markdown);
   expect(await downloadReadme(page)).toBe(generated.markdown);
   await page.keyboard.press("Control+Home");
+  await expect
+    .poll(() =>
+      page.locator('[data-editor-scroll-panel="preview"]').evaluate((element) => element.scrollTop),
+    )
+    .toBe(0);
+  // Native Home acts on the focused column. Reset the page only for the overview capture.
+  await page.evaluate(() => {
+    window.scrollTo(0, 0);
+    document.querySelector('[data-editor-scroll-panel="configuration"]')!.scrollTop = 0;
+  });
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
   await page.screenshot({ path: "work/previews/focused-profile-desktop.png", fullPage: true });
 });

@@ -2,7 +2,6 @@ import "server-only";
 
 import { z } from "zod";
 import {
-  defaultExtendedStats,
   extendedLanguageOptionsSchema,
   extendedStatIds,
   extendedStatsOptionsSchema,
@@ -17,6 +16,17 @@ import {
 } from "@/core/activity/extended-types";
 import { normalizeGitHubUsername } from "@/core/activity";
 import { activityPeriod, GitHubActivityError, queryGitHub, readBoundedJson } from "./client";
+import {
+  extendedFilterKey,
+  needsExtendedLanguages,
+  selectedExtendedStats,
+} from "./extended-data-plan";
+
+export type ExtendedProfileIdentity = Pick<ExtendedProfileSnapshot, "username" | "displayName">;
+export type ExtendedProfileFetch = {
+  data: ExtendedProfileSnapshot;
+  coverage: { stats: ExtendedStatId[]; languages: boolean };
+};
 
 const count = z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER);
 const identity = {
@@ -222,7 +232,9 @@ export async function fetchExtendedProfile(
   token: string,
   now: Date,
   options: { stats?: ExtendedStatsOptions; languages?: ExtendedLanguageOptions } = {},
-): Promise<ExtendedProfileSnapshot> {
+  knownIdentity?: ExtendedProfileIdentity,
+  deadline = now.getTime() + 15_000,
+): Promise<ExtendedProfileFetch> {
   const username = normalizeGitHubUsername(rawUsername);
   if (!username) throw new GitHubActivityError("invalid_username");
   const parsedOptions = z
@@ -234,23 +246,9 @@ export async function fetchExtendedProfile(
   if (!parsedOptions.success) throw new GitHubActivityError("unavailable");
   const statsOptions = parsedOptions.data.stats ?? {};
   const languageOptions = parsedOptions.data.languages ?? {};
-  const languageOnly = options.languages !== undefined && options.stats === undefined;
-  const selected = new Set<ExtendedStatId>(
-    languageOnly ? [] : (statsOptions.items ?? defaultExtendedStats),
-  );
-  if (statsOptions.showRank) {
-    for (const item of [
-      "commits",
-      "pullRequests",
-      "issues",
-      "reviews",
-      "stars",
-      "followers",
-    ] as const)
-      selected.add(item);
-  }
+  const selected = selectedExtendedStats(parsedOptions.data);
   const period = activityPeriod(now);
-  const signal = AbortSignal.timeout(15_000);
+  const signal = AbortSignal.timeout(Math.max(1, Math.min(15_000, deadline - Date.now())));
   let requests = 0;
   const request = async (query: string, variables: Record<string, unknown>): Promise<unknown> => {
     if (requests >= 15 || signal.aborted) throw new GitHubActivityError("unavailable");
@@ -291,20 +289,55 @@ export async function fetchExtendedProfile(
   });
   const wantsHistory =
     selected.has("allTimeContributions") || selected.has("allTimeRepositoriesContributedTo");
+  // These values already travel in the selected source: retain them without
+  // adding network operations, so a later checkbox can reuse their coverage.
+  if (wantsCollection) {
+    selected.add("reviews");
+    selected.add("repositoriesContributedTo");
+    if ((statsOptions.commitsPeriod ?? "period") === "period") selected.add("commits");
+  }
+  if (wantsHistory) {
+    selected.add("allTimeContributions");
+    selected.add("allTimeRepositoriesContributedTo");
+  }
+  for (const [first, second] of [
+    ["pullRequests", "authoredPullRequests"],
+    ["issues", "authoredIssues"],
+  ] as const) {
+    if (selected.has(first) || selected.has(second)) {
+      selected.add(first);
+      selected.add(second);
+    }
+  }
+  const canReuseIdentity =
+    knownIdentity?.username.toLowerCase() === username.toLowerCase() &&
+    !wantsCollection &&
+    !wantsHistory &&
+    !selected.has("followers");
+  if (!canReuseIdentity) selected.add("followers");
   const base = baseSchema.safeParse(
-    await request(
-      `query ExtendedIdentity($login: String!${wantsCollection ? ", $from: DateTime!, $to: DateTime!" : ""}) {
+    canReuseIdentity
+      ? {
+          user: {
+            login: knownIdentity.username,
+            name: knownIdentity.displayName,
+            userViewType: "PUBLIC",
+            isViewer: false,
+          },
+        }
+      : await request(
+          `query ExtendedIdentity($login: String!${wantsCollection ? ", $from: DateTime!, $to: DateTime!" : ""}) {
     user(login: $login) { ${identityFields} name
       ${selected.has("followers") ? "followers { totalCount }" : ""}
       ${wantsCollection ? `current: contributionsCollection(from: $from, to: $to) { ${collectionFields} }` : ""}
       ${wantsHistory ? "contributionYears: contributionsCollection { contributionYears }" : ""}
     }
   }`,
-      {
-        login: username,
-        ...(wantsCollection ? { from: `${period.from}T00:00:00Z`, to: now.toISOString() } : {}),
-      },
-    ),
+          {
+            login: username,
+            ...(wantsCollection ? { from: `${period.from}T00:00:00Z`, to: now.toISOString() } : {}),
+          },
+        ),
   );
   if (!base.success) throw new GitHubActivityError("unavailable");
   if (!base.data.user) throw new GitHubActivityError("not_found");
@@ -477,21 +510,16 @@ export async function fetchExtendedProfile(
     };
   }
 
-  const needsStatsRepositories = selected.has("stars") || !!statsOptions.roles?.length;
+  const needsStatsRepositories =
+    selected.has("stars") ||
+    (!!statsOptions.roles?.length && [...selected].some((id) => id !== "followers"));
   const needsLanguages =
     options.languages !== undefined ||
     (options.stats === undefined && options.languages === undefined);
-  const filterKey = (filters: Filters): string =>
-    JSON.stringify([
-      filters.repositories?.map((value) => value.toLowerCase()).sort() ?? [],
-      filters.owners?.map((value) => value.toLowerCase()).sort() ?? [],
-      [...(filters.roles ?? ["OWNER"])].sort(),
-      filters.excludeRepositories?.map((value) => value.toLowerCase()).sort() ?? [],
-    ]);
   const shareRepositories =
     needsStatsRepositories &&
     needsLanguages &&
-    filterKey(statsOptions) === filterKey(languageOptions);
+    extendedFilterKey(statsOptions, true) === extendedFilterKey(languageOptions, true);
   const statsRepositories = needsStatsRepositories
     ? await optional(() => readRepositories(statsOptions, shareRepositories))
     : null;
@@ -505,6 +533,14 @@ export async function fetchExtendedProfile(
       ? await optional(() => readRepositories(languageOptions, true))
       : null;
   const languages = languagesRead?.languages ?? { ...emptyLanguages, truncated: needsLanguages };
+  if (
+    needsLanguages &&
+    !selected.has("stars") &&
+    extendedFilterKey(statsOptions, true) === extendedFilterKey(languageOptions, true)
+  ) {
+    selected.add("stars");
+    setMetric("stars", languagesRead?.stars ?? null, languagesRead?.truncated ?? true);
+  }
   const allowed = statsOptions.roles?.length
     ? new Set(
         statsRepositories?.repositories.map((repository) =>
@@ -947,5 +983,8 @@ export async function fetchExtendedProfile(
     languages,
   });
   if (!snapshot.success) throw new GitHubActivityError("unavailable");
-  return snapshot.data;
+  return {
+    data: snapshot.data,
+    coverage: { stats: [...selected], languages: needsExtendedLanguages(parsedOptions.data) },
+  };
 }

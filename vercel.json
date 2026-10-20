@@ -1,0 +1,18 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs",
+  "installCommand": "corepack pnpm install --frozen-lockfile",
+  "buildCommand": "pnpm build",
+  "fluid": true,
+  "functions": {
+    "src/app/api/github/**/route.ts": {
+      "maxDuration": 75
+    },
+    "src/app/cards/github/**/route.ts": {
+      "maxDuration": 75
+    },
+    "src/app/cards/extended/**/route.ts": {
+      "maxDuration": 150
+    }
+  }
+}

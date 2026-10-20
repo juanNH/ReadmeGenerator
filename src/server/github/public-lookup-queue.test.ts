@@ -125,6 +125,26 @@ describe("shared public lookup scheduler", () => {
     expect(run).not.toHaveBeenCalled();
   });
 
+  it("keeps a caller's remaining deadline instead of starting another 45-second wait", async () => {
+    const { enqueuePublicLookup } = await import("./public-lookup-queue");
+    const gate = deferred<void>();
+    const blockers = Array.from({ length: 4 }, () =>
+      enqueuePublicLookup(
+        () => gate.promise,
+        () => {},
+      ),
+    );
+    const run = vi.fn().mockResolvedValue("late");
+    const deadline = Date.now() + 2000;
+    const result = enqueuePublicLookup(run, () => {}, deadline);
+    const rejected = expect(result).rejects.toMatchObject({ code: "rate_limited" });
+    await vi.advanceTimersByTimeAsync(2000);
+    await rejected;
+    gate.resolve();
+    await Promise.all(blockers);
+    expect(run).not.toHaveBeenCalled();
+  });
+
   it("releases capacity after asynchronous and synchronous lookup failures", async () => {
     const { enqueuePublicLookup } = await import("./public-lookup-queue");
     const failure = new Error("provider failure");

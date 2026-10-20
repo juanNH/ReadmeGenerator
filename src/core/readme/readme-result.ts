@@ -34,5 +34,6 @@ export type ReadmeResult =
       readonly exportIssues?: readonly ReadmeIssue[];
       readonly customImages?: readonly CustomImageSource[];
       readonly customHtml?: readonly CustomHtmlFragment[];
+      readonly activityCards?: readonly string[];
     }
   | { readonly success: false; readonly errors: readonly ReadmeIssue[] };

@@ -29,6 +29,7 @@ export function generateReadme(
   const exportIssues: ReadmeIssue[] = [];
   const customImages: CustomImageSource[] = [];
   const customHtml: CustomHtmlFragment[] = [];
+  const activityCards: string[] = [];
   const labels = readmeLabels[document.contentLocale];
   let customListIndex = 0;
   let cursor = 0;
@@ -129,6 +130,7 @@ export function generateReadme(
           errors,
           exportIssues,
           options.activityCardBaseUrl,
+          activityCards,
         );
         break;
       case "contact":
@@ -148,5 +150,6 @@ export function generateReadme(
     ...(exportIssues.length > 0 ? { exportIssues } : {}),
     ...(customImages.length > 0 ? { customImages } : {}),
     ...(customHtml.length > 0 ? { customHtml } : {}),
+    ...(activityCards.length > 0 ? { activityCards } : {}),
   };
 }

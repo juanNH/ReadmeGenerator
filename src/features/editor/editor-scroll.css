@@ -1,0 +1,110 @@
+/* Native scrollbars retain wheel, touch, keyboard and high-contrast support. */
+.editor-scroll-grid,
+.editor-scroll-grid *,
+[data-section-row] {
+  scrollbar-color: var(--border-strong) var(--surface-raised);
+  scrollbar-width: thin;
+}
+
+@supports selector(::-webkit-scrollbar) {
+  .editor-scroll-grid,
+  .editor-scroll-grid *,
+  [data-section-row] {
+    scrollbar-color: auto;
+    scrollbar-width: auto;
+  }
+
+  .editor-scroll-grid::-webkit-scrollbar,
+  .editor-scroll-grid *::-webkit-scrollbar,
+  [data-section-row]::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+
+  .editor-scroll-grid::-webkit-scrollbar-track,
+  .editor-scroll-grid *::-webkit-scrollbar-track,
+  [data-section-row]::-webkit-scrollbar-track {
+    border-radius: 999px;
+    background: var(--surface-raised);
+  }
+
+  .editor-scroll-grid::-webkit-scrollbar-thumb,
+  .editor-scroll-grid *::-webkit-scrollbar-thumb,
+  [data-section-row]::-webkit-scrollbar-thumb {
+    border: 3px solid var(--surface-raised);
+    border-radius: 999px;
+    background: var(--border-strong);
+  }
+
+  .editor-scroll-grid::-webkit-scrollbar-thumb:hover,
+  .editor-scroll-grid *::-webkit-scrollbar-thumb:hover,
+  [data-section-row]::-webkit-scrollbar-thumb:hover {
+    background: var(--muted-foreground);
+  }
+
+  .editor-scroll-grid::-webkit-scrollbar-corner,
+  .editor-scroll-grid *::-webkit-scrollbar-corner,
+  [data-section-row]::-webkit-scrollbar-corner {
+    background: var(--surface-raised);
+  }
+}
+
+.editor-scroll-panel {
+  min-width: 0;
+}
+
+/* Match the existing two-column breakpoint, relative to the editor's text size. */
+@container editor (min-width: 75em) {
+  @media (min-height: 44rem) {
+    .editor-scroll-grid[data-editor-scroll-ready="true"] {
+      position: sticky;
+      top: var(--editor-toolbar-offset);
+      height: var(--editor-scroll-height);
+    }
+
+    .editor-scroll-grid[data-editor-scroll-ready="true"] > .editor-scroll-panel {
+      height: 100%;
+      min-height: 0;
+      overflow: auto;
+      overscroll-behavior-y: contain;
+      scrollbar-gutter: stable;
+      scroll-padding-block: 1rem;
+      /* Leave room for a focused border without clipping it against the scrollport. */
+      padding: 4px;
+      margin: -4px;
+    }
+
+    .editor-scroll-grid[data-editor-scroll-ready="true"]
+      > .editor-scroll-panel
+      :is(input, select, textarea, [tabindex]) {
+      scroll-margin-top: 1rem;
+    }
+  }
+}
+
+@media (forced-colors: active) {
+  .editor-scroll-grid,
+  .editor-scroll-grid *,
+  [data-section-row] {
+    scrollbar-color: auto;
+    scrollbar-width: auto;
+  }
+
+  .editor-scroll-grid::-webkit-scrollbar,
+  .editor-scroll-grid *::-webkit-scrollbar,
+  [data-section-row]::-webkit-scrollbar {
+    width: revert;
+    height: revert;
+  }
+
+  .editor-scroll-grid::-webkit-scrollbar-track,
+  .editor-scroll-grid *::-webkit-scrollbar-track,
+  [data-section-row]::-webkit-scrollbar-track,
+  .editor-scroll-grid::-webkit-scrollbar-thumb,
+  .editor-scroll-grid *::-webkit-scrollbar-thumb,
+  [data-section-row]::-webkit-scrollbar-thumb {
+    border: revert;
+    border-radius: revert;
+    background: revert;
+  }
+}

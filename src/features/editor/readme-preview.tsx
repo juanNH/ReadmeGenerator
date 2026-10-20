@@ -23,14 +23,26 @@ import { remarkCustomHtml } from "./remark-custom-html";
 import { remarkPreviewHeadings } from "./remark-preview-headings";
 import { CodePreview } from "./code-preview";
 import { readGeneratedCodeSource } from "./code-preview-source";
-import { ActivityCardPreview } from "./activity-card-preview";
+import { LocalActivityCardPreview } from "./local-activity-card-preview";
+import type { ActivityDataCardState } from "./activity-data-cache";
+
+const idleCard = (): ActivityDataCardState => ({ status: "idle" });
+const ignoreRetry = () => {};
 
 const PreviewImagesContext = createContext<{
   customImages: readonly CustomImageSource[];
   customHtml: readonly CustomHtmlFragment[];
   activityCardBaseUrl?: string;
   markdown: string;
-}>({ customImages: [], customHtml: [], markdown: "" });
+  getActivityCard: (source: string) => ActivityDataCardState;
+  retryActivityCard: (source: string) => void;
+}>({
+  customImages: [],
+  customHtml: [],
+  markdown: "",
+  getActivityCard: idleCard,
+  retryActivityCard: ignoreRetry,
+});
 type ReadmePreviewProps = {
   markdown: string | null;
   contentLocale: ContentLocale;
@@ -39,6 +51,8 @@ type ReadmePreviewProps = {
   activityCardBaseUrl?: string;
   customImages?: readonly CustomImageSource[];
   customHtml?: readonly CustomHtmlFragment[];
+  getActivityCard?: (source: string) => ActivityDataCardState;
+  retryActivityCard?: (source: string) => void;
 };
 
 export function ReadmePreview({
@@ -49,6 +63,8 @@ export function ReadmePreview({
   activityCardBaseUrl,
   customImages = [],
   customHtml = [],
+  getActivityCard = idleCard,
+  retryActivityCard = ignoreRetry,
 }: ReadmePreviewProps) {
   const t = useTranslations("Editor.preview");
 
@@ -75,7 +91,14 @@ export function ReadmePreview({
           className="min-h-72 p-6 text-sm leading-7 wrap-anywhere sm:p-8 [&_a]:text-accent [&_a]:underline [&_a]:underline-offset-4 [&_li]:pl-1 [&_ol]:my-4 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:my-4 [&_strong]:font-semibold [&_ul]:my-4 [&_ul]:list-disc [&_ul]:pl-5"
         >
           <PreviewImagesContext.Provider
-            value={{ customImages, customHtml, activityCardBaseUrl, markdown }}
+            value={{
+              customImages,
+              customHtml,
+              activityCardBaseUrl,
+              markdown,
+              getActivityCard,
+              retryActivityCard,
+            }}
           >
             <ReactMarkdown
               skipHtml
@@ -177,7 +200,8 @@ function PreviewHeading({
 
 // Stable paragraph and image component identities preserve load failures across unrelated edits.
 const PreviewImage: Components["img"] = ({ src, alt }) => {
-  const { customImages, activityCardBaseUrl } = useContext(PreviewImagesContext);
+  const { customImages, activityCardBaseUrl, getActivityCard, retryActivityCard } =
+    useContext(PreviewImagesContext);
   const authoredImage = customImages.find((entry) => entry.src === src && entry.alt === alt);
   if (authoredImage && normalizePublicImageUrl(authoredImage.src) === authoredImage.src)
     return <PublicProfileImage key={authoredImage.src} {...authoredImage} />;
@@ -188,16 +212,18 @@ const PreviewImage: Components["img"] = ({ src, alt }) => {
       : null;
   if (card)
     return (
-      <ActivityCardPreview
+      <LocalActivityCardPreview
         key={
           "username" in card
             ? `profile:${card.username}:${card.card}`
             : `resource:${card.kind}:${card.target}`
         }
-        src={card.localUrl}
+        state={getActivityCard(card.localUrl)}
+        card={"card" in card ? card.card : `extended-${card.kind}`}
         href={src as string}
         alt={alt ?? ""}
         width={card.appearance?.width ?? (card.appearance?.size === "wide" ? 1000 : 700)}
+        onRetry={() => retryActivityCard(card.localUrl)}
       />
     );
   const country = typeof src === "string" ? findCountryByIconUrl(src) : undefined;

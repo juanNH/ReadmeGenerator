@@ -13,6 +13,7 @@ export function renderActivity(
   errors: ReadmeIssue[],
   exportIssues: ReadmeIssue[],
   activityCardBaseUrl?: string,
+  activityCards: string[] = [],
 ) {
   const highlights = document.visibility.contributions
     ? renderContributionItems(document.data.contributions, labels, errors)
@@ -67,6 +68,7 @@ export function renderActivity(
           });
           return [];
         }
+        activityCards.push(url);
         return [`[![${labels[card]} (${target})](${url})](${url})`];
       });
     }
@@ -91,6 +93,7 @@ export function renderActivity(
       errors.push({ code: "invalid_activity_options", path: ["data", "metrics", "extended"] });
       return [];
     }
+    activityCards.push(url);
     return [`[![${labels[card]} (@${username})](${url})](${url})`];
   });
   return renderSection(

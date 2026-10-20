@@ -1,6 +1,6 @@
 # Cómo contribuir
 
-Este repositorio está construyendo la base de GitHub Profile Generator. Antes de proponer cambios, revisá la [definición del producto](docs/product.md) y la [arquitectura](docs/architecture.md). La documentación pública describe la propuesta y el estado disponible; la planificación de desarrollo se mantiene privada.
+GitHub Profile Generator es un editor visual de README para perfiles de GitHub, con vista previa, exportación e importación local y archivos de proyecto para continuar editando. Antes de proponer cambios, revisá la [definición del producto](docs/product.md) y la [arquitectura](docs/architecture.md). La documentación pública describe las funciones disponibles y sus límites; la planificación de desarrollo se mantiene privada.
 
 ## Preparación
 

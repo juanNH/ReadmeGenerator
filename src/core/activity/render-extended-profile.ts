@@ -273,10 +273,10 @@ function scopeText(
   metric: ExtendedMetric,
   strings: Labels,
   options: ExtendedStatsOptions,
-  fetchedAt: string,
+  periodTo: string,
 ): string {
   if (id === "commits" && options.commitsPeriod === "year")
-    return `${strings.period} · ${options.year ?? fetchedAt.slice(0, 4)}`;
+    return `${strings.period} · ${options.year ?? periodTo.slice(0, 4)}`;
   return strings[metric.scope];
 }
 
@@ -359,7 +359,7 @@ function renderStats(
         text(
           scopeX,
           y,
-          scopeText(id, metric, strings, statsOptions, snapshot.fetchedAt),
+          scopeText(id, metric, strings, statsOptions, snapshot.period.to),
           `font-size="10" fill="${style.muted}" text-anchor="end"`,
         ) +
         text(
@@ -410,7 +410,7 @@ function renderStats(
     `${strings.period}: ${formatDate(snapshot.period.from, locale)} – ${formatDate(snapshot.period.to, locale)} (UTC).`,
     ...(statsOptions.commitsPeriod === "year" && items.includes("commits")
       ? [
-          `${strings.commits}: ${strings.period} · ${statsOptions.year ?? snapshot.fetchedAt.slice(0, 4)} (UTC).`,
+          `${strings.commits}: ${strings.period} · ${statsOptions.year ?? snapshot.period.to.slice(0, 4)} (UTC).`,
         ]
       : []),
     ...(hasPartial ? [strings.partial] : []),
@@ -425,7 +425,7 @@ function renderStats(
     `${snapshot.displayName} (@${snapshot.username})`,
     ...items.map(
       (id) =>
-        `${strings[id]}: ${rowValue(id, snapshot.stats[id], locale, style)} (${scopeText(id, snapshot.stats[id], strings, statsOptions, snapshot.fetchedAt)})`,
+        `${strings[id]}: ${rowValue(id, snapshot.stats[id], locale, style)} (${scopeText(id, snapshot.stats[id], strings, statsOptions, snapshot.period.to)})`,
     ),
     ...(rank
       ? [

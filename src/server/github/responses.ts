@@ -19,7 +19,13 @@ export function parseCardRequest(username: string, cardFilename: string, url: UR
   const normalizedUsername = normalizeGitHubUsername(username);
   const options = parseCardOptions(url.searchParams);
   const card = profileActivityCardIds.find((id) => `${id}.svg` === cardFilename);
-  if (!normalizedUsername || !card || !options) {
+  if (
+    !normalizedUsername ||
+    !card ||
+    !options ||
+    (url.searchParams.has("stats") && card !== "extended-stats") ||
+    (url.searchParams.has("languages") && card !== "extended-languages")
+  ) {
     return null;
   }
   return { username: normalizedUsername, card, ...options };

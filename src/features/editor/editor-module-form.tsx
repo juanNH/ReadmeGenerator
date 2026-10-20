@@ -1,4 +1,5 @@
 import type { ProfileModuleData } from "@/core/profile/module-content";
+import type { ActivityErrorCode } from "@/core/activity/activity-types";
 import type { ProfileDocument } from "@/core/profile/profile-schema";
 import type { ReadmeIssue } from "@/core/readme";
 import { ContactForm } from "@/modules/contact/contact-form";
@@ -13,9 +14,34 @@ type EditorModuleFormProps = {
   profile: ProfileDocument;
   errors: readonly ReadmeIssue[];
   onChange: (next: ProfileDocument) => void;
+  onRequestCards: () => void;
+  cardsNeedRefresh: boolean;
+  canRequestCards: boolean;
+  cardsLoading: boolean;
+  cardsCompleted: number;
+  cardsTotal: number;
+  cardsSearchError?: ActivityErrorCode;
+  cardsSearchPartial: boolean;
+  cardsStorageState: "loading" | "saving" | "saved" | "memory";
+  cardsHaveStoredData: boolean;
 };
 
-export function EditorModuleForm({ id, profile, errors, onChange }: EditorModuleFormProps) {
+export function EditorModuleForm({
+  id,
+  profile,
+  errors,
+  onChange,
+  onRequestCards,
+  cardsNeedRefresh,
+  canRequestCards,
+  cardsLoading,
+  cardsCompleted,
+  cardsTotal,
+  cardsSearchError,
+  cardsSearchPartial,
+  cardsStorageState,
+  cardsHaveStoredData,
+}: EditorModuleFormProps) {
   function update<K extends EditableModuleId>(moduleId: K, value: ProfileModuleData[K]) {
     onChange({ ...profile, data: { ...profile.data, [moduleId]: value } });
   }
@@ -48,6 +74,16 @@ export function EditorModuleForm({ id, profile, errors, onChange }: EditorModule
     case "contributions":
       return (
         <ContributionsForm
+          onRequestCards={onRequestCards}
+          cardsNeedRefresh={cardsNeedRefresh}
+          canRequestCards={canRequestCards}
+          cardsLoading={cardsLoading}
+          cardsCompleted={cardsCompleted}
+          cardsTotal={cardsTotal}
+          cardsSearchError={cardsSearchError}
+          cardsSearchPartial={cardsSearchPartial}
+          cardsStorageState={cardsStorageState}
+          cardsHaveStoredData={cardsHaveStoredData}
           value={profile.data.contributions}
           metrics={profile.data.metrics}
           metricsVisible={profile.visibility.metrics}

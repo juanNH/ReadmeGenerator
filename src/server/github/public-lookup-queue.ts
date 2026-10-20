@@ -75,7 +75,13 @@ function drain(): void {
 }
 
 /** FIFO, bounded waiting; callers keep deduplication across queued and active work. */
-export function enqueuePublicLookup<T>(run: () => Promise<T>, beforeStart: () => void): Promise<T> {
+export function enqueuePublicLookup<T>(
+  run: () => Promise<T>,
+  beforeStart: () => void,
+  deadline = Date.now() + maximumQueueWaitMs,
+): Promise<T> {
+  const queueDeadline = Math.min(deadline, Date.now() + maximumQueueWaitMs);
+  if (queueDeadline <= Date.now()) return Promise.reject(rateLimited(Date.now()));
   if (queue.length >= maximumQueuedLookups) return Promise.reject(rateLimited(Date.now()));
   return new Promise<T>((resolve, reject) => {
     const release = () => {
@@ -83,14 +89,17 @@ export function enqueuePublicLookup<T>(run: () => Promise<T>, beforeStart: () =>
       drain();
     };
     const lookup: QueuedLookup = {
-      deadline: Date.now() + maximumQueueWaitMs,
-      timer: setTimeout(() => {
-        const index = queue.indexOf(lookup);
-        if (index === -1) return;
-        queue.splice(index, 1);
-        reject(rateLimited(Date.now()));
-        drain();
-      }, maximumQueueWaitMs),
+      deadline: queueDeadline,
+      timer: setTimeout(
+        () => {
+          const index = queue.indexOf(lookup);
+          if (index === -1) return;
+          queue.splice(index, 1);
+          reject(rateLimited(Date.now()));
+          drain();
+        },
+        Math.max(1, queueDeadline - Date.now()),
+      ),
       beforeStart,
       start: () => {
         try {

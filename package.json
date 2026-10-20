@@ -18,11 +18,14 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
+    "test:e2e:cards": "playwright test --config tests/e2e/exported-cards.config.ts",
     "test:a11y": "playwright test --grep accessibility",
+    "cards:check": "node scripts/check-public-cards.mjs",
+    "test:cards": "node --test scripts/check-public-cards.test.mjs",
     "docs:check": "node scripts/check-doc-links.mjs",
     "licenses:check": "node scripts/check-licenses.mjs",
     "licenses:generate": "node scripts/check-licenses.mjs --write",
-    "check": "pnpm licenses:check && pnpm lint && pnpm typecheck && pnpm format:check && pnpm docs:check && pnpm test"
+    "check": "pnpm licenses:check && pnpm lint && pnpm typecheck && pnpm format:check && pnpm docs:check && pnpm test && pnpm test:cards"
   },
   "dependencies": {
     "@codemirror/commands": "6.11.1",

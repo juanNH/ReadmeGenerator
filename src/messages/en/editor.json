@@ -29,6 +29,7 @@
     "chooseTitle": "Choose a section to start",
     "chooseHelp": "Choose a section and make it yours. A few lines are enough to start.",
     "languageHelp": "Changes generated headings. Your writing and the app language stay unchanged.",
+    "languageCompact": "README",
     "sectionHidden": "{module} is hidden from the README. Its settings and writing are still available here.",
     "importReadme": "Import README",
     "importLoading": "Opening README importer…",
@@ -41,8 +42,8 @@
     "reviewNamed": "Review fields in {module}"
   },
   "metrics": {
-    "title": "These cards are for local preview",
-    "help": "Publishing cards needs a public address for this app. That address has not been configured yet. You can exclude the cards and export your writing and highlights.",
+    "title": "Publishing cards",
+    "help": "Search and preview work locally. Publishing these cards on GitHub requires this app's public address to be configured.",
     "hide": "Exclude GitHub cards and keep their settings",
     "hidden": "GitHub cards are excluded. Their saved settings have been kept."
   },
@@ -143,6 +144,18 @@
     "fileLabel": "Live preview",
     "documentLabel": "README preview",
     "cardLoading": "Loading card…",
+    "cardSample": "Layout example, without account data. Enter your username and press Search data in Activity & contributions; cards then reuse that information.",
+    "cardImageFailure": "The local preview could not be displayed. Retry without querying GitHub.",
+    "cardSupplementPending": "Some contribution data has not been loaded. Use Search to complete this card.",
+    "cardSupplementLoading": "Loading additional contributions…",
+    "cardSupplementFailure": "Some contribution data could not be loaded.",
+    "cardErrors": {
+      "invalid_username": "Check the username or public resource identifier.",
+      "not_found": "This public account or resource was not found.",
+      "not_configured": "GitHub queries are not configured on this server.",
+      "rate_limited": "The query limit was reached. Wait before retrying.",
+      "unavailable": "The public data service is temporarily unavailable."
+    },
     "cardUpdating": "Updating card… The previous version stays visible while it loads.",
     "cardLoadFailure": "We could not load this card.",
     "cardUpdateFailure": "We could not update this card. The previous version is still visible.",

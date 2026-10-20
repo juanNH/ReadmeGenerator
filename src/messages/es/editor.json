@@ -29,6 +29,7 @@
     "chooseTitle": "Elegí una sección para empezar",
     "chooseHelp": "Elegí una sección y dale tu toque. Unas pocas líneas alcanzan para empezar.",
     "languageHelp": "Cambia los títulos generados. Tus textos y el idioma de la aplicación se conservan.",
+    "languageCompact": "README",
     "sectionHidden": "{module} está oculta en el README. Su configuración y sus textos siguen disponibles acá.",
     "importReadme": "Importar README",
     "importLoading": "Abriendo el importador de README…",
@@ -41,8 +42,8 @@
     "reviewNamed": "Revisar campos en {module}"
   },
   "metrics": {
-    "title": "Estas tarjetas son una vista previa local",
-    "help": "Para publicar tarjetas hace falta una dirección pública de esta aplicación. Todavía no está configurada. Podés excluir las tarjetas y exportar tus textos y aportes destacados.",
+    "title": "Publicación de tarjetas",
+    "help": "La búsqueda y la vista previa funcionan localmente. Para publicar estas tarjetas en GitHub hace falta configurar la dirección pública de esta aplicación.",
     "hide": "Excluir tarjetas de GitHub y conservar su configuración",
     "hidden": "Las tarjetas de GitHub están excluidas. Se conservó su configuración guardada."
   },
@@ -143,6 +144,18 @@
     "fileLabel": "Vista previa",
     "documentLabel": "Vista previa del README",
     "cardLoading": "Cargando tarjeta…",
+    "cardSample": "Ejemplo de diseño, sin datos de la cuenta. Ingresá tu usuario y pulsá Buscar datos en Actividad y contribuciones; después las tarjetas reutilizan esa información.",
+    "cardImageFailure": "No se pudo mostrar la vista previa local. Reintentá sin consultar GitHub.",
+    "cardSupplementPending": "Faltan datos de aportes. Usá Buscar para completar esta tarjeta.",
+    "cardSupplementLoading": "Cargando aportes adicionales…",
+    "cardSupplementFailure": "No se pudieron cargar algunos datos de aportes.",
+    "cardErrors": {
+      "invalid_username": "Revisá el usuario o el identificador del recurso público.",
+      "not_found": "No se encontró esta cuenta o recurso público.",
+      "not_configured": "Las consultas a GitHub no están configuradas en este servidor.",
+      "rate_limited": "Se alcanzó el límite de consultas. Esperá antes de reintentar.",
+      "unavailable": "El servicio de datos públicos no está disponible temporalmente."
+    },
     "cardUpdating": "Actualizando tarjeta… La versión anterior sigue visible mientras carga.",
     "cardLoadFailure": "No pudimos cargar esta tarjeta.",
     "cardUpdateFailure": "No pudimos actualizar esta tarjeta. La versión anterior sigue visible.",

@@ -35,24 +35,29 @@ pnpm start
 
 ## Comandos
 
-| Comando             | Propósito                                                                               |
-| ------------------- | --------------------------------------------------------------------------------------- |
-| `pnpm dev`          | Iniciar el servidor de desarrollo.                                                      |
-| `pnpm build`        | Crear la compilación de producción.                                                     |
-| `pnpm start`        | Servir la compilación de producción existente.                                          |
-| `pnpm lint`         | Revisar el código con las reglas del repositorio.                                       |
-| `pnpm typecheck`    | Comprobar los tipos sin emitir archivos.                                                |
-| `pnpm format`       | Aplicar el formato definido por el proyecto.                                            |
-| `pnpm format:check` | Comprobar el formato sin modificar archivos.                                            |
-| `pnpm test`         | Comprobar perfil, generación, adaptador de borrador y traducciones EN/ES con Vitest.    |
-| `pnpm test:watch`   | Ejecutar esas pruebas durante el desarrollo.                                            |
-| `pnpm test:e2e`     | Revisar rutas públicas y recorrido de edición, recuperación y exportación en navegador. |
-| `pnpm test:e2e:ui`  | Abrir la interfaz interna de Playwright para explorar y ejecutar los recorridos.        |
-| `pnpm test:a11y`    | Ejecutar las comprobaciones automáticas de accesibilidad de rutas públicas y editor.    |
-| `pnpm docs:check`   | Verificar enlaces locales de los archivos Markdown del repositorio.                     |
-| `pnpm check`        | Ejecutar lint, tipos, formato, enlaces de documentación y pruebas unitarias.            |
+| Comando                  | Propósito                                                                               |
+| ------------------------ | --------------------------------------------------------------------------------------- |
+| `pnpm dev`               | Iniciar el servidor de desarrollo.                                                      |
+| `pnpm build`             | Crear la compilación de producción.                                                     |
+| `pnpm start`             | Servir la compilación de producción existente.                                          |
+| `pnpm lint`              | Revisar el código con las reglas del repositorio.                                       |
+| `pnpm typecheck`         | Comprobar los tipos sin emitir archivos.                                                |
+| `pnpm format`            | Aplicar el formato definido por el proyecto.                                            |
+| `pnpm format:check`      | Comprobar el formato sin modificar archivos.                                            |
+| `pnpm test`              | Comprobar perfil, generación, adaptador de borrador y traducciones EN/ES con Vitest.    |
+| `pnpm test:watch`        | Ejecutar esas pruebas durante el desarrollo.                                            |
+| `pnpm test:e2e`          | Revisar rutas públicas y recorrido de edición, recuperación y exportación en navegador. |
+| `pnpm test:e2e:ui`       | Abrir la interfaz interna de Playwright para explorar y ejecutar los recorridos.        |
+| `pnpm test:a11y`         | Ejecutar las comprobaciones automáticas de accesibilidad de rutas públicas y editor.    |
+| `pnpm test:e2e:cards`    | Probar las diez familias exportadas con rutas reales y proveedores controlados.         |
+| `pnpm test:cards`        | Probar el comprobador de tarjetas sin credenciales ni solicitudes externas.             |
+| `pnpm cards:check`       | Comprobar URLs SVG de un origen público o un README exportado.                          |
+| `pnpm docs:check`        | Verificar enlaces locales de los archivos Markdown del repositorio.                     |
+| `pnpm licenses:generate` | Regenerar el inventario y los avisos de dependencias y recursos de terceros.            |
+| `pnpm licenses:check`    | Verificar el inventario y los avisos de dependencias y recursos de terceros.            |
+| `pnpm check`             | Ejecutar licencias, lint, tipos, formato, enlaces de documentación y pruebas unitarias. |
 
-`pnpm check` agrupa `lint`, `typecheck`, `format:check`, `docs:check` y `test`. La compilación y las comprobaciones en navegador se ejecutan por separado. `typecheck` genera primero los tipos de rutas de Next.js, incluidos los getters de `next/root-params`.
+`pnpm check` agrupa `licenses:check`, `lint`, `typecheck`, `format:check`, `docs:check`, `test` y `test:cards`. La compilación y las comprobaciones en navegador se ejecutan por separado. Para desplegar con PAT y sin login, seguí la [guía de Vercel con main/dev](vercel-deployment.md). `licenses:generate` actualiza los avisos cuando cambian dependencias o recursos distribuidos; revisá su diff según la [guía open source](open-source.md). `typecheck` genera primero los tipos de rutas de Next.js, incluidos los getters de `next/root-params`.
 
 Si las pruebas en navegador solicitan instalar su navegador de ejecución, preparalo con:
 
@@ -630,3 +635,125 @@ La reproducción real con `juannh`, ranking encendido y cuatro cambios de selecc
 La revisión independiente encontró que los mensajes de interfaz heredaban el idioma del README cuando ambos diferían. Se aplicó el idioma del editor al estado y botón, conservando el idioma del contenido; los dos cruces EN/ES quedaron cubiertos. No hubo otros hallazgos accionables en el cierre de código o licencias.
 
 Las verificaciones usan contextos aislados y producción local en 3100 con credenciales y origen público vacíos solo en ese proceso. No alteran el borrador real ni la configuración de desarrollo. Las capturas y sondas están en `work/`, ignorado. No se ejecutó Linux ni se certificó un contenedor o cierre de componentes nativos; el catálogo sí verifica sus variantes actuales contra fuentes oficiales. La emulación y los controles automáticos no sustituyen dispositivos físicos ni una evaluación completa con lectores de pantalla.
+
+## Validación de consultas incrementales y cambios rápidos
+
+El 20 de octubre de 2026 se optimizó la caché Extended por campo y filtros efectivos. La vista previa agrupa cambios durante 400 ms, conserva la imagen válida y mantiene el documento y el Markdown actuales. La primera carga y el reintento siguen siendo inmediatos. Se corrigió además un caso de primera imagen completada durante otra selección que podía dejar «Cargando» permanente al volver a ella. Ver [ADR 0025](decisions/0025-activity-data-cache-and-preview-batching.md).
+
+Mediciones con respuestas GitHub controladas:
+
+- Estadísticas iniciales, quitar/reordenar contadores, cambiar icono y activar ranking: tres solicitudes totales, todas de la carga inicial; las ediciones posteriores no agregan solicitudes a GitHub.
+- Agregar PR fusionadas a esa cobertura: una consulta adicional de búsqueda, sin repetir identidad, repositorios ni contadores anteriores.
+- Lenguajes iniciales, cinco diseños, ocultamiento, formato y ponderaciones, y luego estrellas: dos solicitudes totales de la carga inicial.
+- Cuatro solicitudes simultáneas con selecciones superpuestas: cuatro llamadas totales.
+- Tres cambios rápidos en el navegador: una petición SVG final adicional; ninguna intermedia ni antes de 400 ms desde el último cambio. Volver a la configuración cargada antes del plazo no agrega peticiones.
+
+Verificaciones ejecutadas:
+
+- `pnpm check` final: licencias, lint, generación de tipos, TypeScript, formato, enlaces de 43 documentos Markdown y 1.310 pruebas en 48 suites correctos. Incluye 26 casos nuevos Extended, uno adicional de cola y tres del año mostrado en el SVG.
+- `pnpm build`: compilación de producción correcta.
+- Diez E2E focales correctos: ráfagas, cancelación al volver u ocultar, mínimo de un contador, recuperación, orden, respuestas tardías, éxito/error antes de primera carga, reintento inmediato y separación de identidades e idiomas.
+- Cuatro recorridos visuales dirigidos en producción local, EN/ES y escritorio de 1440 × 1000/móvil emulado de 390 × 844: sin desbordamiento ni errores de página, imagen previa visible, reintento con teclado y foco visible. Se inspeccionaron las capturas móvil ES en actualización y escritorio EN con error y foco.
+- Smoke local con datos públicos reales de `juannh`: cuatro selecciones JSON, tarjeta de estadísticas y tarjeta de lenguajes respondieron HTTP 200; los SVG declararon `ready` y conservaron los encabezados de caché. Los tiempos puntuales de localhost no se consideran un benchmark.
+
+Las regresiones del servidor cubren cobertura nula/parcial, frescura y antigüedad originales, plazo de 24 horas, filtros, períodos, expulsión del límite combinado de 512 entradas, usuario inexistente, rotación A→B→A del token y éxito tardío después de invalidación global de credenciales. La cola y la red heredan el plazo restante de la solicitud Extended de 60 segundos; no se mezclan períodos temporales UTC distintos. La revisión independiente no dejó hallazgos pendientes.
+
+La primera regresión completa de producción terminó con 307/307 recorridos correctos en 7,3 minutos. La revisión posterior agregó dos casos de servidor: cambio de año UTC mientras espera la cola y datos que vencen durante esa espera. El plan se recalcula al iniciar. Tres casos puros EN/ES verifican además que el año implícito de commits derive del intervalo temporal aunque otro contador tenga una fecha anterior; un año elegido explícitamente conserva prioridad. Las 36 pruebas focales de estos ámbitos pasaron.
+
+La compilación final volvió a pasar la regresión completa: 307/307 recorridos correctos en 7,1 minutos, sin exclusiones ni reintentos automáticos. También se repitieron los cuatro recorridos visuales y el smoke real local con resultado correcto.
+
+Las pruebas de producción usan 3100 con token y origen público vacíos solo en ese proceso, contextos aislados y respuestas controladas. El smoke real usa el servidor de desarrollo existente, sin mostrar su credencial ni modificar el borrador. No se agregaron dependencias. La caché y las cuotas locales siguen siendo por proceso y no sustituyen infraestructura compartida.
+
+Para el despliegue futuro se consultaron [Vercel Hobby](https://vercel.com/docs/plans/hobby) y sus [límites de funciones](https://vercel.com/docs/functions/limitations): el plan gratuito requiere uso personal no comercial y tiene cuotas; Fluid admite hasta 300 segundos, mientras una función Hobby sin Fluid tiene 10 segundos por defecto y hasta 60 configurables. Se deberá revisar la configuración y el plazo acumulado de las tarjetas con recursos y aportes antes de publicar. GitHub App y la infraestructura de producción quedan para una etapa posterior.
+
+## Validación de selección visual y consulta explícita
+
+El 20 de octubre de 2026 se sustituyó la consulta automática de configuraciones nuevas por selección con diez miniaturas CSS locales y «Buscar y mostrar tarjetas». La búsqueda básica de aportes sugeridos quedó como acción opcional independiente. El idioma del README pasó a la cabecera de configuración, antes del formulario. Ver [ADR 0026](decisions/0026-explicit-card-loading-and-local-samples.md).
+
+`ReadmeResult.activityCards?` deriva las URLs exactamente junto al Markdown. El editor aprueba el último lote de rutas locales canónicas solo en memoria; los cambios nuevos muestran muestras sin enlace al endpoint. Reemplazar, restaurar o borrar el perfil revoca esa aprobación. El documento y las condiciones de exportación no cambian.
+
+Verificaciones ejecutadas:
+
+- `pnpm check`: licencias, lint, generación de tipos, TypeScript, formato, enlaces de 45 documentos Markdown y 1.317 pruebas en 50 suites correctos. Siete casos nuevos protegen metadatos exactos/ausentes, código literal y validación/deduplicación de URLs.
+- `pnpm build`: compilación de producción correcta.
+- 24 E2E focales de actividad correctos, más dos repeticiones con aserciones de geometría y nombre accesible durante carga. Cubren diez tipos elegidos sin consultas previas, lote final, recuperación, cambios de contadores/idioma/destinos, búsqueda opcional, proyecto con URLs idénticas, borrado y nueva selección idéntica, errores, reintento, respuestas tardías e identidades.
+- Seis E2E nuevos para idioma: EN/ES y 320 × 568, 390 × 844 y 1440 × 1000. Antes de enfocar o interactuar se midió el control completo dentro del viewport y antes del título; se comprobó foco, idioma HTML, guardado, ausencia de consultas y de desbordamiento. Un primer control estático detectó una variable del test que ocultaba `document`; se corrigió el nombre y el control final pasó.
+- Cuatro recorridos visuales de selección/carga/error/reintento, EN/ES y escritorio/móvil emulado, correctos tanto en desarrollo como en producción. La muestra autorizada midió 308 px en un viewport de 390 px; no hubo errores de página ni desbordamiento. Se inspeccionaron las capturas ES de selección en escritorio y carga en móvil.
+- Smoke con `juannh` y la credencial de desarrollo existente, en un contexto aislado: cero solicitudes de tarjetas o JSON antes de aplicar; un SVG HTTP 200 con estado `ready` después, sin consulta básica adicional ni encabezado de autorización del proveedor en el navegador.
+
+La revisión independiente detectó un enlace sin nombre mientras la primera imagen permanecía oculta y un posible ancho colapsado de muestra. Se añadieron nombre accesible y ancho validado con máximo del contenedor; las pruebas con respuesta retenida verificaron ambos. Los stubs usan datos controlados; los fallos iniciales de dos aserciones de red se ajustaron para permitir reutilización legítima del navegador, sin relajar que una configuración nueva espere al botón.
+
+La primera regresión completa detectó nueve fallos de geometría: siete por desbordamiento al ampliar texto al 200 % y dos por el primer campo personalizado parcialmente fuera de 320 × 568. Se limitó el ancho del grupo de idioma y se compactó la cabecera móvil: el contador de posición permanece accesible para lectores de pantalla y las acciones junto al título usan iconos con nombre y área de 44 px. Pasaron los ocho recorridos focales de formularios con texto ampliado, los trece restantes de idioma/navegación/proyectos y las cuatro repeticiones de 320 × 568 y navegación al 200 %, conservando las aserciones originales de viewport. La captura ES muestra el primer campo completo antes de cualquier interacción. El control final `pnpm check` volvió a pasar con 1.317 pruebas.
+
+La compilación final pasó los 316/316 recorridos de producción local en 7,2 minutos, sin exclusiones ni reintentos automáticos. Se repitieron los cuatro recorridos visuales y el smoke real con `juannh`, ambos correctos. La revisión final de código, captura móvil y guía de alojamiento no dejó hallazgos accionables. Las medidas corresponden a Chromium y teléfonos emulados; no constituyen una prueba de carga de Vercel ni una evaluación completa de accesibilidad.
+
+Las pruebas de producción usan el puerto temporal 3100, con token y origen vacíos exclusivamente en ese proceso. No se altera el borrador real ni se agregan dependencias. La [guía de API, credenciales y alojamiento](github-api-and-hosting.md) conserva las fuentes oficiales consultadas y diferencia visitantes, cuota compartida del PAT, caché por proceso y cuotas Hobby; no se creó una GitHub App ni infraestructura de producción.
+
+## Validación de búsqueda centralizada y desplazamiento independiente
+
+El 20 de octubre de 2026 se integró una caché de datos públicos en memoria del editor. Buscar agrupa las fuentes JSON, carga solo cobertura faltante o vencida y muestra progreso por dato y por tarjeta. La vista previa genera imágenes SVG locales con los mismos renderizadores puros de las rutas públicas; cambiar apariencia, idioma, orden o una selección cubierta no produce peticiones SVG ni JSON. El Markdown mantiene las URLs dinámicas actuales y las condiciones de exportación. Ver [ADR 0027](decisions/0027-browser-activity-data-cache.md).
+
+La caché conserva fechas originales, datos nulos/parciales consultados y claves por dependencia efectiva, sin localStorage. Tiene frescura de 30 minutos, resultados anteriores acotados a 24 horas, límite de 512 entradas y 8 MiB de datos, memo de hasta 100 SVG y tres solicitudes JSON simultáneas por editor. Reiniciar o reemplazar el documento cancela e invalida la generación anterior. Se toleran cinco segundos de diferencia de reloj; fechas futuras mayores se rechazan. No se agregaron endpoints, dependencias o credenciales.
+
+La configuración y vista previa tienen desplazamiento nativo independiente en escritorio con altura suficiente. Teléfono, texto ampliado y pantallas bajas mantienen el flujo natural. Las barras usan tokens y pulgares redondeados; los colores forzados conservan representación nativa. Ver [ADR 0028](decisions/0028-independent-editor-scroll.md).
+
+Verificaciones ejecutadas antes de la regresión completa:
+
+- `pnpm check`: licencias, lint, tipos, formato, enlaces de 47 documentos y 1.350 pruebas en 51 suites correctos. Los 33 nuevos casos de caché cubren agrupación, faltantes, opciones visuales, frescura original, UTC/años, nulos, memoria, tamaños, concurrencia, errores, reintentos y cancelación.
+- `pnpm build`: compilación final de producción correcta.
+- 33 E2E focales de actividad: 31 en la última corrida conjunta y dos nuevos repetidos tras corregir sus simulaciones. Incluyen diez familias, cinco propias con un JSON, Extended combinado, personalización sin HTTP, TTL, borrado/importación/proyecto, respuestas tardías, errores parciales, reintento solo de la fuente fallida y reintento de decodificación Blob sin consulta al proveedor. El skeleton tiene `skeleton-pulse` con movimiento permitido y `none` al reducirlo.
+- Siete E2E de scroll y dos repeticiones móviles correctos: rueda y PageDown independientes, foco de campos profundos, 320 × 568 medido antes de interacción, texto al 200 %, altura reducida y colores forzados. Se inspeccionaron capturas de escritorio ES y teléfono ES con el primer campo completo.
+- Smoke real aislado con `juannh`: cuatro tarjetas iniciales mediante dos JSON; tema y paleta sin red adicional; agregar seguidores pidió únicamente ese contador en un tercer JSON. Cero HTTP SVG, cero Authorization del proveedor en navegador, cero errores de página y snapshots fuera del borrador. Se inspeccionó la captura de ambas columnas después de editar.
+
+La revisión independiente corrigió tres casos: los metadatos de un repositorio permanecen visibles si fallan sus aportes; respuestas de generaciones anteriores no vuelven a invalidar una recuperación posterior; y el memo retira contadores cuyo suplemento stale supera 24 horas aunque sus referencias no cambien. Los regresores de esas carreras y vencimientos pasaron. Algunos primeros intentos de E2E usaban fechas caducadas, asumían que ranking no había cargado seguidores, o desplazaban solo la ventana; se ajustaron a los contratos y al scroll independiente. El fallo de Blob se simula hasta liberarlo explícitamente para contemplar los dos efectos de Strict Mode en desarrollo.
+
+La primera regresión completa terminó con 331/332 correctos; el único fallo esperaba que Ctrl+Inicio desplazara la ventana después de descargar, cuando el foco estaba en la columna. La comprobación ahora verifica el inicio de la columna y restablece la página únicamente para la captura; pasó junto al recorrido equivalente de copia/descarga. La inspección visual reveló además que desplazar el título al seleccionar podía recortar el idioma en escritorio: se unificó la vuelta a la cabecera completa al cambiar o volver a pulsar la sección, conservando foco y el comportamiento móvil. Pasaron 13 focales de scroll/idioma y dos repeticiones de navegación activa con medidas de la cabecera. El `pnpm check` y build posteriores volvieron a pasar.
+
+Cuatro recorridos visuales en la compilación definitiva, EN/ES y escritorio de 1440 × 1000/móvil emulado de 390 × 844, comprobaron carga progresiva, error, foco y reintento con Enter, éxito posterior y ausencia de desbordamiento/errores de página. Cada recorrido hizo tres JSON controlados y cero HTTP SVG. Se inspeccionaron carga móvil ES, error con foco en escritorio ES y la consulta real con ambas columnas.
+
+La regresión completa de la compilación definitiva terminó con **332/332 correctos en 6,4 minutos**, sin exclusiones ni reintentos automáticos. Se repitieron los cuatro visuales y el smoke real de `juannh`, ambos correctos. La instancia temporal confirmó `not_configured` sin token y se cerró al finalizar; el editor de desarrollo continuó respondiendo HTTP 200.
+
+La producción de prueba usa 3100 con token y origen público vacíos solo en ese proceso; el smoke real usa el servidor de desarrollo existente sin leer su secreto ni alterar el borrador real. Chromium y las alturas de teléfono son emulados; no se certifica accesibilidad completa, un dispositivo físico o la capacidad de Vercel ante tráfico masivo.
+
+## Buscar la cuenta antes de elegir tarjetas
+
+La revisión del 20 de octubre de 2026 pidió ubicar Buscar debajo del usuario y cargar los datos antes de elegir componentes. Se implementó [ADR 0029](decisions/0029-account-first-activity-search.md): la primera acción prepara básico y Extended por defecto aun sin tarjetas; las selecciones posteriores reutilizan la cobertura y agrupan faltantes durante 300 ms. Un usuario nuevo requiere Buscar. Los recursos elegidos y aplicados pueden cargarse tras la primera acción; el autor nuevo de aportes de un repositorio requiere búsqueda explícita. El aviso de publicación pasó al área de exportación, conservando su bloqueo y la exclusión sin borrar configuración.
+
+Verificación ejecutada:
+
+- `pnpm check`: licencias, ESLint, tipos, formato, enlaces de 48 documentos y **1.360 pruebas en 52 suites** correctos. El primer intento de typegen encontró un bloqueo del sandbox para la caché nativa SWC de Windows; la repetición fuera del sandbox pasó sin modificar dependencias.
+- `pnpm build`: compilación de producción correcta.
+- **37/37 E2E** de actividad contra desarrollo y **2/2 focales** posteriores correctos. La suite de actividad resultante tiene 38 casos: búsqueda sin tarjetas EN/ES, geometría del botón, datos listos al seleccionar, faltantes automáticos agrupados, otra cuenta sin consultas hasta Buscar, errores sin bucle, resultado parcial sin tarjetas y aviso dentro de exportación con copia/descarga bloqueadas.
+- Tres recorridos adicionales correctos: captura ES en escritorio 1440 × 1000 y móvil emulado 390 × 844 con carga y tarjetas; consulta real de `juannh` desde cero tarjetas mediante Enter. Dos JSON preparan los datos; seleccionar cuatro tarjetas no agrega solicitudes; seguidores agrega un único JSON con ese contador. Cero HTTP SVG, cero Authorization del proveedor en navegador, cero errores de página y snapshots fuera del borrador. Capturas revisadas.
+
+La regresión completa de producción local terminó con **336/337 correctos en 7,1 minutos**. El caso de contacto falló antes de editar, esperando la habilitación inicial del editor. La traza identificó un fallo de descarga del runtime `turbopack-3-ry682tkyiqk.js` con `net::ERR_NO_BUFFER_SPACE`: 16 solicitudes HTTP 200, un script fallido sin respuesta HTTP, cero errores de aplicación registrados y cero consultas API. La página quedó en el HTML inicial; la traza no permite atribuir la causa precisa del agotamiento de recursos. Se repitió el mismo caso tres veces con la misma compilación y servidor: **3/3 correctos en 13,4 segundos**, sin modificar código ni ampliar esperas. Se conserva la evidencia del fallo de entorno, sin presentarlo como una corrida completa limpia.
+
+Los cambios conservan las limitaciones de caché por proceso, cuota compartida e infraestructura documentadas; no se realizaron publicaciones Git ni despliegues.
+
+## Precarga de los 18 contadores
+
+La aclaración posterior pidió cargar todos los contadores al buscar, incluidos los no elegidos. La precarga anterior cubría solo seis métricas predeterminadas. Se implementó [ADR 0030](decisions/0030-all-profile-counters-prefetch.md): los 18 contadores, básico y lenguajes se preparan para el período y filtros actuales, aun sin tarjetas. Los destinos independientes conservan su elección explícita. Los éxitos con datos nulos, parciales o truncados se informan, sin reintentar al marcar casillas.
+
+Verificación ejecutada:
+
+- **52 pruebas focales** de caché y sesión: cobertura de todos los contadores, filtros/año sin selección, cero red por casillas/orden/ranking, nuevos alcances agrupados y ausencia de reintentos continuos. Incluye configuración visual máxima con nombres Unicode cuya URL completa supera el límite: las semillas conservan solo filtros de datos, permanecen válidas y no pierden el alcance. El porcentaje derivado también marca parcialidad cuando PR fusionadas supera PR totales.
+- `pnpm check`: licencias, lint, tipos, formato, enlaces de 49 documentos y **1.369 pruebas en 52 suites** correctos. Un intento coincidió con la reescritura de avisos por `pnpm build`; se repitió secuencialmente después de terminar esa escritura y pasó. El archivo de avisos, manifiesto y lockfile no cambiaron.
+- **40/40 E2E de actividad correctos en 1,9 minutos** en la repetición final. La corrida anterior tenía una comparación de orden de roles incompatible con la ordenación canónica de la API; se corrigió a igualdad de conjuntos y se repitió la suite completa. Se comprueba selección de los 18, ocultar/mostrar, configuración previa a las tarjetas, valores no disponibles visibles y estados parciales sin tarjetas.
+- Consulta real aislada con `juannh`: dos JSON preparan básico y Extended; el último pide 17 campos físicos y calcula el porcentaje derivado. Seleccionar los 18 y alternar PR fusionadas, porcentaje y seguidores no agrega JSON ni HTTP SVG. Cero Authorization del proveedor en navegador, cero errores de página y snapshots fuera del borrador. Captura de ambas columnas inspeccionada. El tiempo observado usa las cachés existentes del desarrollo y no es una medición de arranque frío ni capacidad de producción.
+- `pnpm build` final correcto después del ajuste de parcialidad del porcentaje. El smoke real se repitió sobre el código final: correcto en 5,6 segundos, sin solicitudes adicionales al elegir contadores. Formato, enlaces y diff finales correctos; el editor de desarrollo continúa funcional.
+
+La precarga mueve más trabajo a la primera búsqueda. El costo externo depende de agrupación, paginación, alcances y cachés; dos JSON no significan dos llamadas a GitHub. Se revisaron nuevamente las fuentes oficiales de GitHub/Vercel en [API y alojamiento](github-api-and-hosting.md), distinguiendo RAM de pestaña, RAM por proceso y CDN de SVG. No se incorporó caché distribuida ni se realizó una prueba de carga para miles de usuarios.
+
+## Caché de actividad en IndexedDB del navegador
+
+La aclaración posterior pidió conservar la primera carga en el navegador, incluso al recargar. Se implementó [ADR 0031](decisions/0031-browser-persistent-activity-cache.md) con IndexedDB nativo independiente de ProfileDocument, localStorage y respaldos. Se guardan datos públicos validados con claves canónicas, identidad, filtros y fechas originales; no errores, autorizaciones de red, credenciales, SVG ni Blob. Las operaciones son asíncronas y el estado guardado requiere completar la transacción. Se mantiene frescura de 30 minutos y retención máxima de 24 horas, sin mezclar períodos/días UTC. La memoria del editor permite continuar ante bloqueo o cuota.
+
+Verificación ejecutada:
+
+- **92/92 focales en cinco suites**: caché, sesión, codec, coordinador y adaptador IndexedDB. Se cubren límite de entradas/bytes, datos manipulados, identidad/alcance, timestamps, carga antes de Buscar, escrituras agrupadas, commit, bloqueo/cuota, lectura tardía, reset durante escritura y ciclo dispose/resume de Strict Mode. No se modificaron el modelo, credenciales ni límites del servidor.
+- **49/49 E2E de actividad en 2,4 minutos** contra desarrollo: los 40 anteriores y nueve nuevos de IndexedDB real, recarga y navegación sin consultas, nuevos alcances y TTL que esperan Buscar, aislamiento de usuario, purga por clear, bloqueo, cuota y registro manipulado. ESLint, TypeScript, formato y diff focales correctos.
+- `pnpm check`: licencias, lint, tipos, formato, enlaces de 50 documentos y **1.409 pruebas en 55 suites** correctos.
+- Smoke público real aislado con `juannh`, interfaz ES: dos JSON iniciales; IndexedDB guardó aproximadamente 31 KiB. Recargar recuperó tres tarjetas, agregar calendario y seleccionar los 18 contadores produjo cuatro tarjetas listas con **cero consultas adicionales**. Cero HTTP SVG, cero Authorization del proveedor en navegador, cero errores de página y snapshots fuera del borrador. Captura de ambas columnas inspeccionada. Este tamaño es el observado en esa cuenta, sin inferir otros perfiles ni capacidad de tráfico.
+- `pnpm build` final correcto; formato, enlaces de 50 documentos y diff revisados después de documentar los resultados. El servidor de desarrollo sigue disponible y el smoke real no alteró el borrador del usuario.
+
+Los datos se reutilizan en el mismo navegador y origen; no se sincronizan entre dispositivos. La primera consulta y los alcances nuevos siguen pasando por el servidor. El navegador puede eliminar esta caché descartable según su política. La caché persistida no configura infraestructura de producción ni elimina cuotas del proveedor.

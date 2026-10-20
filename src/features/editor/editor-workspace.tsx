@@ -50,6 +50,9 @@ import {
 } from "./module-composition";
 import { ReadmePreview } from "./readme-preview";
 import { useProfileDraft } from "./use-profile-draft";
+import { localActivityCardSources } from "./activity-card-requests";
+import { useActivityData } from "./use-activity-data";
+import { useEditorScroll } from "./use-editor-scroll";
 
 function ImportLoading() {
   const t = useTranslations("Editor");
@@ -83,6 +86,14 @@ type ExportFeedback = "idle" | "copying" | "copied" | "copyError" | "downloaded"
 
 // Changed only by browser events. Locale navigation may remount the workspace.
 let pendingReadmeImportOpen = false;
+
+function revealConfiguration(heading: HTMLHeadingElement | null, moveFocus = false) {
+  const panel = heading?.closest<HTMLElement>('[data-editor-scroll-panel="configuration"]');
+  const independent = panel && getComputedStyle(panel).overflowY === "auto";
+  if (moveFocus) heading?.focus({ preventScroll: Boolean(independent) });
+  if (independent) panel.scrollTop = 0;
+  else if (!moveFocus) heading?.scrollIntoView({ block: "start" });
+}
 
 export function EditorWorkspace({
   initialContentLocale,
@@ -119,6 +130,7 @@ export function EditorWorkspace({
   const [compactView, setCompactView] = useState<"edit" | "preview">("edit");
   const [importOpen, setImportOpen] = useState(false);
   const [projectOpen, setProjectOpen] = useState(false);
+  const editorScrollRef = useEditorScroll();
   const projectTriggerRef = useRef<HTMLButtonElement>(null);
   const importTriggerRef = useRef<HTMLButtonElement>(null);
   const [toolbarSize, setToolbarSize] = useState({ height: 0, sticky: true });
@@ -169,6 +181,16 @@ export function EditorWorkspace({
     : activeLabel;
   const isLoading = hydration === "loading";
   const result = generateReadme(profile, { activityCardBaseUrl });
+  const activityCardSources = result.success
+    ? localActivityCardSources(result.activityCards ?? [], activityCardBaseUrl)
+    : [];
+  const activityData = useActivityData(
+    activityCardSources,
+    profile.data.metrics.username,
+    profile.data.metrics.extended,
+  );
+  const canRequestCards = !isLoading && activityData.canSearch;
+  const cardsNeedRefresh = activityData.needsSearch;
   const readmeErrors = result.success ? [] : result.errors;
   const isEmpty = readmeErrors.some((error) => error.code === "empty_profile");
   const hasUrlErrors = readmeErrors.some((error) => error.code === "invalid_url");
@@ -260,9 +282,8 @@ export function EditorWorkspace({
     const pending = pendingFocus.current;
     if (!pending) return;
     pendingFocus.current = null;
-    if (pending.kind === "settings") configurationHeadingRef.current?.focus();
-    else if (pending.kind === "navigation")
-      configurationHeadingRef.current?.scrollIntoView({ block: "start" });
+    if (pending.kind === "settings") revealConfiguration(configurationHeadingRef.current, true);
+    else if (pending.kind === "navigation") revealConfiguration(configurationHeadingRef.current);
     else if (pending.kind === "title")
       panelRefs.current.get(pending.id)?.querySelector<HTMLInputElement>("input")?.focus();
     else if (pending.kind === "error")
@@ -295,7 +316,7 @@ export function EditorWorkspace({
     setSelectedId(id);
     setCompactView("edit");
     if (activeId === id && compactView === "edit")
-      configurationHeadingRef.current?.scrollIntoView({ block: "start" });
+      revealConfiguration(configurationHeadingRef.current);
     else pendingFocus.current = { id, kind: "navigation" };
   }
 
@@ -470,6 +491,7 @@ export function EditorWorkspace({
       setCompactView("edit");
       setProjectOpen(false);
       startNewDraft();
+      activityData.reset();
     }
   }
 
@@ -477,6 +499,7 @@ export function EditorWorkspace({
     if (isLoading || !window.confirm(t("reset.confirmation"))) return;
     const cleared = clearReadme();
     if (cleared.status === "not_ready") return;
+    activityData.reset();
     pendingReadmeImportOpen = false;
     setImportOpen(false);
     setProjectOpen(false);
@@ -491,6 +514,7 @@ export function EditorWorkspace({
   }
 
   function completeImport(next: ProfileDocument) {
+    activityData.reset();
     setClearFeedback(null);
     setExportFeedback("idle");
     pendingReadmeImportOpen = false;
@@ -521,6 +545,7 @@ export function EditorWorkspace({
   }
 
   function completeProject(next: ProfileDocument) {
+    activityData.reset();
     setClearFeedback(null);
     setExportFeedback("idle");
     setProjectOpen(false);
@@ -623,30 +648,6 @@ export function EditorWorkspace({
             {t("storage.writeFailureTitle")}
           </p>
           <p className="mt-2 text-sm leading-6">{t("storage.writeFailureHelp")}</p>
-        </div>
-      )}
-      {hasLocalCards && (
-        <div
-          role="status"
-          className="rounded-lg border border-warning/30 bg-warning-soft p-5 text-warning"
-        >
-          <p className="text-sm font-semibold">{t("metrics.title")}</p>
-          <p className="mt-2 text-sm leading-6">{t("metrics.help")}</p>
-          <Button
-            variant="outline"
-            className="mt-3"
-            disabled={isLoading}
-            onClick={() => {
-              const next = setModuleVisibility(profile, "metrics", false);
-              if (next.success) {
-                pendingWorkspaceFocus.current = true;
-                editDocument(next.data);
-                setAnnouncement(t("metrics.hidden"));
-              }
-            }}
-          >
-            {t("metrics.hide")}
-          </Button>
         </div>
       )}
       <div
@@ -777,77 +778,121 @@ export function EditorWorkspace({
           {t("storage.importMemoryHelp")}
         </p>
       )}
-      <div className="grid min-w-0 items-start gap-5 @min-[75em]/editor:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] @min-[75em]/editor:gap-6">
+      <div
+        ref={editorScrollRef}
+        data-editor-scroll-grid
+        className="editor-scroll-grid grid min-w-0 items-start gap-5 @min-[75em]/editor:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] @min-[75em]/editor:gap-6"
+      >
         <div
+          data-editor-scroll-panel="configuration"
+          tabIndex={0}
+          role="region"
+          aria-label={t("settings.configuring")}
           className={cn(
-            "min-w-0 space-y-4 @min-[75em]/editor:block",
+            "editor-scroll-panel min-w-0 space-y-4 @min-[75em]/editor:block",
             compactView === "preview" && "hidden",
           )}
         >
           <Card>
             <CardHeader className="gap-1 border-b border-border px-4 py-2 sm:gap-2 sm:p-6">
-              <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
-                <span className="hidden items-center gap-2 font-medium sm:flex">
-                  <PenLine className="size-3.5" aria-hidden="true" />
-                  {t("settings.configuring")}
-                </span>
-                {activeId && (
-                  <span>
-                    {isSectionIncluded(profile, activeId)
-                      ? t("settings.position", {
-                          position: visibleModules.indexOf(activeId) + 1,
-                          total: visibleModules.length,
-                        })
-                      : t("settings.notIncluded")}
+              <div className="flex min-w-0 items-center justify-between gap-2 text-xs text-muted-foreground">
+                <div className="sr-only sm:not-sr-only sm:min-w-0">
+                  <span className="hidden items-center gap-2 font-medium sm:flex">
+                    <PenLine className="size-3.5" aria-hidden="true" />
+                    {t("settings.configuring")}
                   </span>
+                  {activeId && (
+                    <span className="block truncate">
+                      {isSectionIncluded(profile, activeId)
+                        ? t("settings.position", {
+                            position: visibleModules.indexOf(activeId) + 1,
+                            total: visibleModules.length,
+                          })
+                        : t("settings.notIncluded")}
+                    </span>
+                  )}
+                </div>
+                <div className="ml-auto flex max-w-full min-w-0 flex-wrap items-center gap-2 sm:shrink-0">
+                  <label
+                    htmlFor="readme-language"
+                    className="flex items-center gap-1.5 font-medium"
+                  >
+                    <Globe2 className="size-3.5" aria-hidden="true" />
+                    <span className="hidden sm:inline">{t("contentLanguage")}</span>
+                    <span className="sm:hidden">{t("settings.languageCompact")}</span>
+                  </label>
+                  <select
+                    id="readme-language"
+                    aria-label={t("contentLanguage")}
+                    aria-describedby="readme-language-help"
+                    value={profile.contentLocale}
+                    disabled={isLoading}
+                    onChange={(event) => {
+                      const contentLocale = event.target.value;
+                      if (contentLocale === "en" || contentLocale === "es")
+                        editDocument({ ...profile, contentLocale });
+                    }}
+                    className="min-h-11 w-28 max-w-full min-w-0 rounded-md border border-border-strong bg-surface px-2 py-2 text-base focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:outline-none disabled:opacity-60 sm:text-sm"
+                  >
+                    <option value="en">{t("languageOptions.en")}</option>
+                    <option value="es">{t("languageOptions.es")}</option>
+                  </select>
+                  <p id="readme-language-help" className="sr-only">
+                    {t("settings.languageHelp")}
+                  </p>
+                </div>
+              </div>
+              <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 sm:block sm:space-y-2">
+                <h2
+                  id="editor-section-title"
+                  ref={configurationHeadingRef}
+                  tabIndex={-1}
+                  className="min-w-0 scroll-mt-[var(--editor-toolbar-offset)] text-base font-semibold tracking-tight wrap-anywhere sm:text-xl"
+                >
+                  {activeHeading ?? t("settings.chooseTitle")}
+                </h2>
+                <p className="hidden text-sm leading-6 text-muted-foreground sm:block">
+                  {activeId
+                    ? activeCustom
+                      ? formText("custom.description")
+                      : activeId === "presentation" || activeId === "contact"
+                        ? t(`${activeId}.description`)
+                        : activeId === "technologies" ||
+                            activeId === "projects" ||
+                            activeId === "contributions"
+                          ? formText(`${activeId}.description`)
+                          : ""
+                    : t("settings.chooseHelp")}
+                </p>
+                {activeCustom && (
+                  <div className="col-start-2 row-start-1 flex flex-wrap gap-1 sm:gap-2 sm:pt-2">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="sm:w-auto sm:px-3"
+                      aria-label={t("custom.duplicate")}
+                      title={t("custom.duplicate")}
+                      disabled={isLoading}
+                      onClick={duplicateSection}
+                    >
+                      <Copy aria-hidden="true" />
+                      <span className="hidden sm:inline">{t("custom.duplicate")}</span>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="sm:w-auto sm:px-3"
+                      aria-label={t("custom.delete")}
+                      title={t("custom.delete")}
+                      disabled={isLoading}
+                      onClick={deleteSection}
+                    >
+                      <Trash2 aria-hidden="true" />
+                      <span className="hidden sm:inline">{t("custom.delete")}</span>
+                    </Button>
+                  </div>
                 )}
               </div>
-              <h2
-                id="editor-section-title"
-                ref={configurationHeadingRef}
-                tabIndex={-1}
-                className="scroll-mt-[var(--editor-toolbar-offset)] text-xl font-semibold tracking-tight wrap-anywhere"
-              >
-                {activeHeading ?? t("settings.chooseTitle")}
-              </h2>
-              <p className="hidden text-sm leading-6 text-muted-foreground sm:block">
-                {activeId
-                  ? activeCustom
-                    ? formText("custom.description")
-                    : activeId === "presentation" || activeId === "contact"
-                      ? t(`${activeId}.description`)
-                      : activeId === "technologies" ||
-                          activeId === "projects" ||
-                          activeId === "contributions"
-                        ? formText(`${activeId}.description`)
-                        : ""
-                  : t("settings.chooseHelp")}
-              </p>
-              {activeCustom && (
-                <div className="flex flex-wrap gap-2 sm:pt-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={isLoading}
-                    onClick={duplicateSection}
-                  >
-                    <Copy aria-hidden="true" />
-                    {t("custom.duplicate")}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="sm:w-auto sm:px-3"
-                    aria-label={t("custom.delete")}
-                    title={t("custom.delete")}
-                    disabled={isLoading}
-                    onClick={deleteSection}
-                  >
-                    <Trash2 aria-hidden="true" />
-                    <span className="hidden sm:inline">{t("custom.delete")}</span>
-                  </Button>
-                </div>
-              )}
             </CardHeader>
             <CardContent className="@container/configuration px-4 pt-4 pb-4 sm:px-6 sm:pt-6 sm:pb-6">
               <fieldset disabled={isLoading} className="min-w-0">
@@ -886,6 +931,18 @@ export function EditorWorkspace({
                         profile={profile}
                         errors={readmeErrors}
                         onChange={editDocument}
+                        onRequestCards={() => {
+                          if (canRequestCards) activityData.search();
+                        }}
+                        canRequestCards={canRequestCards}
+                        cardsNeedRefresh={cardsNeedRefresh}
+                        cardsLoading={activityData.loading}
+                        cardsCompleted={activityData.completed}
+                        cardsTotal={activityData.total}
+                        cardsSearchError={activityData.searchState.code}
+                        cardsSearchPartial={activityData.searchState.partial === true}
+                        cardsStorageState={activityData.storageState}
+                        cardsHaveStoredData={activityData.hasStoredData}
                       />
                     ) : null}
                   </div>
@@ -893,41 +950,16 @@ export function EditorWorkspace({
               </fieldset>
             </CardContent>
           </Card>
-          <div className="flex min-w-0 flex-wrap items-center justify-between gap-3 px-1">
-            <label
-              htmlFor="readme-language"
-              className="flex items-center gap-2 text-xs font-medium text-muted-foreground"
-            >
-              <Globe2 className="size-3.5" aria-hidden="true" />
-              {t("contentLanguage")}
-            </label>
-            <select
-              id="readme-language"
-              aria-describedby="readme-language-help"
-              value={profile.contentLocale}
-              disabled={isLoading}
-              onChange={(event) => {
-                const contentLocale = event.target.value;
-                if (contentLocale === "en" || contentLocale === "es")
-                  editDocument({ ...profile, contentLocale });
-              }}
-              className="min-h-11 max-w-full rounded-md border border-border-strong bg-surface px-3 py-2 text-base focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:outline-none disabled:opacity-60 sm:text-sm"
-            >
-              <option value="en">{t("languageOptions.en")}</option>
-              <option value="es">{t("languageOptions.es")}</option>
-            </select>
-            <p id="readme-language-help" className="sr-only">
-              {t("settings.languageHelp")}
-            </p>
-          </div>
           <p className="flex items-start gap-2 text-xs leading-5 text-muted-foreground">
             <Globe2 className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
             {t("storage.privacy")}
           </p>
         </div>
         <section
+          data-editor-scroll-panel="preview"
+          tabIndex={0}
           className={cn(
-            "min-w-0 space-y-4 @min-[75em]/editor:sticky @min-[75em]/editor:top-[var(--editor-toolbar-offset)] @min-[75em]/editor:block",
+            "editor-scroll-panel min-w-0 space-y-4 @min-[75em]/editor:block",
             compactView === "edit" && "hidden",
           )}
           aria-labelledby="readme-preview-title"
@@ -957,9 +989,33 @@ export function EditorWorkspace({
             hasErrors={!isEmpty && readmeErrors.length > 0}
             activityCardBaseUrl={activityCardBaseUrl}
             customImages={result.success ? result.customImages : undefined}
+            getActivityCard={activityData.getCard}
+            retryActivityCard={activityData.retry}
             customHtml={result.success ? result.customHtml : undefined}
           />
           <div className="space-y-4">
+            {hasLocalCards && (
+              <div className="rounded-md border border-warning/30 bg-warning-soft p-3 text-warning">
+                <p className="text-xs font-semibold">{t("metrics.title")}</p>
+                <p className="mt-1 text-xs leading-5">{t("metrics.help")}</p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-2 max-w-full text-left whitespace-normal"
+                  disabled={isLoading}
+                  onClick={() => {
+                    const next = setModuleVisibility(profile, "metrics", false);
+                    if (next.success) {
+                      pendingWorkspaceFocus.current = true;
+                      editDocument(next.data);
+                      setAnnouncement(t("metrics.hidden"));
+                    }
+                  }}
+                >
+                  {t("metrics.hide")}
+                </Button>
+              </div>
+            )}
             <p
               id="readme-export-guidance"
               className={cn(

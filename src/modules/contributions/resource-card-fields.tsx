@@ -14,6 +14,7 @@ import {
   type ResourceCardOptions,
 } from "@/core/activity/extended-options";
 import type { MetricCardId } from "@/core/profile/module-content";
+import { ActivityCardSample } from "./activity-card-sample";
 import {
   SettingsNumber,
   SettingsToggle,
@@ -140,7 +141,6 @@ export function ResourceCardFields({
                 <Checkbox
                   id={`${baseId}-${id}`}
                   checked={(metricsVisible || !sectionIncluded) && selected}
-                  disabled={!selected && !configured}
                   aria-describedby={`${baseId}-${id}-help`}
                   onCheckedChange={(checked) => onToggle(id, checked === true)}
                 />
@@ -154,6 +154,9 @@ export function ResourceCardFields({
                     className="mt-1 block text-xs leading-5 text-muted-foreground"
                   >
                     {t(`${field}.cardHelp`)}
+                  </span>
+                  <span className="mt-2 block">
+                    <ActivityCardSample card={id} />
                   </span>
                 </label>
               </div>

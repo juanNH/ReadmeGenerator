@@ -3,14 +3,17 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 import { readFile } from "node:fs/promises";
 import type { ActivitySnapshot } from "../../src/core/activity/activity-types";
-import { renderActivityCard } from "../../src/core/activity/render-card";
-import { profileActivityCardIds as metricCardIds } from "../../src/core/profile/module-content";
 import { createEmptyProfile } from "../../src/core/profile/profile-operations";
 import type { ProfileDocument } from "../../src/core/profile/profile-schema";
+import { extendedSnapshot } from "./helpers/activity-fixtures";
 
 const draftKey = "github-profile-generator.profile.v2";
 const activityLabel = "Activity & contributions";
 const cards = ["Contribution calendar", "Activity summary", "Repository languages"];
+
+test.beforeEach(async ({ page }) => {
+  await page.clock.install({ time: new Date("2026-10-19T12:05:00Z") });
+});
 
 function snapshot(username = "example-dev", empty = false): ActivitySnapshot {
   const days = Array.from({ length: 365 }, (_, index) => ({
@@ -65,22 +68,16 @@ async function stubActivity(
   result: unknown = { success: true, data: snapshot(), stale: false },
 ) {
   await page.route("**/api/github/**", async (route) => {
-    if (new URL(route.request().url()).pathname === "/api/github/activity")
-      await route.fulfill({ json: result });
-  });
-  await page.route("**/cards/github/**", async (route) => {
     const url = new URL(route.request().url());
-    const card = metricCardIds.find((id) => url.pathname.endsWith(`/${id}.svg`));
-    if (!card) throw new Error("The preview must request a known GitHub card.");
-    await route.fulfill({
-      contentType: "image/svg+xml",
-      body: renderActivityCard(
-        snapshot(),
-        card,
-        url.searchParams.get("locale") === "es" ? "es" : "en",
-      ),
-    });
+    if (url.pathname === "/api/github/activity") await route.fulfill({ json: result });
+    else if (url.pathname === "/api/github/extended") {
+      const data = extendedSnapshot(url);
+      data.fetchedAt = "2026-10-19T12:00:00.000Z";
+      data.period = snapshot().period;
+      await route.fulfill({ json: { success: true, data, stale: false } });
+    } else await route.fulfill({ json: { success: false, code: "unavailable" } });
   });
+  await page.route("**/cards/**", (route) => route.abort("blockedbyclient"));
 }
 
 async function showSections(page: Page) {
@@ -137,9 +134,25 @@ async function storedProfile(page: Page): Promise<ProfileDocument> {
   );
 }
 
+function contributionQueryButton(page: Page) {
+  return page.getByRole("button", {
+    name: /^(Find GitHub contributions|Search contributions again|Retry contribution search)$/,
+  });
+}
+
+async function requestCards(page: Page, locale: "en" | "es" = "en") {
+  await page
+    .getByRole("button", {
+      name: locale === "en" ? "Search data" : "Buscar datos",
+      exact: true,
+    })
+    .click();
+}
+
 async function queryActivity(page: Page, username = "example-dev") {
   await page.getByRole("textbox", { name: "GitHub username", exact: true }).fill(username);
-  await page.getByRole("button", { name: "Check GitHub activity", exact: true }).click();
+  await page.getByText("Optional: find contributions to feature", { exact: true }).click();
+  await contributionQueryButton(page).click();
   await expect(
     page.getByText(`Checked @${username.replace(/^@/, "").toLowerCase()} on Oct 19, 2026.`, {
       exact: true,
@@ -169,12 +182,13 @@ test("manual contributions need no GitHub username and keep all three cards off 
     ).not.toBeChecked();
     await expect(
       page.getByRole("checkbox", { name, exact: true, includeHidden: true }),
-    ).toBeDisabled();
+    ).toBeEnabled();
   }
   await expect(page.getByRole("textbox", { name: "GitHub username", exact: true })).toHaveValue("");
   await expect(page.getByRole("button", { name: "Download README", exact: true })).toBeEnabled();
   await page.getByRole("textbox", { name: "GitHub username", exact: true }).fill("example-dev");
-  await page.getByRole("button", { name: "Check GitHub activity", exact: true }).click();
+  await page.getByText("Optional: find contributions to feature", { exact: true }).click();
+  await contributionQueryButton(page).click();
   await expect(
     page.getByText(
       "GitHub activity is not enabled on this instance yet. You can still add your featured contributions below.",
@@ -198,7 +212,8 @@ test("GitHub is queried only on request and a successful empty profile differs f
   await openEditor(page);
   await page.getByRole("textbox", { name: "GitHub username", exact: true }).fill("@New-Dev");
   expect(requests).toEqual([]);
-  await page.getByRole("button", { name: "Check GitHub activity", exact: true }).click();
+  await page.getByText("Optional: find contributions to feature", { exact: true }).click();
+  await contributionQueryButton(page).click();
   await expect(
     page.getByText(
       "No contributions were found for this period. You can still share technologies, projects, or contributions in your own words.",
@@ -219,7 +234,7 @@ test("GitHub is queried only on request and a successful empty profile differs f
   );
   await page.getByRole("textbox", { name: "GitHub username", exact: true }).fill("missing-dev");
   await expect(page.getByText(/Checked @new-dev/)).toHaveCount(0);
-  await page.getByRole("button", { name: "Check GitHub activity", exact: true }).click();
+  await contributionQueryButton(page).click();
   await expect(
     page.getByText("We could not find that GitHub account. Check the username and try again.", {
       exact: true,
@@ -234,19 +249,21 @@ test("GitHub is queried only on request and a successful empty profile differs f
   for (const name of cards)
     await expect(
       page.getByRole("checkbox", { name, exact: true, includeHidden: true }),
-    ).toBeDisabled();
+    ).toBeEnabled();
 });
 
 test("cards are independent, retained in v2 and restored without requesting GitHub on reload", async ({
   page,
 }) => {
   let requests = 0;
+  let cardRequests = 0;
   page.on("request", (request) => {
     if (new URL(request.url()).pathname === "/api/github/activity") requests += 1;
+    if (new URL(request.url()).pathname.startsWith("/cards/")) cardRequests += 1;
   });
   await stubActivity(page);
   await openEditor(page);
-  await queryActivity(page);
+  await page.getByRole("textbox", { name: "GitHub username", exact: true }).fill("example-dev");
   await page.getByRole("checkbox", { name: cards[0], exact: true, includeHidden: true }).check();
   await page.getByRole("checkbox", { name: cards[2], exact: true, includeHidden: true }).check();
   await expect(
@@ -269,7 +286,8 @@ test("cards are independent, retained in v2 and restored without requesting GitH
   await expect(
     page.getByRole("checkbox", { name: cards[2], exact: true, includeHidden: true }),
   ).toBeChecked();
-  expect(requests).toBe(1);
+  expect(requests).toBe(0);
+  expect(cardRequests).toBe(0);
   await page.getByRole("checkbox", { name: cards[0], exact: true, includeHidden: true }).uncheck();
   const changed = await storedProfile(page);
   expect(changed.data.metrics.cards).toEqual(["languages"]);
@@ -314,7 +332,7 @@ test("featured GitHub contributions are explicitly copied once and remain editab
   await expect(page.getByRole("button", { name: "Download README", exact: true })).toBeEnabled();
 });
 
-test("a delayed response from another username cannot replace the current account or enable its cards", async ({
+test("a delayed response from another username cannot replace the current account or approve cards", async ({
   page,
 }) => {
   let releaseFirst!: () => void;
@@ -338,13 +356,14 @@ test("a delayed response from another username cannot replace the current accoun
   await openEditor(page);
   const username = page.getByRole("textbox", { name: "GitHub username", exact: true });
   await username.fill("first-dev");
-  await page.getByRole("button", { name: "Check GitHub activity", exact: true }).click();
+  await page.getByText("Optional: find contributions to feature", { exact: true }).click();
+  await contributionQueryButton(page).click();
   await expect.poll(() => firstStarted).toBe(true);
   await username.fill("second-dev");
   await expect(
     page.getByRole("checkbox", { name: cards[0], exact: true, includeHidden: true }),
-  ).toBeDisabled();
-  await page.getByRole("button", { name: "Check GitHub activity", exact: true }).click();
+  ).toBeEnabled();
+  await contributionQueryButton(page).click();
   await expect(
     page.getByText("Checked @second-dev on Oct 19, 2026.", { exact: true }),
   ).toBeVisible();
@@ -357,7 +376,7 @@ test("a delayed response from another username cannot replace the current accoun
   await expect(page.getByText(/Checked @second-dev/)).toHaveCount(0);
   await expect(
     page.getByRole("checkbox", { name: cards[0], exact: true, includeHidden: true }),
-  ).toBeDisabled();
+  ).toBeEnabled();
 });
 
 test("legacy metrics alone use one editable section and preserve data when the whole section is hidden", async ({
@@ -410,9 +429,31 @@ test("local card previews block export until cards are explicitly excluded, pres
   await addManualContribution(page, "A useful guide for new contributors");
   await queryActivity(page);
   await page.getByRole("checkbox", { name: cards[0], exact: true, includeHidden: true }).check();
+  await requestCards(page);
   const preview = page.getByRole("article", { name: "README preview", exact: true });
   await expect(preview.locator("img")).toHaveCount(1);
   await expect(preview).toContainText("A useful guide for new contributors");
+  const publishing = page.getByText("Publishing cards", { exact: true });
+  await expect(publishing).toHaveCount(1);
+  const placement = await publishing.evaluate((element) => {
+    const toolbar = document.querySelector('[aria-label="Editor controls"]');
+    const guidance = document.querySelector("#readme-export-guidance");
+    return {
+      inPreview: !!element.closest('[data-editor-scroll-panel="preview"]'),
+      afterToolbar:
+        !!toolbar &&
+        !!(toolbar.compareDocumentPosition(element) & Node.DOCUMENT_POSITION_FOLLOWING),
+      beforeExport:
+        !!guidance &&
+        !!(element.compareDocumentPosition(guidance) & Node.DOCUMENT_POSITION_FOLLOWING),
+    };
+  });
+  expect(placement).toEqual({ inPreview: true, afterToolbar: true, beforeExport: true });
+  await expect(
+    page
+      .locator('[data-editor-scroll-panel="configuration"]')
+      .getByText("Publishing cards", { exact: true }),
+  ).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Copy README", exact: true })).toBeDisabled();
   await expect(page.getByRole("button", { name: "Download README", exact: true })).toBeDisabled();
   await page
@@ -526,9 +567,8 @@ for (const locale of ["en", "es"] as const) {
       await page
         .getByRole("textbox", { name: "Usuario de GitHub", exact: true })
         .fill("example-dev");
-      await page
-        .getByRole("button", { name: "Consultar actividad de GitHub", exact: true })
-        .click();
+      await page.getByText("Opcional: buscar aportes para destacar", { exact: true }).click();
+      await page.getByRole("button", { name: "Buscar aportes en GitHub", exact: true }).click();
       await expect(
         page.getByRole("checkbox", {
           name: "Calendario de contribuciones",
@@ -548,6 +588,7 @@ for (const locale of ["en", "es"] as const) {
         .getByRole("textbox", { name: "Título de la contribución", exact: true })
         .fill("Una guía útil para la comunidad");
     }
+    await requestCards(page, locale);
     const theme = page.getByRole("button", {
       name: locale === "en" ? "Toggle dark mode" : "Activar o desactivar el modo oscuro",
       exact: true,
@@ -613,6 +654,7 @@ test("desktop activity keeps the five-section layout with fictional charts and a
   for (const name of cards)
     await page.getByRole("checkbox", { name, exact: true, includeHidden: true }).check();
   await addManualContribution(page, "A useful guide for new contributors");
+  await requestCards(page);
   const preview = page.getByRole("article", { name: "README preview", exact: true });
   await expect(preview.locator("img")).toHaveCount(3);
   await expect
@@ -635,6 +677,9 @@ test("desktop activity keeps the five-section layout with fictional charts and a
   expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)).toBe(
     false,
   );
+  await page.locator("[data-editor-scroll-panel]").evaluateAll((panels) => {
+    for (const panel of panels) panel.scrollTop = 0;
+  });
   await page.evaluate(() => window.scrollTo(0, 0));
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
   await expect(page.locator("#editor-section-title")).toBeInViewport();

@@ -3,7 +3,7 @@ name: Quality
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [main, dev]
 
 permissions:
   contents: read
@@ -44,3 +44,5 @@ jobs:
         run: pnpm exec playwright install --with-deps chromium
       - name: Check browser interactions and accessibility
         run: pnpm test:e2e
+      - name: Check exported public card routes with controlled providers
+        run: pnpm test:e2e:cards

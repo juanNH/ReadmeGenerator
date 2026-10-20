@@ -128,6 +128,8 @@ Found a bug or have a suggestion? Open an [issue](https://github.com/juanNH/Read
 
 Detailed guides are currently in Spanish.
 
+Despliegue con PAT y sin login: [Vercel Hobby, main/Dev y comprobación de tarjetas](docs/vercel-deployment.md).
+
 | To…                                               | Read                                                                          |
 | ------------------------------------------------- | ----------------------------------------------------------------------------- |
 | Use the editor, save projects and import Markdown | [Editor guide](docs/editor.md)                                                |
