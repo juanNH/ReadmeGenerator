@@ -1,3 +1,4 @@
+import { showCustomBlockPicker } from "./editor-test-helpers";
 import { expect, test, type Page } from "@playwright/test";
 import { createEmptyProfile } from "../../src/core/profile/profile-operations";
 import type { CustomBlock } from "../../src/core/profile/custom-content";
@@ -65,6 +66,7 @@ test("all nine block cards keep their names and keyboard order, and a divider ke
   await addDivider.focus();
   await addDivider.press("Enter");
   await expect(page.getByRole("heading", { name: "Divider 1", exact: true })).toBeFocused();
+  await showCustomBlockPicker(page);
   const addText = picker.getByRole("button", { name: "Add text", exact: true });
   await addText.focus();
   await addText.press("Space");
@@ -89,7 +91,7 @@ test("all nine block cards keep their names and keyboard order, and a divider ke
   const removeText = page.getByRole("button", { name: "Remove Text block 1", exact: true });
   await removeText.focus();
   await removeText.press("Enter");
-  await expect(addText).toBeFocused();
+  await expect(page.getByRole("button", { name: "Add block", exact: true })).toBeFocused();
   await expect.poll(() => storedProfile(page)).toEqual(profile);
 });
 

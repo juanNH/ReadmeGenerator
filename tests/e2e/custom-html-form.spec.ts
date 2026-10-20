@@ -1,3 +1,4 @@
+import { showCustomBlockPicker, showSectionOrganizer } from "./editor-test-helpers";
 import { expect, test, type Page } from "@playwright/test";
 import { createEmptyProfile } from "../../src/core/profile/profile-operations";
 import type { ProfileDocument } from "../../src/core/profile/profile-schema";
@@ -84,6 +85,7 @@ test("HTML examples stay local and replace code only after an explicit choice an
   });
   await openEditor(page);
   await page.getByRole("button", { name: "Add custom section", exact: true }).click();
+  await showCustomBlockPicker(page);
   await page.getByRole("button", { name: "Add HTML", exact: true }).click();
   const field = page.getByRole("textbox", { name: "HTML code", exact: true });
   await page.getByText("Supported HTML", { exact: true }).click();
@@ -135,6 +137,7 @@ test("HTML original and filtered output stay distinct across duplication, hiding
   await openEditor(page);
   await page.getByRole("button", { name: "Add custom section", exact: true }).click();
   await page.getByRole("textbox", { name: "Section title", exact: true }).fill("HTML notes");
+  await showCustomBlockPicker(page);
   await page.getByRole("button", { name: "Add HTML", exact: true }).click();
   const source = '<p class="note">My original text</p>\n<!-- keep my original -->';
   const field = page.getByRole("textbox", { name: "HTML code", exact: true });
@@ -160,7 +163,10 @@ test("HTML original and filtered output stay distinct across duplication, hiding
   await page.getByRole("textbox", { name: "Section title", exact: true }).fill("HTML copy");
   const copiedSource = "<p>Independent HTML copy</p>";
   await field.fill(copiedSource);
-  await page.getByRole("checkbox", { name: "HTML notes", exact: true }).uncheck();
+  await showSectionOrganizer(page);
+  await page
+    .getByRole("checkbox", { name: "HTML notes", exact: true, includeHidden: true })
+    .uncheck();
   await expect
     .poll(async () => (await storedProfile(page))?.customSections[1]?.blocks[0])
     .toMatchObject({ type: "html", source: copiedSource });
@@ -172,9 +178,13 @@ test("HTML original and filtered output stay distinct across duplication, hiding
   expect(saved.customSections[1]?.id).not.toBe(original.id);
   expect(saved.customSections[1]?.blocks[0]?.id).not.toBe(original.blocks[0]?.id);
   await page.reload();
-  await expect(page.getByRole("checkbox", { name: "HTML notes", exact: true })).not.toBeChecked();
+  await expect(
+    page.getByRole("checkbox", { name: "HTML notes", exact: true, includeHidden: true }),
+  ).not.toBeChecked();
+  await showSectionOrganizer(page);
   await page.getByRole("button", { name: "HTML copy", exact: true }).click();
   await expect(field).toHaveValue(copiedSource);
+  await showSectionOrganizer(page);
   await page.getByRole("button", { name: "Add and edit HTML notes", exact: true }).click();
   await expect(field).toHaveValue(source);
 });
@@ -209,6 +219,7 @@ test("valid HTML blocks explain the combined limit and focus the affected code",
   await expect(field).toHaveAccessibleDescription(/150,000 characters in total/);
   await expect(affected.getByRole("list", { name: "HTML problems", exact: true })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Download README", exact: true })).toBeDisabled();
+  await showSectionOrganizer(page);
   await page.getByRole("button", { name: "Review fields in HTML limit", exact: true }).click();
   await expect(field).toBeFocused();
   await field.fill("<p>A smaller block</p>");

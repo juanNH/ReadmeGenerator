@@ -5,6 +5,7 @@
   "titlePlaceholder": "Por ejemplo, Cómo me gusta trabajar",
   "intro": "Elegí un bloque de abajo. Cada muestra indica su distribución antes de agregarlo; el nuevo bloque empieza vacío.",
   "addContent": "Agregar contenido a la sección",
+  "addBlock": "Agregar bloque",
   "addText": "Agregar texto",
   "addBulletList": "Agregar lista con puntos",
   "addNumberedList": "Agregar lista numerada",

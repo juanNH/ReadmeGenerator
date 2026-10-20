@@ -5,6 +5,7 @@
   "titlePlaceholder": "For example, How I like to work",
   "intro": "Choose a block below. Each small sample shows its layout before you add it; the new block starts empty.",
   "addContent": "Add section content",
+  "addBlock": "Add block",
   "addText": "Add text",
   "addBulletList": "Add bullet list",
   "addNumberedList": "Add numbered list",

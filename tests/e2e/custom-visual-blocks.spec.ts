@@ -1,3 +1,4 @@
+import { showCustomBlockPicker, showSectionOrganizer } from "./editor-test-helpers";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 import { readFile } from "node:fs/promises";
@@ -91,16 +92,20 @@ test("visual choices have local samples and create empty blocks with the right f
     await expect(option.locator('[aria-hidden="true"]')).toHaveCount(1);
   }
   await expect(picker.locator("img")).toHaveCount(0);
+  await showCustomBlockPicker(page);
   await page.getByRole("button", { name: "Add image / banner", exact: true }).click();
   await expect(page.getByRole("textbox", { name: "Public image URL", exact: true })).toBeFocused();
   await expect(page.getByRole("textbox", { name: "Image description", exact: true })).toHaveValue(
     "",
   );
+  await showCustomBlockPicker(page);
   await page.getByRole("button", { name: "Add subtitle", exact: true }).click();
   await expect(page.getByRole("textbox", { name: "Subtitle", exact: true })).toBeFocused();
   await expect(page.getByRole("textbox", { name: "Subtitle", exact: true })).toHaveValue("");
+  await showCustomBlockPicker(page);
   await page.getByRole("button", { name: "Add highlighted quote", exact: true }).click();
   await expect(page.getByRole("textbox", { name: "Highlighted quote", exact: true })).toBeFocused();
+  await showCustomBlockPicker(page);
   await page.getByRole("button", { name: "Add divider", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Divider 4", exact: true })).toBeFocused();
   await expect
@@ -132,6 +137,7 @@ test("image, subtitle, quote and divider share the preview and exported README a
   await openEditor(page);
   await page.getByRole("button", { name: "Add custom section", exact: true }).click();
   await page.getByRole("textbox", { name: "Section title", exact: true }).fill("My corner");
+  await showCustomBlockPicker(page);
   await page.getByRole("button", { name: "Add image / banner", exact: true }).click();
   await page.getByRole("textbox", { name: "Public image URL", exact: true }).fill(imageUrl);
   await expect(
@@ -141,12 +147,15 @@ test("image, subtitle, quote and divider share the preview and exported README a
   await page
     .getByRole("textbox", { name: "Image description", exact: true })
     .fill(imageDescription);
+  await showCustomBlockPicker(page);
   await page.getByRole("button", { name: "Add subtitle", exact: true }).click();
   await page.getByRole("textbox", { name: "Subtitle", exact: true }).fill("Small experiments");
+  await showCustomBlockPicker(page);
   await page.getByRole("button", { name: "Add highlighted quote", exact: true }).click();
   await page
     .getByRole("textbox", { name: "Highlighted quote", exact: true })
     .fill("Build something useful.\nShare what you learn.");
+  await showCustomBlockPicker(page);
   await page.getByRole("button", { name: "Add divider", exact: true }).click();
   const preview = page.getByRole("article", { name: "README preview", exact: true });
   const image = preview.getByRole("img", { name: imageDescription, exact: true });
@@ -188,9 +197,16 @@ test("image, subtitle, quote and divider share the preview and exported README a
   await page
     .getByRole("textbox", { name: "Image description", exact: true })
     .fill("An independent cover description");
-  await page.getByRole("checkbox", { name: "My corner", exact: true }).uncheck();
-  await page.getByRole("checkbox", { name: "Technologies & tools", exact: true }).check();
-  await page.getByRole("button", { name: "Move My experiments up", exact: true }).click();
+  await showSectionOrganizer(page);
+  await page
+    .getByRole("checkbox", { name: "My corner", exact: true, includeHidden: true })
+    .uncheck();
+  await showSectionOrganizer(page);
+  await page
+    .getByRole("checkbox", { name: "Technologies & tools", exact: true, includeHidden: true })
+    .check();
+  await showSectionOrganizer(page);
+  await page.getByRole("button", { name: "Move My experiments left", exact: true }).click();
   await expect
     .poll(async () => (await storedProfile(page))?.customSections[0]?.visible)
     .toBe(false);
@@ -229,6 +245,7 @@ test("image field errors review exactly, hide without loss and never request inv
     if (request.url().startsWith("https://127.0.0.1")) forbiddenRequests.push(request.url());
   });
   await openEditor(page, profile);
+  await showSectionOrganizer(page);
   await page.getByRole("button", { name: "Review fields in My corner", exact: true }).click();
   const url = page.getByRole("textbox", { name: "Public image URL", exact: true });
   const alt = page.getByRole("textbox", { name: "Image description", exact: true });
@@ -236,13 +253,19 @@ test("image field errors review exactly, hide without loss and never request inv
   await expect(url).toHaveAttribute("aria-invalid", "true");
   await expect(alt).toHaveAttribute("aria-invalid", "true");
   await expect(page.getByRole("button", { name: "Download README", exact: true })).toBeDisabled();
-  await page.getByRole("checkbox", { name: "My corner", exact: true }).uncheck();
+  await showSectionOrganizer(page);
+  await page
+    .getByRole("checkbox", { name: "My corner", exact: true, includeHidden: true })
+    .uncheck();
   await expect(page.getByRole("button", { name: "Download README", exact: true })).toBeEnabled();
   expect(await downloadReadme(page)).not.toContain("127.0.0.1");
-  await page.getByRole("checkbox", { name: "My corner", exact: true }).check();
+  await showSectionOrganizer(page);
+  await page.getByRole("checkbox", { name: "My corner", exact: true, includeHidden: true }).check();
   await mockImages(page);
   await url.fill(imageUrl);
+  await showSectionOrganizer(page);
   await page.getByRole("button", { name: "About you", exact: true }).click();
+  await showSectionOrganizer(page);
   await page.getByRole("button", { name: "Review fields in My corner", exact: true }).click();
   await expect(alt).toBeFocused();
   await alt.fill("Accessible cover");
@@ -321,7 +344,10 @@ test("visual text fields cannot inject image nodes, HTML, scripts or links", asy
   await expect(preview.locator("script, iframe")).toHaveCount(0);
   await expect(preview).toContainText(attack);
   expect(attacks).toEqual([]);
-  await page.getByRole("checkbox", { name: "My corner", exact: true }).uncheck();
+  await showSectionOrganizer(page);
+  await page
+    .getByRole("checkbox", { name: "My corner", exact: true, includeHidden: true })
+    .uncheck();
   await expect(preview.locator("img")).toHaveCount(0);
 });
 
@@ -334,6 +360,7 @@ for (const locale of ["en", "es"] as const) {
       await page.emulateMedia({ colorScheme: theme });
       await mockImages(page);
       await openEditor(page, visualProfile(locale), locale);
+      await showCustomBlockPicker(page);
       const picker = page.getByRole("group", {
         name: locale === "en" ? "Add section content" : "Agregar contenido a la sección",
         exact: true,

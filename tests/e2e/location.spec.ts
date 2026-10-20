@@ -36,9 +36,9 @@ async function openPresentation(page: Page, locale: Locale) {
     includeHidden: true,
   });
   await expect(checkbox).toBeEnabled();
-  const sections = page.getByRole("button", { name: /^(Sections|Secciones)$/, exact: true });
-  if ((await sections.isVisible()) && (await sections.getAttribute("aria-expanded")) !== "true")
-    await sections.click();
+  await expect(
+    page.getByRole("navigation", { name: /^(Your sections|Tus secciones)$/, exact: true }),
+  ).toBeVisible();
   await checkbox.check();
   await page.getByRole("button", { name: copy[locale].section, exact: true }).click();
   await page.getByText(copy[locale].details, { exact: true }).click();

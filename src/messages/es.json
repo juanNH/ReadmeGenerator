@@ -8,7 +8,6 @@
     "main": "Navegación principal",
     "modules": "Módulos",
     "howItWorks": "Cómo funciona",
-    "designSystem": "Sistema de diseño",
     "editor": "Crear tu perfil",
     "skip": "Saltar al contenido"
   },
@@ -31,7 +30,7 @@
     "titleAccent": "A tu manera.",
     "description": "Presentate, elegí tus herramientas y compartí lo que disfrutás crear. Unas pocas líneas pueden decir mucho.",
     "primary": "Crear tu perfil",
-    "secondary": "Explorar el sistema de diseño",
+    "secondary": "Explorar las secciones",
     "note": "Sin crear una cuenta. Elegí qué querés compartir y dejá el resto afuera.",
     "previewLabel": "Perfil de ejemplo",
     "previewName": "Alex Rivera",
@@ -91,7 +90,7 @@
     },
     "closingTitle": "Un pequeño espacio. Una mejor presentación.",
     "closingDescription": "Contenido claro, detalles cuidados y un diseño que te da lugar.",
-    "closingAction": "Ver las bases visuales",
+    "closingAction": "Crear tu perfil",
     "footer": "Pensado para personas, en cada etapa.",
     "footerNote": "Proyecto independiente. Sin afiliación con GitHub."
   },

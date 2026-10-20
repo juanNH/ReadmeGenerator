@@ -1,3 +1,4 @@
+import { showSectionOrganizer } from "./editor-test-helpers";
 import { expect, test, type Page } from "@playwright/test";
 import { createEmptyProfile } from "../../src/core/profile/profile-operations";
 import type { ProfileDocument } from "../../src/core/profile/profile-schema";
@@ -94,7 +95,12 @@ async function storedProfile(page: Page): Promise<ProfileDocument> {
 }
 
 async function expectNavigationOrder(page: Page, ids: string[]) {
-  const navigation = page.getByRole("navigation", { name: "Your sections", exact: true });
+  await showSectionOrganizer(page);
+  const navigation = page.getByRole("navigation", {
+    name: "Your sections",
+    exact: true,
+    includeHidden: true,
+  });
   await expect
     .poll(() =>
       navigation
@@ -130,10 +136,18 @@ test("keyboard dropping a custom section across a built-in preserves hidden slot
 }) => {
   const profile = keyboardProfile();
   await openEditor(page, profile);
-  const navigation = page.getByRole("navigation", { name: "Your sections", exact: true });
-  await navigation.getByRole("button", { name: "Exploring", exact: true }).click();
+  const navigation = page.getByRole("navigation", {
+    name: "Your sections",
+    exact: true,
+    includeHidden: true,
+  });
+  await showSectionOrganizer(page);
+  await navigation
+    .getByRole("button", { name: "Exploring", exact: true, includeHidden: true })
+    .click();
   const title = page.getByRole("textbox", { name: "Section title", exact: true });
   await expect(title).toHaveValue("Exploring");
+  await showSectionOrganizer(page);
   const handle = navigation.getByRole("button", {
     name: "Drag Keyboard notes to reorder",
     exact: true,
@@ -141,7 +155,7 @@ test("keyboard dropping a custom section across a built-in preserves hidden slot
   await handle.focus();
   await page.keyboard.press("Space");
   await expect(handle).toHaveAttribute("aria-pressed", "true");
-  await page.keyboard.press("ArrowDown");
+  await page.keyboard.press("ArrowRight");
   await expectNavigationOrder(page, [
     "technologies",
     `custom:${notesId}`,
@@ -158,12 +172,11 @@ test("keyboard dropping a custom section across a built-in preserves hidden slot
   expect(stored.data).toEqual(profile.data);
   expect(stored.visibility).toEqual(profile.visibility);
   expect(stored.customSections).toEqual(profile.customSections);
-  await expect(page.locator("#editor-section-title")).toHaveText("Exploring");
+  await expect(page.locator("#editor-section-title")).toHaveText("Custom section 3");
   await expect(title).toHaveValue("Exploring");
-  await expect(navigation.getByRole("button", { name: "Exploring", exact: true })).toHaveAttribute(
-    "aria-current",
-    "step",
-  );
+  await expect(
+    navigation.getByRole("button", { name: "Exploring", exact: true, includeHidden: true }),
+  ).toHaveAttribute("aria-current", "step");
   await expectSafeDomIds(page);
   await page.reload();
   await expectNavigationOrder(page, [
@@ -173,7 +186,10 @@ test("keyboard dropping a custom section across a built-in preserves hidden slot
     "projects",
   ]);
   expect((await storedProfile(page)).sectionOrder).toEqual(order);
-  await navigation.getByRole("button", { name: "Keyboard notes", exact: true }).click();
+  await showSectionOrganizer(page);
+  await navigation
+    .getByRole("button", { name: "Keyboard notes", exact: true, includeHidden: true })
+    .click();
   await expect(page.getByRole("textbox", { name: "Text", exact: true })).toHaveValue("");
   await expectSafeDomIds(page);
 });
@@ -183,8 +199,16 @@ test("Escape cancels a mixed keyboard drag without persisting its projected orde
 }) => {
   const profile = keyboardProfile();
   await openEditor(page, profile);
-  const navigation = page.getByRole("navigation", { name: "Your sections", exact: true });
-  await navigation.getByRole("button", { name: "Exploring", exact: true }).click();
+  const navigation = page.getByRole("navigation", {
+    name: "Your sections",
+    exact: true,
+    includeHidden: true,
+  });
+  await showSectionOrganizer(page);
+  await navigation
+    .getByRole("button", { name: "Exploring", exact: true, includeHidden: true })
+    .click();
+  await showSectionOrganizer(page);
   const handle = navigation.getByRole("button", {
     name: "Drag Keyboard notes to reorder",
     exact: true,
@@ -192,7 +216,7 @@ test("Escape cancels a mixed keyboard drag without persisting its projected orde
   await handle.focus();
   await page.keyboard.press("Space");
   await expect(handle).toHaveAttribute("aria-pressed", "true");
-  await page.keyboard.press("ArrowDown");
+  await page.keyboard.press("ArrowRight");
   await expectNavigationOrder(page, [
     "technologies",
     `custom:${notesId}`,
@@ -209,7 +233,7 @@ test("Escape cancels a mixed keyboard drag without persisting its projected orde
     `custom:${exploringId}`,
     "projects",
   ]);
-  await expect(page.locator("#editor-section-title")).toHaveText("Exploring");
+  await expect(page.locator("#editor-section-title")).toHaveText("Custom section 3");
   await expect(page.getByRole("textbox", { name: "Section title", exact: true })).toHaveValue(
     "Exploring",
   );

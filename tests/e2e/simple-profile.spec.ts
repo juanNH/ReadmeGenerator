@@ -1,3 +1,4 @@
+import { showSectionOrganizer } from "./editor-test-helpers";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 import { readFile } from "node:fs/promises";
@@ -18,14 +19,15 @@ async function openEditor(page: Page, locale: "en" | "es" = "en") {
 }
 
 async function showSections(page: Page) {
-  const button = page.getByRole("button", { name: /^(Sections|Secciones)$/, exact: true });
-  if ((await button.isVisible()) && (await button.getAttribute("aria-expanded")) !== "true")
-    await button.click();
+  await expect(
+    page.getByRole("navigation", { name: /^(Your sections|Tus secciones)$/, exact: true }),
+  ).toBeVisible();
 }
 
 async function addSection(page: Page, name: string) {
   await showSections(page);
-  await page.getByRole("checkbox", { name, exact: true }).check();
+  await showSectionOrganizer(page);
+  await page.getByRole("checkbox", { name, exact: true, includeHidden: true }).check();
   await page.getByRole("button", { name, exact: true }).click();
   await expect(page.locator("#editor-section-title")).toHaveText(name);
 }
@@ -61,14 +63,28 @@ test("a fresh profile offers five optional sections and a short introduction wit
   page,
 }) => {
   await openEditor(page);
-  const navigation = page.getByRole("navigation", { name: "Your sections", exact: true });
-  await expect(navigation.getByRole("checkbox")).toHaveCount(5);
-  await expect(navigation.getByRole("checkbox", { checked: true })).toHaveCount(0);
-  await expect(navigation.getByRole("checkbox", { name: "Knowledge", exact: true })).toHaveCount(0);
+  const navigation = page.getByRole("navigation", {
+    name: "Your sections",
+    exact: true,
+    includeHidden: true,
+  });
+  await expect(navigation.getByRole("checkbox", { includeHidden: true })).toHaveCount(5);
   await expect(
-    navigation.getByRole("checkbox", { name: "Education & training", exact: true }),
+    navigation.getByRole("checkbox", { checked: true, includeHidden: true }),
   ).toHaveCount(0);
-  await expect(navigation.getByRole("checkbox", { name: "Right now", exact: true })).toHaveCount(0);
+  await expect(
+    navigation.getByRole("checkbox", { name: "Knowledge", exact: true, includeHidden: true }),
+  ).toHaveCount(0);
+  await expect(
+    navigation.getByRole("checkbox", {
+      name: "Education & training",
+      exact: true,
+      includeHidden: true,
+    }),
+  ).toHaveCount(0);
+  await expect(
+    navigation.getByRole("checkbox", { name: "Right now", exact: true, includeHidden: true }),
+  ).toHaveCount(0);
   await addSection(page, "About you");
   await page.getByRole("textbox", { name: "Display name", exact: true }).fill("Alex Example");
   const bio = "I enjoy building useful interfaces and learning Docker";
@@ -233,7 +249,7 @@ test("accessibility: the simple Spanish editor fits 360px with autocomplete, pro
 }) => {
   await page.setViewportSize({ width: 360, height: 800 });
   await openEditor(page, "es");
-  await expect(page.getByRole("checkbox")).toHaveCount(5);
+  await expect(page.getByRole("checkbox", { includeHidden: true })).toHaveCount(5);
   await addSection(page, "Presentación");
   await page.getByRole("textbox", { name: "Nombre para mostrar", exact: true }).fill("Sol Ejemplo");
   await page

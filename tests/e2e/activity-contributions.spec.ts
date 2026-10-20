@@ -1,3 +1,4 @@
+import { showSectionOrganizer } from "./editor-test-helpers";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 import { readFile } from "node:fs/promises";
@@ -83,9 +84,9 @@ async function stubActivity(
 }
 
 async function showSections(page: Page) {
-  const button = page.getByRole("button", { name: /^(Sections|Secciones)$/, exact: true });
-  if ((await button.isVisible()) && (await button.getAttribute("aria-expanded")) !== "true")
-    await button.click();
+  await expect(
+    page.getByRole("navigation", { name: /^(Your sections|Tus secciones)$/, exact: true }),
+  ).toBeVisible();
 }
 
 async function showPreview(page: Page, locale: "en" | "es" = "en") {
@@ -115,7 +116,8 @@ async function openEditor(
     page.getByRole("checkbox", { name, exact: true, includeHidden: true }),
   ).toBeEnabled();
   await showSections(page);
-  await page.getByRole("checkbox", { name, exact: true }).check();
+  await showSectionOrganizer(page);
+  await page.getByRole("checkbox", { name, exact: true, includeHidden: true }).check();
   await page.getByRole("button", { name, exact: true }).click();
   await expect(page.locator("#editor-section-title")).toHaveText(name);
   const summary = page.getByText(
@@ -162,8 +164,12 @@ test("manual contributions need no GitHub username and keep all three cards off 
   await expect(page.getByRole("button", { name: "Download README", exact: true })).toBeEnabled();
   await page.getByText("GitHub activity (optional)", { exact: true }).click();
   for (const name of cards) {
-    await expect(page.getByRole("checkbox", { name, exact: true })).not.toBeChecked();
-    await expect(page.getByRole("checkbox", { name, exact: true })).toBeDisabled();
+    await expect(
+      page.getByRole("checkbox", { name, exact: true, includeHidden: true }),
+    ).not.toBeChecked();
+    await expect(
+      page.getByRole("checkbox", { name, exact: true, includeHidden: true }),
+    ).toBeDisabled();
   }
   await expect(page.getByRole("textbox", { name: "GitHub username", exact: true })).toHaveValue("");
   await expect(page.getByRole("button", { name: "Download README", exact: true })).toBeEnabled();
@@ -201,8 +207,12 @@ test("GitHub is queried only on request and a successful empty profile differs f
   ).toBeVisible();
   expect(requests).toEqual(["new-dev"]);
   for (const name of cards) {
-    await expect(page.getByRole("checkbox", { name, exact: true })).toBeEnabled();
-    await expect(page.getByRole("checkbox", { name, exact: true })).not.toBeChecked();
+    await expect(
+      page.getByRole("checkbox", { name, exact: true, includeHidden: true }),
+    ).toBeEnabled();
+    await expect(
+      page.getByRole("checkbox", { name, exact: true, includeHidden: true }),
+    ).not.toBeChecked();
   }
   await page.route("**/api/github/activity?*", (route) =>
     route.fulfill({ json: { success: false, code: "not_found" } }),
@@ -222,7 +232,9 @@ test("GitHub is queried only on request and a successful empty profile differs f
     ),
   ).toHaveCount(0);
   for (const name of cards)
-    await expect(page.getByRole("checkbox", { name, exact: true })).toBeDisabled();
+    await expect(
+      page.getByRole("checkbox", { name, exact: true, includeHidden: true }),
+    ).toBeDisabled();
 });
 
 test("cards are independent, retained in v2 and restored without requesting GitHub on reload", async ({
@@ -235,9 +247,11 @@ test("cards are independent, retained in v2 and restored without requesting GitH
   await stubActivity(page);
   await openEditor(page);
   await queryActivity(page);
-  await page.getByRole("checkbox", { name: cards[0], exact: true }).check();
-  await page.getByRole("checkbox", { name: cards[2], exact: true }).check();
-  await expect(page.getByRole("checkbox", { name: cards[1], exact: true })).not.toBeChecked();
+  await page.getByRole("checkbox", { name: cards[0], exact: true, includeHidden: true }).check();
+  await page.getByRole("checkbox", { name: cards[2], exact: true, includeHidden: true }).check();
+  await expect(
+    page.getByRole("checkbox", { name: cards[1], exact: true, includeHidden: true }),
+  ).not.toBeChecked();
   const stored = await storedProfile(page);
   expect(stored.schemaVersion).toBe(2);
   expect(stored.data.metrics).toEqual({
@@ -249,13 +263,19 @@ test("cards are independent, retained in v2 and restored without requesting GitH
   expect(stored).not.toHaveProperty("activitySnapshot");
   expect(JSON.stringify(stored)).not.toContain("fetchedAt");
   await page.reload();
-  await expect(page.getByRole("checkbox", { name: cards[0], exact: true })).toBeChecked();
-  await expect(page.getByRole("checkbox", { name: cards[2], exact: true })).toBeChecked();
+  await expect(
+    page.getByRole("checkbox", { name: cards[0], exact: true, includeHidden: true }),
+  ).toBeChecked();
+  await expect(
+    page.getByRole("checkbox", { name: cards[2], exact: true, includeHidden: true }),
+  ).toBeChecked();
   expect(requests).toBe(1);
-  await page.getByRole("checkbox", { name: cards[0], exact: true }).uncheck();
+  await page.getByRole("checkbox", { name: cards[0], exact: true, includeHidden: true }).uncheck();
   const changed = await storedProfile(page);
   expect(changed.data.metrics.cards).toEqual(["languages"]);
-  await expect(page.getByRole("checkbox", { name: cards[2], exact: true })).toBeChecked();
+  await expect(
+    page.getByRole("checkbox", { name: cards[2], exact: true, includeHidden: true }),
+  ).toBeChecked();
 });
 
 test("featured GitHub contributions are explicitly copied once and remain editable alongside manual notes", async ({
@@ -321,17 +341,23 @@ test("a delayed response from another username cannot replace the current accoun
   await page.getByRole("button", { name: "Check GitHub activity", exact: true }).click();
   await expect.poll(() => firstStarted).toBe(true);
   await username.fill("second-dev");
-  await expect(page.getByRole("checkbox", { name: cards[0], exact: true })).toBeDisabled();
+  await expect(
+    page.getByRole("checkbox", { name: cards[0], exact: true, includeHidden: true }),
+  ).toBeDisabled();
   await page.getByRole("button", { name: "Check GitHub activity", exact: true }).click();
   await expect(
     page.getByText("Checked @second-dev on Oct 19, 2026.", { exact: true }),
   ).toBeVisible();
   releaseFirst();
   await expect(page.getByText(/Checked @first-dev/)).toHaveCount(0);
-  await expect(page.getByRole("checkbox", { name: cards[0], exact: true })).toBeEnabled();
+  await expect(
+    page.getByRole("checkbox", { name: cards[0], exact: true, includeHidden: true }),
+  ).toBeEnabled();
   await username.fill("first-dev");
   await expect(page.getByText(/Checked @second-dev/)).toHaveCount(0);
-  await expect(page.getByRole("checkbox", { name: cards[0], exact: true })).toBeDisabled();
+  await expect(
+    page.getByRole("checkbox", { name: cards[0], exact: true, includeHidden: true }),
+  ).toBeDisabled();
 });
 
 test("legacy metrics alone use one editable section and preserve data when the whole section is hidden", async ({
@@ -342,9 +368,18 @@ test("legacy metrics alone use one editable section and preserve data when the w
   profile.visibility.metrics = true;
   profile.data.metrics = { username: "example-dev", cards: ["calendar"] };
   await openEditor(page, profile);
-  const navigation = page.getByRole("navigation", { name: "Your sections", exact: true });
-  await expect(navigation.getByRole("checkbox")).toHaveCount(5);
-  const choice = navigation.getByRole("checkbox", { name: activityLabel, exact: true });
+  await showSectionOrganizer(page);
+  const navigation = page.getByRole("navigation", {
+    name: "Your sections",
+    exact: true,
+    includeHidden: true,
+  });
+  await expect(navigation.getByRole("checkbox", { includeHidden: true })).toHaveCount(5);
+  const choice = navigation.getByRole("checkbox", {
+    name: activityLabel,
+    exact: true,
+    includeHidden: true,
+  });
   await expect(choice).toBeChecked();
   await expect(page.getByRole("textbox", { name: "GitHub username", exact: true })).toHaveValue(
     "example-dev",
@@ -374,7 +409,7 @@ test("local card previews block export until cards are explicitly excluded, pres
   await openEditor(page);
   await addManualContribution(page, "A useful guide for new contributors");
   await queryActivity(page);
-  await page.getByRole("checkbox", { name: cards[0], exact: true }).check();
+  await page.getByRole("checkbox", { name: cards[0], exact: true, includeHidden: true }).check();
   const preview = page.getByRole("article", { name: "README preview", exact: true });
   await expect(preview.locator("img")).toHaveCount(1);
   await expect(preview).toContainText("A useful guide for new contributors");
@@ -421,27 +456,38 @@ test("restoring one excluded card does not restore others and hidden sections ke
   expect(excluded.data.metrics.cards).toEqual(["calendar", "summary"]);
   expect(excluded.visibility.metrics).toBe(false);
   for (const name of cards)
-    await expect(page.getByRole("checkbox", { name, exact: true })).not.toBeChecked();
+    await expect(
+      page.getByRole("checkbox", { name, exact: true, includeHidden: true }),
+    ).not.toBeChecked();
 
-  await page.getByRole("checkbox", { name: "Contribution calendar", exact: true }).check();
+  await page
+    .getByRole("checkbox", { name: "Contribution calendar", exact: true, includeHidden: true })
+    .check();
   const selected = await storedProfile(page);
   expect(selected.data.metrics.cards).toEqual(["calendar"]);
   expect(selected.visibility.metrics).toBe(true);
   await expect(
-    page.getByRole("checkbox", { name: "Activity summary", exact: true }),
+    page.getByRole("checkbox", { name: "Activity summary", exact: true, includeHidden: true }),
   ).not.toBeChecked();
 
+  await showSectionOrganizer(page);
   const section = page
-    .getByRole("navigation", { name: "Your sections", exact: true })
-    .getByRole("checkbox", { name: activityLabel, exact: true });
+    .getByRole("navigation", { name: "Your sections", exact: true, includeHidden: true })
+    .getByRole("checkbox", { name: activityLabel, exact: true, includeHidden: true });
   await section.uncheck();
   await expect(page.getByText("Not included in README", { exact: true })).toBeVisible();
   await expect(
-    page.getByRole("checkbox", { name: "Contribution calendar", exact: true }),
+    page.getByRole("checkbox", { name: "Contribution calendar", exact: true, includeHidden: true }),
   ).toBeChecked();
-  await page.getByRole("checkbox", { name: "Contribution calendar", exact: true }).uncheck();
-  await page.getByRole("checkbox", { name: "Activity summary", exact: true }).check();
-  await expect(page.getByRole("checkbox", { name: "Activity summary", exact: true })).toBeChecked();
+  await page
+    .getByRole("checkbox", { name: "Contribution calendar", exact: true, includeHidden: true })
+    .uncheck();
+  await page
+    .getByRole("checkbox", { name: "Activity summary", exact: true, includeHidden: true })
+    .check();
+  await expect(
+    page.getByRole("checkbox", { name: "Activity summary", exact: true, includeHidden: true }),
+  ).toBeChecked();
   await expect(section).not.toBeChecked();
   const editedWhileHidden = await storedProfile(page);
   expect(editedWhileHidden.data.metrics.cards).toEqual(["summary"]);
@@ -455,9 +501,11 @@ test("restoring one excluded card does not restore others and hidden sections ke
   expect(restored.visibility.metrics).toBe(true);
   expect(restored.data.metrics.cards).toEqual(["summary"]);
   await expect(
-    page.getByRole("checkbox", { name: "Contribution calendar", exact: true }),
+    page.getByRole("checkbox", { name: "Contribution calendar", exact: true, includeHidden: true }),
   ).not.toBeChecked();
-  await expect(page.getByRole("checkbox", { name: "Activity summary", exact: true })).toBeChecked();
+  await expect(
+    page.getByRole("checkbox", { name: "Activity summary", exact: true, includeHidden: true }),
+  ).toBeChecked();
   expect(restored.sectionOrder).toEqual(profile.sectionOrder);
 });
 
@@ -470,7 +518,9 @@ for (const locale of ["en", "es"] as const) {
     await openEditor(page, undefined, locale);
     if (locale === "en") {
       await queryActivity(page);
-      await page.getByRole("checkbox", { name: cards[0], exact: true }).check();
+      await page
+        .getByRole("checkbox", { name: cards[0], exact: true, includeHidden: true })
+        .check();
       await addManualContribution(page, "A helpful community guide");
     } else {
       await page
@@ -480,10 +530,18 @@ for (const locale of ["en", "es"] as const) {
         .getByRole("button", { name: "Consultar actividad de GitHub", exact: true })
         .click();
       await expect(
-        page.getByRole("checkbox", { name: "Calendario de contribuciones", exact: true }),
+        page.getByRole("checkbox", {
+          name: "Calendario de contribuciones",
+          exact: true,
+          includeHidden: true,
+        }),
       ).toBeEnabled();
       await page
-        .getByRole("checkbox", { name: "Calendario de contribuciones", exact: true })
+        .getByRole("checkbox", {
+          name: "Calendario de contribuciones",
+          exact: true,
+          includeHidden: true,
+        })
         .check();
       await page.getByRole("button", { name: "Agregar contribución", exact: true }).click();
       await page
@@ -552,7 +610,8 @@ test("desktop activity keeps the five-section layout with fictional charts and a
   await stubActivity(page);
   await openEditor(page);
   await queryActivity(page);
-  for (const name of cards) await page.getByRole("checkbox", { name, exact: true }).check();
+  for (const name of cards)
+    await page.getByRole("checkbox", { name, exact: true, includeHidden: true }).check();
   await addManualContribution(page, "A useful guide for new contributors");
   const preview = page.getByRole("article", { name: "README preview", exact: true });
   await expect(preview.locator("img")).toHaveCount(3);
@@ -569,7 +628,9 @@ test("desktop activity keeps the five-section layout with fictional charts and a
     )
     .toBe(true);
   await expect(
-    page.getByRole("navigation", { name: "Your sections", exact: true }).getByRole("checkbox"),
+    page
+      .getByRole("navigation", { name: "Your sections", exact: true, includeHidden: true })
+      .getByRole("checkbox", { includeHidden: true }),
   ).toHaveCount(5);
   expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)).toBe(
     false,
@@ -578,7 +639,7 @@ test("desktop activity keeps the five-section layout with fictional charts and a
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
   await expect(page.locator("#editor-section-title")).toBeInViewport();
   await expect(
-    page.getByRole("navigation", { name: "Your sections", exact: true }),
+    page.getByRole("navigation", { name: "Your sections", exact: true, includeHidden: true }),
   ).toBeInViewport();
   await expect(preview).toBeInViewport();
   await page.screenshot({ path: "work/previews/activity-desktop.png", fullPage: true });

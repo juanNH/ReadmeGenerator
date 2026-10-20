@@ -4,6 +4,7 @@
   "pageEyebrow": "Tu perfil, tu historia",
   "pageTitle": "Tu perfil de GitHub",
   "pageDescription": "Elegí una sección, contá tu historia y arrastrá para ordenar. Todas las secciones son opcionales.",
+  "pageCompactDescription": "Elegí qué compartir. Todas las secciones son opcionales.",
   "workspaceTitle": "Dale tu toque",
   "workspaceDescription": "Elegí qué querés compartir. Unas pocas palabras alcanzan para empezar.",
   "sectionsTitle": "1. Elegí tus secciones",
@@ -17,7 +18,7 @@
   },
   "hiddenHelp": "Desmarcar una sección la oculta del README y conserva todo lo que escribiste.",
   "settings": {
-    "sections": "Secciones",
+    "controls": "Controles del editor",
     "viewLabel": "Vista del espacio de trabajo",
     "edit": "Editar",
     "preview": "Vista previa",
@@ -31,8 +32,6 @@
     "sectionHidden": "{module} está oculta en el README. Su configuración y sus textos siguen disponibles acá."
   },
   "composition": {
-    "moveUp": "Subir {module}",
-    "moveDown": "Bajar {module}",
     "moved": "{module} pasó a la posición {position} de {total}.",
     "errorSummary": "Algunos campos necesitan revisión.",
     "review": "Revisar campos",
@@ -45,6 +44,7 @@
     "hidden": "Las tarjetas de GitHub están excluidas. Se conservó su configuración guardada."
   },
   "custom": {
+    "addAction": "Agregar sección personalizada",
     "untitled": "Sección personalizada {number}",
     "namedInstance": "{title} · personalizada {number}",
     "duplicate": "Duplicar sección",

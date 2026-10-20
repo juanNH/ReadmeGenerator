@@ -26,10 +26,15 @@ export async function generateMetadata({
 }: {
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
+  if (process.env.NODE_ENV !== "development") notFound();
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   const t = await getTranslations({ locale, namespace: "DesignSystem" });
-  return { title: t("metaTitle"), description: t("metaDescription") };
+  return {
+    title: t("metaTitle"),
+    description: t("metaDescription"),
+    robots: { index: false, follow: false },
+  };
 }
 
 function ShowcaseSection({
@@ -68,6 +73,7 @@ export default async function DesignSystemPage({
 }: {
   params: Promise<{ locale: string }>;
 }) {
+  if (process.env.NODE_ENV !== "development") notFound();
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   const [t, messages] = await Promise.all([

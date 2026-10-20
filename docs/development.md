@@ -20,7 +20,7 @@ pnpm install
 pnpm dev
 ```
 
-Abrí [http://127.0.0.1:3000/en](http://127.0.0.1:3000/en) para inglés o [http://127.0.0.1:3000/es](http://127.0.0.1:3000/es) para español. El kit visual está en [inglés](http://127.0.0.1:3000/en/design-system) y [español](http://127.0.0.1:3000/es/design-system). La ruta [http://127.0.0.1:3000](http://127.0.0.1:3000) redirige a inglés.
+Abrí [http://127.0.0.1:3000/en](http://127.0.0.1:3000/en) para inglés o [http://127.0.0.1:3000/es](http://127.0.0.1:3000/es) para español. El kit interno está en [inglés](http://127.0.0.1:3000/en/design-system) y [español](http://127.0.0.1:3000/es/design-system) solo con este servidor de desarrollo; producción devuelve 404. La ruta [http://127.0.0.1:3000](http://127.0.0.1:3000) redirige a inglés.
 
 Para ejecutar la compilación de producción:
 
@@ -33,21 +33,22 @@ pnpm start
 
 ## Comandos
 
-| Comando             | Propósito                                                                            |
-| ------------------- | ------------------------------------------------------------------------------------ |
-| `pnpm dev`          | Iniciar el servidor de desarrollo.                                                   |
-| `pnpm build`        | Crear la compilación de producción.                                                  |
-| `pnpm start`        | Servir la compilación de producción existente.                                       |
-| `pnpm lint`         | Revisar el código con las reglas del repositorio.                                    |
-| `pnpm typecheck`    | Comprobar los tipos sin emitir archivos.                                             |
-| `pnpm format`       | Aplicar el formato definido por el proyecto.                                         |
-| `pnpm format:check` | Comprobar el formato sin modificar archivos.                                         |
-| `pnpm test`         | Comprobar perfil, generación, adaptador de borrador y traducciones EN/ES con Vitest. |
-| `pnpm test:watch`   | Ejecutar esas pruebas durante el desarrollo.                                         |
-| `pnpm test:e2e`     | Revisar rutas, kit y recorrido de edición, recuperación y exportación en navegador.  |
-| `pnpm test:a11y`    | Ejecutar las comprobaciones automáticas de accesibilidad de rutas, kit y editor.     |
-| `pnpm docs:check`   | Verificar enlaces locales de los archivos Markdown del repositorio.                  |
-| `pnpm check`        | Ejecutar lint, tipos, formato, enlaces de documentación y pruebas unitarias.         |
+| Comando             | Propósito                                                                               |
+| ------------------- | --------------------------------------------------------------------------------------- |
+| `pnpm dev`          | Iniciar el servidor de desarrollo.                                                      |
+| `pnpm build`        | Crear la compilación de producción.                                                     |
+| `pnpm start`        | Servir la compilación de producción existente.                                          |
+| `pnpm lint`         | Revisar el código con las reglas del repositorio.                                       |
+| `pnpm typecheck`    | Comprobar los tipos sin emitir archivos.                                                |
+| `pnpm format`       | Aplicar el formato definido por el proyecto.                                            |
+| `pnpm format:check` | Comprobar el formato sin modificar archivos.                                            |
+| `pnpm test`         | Comprobar perfil, generación, adaptador de borrador y traducciones EN/ES con Vitest.    |
+| `pnpm test:watch`   | Ejecutar esas pruebas durante el desarrollo.                                            |
+| `pnpm test:e2e`     | Revisar rutas públicas y recorrido de edición, recuperación y exportación en navegador. |
+| `pnpm test:e2e:ui`  | Abrir la interfaz interna de Playwright para explorar y ejecutar los recorridos.        |
+| `pnpm test:a11y`    | Ejecutar las comprobaciones automáticas de accesibilidad de rutas públicas y editor.    |
+| `pnpm docs:check`   | Verificar enlaces locales de los archivos Markdown del repositorio.                     |
+| `pnpm check`        | Ejecutar lint, tipos, formato, enlaces de documentación y pruebas unitarias.            |
 
 `pnpm check` agrupa `lint`, `typecheck`, `format:check`, `docs:check` y `test`. La compilación y las comprobaciones en navegador se ejecutan por separado. `typecheck` genera primero los tipos de rutas de Next.js, incluidos los getters de `next/root-params`.
 
@@ -63,13 +64,13 @@ La planificación interna se conserva localmente en `.private/planning/`, exclui
 
 - `/`: redirección al idioma predeterminado, inglés.
 - `/en` y `/es`: entrada de la aplicación y presentación del estado inicial del proyecto.
-- `/en/design-system` y `/es/design-system`: catálogo del kit visual y sus estados de interacción.
-- `/en/editor` y `/es/editor`: cinco secciones fijas opcionales y secciones personalizadas repetibles, con navegación, configuración estable, orden por arrastre o botones, vista previa, exportación y borrador local. Conocimientos, formación y actualidad están retirados también para borradores anteriores. El editor se renderiza por solicitud para leer la configuración de tarjetas en ejecución; portada y kit siguen pregenerados.
+- `/en/design-system` y `/es/design-system`: catálogo interno del kit visual, disponible solo con `pnpm dev`; producción responde 404 y no lo enlaza desde la aplicación.
+- `/en/editor` y `/es/editor`: cinco secciones fijas opcionales y secciones personalizadas repetibles, con navegación superior, organización plegable, configuración estable, orden por arrastre o botones, vista previa, exportación y borrador local. Conocimientos, formación y actualidad están retirados también para borradores anteriores. El editor se renderiza por solicitud para leer la configuración de tarjetas en ejecución; portada sigue pregenerada.
 - Selector de idioma funcional, rutas localizadas y mensajes separados para inglés y español.
 - Componentes compartidos y configuración inicial de calidad y pruebas.
 - Contrato de perfil v2, referencias fijas/personalizadas en `sectionOrder`, bloques en `customSections`, migración validada de v1 y operaciones puras de creación, duplicación, visibilidad, eliminación y orden en `src/core/`.
 
-Las pruebas unitarias incluyen contratos y operaciones del perfil, generación de README, adaptador de almacenamiento, mensajes, SVG y cliente de GitHub con respuestas controladas. Las comprobaciones de navegador cubren la base visual, el kit y el recorrido del editor. La integración de actividad de GitHub está implementada y requiere configuración del servidor; no hay proveedores de IA.
+Las pruebas unitarias incluyen contratos y operaciones del perfil, generación de README, adaptador de almacenamiento, mensajes, SVG y cliente de GitHub con respuestas controladas. Las comprobaciones de navegador de producción cubren la base visual, el recorrido del editor y la ausencia del kit público. La integración de actividad de GitHub está implementada y requiere configuración del servidor; no hay proveedores de IA.
 
 Vitest comprueba el comportamiento del núcleo, los límites de salida y persistencia, y la paridad de claves y parámetros de mensajes en ambos idiomas. Playwright comprueba recorridos, idiomas, tema, teclado, errores, tamaños de pantalla y exportación. Los resultados ejecutados se registran por entrega más abajo; la existencia de una prueba no implica que ya se haya ejecutado en esta revisión.
 
@@ -399,3 +400,63 @@ Se comprueban títulos centrados, imágenes enlazadas, tablas, desplegables y c�
 La revisión corrigió fallbacks con controles anidados, nombres accesibles de enlaces después de un fallo, focos añadidos dentro de enlaces y jerarquía externa afectada por encabezados de un `details` cerrado. La navegación conserva su nombre de acción y asocia el estado como descripción; el orden y el estado visibles quedan fuera del contenido del botón para mantener la coincidencia de su nombre accesible. La regresión completa incluye arrastre por puntero/tacto emulado/teclado, Escape, almacenamiento, idiomas, tecnologías, contactos, ubicación y actividad.
 
 Se incorporaron tres utilidades AST con versiones directas fijadas y los tipos HAST: `hast-util-from-html` 2.0.3, `hast-util-sanitize` 5.0.2, `hast-util-to-html` 9.0.5 y `@types/hast` 3.0.5. La advertencia de peers conocida de la cadena de herramientas continúa; no se añadieron servicios ni cuentas. Esta entrega no incorpora el importador de README. La revisión no incluye publicación real en GitHub, lectores de pantalla, dispositivos físicos, otros motores ni CI remoto; las comprobaciones automáticas no certifican accesibilidad completa. Ver [ADR 0015](decisions/0015-explicit-profile-html.md).
+
+## Validación de reflujo y navegación del editor
+
+Revisión local del **2026-10-19**, con Node.js 24.21.0, pnpm 11.25.0 y Chromium sobre la compilación de producción. Se corrigieron títulos partidos y estados superpuestos en la navegación: el título dispone de más ancho, el estado y el número siguen el flujo del documento y los controles de orden quedan debajo. El tirador permanece montado aunque su fila esté oculta; desmontarlo hacía que la librería de arrastre aplicara un rol de botón deshabilitado a toda la entrada.
+
+| Comprobación    | Resultado observado                                                                                                                                                                                         |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm check`    | Correcto: lint, tipos, formato, enlaces de 31 documentos Markdown y 840 pruebas unitarias en 27 suites.                                                                                                     |
+| `pnpm build`    | Correcto; editor dinámico y portada/kit pregenerados en EN/ES.                                                                                                                                              |
+| `pnpm test:e2e` | 193 recorridos correctos en la ejecución completa final, incluidos 52 casos nuevos.                                                                                                                         |
+| Reflujo         | 320, 360, 768, 1024, 1280, 1440, 1657 y 1920 px, ambos idiomas y temas, sin desbordamiento horizontal del documento en los casos comprobados.                                                               |
+| Texto ampliado  | Tamaño raíz de 32 px en 320 y 1280 px, EN/ES: navegación, cinco formularios fijos, secciones personalizadas y vista previa. Se amplían texto y medidas en rem; no se comprobó el zoom nativo del navegador. |
+| Accesibilidad   | Análisis axe sin infracciones detectadas de las reglas ejecutadas; teclado, foco, nombres y descripciones accesibles, errores e inclusión revisados.                                                        |
+
+La matriz comprueba siete secciones incluidas, títulos largos con y sin espacios, separación geométrica entre título y estado y superficies de navegación de al menos 44 px. Se verifican URL inválida antes de corregir, exclusión de la sección activa sin deshabilitar su casilla, conservación del texto entre edición/vista previa y Tab hasta agregar otra sección dentro de la navegación desplazable. Los bloques personalizados se adaptan al ancho de su panel; las columnas del editor también responden al tamaño de letra. Botones, encabezado, leyendas y URLs largas admiten ajuste sin ensanchar el documento.
+
+Se inspeccionaron capturas equivalentes a la composición original de escritorio a 1657 px, configuración móvil a 360 px y capturas de la matriz y de texto ampliado. La revisión independiente de integración no encontró defectos bloqueantes. La regresión completa mantiene arrastre con puntero, tacto emulado y teclado, Escape, idiomas, guardado, exportación, HTML, tecnologías, ubicación y contacto. No cambian el documento, la generación ni las dependencias.
+
+Los resultados corresponden a Chromium local y datos controlados. No se verificaron lectores de pantalla reales, dispositivos físicos, otros motores, zoom nativo ni cambios de tamaño durante una edición con foco activo. Las comprobaciones automáticas y la revisión visual no certifican accesibilidad completa.
+
+## Validación de navegación superior y herramientas internas
+
+Iteración local del **2026-10-19**. La revisión anterior comprobaba reflujo horizontal, pero no la llegada a los campos con la altura útil de un teléfono. Esta iteración reemplaza la disposición lateral por una barra superior y un organizador plegable, reduce la cabecera móvil y despliega las muestras mediante «Agregar bloque».
+
+| Comprobación                    | Resultado observado                                                                                       |
+| ------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `pnpm check`                    | Correcto: lint, tipos, formato, enlaces de 32 documentos y 840 pruebas unitarias en 27 suites.            |
+| `pnpm build`                    | Correcto con el código final. Kit interno ausente de producción; EN/ES devuelven 404.                     |
+| `pnpm test:e2e`                 | 206 recorridos de Chromium correctos en la ejecución completa final, sin exclusiones.                     |
+| Regresiones nuevas              | 16 casos de navegación superior, alcance de campos, organización, bloques, foco y emulación móvil táctil. |
+| Revisión final de documentación | `git diff --check`, `pnpm format:check` y `pnpm docs:check` correctos.                                    |
+
+Se verifica el primer campo sin desplazar la página en 320 × 568, 360 × 640 y 390 × 844, en ambos idiomas. La matriz mantiene anchos de 320 a 1920 px, ambos temas y tamaño raíz de 32 px. Dos contextos con `isMobile` y `hasTouch` comprueban edición, navegación, conservación del borrador y análisis axe. Se revisaron capturas iniciales y de los paneles abiertos. Las reglas automáticas ejecutadas no detectaron infracciones.
+
+Los recorridos incluyen veinte secciones, edición desde el final de doce bloques, organizador con alto acotado, retorno de foco al cerrar, selección consecutiva con flechas y cancelación de arrastre. El selector nativo conserva el foco; cambiar entre edición y vista previa muestra su inicio. Se mantienen las regresiones de exportación, almacenamiento, HTML, tecnologías, contactos y actividad.
+
+El cambio de idioma conserva query repetida, hash normal, codificado o vacío, historial y foco durante doce transiciones. Se corrigió una duplicación de hash de rutas cacheadas de Next.js 16.4 mediante la API pública de History, sin recargar la página ni usar estado privado del router.
+
+El kit responde 200 en EN/ES bajo un servidor de desarrollo separado y 404 en producción; no aparece en la portada ni navegación pública. `pnpm test:e2e:ui --help` terminó correctamente; la interfaz gráfica de Playwright no se abrió durante esta validación. No se incorporó Storybook ni nuevas dependencias. Ver [ADR 0016](decisions/0016-top-navigation-and-internal-tools.md).
+
+La verificación se limita a Chromium local y emulación: no incluye dispositivos físicos, teclado del sistema móvil, Safari, lectores de pantalla reales ni zoom nativo del navegador. No certifica accesibilidad completa. Los cambios permanecen locales, sin commit, push ni despliegue.
+
+## Validación de fila horizontal de secciones
+
+Iteración local cerrada el **2026-10-20**, con Node.js 24.21.0, pnpm 11.25.0 y Chromium sobre producción local. Las secciones permanecen en una fila superior sin desplegar un organizador. Cada elemento ofrece casilla, nombre y tirador; una pareja de flechas ordena la sección activa. Las que no entran se recorren horizontalmente dentro de la fila, sin ensanchar la página.
+
+| Comprobación                 | Resultado observado                                                                            |
+| ---------------------------- | ---------------------------------------------------------------------------------------------- |
+| `pnpm check`                 | Correcto: lint, tipos, formato, enlaces de 33 documentos y 840 pruebas unitarias en 27 suites. |
+| `pnpm build`                 | Correcto con el código final de navegación y restauración de foco.                             |
+| Recorridos dirigidos finales | 33 correctos: navegación, primer campo móvil, texto ampliado, orden, foco y cancelación.       |
+| `pnpm test:e2e`              | 208 recorridos correctos en la ejecución completa final, sin exclusiones (4,5 minutos).        |
+
+La regresión superior contiene 18 casos y comprueba 320 × 568, 360 × 640 y 390 × 844, EN/ES, veinte secciones en una fila, nombres largos, selección conservando foco, inclusión y ocultación sin perder el control enfocado, tacto emulado y raíz de 32 px. Las acciones admiten salto de línea al ampliar texto y no se superponen. Se inspeccionaron capturas móviles y la composición de escritorio de 1657 px.
+
+Los casos de teclado comprueban un desplazamiento por flecha, recorrido fuera del área inicialmente visible, inversión de dirección, flechas opuestas dentro de la misma tarea, tomar y soltar sin mover y Escape sin persistir la proyección. Una edición larga mantiene `scrollY` al tomar, mover y cancelar; el foco vuelve al tirador sin desplazar la página. La preparación de esa prueba usa `focus({preventScroll:true})` para aislar el gesto de la navegación de foco nativa.
+
+La revisión corrigió textos ocultos que escapaban del contenedor, desplazamiento entre pointerdown y pointerup, revelado de controles con letra ampliada y restauración de foco de la biblioteca. No se oculta el desbordamiento global ni se modifica la dependencia. Los análisis axe no detectaron infracciones de las reglas ejecutadas. Revisiones independientes cerradas sin hallazgos accionables. Ver [ADR 0017](decisions/0017-horizontal-section-navigation.md).
+
+No cambia el documento, la persistencia ni la generación del README, y no se incorporan dependencias. Las comprobaciones automáticas de accesibilidad no equivalen a una revisión completa: quedan dispositivos físicos, Safari, teclado móvil del sistema, lectores de pantalla y zoom nativo. Los cambios siguen locales, sin commit, push ni despliegue.

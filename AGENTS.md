@@ -40,6 +40,8 @@ La entrega actual incluye la base Next.js, el kit visual bilingüe, `ProfileDocu
 - Reservar `src/modules/` para las secciones del perfil; `src/components/ui/` para primitivas visuales reutilizables. No confundir módulos de producto con componentes genéricos.
 - Mantener credenciales y clientes de servicios en `src/server/` con `server-only`. Validar entradas en cada frontera; ninguna clave secreta usa `NEXT_PUBLIC_`.
 - Reutilizar tokens y primitivas del kit visual. Mantener navegación por teclado, etiquetas, foco visible, contraste y estados de error claros.
+- El kit visual es interno: `/design-system` solo funciona en desarrollo y debe responder 404 en producción, sin enlaces públicos. Playwright (`pnpm test:e2e:ui`) es una herramienta del repositorio. No presentar Storybook como instalado ni sumar un taller nuevo sin acordar sus dependencias.
+- La navegación del editor muestra siempre las secciones en una sola fila horizontal con scroll interno, casillas, selección y tiradores. Conservar foco al seleccionar o incluir, mostrar horizontalmente el elemento activo/enfocado sin saltos verticales y ofrecer izquierda/derecha para ordenar la sección activa. Mantener proyección temporal, confirmación al soltar y Escape para cancelar el arrastre. El selector de bloques sigue plegable. Revisar alturas de teléfono, llegada a campos y desbordamiento local, sin ensanchar la página. Ver [ADR 0017](docs/decisions/0017-horizontal-section-navigation.md).
 - Preferir funciones y componentes directos. No agregar repositorios, contenedores de inyección, clases base o capas sin una necesidad concreta. No agregar `useMemo` o `useCallback` por reflejo: justificar su necesidad con comportamiento o medición.
 
 ## Verificación
@@ -47,6 +49,8 @@ La entrega actual incluye la base Next.js, el kit visual bilingüe, `ProfileDocu
 Usar los scripts de `package.json`: `pnpm dev`, `pnpm build`, `pnpm start`, `pnpm lint`, `pnpm typecheck`, `pnpm format`, `pnpm format:check`, `pnpm docs:check`, `pnpm test`, `pnpm test:watch`, `pnpm test:e2e`, `pnpm test:a11y` y `pnpm check`.
 
 Elegir verificaciones según el cambio y agregar pruebas de comportamiento cuando protejan contratos o recorridos relevantes. No agregar pruebas que repitan la implementación. Antes de cerrar, revisar el diff, ejecutar los controles pertinentes y distinguir resultados ejecutados de verificaciones pendientes. No afirmar que una revisión automática demuestra accesibilidad completa.
+
+Para móvil, comprobar también alturas de teléfono, llegada al primer campo y uso desde una edición larga. `toBeVisible()` no garantiza que un control esté dentro del viewport y Playwright puede desplazarlo automáticamente antes de interactuar. Las capturas iniciales y las medidas de alcance se toman antes de usar `scrollIntoView`, clic o escritura sobre el campo evaluado. Distinguir emulación de un teléfono y prueba en dispositivo físico.
 
 ## Delegación
 

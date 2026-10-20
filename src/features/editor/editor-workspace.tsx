@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import {
   ArrowUpRight,
   Check,
@@ -9,8 +9,8 @@ import {
   Download,
   Eye,
   Globe2,
-  ListOrdered,
   PenLine,
+  Plus,
   RotateCcw,
   Save,
   Settings2,
@@ -72,7 +72,10 @@ export function EditorWorkspace({
   const [selectedId, setSelectedId] = useState<EditableSectionId | null>(null);
   const [announcement, setAnnouncement] = useState("");
   const [compactView, setCompactView] = useState<"edit" | "preview">("edit");
-  const [mobileNavigationOpen, setMobileNavigationOpen] = useState<boolean | null>(null);
+  const [toolbarSize, setToolbarSize] = useState({ height: 0, sticky: true });
+  const toolbarRef = useRef<HTMLDivElement>(null);
+  const pendingViewScroll = useRef<"edit" | "preview" | null>(null);
+  const previewHeadingRef = useRef<HTMLHeadingElement>(null);
   const workspaceHeadingRef = useRef<HTMLHeadingElement>(null);
   const configurationHeadingRef = useRef<HTMLHeadingElement>(null);
   const pendingWorkspaceFocus = useRef(false);
@@ -81,7 +84,7 @@ export function EditorWorkspace({
   const moveRefs = useRef(new Map<string, HTMLButtonElement>());
   const pendingFocus = useRef<{
     id: EditableSectionId;
-    kind: "settings" | "title" | "error" | "up" | "down";
+    kind: "settings" | "navigation" | "title" | "error" | "up" | "down";
   } | null>(null);
   const visibleModules = visibleEditableSections(profile);
   const allIds = editableSectionIds(profile);
@@ -112,7 +115,9 @@ export function EditorWorkspace({
   }
   const activeLabel = activeId ? (sectionLabels.get(activeId) ?? null) : null;
   const activeCustom = getCustomSection(profile, activeId);
-  const navigationOpen = mobileNavigationOpen ?? activeId === null;
+  const activeHeading = activeCustom
+    ? t("custom.untitled", { number: profile.customSections.indexOf(activeCustom) + 1 })
+    : activeLabel;
   const isLoading = hydration === "loading";
   const result = generateReadme(profile, { activityCardBaseUrl });
   const readmeErrors = result.success ? [] : result.errors;
@@ -151,6 +156,38 @@ export function EditorWorkspace({
                   : t("export.ready");
 
   useEffect(() => {
+    const toolbar = toolbarRef.current;
+    if (!toolbar) return;
+    function measureToolbar() {
+      const height = toolbar!.getBoundingClientRect().height;
+      const availableHeight = window.visualViewport?.height ?? window.innerHeight;
+      // A large toolbar or the on-screen keyboard must not cover the editing area.
+      const sticky = height <= availableHeight * 0.4;
+      setToolbarSize((previous) =>
+        previous.height === height && previous.sticky === sticky ? previous : { height, sticky },
+      );
+    }
+    measureToolbar();
+    const observer = new ResizeObserver(measureToolbar);
+    observer.observe(toolbar);
+    window.addEventListener("resize", measureToolbar);
+    window.visualViewport?.addEventListener("resize", measureToolbar);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", measureToolbar);
+      window.visualViewport?.removeEventListener("resize", measureToolbar);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (pendingViewScroll.current) {
+      const heading =
+        pendingViewScroll.current === "edit"
+          ? configurationHeadingRef.current
+          : previewHeadingRef.current;
+      pendingViewScroll.current = null;
+      heading?.scrollIntoView({ block: "start" });
+    }
     if (pendingWorkspaceFocus.current) {
       pendingWorkspaceFocus.current = false;
       workspaceHeadingRef.current?.focus();
@@ -160,6 +197,8 @@ export function EditorWorkspace({
     if (!pending) return;
     pendingFocus.current = null;
     if (pending.kind === "settings") configurationHeadingRef.current?.focus();
+    else if (pending.kind === "navigation")
+      configurationHeadingRef.current?.scrollIntoView({ block: "start" });
     else if (pending.kind === "title")
       panelRefs.current.get(pending.id)?.querySelector<HTMLInputElement>("input")?.focus();
     else if (pending.kind === "error")
@@ -176,7 +215,7 @@ export function EditorWorkspace({
       else if (alternative && !alternative.disabled) alternative.focus();
       else navigationRefs.current.get(pending.id)?.focus();
     }
-  }, [profile, activeId, compactView, navigationOpen]);
+  }, [profile, activeId, compactView]);
 
   function editDocument(next: ProfileDocument) {
     setExportFeedback("idle");
@@ -190,19 +229,28 @@ export function EditorWorkspace({
     }
     setSelectedId(id);
     setCompactView("edit");
-    setMobileNavigationOpen(false);
-    if (activeId === id && compactView === "edit") configurationHeadingRef.current?.focus();
-    else pendingFocus.current = { id, kind: "settings" };
+    if (activeId === id && compactView === "edit")
+      configurationHeadingRef.current?.scrollIntoView({ block: "start" });
+    else pendingFocus.current = { id, kind: "navigation" };
   }
 
   function toggleModule(id: EditableSectionId, visible: boolean) {
     const next = setSectionVisibility(profile, id, visible);
     if (!next.success) return;
-    setMobileNavigationOpen(true);
     setSelectedId(activeId ?? (visible ? id : null));
     if (!visible && activeId === id)
       setAnnouncement(t("settings.sectionHidden", { module: sectionLabels.get(id) ?? "" }));
     editDocument(next.data);
+  }
+
+  function switchView(view: "edit" | "preview") {
+    if (compactView === view) {
+      const heading = view === "edit" ? configurationHeadingRef.current : previewHeadingRef.current;
+      heading?.scrollIntoView({ block: "start" });
+    } else {
+      pendingViewScroll.current = view;
+      setCompactView(view);
+    }
   }
 
   function announceOrder(next: ProfileDocument, id: EditableSectionId) {
@@ -234,7 +282,6 @@ export function EditorWorkspace({
   function reviewErrors(id: EditableSectionId) {
     setSelectedId(id);
     setCompactView("edit");
-    setMobileNavigationOpen(false);
     if (activeId === id && compactView === "edit")
       panelRefs.current.get(id)?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
     else pendingFocus.current = { id, kind: "error" };
@@ -247,7 +294,6 @@ export function EditorWorkspace({
     editDocument(next);
     setSelectedId(id);
     setCompactView("edit");
-    setMobileNavigationOpen(false);
     pendingFocus.current = { id, kind: "title" };
   }
 
@@ -353,20 +399,26 @@ export function EditorWorkspace({
     if (window.confirm(t("storage.resetConfirmation"))) {
       setExportFeedback("idle");
       setSelectedId(null);
-      setMobileNavigationOpen(true);
       setCompactView("edit");
       startNewDraft();
     }
   }
 
   return (
-    <div className="min-w-0 space-y-5">
+    <div
+      className="@container/editor min-w-0 space-y-3 [&_input]:scroll-mt-[var(--editor-toolbar-offset)] [&_select]:scroll-mt-[var(--editor-toolbar-offset)] [&_textarea]:scroll-mt-[var(--editor-toolbar-offset)]"
+      style={
+        {
+          "--editor-toolbar-offset": toolbarSize.sticky ? `${toolbarSize.height + 16}px` : "1rem",
+        } as CSSProperties
+      }
+    >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2
           ref={workspaceHeadingRef}
           tabIndex={-1}
           id="editor-content-title"
-          className="text-lg font-semibold tracking-tight"
+          className="sr-only text-lg font-semibold tracking-tight focus:not-sr-only sm:not-sr-only"
         >
           {t("workspaceTitle")}
         </h2>
@@ -429,103 +481,93 @@ export function EditorWorkspace({
           </Button>
         </div>
       )}
-      <div className="flex flex-wrap items-center justify-between gap-2 xl:hidden">
-        <Button
-          className="lg:hidden"
-          variant="outline"
-          aria-label={t("settings.sections")}
-          aria-controls="editor-section-navigation"
-          aria-expanded={navigationOpen}
-          onClick={() => setMobileNavigationOpen(!navigationOpen)}
-        >
-          <ListOrdered aria-hidden="true" />
-          {t("settings.sections")}
-        </Button>
-        <div
-          role="group"
-          aria-label={t("settings.viewLabel")}
-          className="inline-flex gap-1 rounded-lg border border-border bg-surface p-1"
-        >
-          <Button
-            variant={compactView === "edit" ? "secondary" : "ghost"}
-            aria-pressed={compactView === "edit"}
-            onClick={() => setCompactView("edit")}
-          >
-            <Settings2 aria-hidden="true" />
-            {t("settings.edit")}
-          </Button>
-          <Button
-            variant={compactView === "preview" ? "secondary" : "ghost"}
-            aria-pressed={compactView === "preview"}
-            onClick={() => setCompactView("preview")}
-          >
-            <Eye aria-hidden="true" />
-            {t("settings.preview")}
-          </Button>
-        </div>
+      <div
+        ref={toolbarRef}
+        role="region"
+        aria-label={t("settings.controls")}
+        className={cn(
+          "z-20 min-w-0 rounded-lg border border-border bg-background p-2 shadow-soft",
+          toolbarSize.sticky && "sticky top-0",
+        )}
+      >
+        <EditorSectionNavigation
+          profile={profile}
+          labels={sectionLabels}
+          activeId={activeId}
+          errors={readmeErrors}
+          disabled={isLoading}
+          onSelect={selectModule}
+          onVisibility={toggleModule}
+          onMove={moveModule}
+          onReorder={reorderModule}
+          onReview={reviewErrors}
+          buttonRef={(id, node) => {
+            if (node) navigationRefs.current.set(id, node);
+            else navigationRefs.current.delete(id);
+          }}
+          moveButtonRef={(id, direction, node) => {
+            if (node) moveRefs.current.set(`${id}-${direction}`, node);
+            else moveRefs.current.delete(`${id}-${direction}`);
+          }}
+          actions={
+            <div className="ml-auto flex max-w-full min-w-0 flex-wrap items-center justify-end gap-1 sm:gap-2">
+              <div
+                role="group"
+                aria-label={t("settings.viewLabel")}
+                className="inline-flex max-w-full min-w-0 flex-wrap gap-1 rounded-md border border-border bg-surface @min-[75em]/editor:hidden"
+              >
+                <Button
+                  size="icon"
+                  className="sm:w-auto sm:px-3"
+                  variant={compactView === "edit" ? "secondary" : "ghost"}
+                  aria-pressed={compactView === "edit"}
+                  aria-label={t("settings.edit")}
+                  title={t("settings.edit")}
+                  onClick={() => switchView("edit")}
+                >
+                  <Settings2 aria-hidden="true" />
+                  <span className="hidden sm:inline">{t("settings.edit")}</span>
+                </Button>
+                <Button
+                  size="icon"
+                  className="sm:w-auto sm:px-3"
+                  variant={compactView === "preview" ? "secondary" : "ghost"}
+                  aria-pressed={compactView === "preview"}
+                  aria-label={t("settings.preview")}
+                  title={t("settings.preview")}
+                  onClick={() => switchView("preview")}
+                >
+                  <Eye aria-hidden="true" />
+                  <span className="hidden sm:inline">{t("settings.preview")}</span>
+                </Button>
+              </div>
+              <Button
+                variant="outline"
+                size="icon"
+                className="sm:w-auto sm:px-3"
+                disabled={isLoading}
+                aria-label={t("custom.addAction")}
+                title={t("custom.addAction")}
+                onClick={addSection}
+              >
+                <Plus aria-hidden="true" />
+                <span className="hidden sm:inline">{t("custom.addAction")}</span>
+              </Button>
+            </div>
+          }
+        />
       </div>
-      <div className="grid min-w-0 items-start gap-5 lg:grid-cols-[15rem_minmax(0,1fr)] xl:grid-cols-[15rem_minmax(0,1fr)_minmax(0,1.08fr)] xl:gap-6">
-        <aside
-          id="editor-section-navigation"
+      <div className="grid min-w-0 items-start gap-5 @min-[75em]/editor:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] @min-[75em]/editor:gap-6">
+        <div
           className={cn(
-            "min-w-0 lg:sticky lg:top-6 lg:block lg:max-h-[calc(100svh-3rem)] lg:overflow-y-auto",
-            !navigationOpen && "hidden",
+            "min-w-0 space-y-4 @min-[75em]/editor:block",
+            compactView === "preview" && "hidden",
           )}
         >
-          <EditorSectionNavigation
-            profile={profile}
-            labels={sectionLabels}
-            onAddCustom={addSection}
-            activeId={activeId}
-            errors={readmeErrors}
-            disabled={isLoading}
-            onSelect={selectModule}
-            onVisibility={toggleModule}
-            onMove={moveModule}
-            onReorder={reorderModule}
-            onReview={reviewErrors}
-            buttonRef={(id, node) => {
-              if (node) navigationRefs.current.set(id, node);
-              else navigationRefs.current.delete(id);
-            }}
-            moveButtonRef={(id, direction, node) => {
-              if (node) moveRefs.current.set(`${id}-${direction}`, node);
-              else moveRefs.current.delete(`${id}-${direction}`);
-            }}
-          />
-        </aside>
-        <div className={cn("min-w-0 space-y-4 xl:block", compactView === "preview" && "hidden")}>
-          <div className="flex min-w-0 flex-wrap items-center justify-between gap-3 px-1">
-            <label
-              htmlFor="readme-language"
-              className="flex items-center gap-2 text-xs font-medium text-muted-foreground"
-            >
-              <Globe2 className="size-3.5" aria-hidden="true" />
-              {t("contentLanguage")}
-            </label>
-            <select
-              id="readme-language"
-              aria-describedby="readme-language-help"
-              value={profile.contentLocale}
-              disabled={isLoading}
-              onChange={(event) => {
-                const contentLocale = event.target.value;
-                if (contentLocale === "en" || contentLocale === "es")
-                  editDocument({ ...profile, contentLocale });
-              }}
-              className="min-h-11 max-w-full rounded-md border border-border-strong bg-surface px-3 py-2 text-base focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:outline-none disabled:opacity-60 sm:text-sm"
-            >
-              <option value="en">{t("languageOptions.en")}</option>
-              <option value="es">{t("languageOptions.es")}</option>
-            </select>
-            <p id="readme-language-help" className="sr-only">
-              {t("settings.languageHelp")}
-            </p>
-          </div>
           <Card>
-            <CardHeader className="border-b border-border">
+            <CardHeader className="gap-1 border-b border-border p-4 sm:gap-2 sm:p-6">
               <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
-                <span className="flex items-center gap-2 font-medium">
+                <span className="hidden items-center gap-2 font-medium sm:flex">
                   <PenLine className="size-3.5" aria-hidden="true" />
                   {t("settings.configuring")}
                 </span>
@@ -544,11 +586,11 @@ export function EditorWorkspace({
                 id="editor-section-title"
                 ref={configurationHeadingRef}
                 tabIndex={-1}
-                className="text-xl font-semibold tracking-tight wrap-anywhere"
+                className="scroll-mt-[var(--editor-toolbar-offset)] text-xl font-semibold tracking-tight wrap-anywhere"
               >
-                {activeLabel ?? t("settings.chooseTitle")}
+                {activeHeading ?? t("settings.chooseTitle")}
               </h2>
-              <p className="text-sm leading-6 text-muted-foreground">
+              <p className="hidden text-sm leading-6 text-muted-foreground sm:block">
                 {activeId
                   ? activeCustom
                     ? formText("custom.description")
@@ -572,14 +614,22 @@ export function EditorWorkspace({
                     <Copy aria-hidden="true" />
                     {t("custom.duplicate")}
                   </Button>
-                  <Button variant="ghost" size="sm" disabled={isLoading} onClick={deleteSection}>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="sm:w-auto sm:px-3"
+                    aria-label={t("custom.delete")}
+                    title={t("custom.delete")}
+                    disabled={isLoading}
+                    onClick={deleteSection}
+                  >
                     <Trash2 aria-hidden="true" />
-                    {t("custom.delete")}
+                    <span className="hidden sm:inline">{t("custom.delete")}</span>
                   </Button>
                 </div>
               )}
             </CardHeader>
-            <CardContent className="pt-5 sm:pt-6">
+            <CardContent className="@container/configuration px-4 pt-4 pb-4 sm:px-6 sm:pt-6 sm:pb-6">
               <fieldset disabled={isLoading} className="min-w-0">
                 <legend className="sr-only">{activeLabel ?? t("settings.chooseTitle")}</legend>
                 {isLoading && (
@@ -623,6 +673,33 @@ export function EditorWorkspace({
               </fieldset>
             </CardContent>
           </Card>
+          <div className="flex min-w-0 flex-wrap items-center justify-between gap-3 px-1">
+            <label
+              htmlFor="readme-language"
+              className="flex items-center gap-2 text-xs font-medium text-muted-foreground"
+            >
+              <Globe2 className="size-3.5" aria-hidden="true" />
+              {t("contentLanguage")}
+            </label>
+            <select
+              id="readme-language"
+              aria-describedby="readme-language-help"
+              value={profile.contentLocale}
+              disabled={isLoading}
+              onChange={(event) => {
+                const contentLocale = event.target.value;
+                if (contentLocale === "en" || contentLocale === "es")
+                  editDocument({ ...profile, contentLocale });
+              }}
+              className="min-h-11 max-w-full rounded-md border border-border-strong bg-surface px-3 py-2 text-base focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:outline-none disabled:opacity-60 sm:text-sm"
+            >
+              <option value="en">{t("languageOptions.en")}</option>
+              <option value="es">{t("languageOptions.es")}</option>
+            </select>
+            <p id="readme-language-help" className="sr-only">
+              {t("settings.languageHelp")}
+            </p>
+          </div>
           <p className="flex items-start gap-2 text-xs leading-5 text-muted-foreground">
             <Globe2 className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
             {t("storage.privacy")}
@@ -630,13 +707,17 @@ export function EditorWorkspace({
         </div>
         <section
           className={cn(
-            "min-w-0 space-y-4 xl:sticky xl:top-6 xl:block",
+            "min-w-0 space-y-4 @min-[75em]/editor:sticky @min-[75em]/editor:top-[var(--editor-toolbar-offset)] @min-[75em]/editor:block",
             compactView === "edit" && "hidden",
           )}
           aria-labelledby="readme-preview-title"
         >
           <div>
-            <h2 id="readme-preview-title" className="text-xl font-semibold tracking-tight">
+            <h2
+              id="readme-preview-title"
+              ref={previewHeadingRef}
+              className="scroll-mt-[var(--editor-toolbar-offset)] text-xl font-semibold tracking-tight"
+            >
               {t("preview.title")}
             </h2>
             <p className="mt-2 text-sm leading-6 text-muted-foreground">

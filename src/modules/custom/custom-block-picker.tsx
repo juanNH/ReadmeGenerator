@@ -1,4 +1,4 @@
-import { useId, type Ref } from "react";
+import { useId } from "react";
 import { Link2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
@@ -27,19 +27,21 @@ const options = [
 ] as const;
 
 type CustomBlockPickerProps = {
-  addTextRef: Ref<HTMLButtonElement>;
   onAdd: (kind: AddBlockKind) => void;
 };
 
-export function CustomBlockPicker({ addTextRef, onAdd }: CustomBlockPickerProps) {
+export function CustomBlockPicker({ onAdd }: CustomBlockPickerProps) {
   const t = useTranslations("EditorModules.custom");
   const baseId = useId();
   return (
-    <div className="grid min-w-0 grid-cols-2 gap-2" role="group" aria-label={t("addContent")}>
+    <div
+      className="grid min-w-0 grid-cols-1 gap-2 @min-[22em]/configuration:grid-cols-2"
+      role="group"
+      aria-label={t("addContent")}
+    >
       {options.map((option, index) => (
         <Button
           key={option.kind}
-          ref={option.kind === "paragraph" ? addTextRef : undefined}
           variant="outline"
           onClick={() => onAdd(option.kind)}
           aria-label={t(option.label)}

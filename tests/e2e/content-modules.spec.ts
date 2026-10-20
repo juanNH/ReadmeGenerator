@@ -1,3 +1,4 @@
+import { showSectionOrganizer } from "./editor-test-helpers";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 import { readFile } from "node:fs/promises";
@@ -35,9 +36,9 @@ async function openSection(page: Page, name: string) {
 }
 
 async function showSections(page: Page) {
-  const sections = page.getByRole("button", { name: /^(Sections|Secciones)$/, exact: true });
-  if ((await sections.isVisible()) && (await sections.getAttribute("aria-expanded")) !== "true")
-    await sections.click();
+  await expect(
+    page.getByRole("navigation", { name: /^(Your sections|Tus secciones)$/, exact: true }),
+  ).toBeVisible();
 }
 
 async function showPreview(page: Page, locale: "en" | "es" = "en") {
@@ -50,7 +51,8 @@ async function showPreview(page: Page, locale: "en" | "es" = "en") {
 
 async function enableSection(page: Page, name: string) {
   await showSections(page);
-  await page.getByRole("checkbox", { name, exact: true }).check();
+  await showSectionOrganizer(page);
+  await page.getByRole("checkbox", { name, exact: true, includeHidden: true }).check();
   await openSection(page, name);
 }
 
@@ -88,10 +90,16 @@ test("retired sections never return from a saved draft and invalid retired links
   study.url = "javascript:alert(1)";
   activity.url = "https://user:secret@example.com/private";
   await openEditor(page, profile);
-  const navigation = page.getByRole("navigation", { name: "Your sections", exact: true });
-  await expect(navigation.getByRole("checkbox")).toHaveCount(5);
+  const navigation = page.getByRole("navigation", {
+    name: "Your sections",
+    exact: true,
+    includeHidden: true,
+  });
+  await expect(navigation.getByRole("checkbox", { includeHidden: true })).toHaveCount(5);
   for (const name of ["Knowledge", "Education & training", "Right now"])
-    await expect(navigation.getByRole("checkbox", { name, exact: true })).toHaveCount(0);
+    await expect(
+      navigation.getByRole("checkbox", { name, exact: true, includeHidden: true }),
+    ).toHaveCount(0);
   const preview = page.getByRole("article", { name: "README preview", exact: true });
   await expect(preview).toContainText("Alex Example");
   await expect(preview).not.toContainText("Accessible interfaces");
@@ -110,7 +118,7 @@ test("retired sections never return from a saved draft and invalid retired links
   expect(stored.sectionOrder).toEqual(profile.sectionOrder);
   expect(stored.schemaVersion).toBe(2);
   await page.reload();
-  await expect(navigation.getByRole("checkbox")).toHaveCount(5);
+  await expect(navigation.getByRole("checkbox", { includeHidden: true })).toHaveCount(5);
   await expect(preview).toContainText("Alex Updated");
   await expect(page.getByRole("button", { name: "Download README", exact: true })).toBeEnabled();
 });
@@ -119,7 +127,12 @@ test("contributions work alone with keyboard, stable list focus and immediate la
   page,
 }) => {
   await openEditor(page);
-  const choice = page.getByRole("checkbox", { name: "Activity & contributions", exact: true });
+  const choice = page.getByRole("checkbox", {
+    name: "Activity & contributions",
+    exact: true,
+    includeHidden: true,
+  });
+  await showSectionOrganizer(page);
   await choice.focus();
   await page.keyboard.press("Space");
   await expect(page.locator("#editor-section-title")).toHaveText("Activity & contributions");
@@ -161,8 +174,12 @@ test("contributions work alone with keyboard, stable list focus and immediate la
   await expect(
     page.getByRole("textbox", { name: "Título de la contribución", exact: true }),
   ).toHaveValue("Clear setup instructions");
-  await expect(page.getByRole("checkbox", { name: "Presentación", exact: true })).not.toBeChecked();
-  await expect(page.getByRole("checkbox", { name: "Proyectos", exact: true })).not.toBeChecked();
+  await expect(
+    page.getByRole("checkbox", { name: "Presentación", exact: true, includeHidden: true }),
+  ).not.toBeChecked();
+  await expect(
+    page.getByRole("checkbox", { name: "Proyectos", exact: true, includeHidden: true }),
+  ).not.toBeChecked();
 });
 
 test("active sections share the same preview, copied and downloaded Markdown without requiring public activity", async ({
@@ -186,8 +203,8 @@ test("active sections share the same preview, copied and downloaded Markdown wit
   if (!project) throw new Error("The example profile must include a project.");
   project.id = "\ud800";
   await openEditor(page, profile);
-  await expect(page.getByRole("checkbox", { checked: true })).toHaveCount(5);
-  await expect(page.getByRole("checkbox")).toHaveCount(5);
+  await expect(page.getByRole("checkbox", { checked: true, includeHidden: true })).toHaveCount(5);
+  await expect(page.getByRole("checkbox", { includeHidden: true })).toHaveCount(5);
   await openSection(page, "Projects");
   await page
     .getByRole("textbox", { name: "Project description", exact: true })
@@ -287,9 +304,15 @@ test("contribution web links and contact email links follow their own validation
   await page.getByText("Customize label (optional)", { exact: true }).click();
   await page.getByRole("textbox", { name: "Link label", exact: true }).fill("Email");
   await page.getByRole("textbox", { name: "URL", exact: true }).fill("mailto:group@example.com");
-  await page.getByRole("checkbox", { name: "Activity & contributions", exact: true }).uncheck();
+  await showSectionOrganizer(page);
+  await page
+    .getByRole("checkbox", { name: "Activity & contributions", exact: true, includeHidden: true })
+    .uncheck();
   await expect(page.getByRole("button", { name: "Download README", exact: true })).toBeEnabled();
-  await page.getByRole("checkbox", { name: "Activity & contributions", exact: true }).check();
+  await showSectionOrganizer(page);
+  await page
+    .getByRole("checkbox", { name: "Activity & contributions", exact: true, includeHidden: true })
+    .check();
   await openSection(page, "Activity & contributions");
   await expect(link).toHaveValue("mailto:group@example.com");
   await link.fill("https://example.com/community-guide");
@@ -390,8 +413,10 @@ test("keyboard ordering preserves hidden positions and metrics settings until hi
       draftKey,
     ),
   ).toBe(true);
+  await showSectionOrganizer(page);
+  await page.getByRole("button", { name: "Activity & contributions", exact: true }).click();
   const moveUp = page.getByRole("button", {
-    name: "Move Activity & contributions up",
+    name: "Move Activity & contributions left",
     exact: true,
   });
   await moveUp.focus();
@@ -405,7 +430,7 @@ test("keyboard ordering preserves hidden positions and metrics settings until hi
   await page.keyboard.press("Enter");
   await expect(moveUp).toBeDisabled();
   await expect(
-    page.getByRole("button", { name: "Move Activity & contributions down", exact: true }),
+    page.getByRole("button", { name: "Move Activity & contributions right", exact: true }),
   ).toBeFocused();
   const stored = await savedProfile(page);
   const expectedOrder = [...profile.sectionOrder];
@@ -425,6 +450,7 @@ test("keyboard ordering preserves hidden positions and metrics settings until hi
   ).toBe(9);
   expect(stored.data).toEqual(profile.data);
   expect(stored.visibility.metrics).toBe(true);
+  await showSectionOrganizer(page);
   await page
     .getByRole("button", { name: "Exclude GitHub cards and keep their settings", exact: true })
     .click();
@@ -436,7 +462,11 @@ test("keyboard ordering preserves hidden positions and metrics settings until hi
   expect(hidden.sectionOrder).toEqual(expectedOrder);
   await page.reload();
   await expect(
-    page.getByRole("button", { name: "Activity & contributions", exact: true }),
+    page.getByRole("button", {
+      name: "Activity & contributions",
+      exact: true,
+      includeHidden: true,
+    }),
   ).toHaveAttribute("aria-current", "step");
   const preview = page.getByRole("article", { name: "README preview", exact: true });
   await expect(preview.getByRole("heading").first()).toHaveText("Contributions");
@@ -458,12 +488,17 @@ test("an inactive section announces link errors and review selects its form at t
     },
   ];
   await openEditor(page, profile);
-  const contribution = page.getByRole("button", { name: "Activity & contributions", exact: true });
+  const contribution = page.getByRole("button", {
+    name: "Activity & contributions",
+    exact: true,
+    includeHidden: true,
+  });
   await expect(contribution).not.toHaveAttribute("aria-current", "step");
   await expect(page.getByRole("textbox", { name: "Contribution link", exact: true })).toHaveCount(
     0,
   );
   await expect(page.getByRole("button", { name: "Download README", exact: true })).toBeDisabled();
+  await showSectionOrganizer(page);
   await page
     .getByRole("button", { name: "Review fields in Activity & contributions", exact: true })
     .click();
@@ -473,8 +508,11 @@ test("an inactive section announces link errors and review selects its form at t
   await expect(link).toHaveAttribute("aria-invalid", "true");
   await link.fill("https://example.com/community-guide");
   await expect(page.getByRole("button", { name: "Download README", exact: true })).toBeEnabled();
-  await page.getByRole("button", { name: "Activity & contributions", exact: true }).click();
-  await expect(page.locator("#editor-section-title")).toBeFocused();
+  await showSectionOrganizer(page);
+  await page
+    .getByRole("button", { name: "Activity & contributions", exact: true, includeHidden: true })
+    .click();
+  await expect(contribution).toBeFocused();
   await expect(contribution).toHaveAttribute("aria-current", "step");
   await expect(link).toBeVisible();
 });

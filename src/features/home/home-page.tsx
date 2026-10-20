@@ -1,6 +1,5 @@
 import {
   ArrowRight,
-  ArrowUpRight,
   AtSign,
   BookOpen,
   CodeXml,
@@ -56,9 +55,9 @@ export async function HomePage() {
                 </Link>
               </Button>
               <Button asChild variant="ghost">
-                <Link href="/design-system">
+                <Link href="/#modules">
                   {t("secondary")}
-                  <ArrowUpRight aria-hidden="true" />
+                  <ArrowRight aria-hidden="true" />
                 </Link>
               </Button>
             </div>
@@ -201,7 +200,7 @@ export async function HomePage() {
             </p>
           </div>
           <Button variant="outline" asChild>
-            <Link href="/design-system">
+            <Link href="/editor">
               {t("closingAction")}
               <ArrowRight aria-hidden="true" />
             </Link>

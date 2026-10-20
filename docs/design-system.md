@@ -2,7 +2,9 @@
 
 ## Estado y propósito
 
-El kit de GitHub Profile Generator define una base visual reutilizable para un generador modular de README. La muestra está disponible en `/en/design-system` y `/es/design-system`. Incluye interacciones locales de demostración; no crea perfiles, no consulta GitHub y no publica contenido.
+El kit de GitHub Profile Generator es una herramienta interna de desarrollo: define los tokens y componentes reutilizables del generador. La muestra está disponible en `/en/design-system` y `/es/design-system` solo al ejecutar `pnpm dev`. En una compilación de producción ambas rutas devuelven 404 y no se muestran enlaces en la navegación ni en la portada. La muestra lleva una directiva para no indexarla; no incluye autenticación y no debe alojarse un servidor de desarrollo como servicio público.
+
+Incluye interacciones locales de demostración; no crea perfiles, no consulta GitHub y no publica contenido. Playwright se usa desde el repositorio para revisar recorridos, tamaños de pantalla y accesibilidad automática; no es una sección del producto. El kit y las pruebas se mantienen separados del recorrido de las personas que crean un README.
 
 La dirección busca una herramienta de creación sobria y cercana: superficies claras, texto carbón, acento verde, bordes precisos y una alternativa oscura equivalente. Los bloques breves reciben el mismo cuidado que los perfiles con muchas secciones. La actividad pública no representa un nivel de habilidad.
 
@@ -32,6 +34,8 @@ El espaciado parte de una grilla de 4 px. La escala más usada es 4, 8, 12, 16, 
 Los radios son 6 px para etiquetas, 10 px para controles, 16 px para tarjetas y 24 px para composiciones amplias. Los valores internos `--ds-radius-*` se exponen como `rounded-sm`, `rounded-md`, `rounded-lg` y `rounded-xl`. `shadow-soft` aporta una separación mínima y `shadow-panel` queda disponible para paneles. El borde y el espaciado sostienen la jerarquía principal.
 
 Geist Sans se usa para contenido y controles; Geist Mono, para números y pequeños detalles técnicos. Las variables `--font-geist-sans` y `--font-geist-mono` se definen mediante las fuentes locales del layout. Escala habitual: 12 px para contexto, 14 px para controles y cuerpo compacto, 16 px para lectura, 20–24 px para títulos de sección y 36–60 px para presentación. Los campos usan 16 px en pantallas pequeñas para evitar el zoom de entrada de algunos navegadores.
+
+El texto hereda `overflow-wrap: anywhere` para ajustar URLs o cadenas sin espacios cuando no entren; las palabras se conservan completas siempre que haya lugar. `Button` limita su ancho al contenedor y permite etiquetas en varias líneas. Agrupar acciones con ajuste de filas, sin encoger iconos ni superponer estados. El editor usa consultas de contenedor en `em` para adaptar sus columnas también al ampliar la letra; los selectores de contenido responden al ancho de su propio panel. Las regiones de código conservan su política explícita de desplazamiento o salto de línea.
 
 ## Componentes y contratos
 
@@ -81,6 +85,8 @@ Los textos pertenecen a `src/messages/en/design-system.json` y `src/messages/es/
 El contenido estático de la página permanece en Server Components. Los ejemplos interactivos y controles Radix forman fronteras cliente. Se usan iconos locales y fuentes locales; no se descargan capturas ni bibliotecas visuales completas para la muestra. Incorporar animaciones, estados de carga o nuevas abstracciones cuando resuelvan una necesidad de producto concreta.
 
 ## Revisión recomendada
+
+Playwright ya está instalado como herramienta del repositorio. `pnpm test:e2e:ui` abre su interfaz de pruebas para revisar recorridos, resultados y trazas fuera de la navegación del producto. El modo de terminal sigue disponible mediante `pnpm test:e2e`. Para un taller independiente de componentes, [Storybook](https://storybook.js.org/docs) permite desarrollar sus estados de forma aislada; no está instalado en esta entrega.
 
 Revisar ambas rutas y ambos temas, teclado completo, foco visible, zoom al 200 %, ancho de 320 px, etiquetas extensas y preferencia de movimiento reducido. Verificar asociaciones de campos, anuncios de cambios, estados deshabilitados y la diferencia entre checkbox y switch. Comprobar que las opciones alteren solo la composición de demostración y que el cambio de idioma conserve la ruta. Las pruebas automáticas de accesibilidad complementan la revisión manual; no certifican accesibilidad completa.
 

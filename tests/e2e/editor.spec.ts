@@ -1,3 +1,4 @@
+import { showSectionOrganizer } from "./editor-test-helpers";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Download, type Page } from "@playwright/test";
 import { readFile } from "node:fs/promises";
@@ -39,9 +40,9 @@ async function openSection(page: Page, name: string) {
 }
 
 async function showSections(page: Page) {
-  const sections = page.getByRole("button", { name: /^(Sections|Secciones)$/, exact: true });
-  if ((await sections.isVisible()) && (await sections.getAttribute("aria-expanded")) !== "true")
-    await sections.click();
+  await expect(
+    page.getByRole("navigation", { name: /^(Your sections|Tus secciones)$/, exact: true }),
+  ).toBeVisible();
 }
 
 async function showPreview(page: Page, locale: "en" | "es" = "en") {
@@ -54,14 +55,16 @@ async function showPreview(page: Page, locale: "en" | "es" = "en") {
 
 async function introduceYourself(page: Page, name = "Sam Example") {
   await showSections(page);
-  await page.getByRole("checkbox", { name: "About you", exact: true }).check();
+  await showSectionOrganizer(page);
+  await page.getByRole("checkbox", { name: "About you", exact: true, includeHidden: true }).check();
   await openSection(page, "About you");
   await page.getByRole("textbox", { name: "Display name", exact: true }).fill(name);
 }
 
 async function addContact(page: Page, label = "Portfolio", url = "https://example.com/profile") {
   await showSections(page);
-  await page.getByRole("checkbox", { name: "Contact", exact: true }).check();
+  await showSectionOrganizer(page);
+  await page.getByRole("checkbox", { name: "Contact", exact: true, includeHidden: true }).check();
   await openSection(page, "Contact");
   await page.getByRole("button", { name: "Add social network", exact: true }).click();
   await expect(
@@ -164,11 +167,18 @@ test("home opens an empty optional editor without saving during hydration", asyn
   await page
     .getByRole("main")
     .getByRole("link", { name: "Create your profile", exact: true })
+    .first()
     .click();
   await expect(page).toHaveURL(/\/en\/editor$/);
-  await expect(page.getByRole("checkbox", { name: "About you", exact: true })).toBeEnabled();
-  await expect(page.getByRole("checkbox", { name: "About you", exact: true })).not.toBeChecked();
-  await expect(page.getByRole("checkbox", { name: "Contact", exact: true })).not.toBeChecked();
+  await expect(
+    page.getByRole("checkbox", { name: "About you", exact: true, includeHidden: true }),
+  ).toBeEnabled();
+  await expect(
+    page.getByRole("checkbox", { name: "About you", exact: true, includeHidden: true }),
+  ).not.toBeChecked();
+  await expect(
+    page.getByRole("checkbox", { name: "Contact", exact: true, includeHidden: true }),
+  ).not.toBeChecked();
   await expect(page.getByRole("textbox")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Copy README", exact: true })).toBeDisabled();
   await expect(page.getByRole("button", { name: "Download README", exact: true })).toBeDisabled();
@@ -181,7 +191,8 @@ test("presentation alone can be completed with keyboard and no required identity
   page,
 }) => {
   await openEditor(page);
-  const about = page.getByRole("checkbox", { name: "About you", exact: true });
+  const about = page.getByRole("checkbox", { name: "About you", exact: true, includeHidden: true });
+  await showSectionOrganizer(page);
   await about.focus();
   await page.keyboard.press("Space");
   await page
@@ -190,7 +201,9 @@ test("presentation alone can be completed with keyboard and no required identity
   const preview = page.getByRole("article", { name: "README preview", exact: true });
   await expect(preview).toContainText("Learning accessible interfaces");
   await expect(page.getByRole("textbox", { name: "Display name", exact: true })).toHaveValue("");
-  await expect(page.getByRole("checkbox", { name: "Contact", exact: true })).not.toBeChecked();
+  await expect(
+    page.getByRole("checkbox", { name: "Contact", exact: true, includeHidden: true }),
+  ).not.toBeChecked();
   expect(await downloadReadme(page)).toBe("Learning accessible interfaces\n");
 });
 
@@ -221,7 +234,9 @@ test("contact alone supports adding, editing and removing stable links with usab
   await expect(labels).toHaveCount(1);
   await expect(labels).toHaveValue("Email");
   await expect(urls).toBeFocused();
-  await expect(page.getByRole("checkbox", { name: "About you", exact: true })).not.toBeChecked();
+  await expect(
+    page.getByRole("checkbox", { name: "About you", exact: true, includeHidden: true }),
+  ).not.toBeChecked();
   const preview = page.getByRole("article", { name: "README preview", exact: true });
   await expect(preview.getByRole("link", { name: "Email", exact: true })).toHaveAttribute(
     "href",
@@ -257,14 +272,21 @@ test("hiding and restoring a section preserves its draft, order and opaque IDs a
   );
   await openSection(page, "Contact");
   await page.getByRole("textbox", { name: "Link label", exact: true }).fill("Updated portfolio");
-  await page.getByRole("checkbox", { name: "About you", exact: true }).uncheck();
+  await showSectionOrganizer(page);
+  await page
+    .getByRole("checkbox", { name: "About you", exact: true, includeHidden: true })
+    .uncheck();
   await expect(
     page.getByRole("article", { name: "README preview", exact: true }),
   ).not.toContainText("Sam Example");
   await expect(page.getByText("Saved on this browser", { exact: true })).toBeVisible();
   await page.reload();
-  await expect(page.getByRole("checkbox", { name: "About you", exact: true })).toBeEnabled();
-  await expect(page.getByRole("checkbox", { name: "About you", exact: true })).not.toBeChecked();
+  await expect(
+    page.getByRole("checkbox", { name: "About you", exact: true, includeHidden: true }),
+  ).toBeEnabled();
+  await expect(
+    page.getByRole("checkbox", { name: "About you", exact: true, includeHidden: true }),
+  ).not.toBeChecked();
   await openSection(page, "Contact");
   await expect(page.getByRole("textbox", { name: "Link label", exact: true })).toHaveValue(
     "Updated portfolio",
@@ -272,7 +294,8 @@ test("hiding and restoring a section preserves its draft, order and opaque IDs a
   await expect(page.getByRole("combobox", { name: "README language", exact: true })).toHaveValue(
     "es",
   );
-  await page.getByRole("checkbox", { name: "About you", exact: true }).check();
+  await showSectionOrganizer(page);
+  await page.getByRole("checkbox", { name: "About you", exact: true, includeHidden: true }).check();
   await openSection(page, "About you");
   await expect(page.getByRole("textbox", { name: "Display name", exact: true })).toHaveValue(
     "Sam Example",
@@ -298,9 +321,11 @@ test("invalid contact URLs explain the error and block export only while that se
   await expect(url).toHaveAccessibleDescription(/Enter a full http:\/\/ or https:\/\/ address/);
   await expect(page.getByRole("button", { name: "Copy README", exact: true })).toBeDisabled();
   await expect(page.getByRole("button", { name: "Download README", exact: true })).toBeDisabled();
-  await page.getByRole("checkbox", { name: "Contact", exact: true }).uncheck();
+  await showSectionOrganizer(page);
+  await page.getByRole("checkbox", { name: "Contact", exact: true, includeHidden: true }).uncheck();
   await expect(page.getByRole("button", { name: "Download README", exact: true })).toBeEnabled();
-  await page.getByRole("checkbox", { name: "Contact", exact: true }).check();
+  await showSectionOrganizer(page);
+  await page.getByRole("checkbox", { name: "Contact", exact: true, includeHidden: true }).check();
   await openSection(page, "Contact");
   await expect(url).toHaveValue("javascript:alert(1)");
   await url.fill("https://example.com/profile");
@@ -449,7 +474,9 @@ for (const [name, saved] of [
     );
     page.once("dialog", (dialog) => dialog.accept());
     await page.getByRole("button", { name: "Start a new saved draft", exact: true }).click();
-    await expect(page.getByRole("checkbox", { name: "About you", exact: true })).not.toBeChecked();
+    await expect(
+      page.getByRole("checkbox", { name: "About you", exact: true, includeHidden: true }),
+    ).not.toBeChecked();
     await page.clock.fastForward(750);
     expect(
       await page.evaluate((key) => JSON.parse(localStorage.getItem(key) ?? "null"), draftKey),
@@ -586,11 +613,17 @@ for (const locale of ["en", "es"] as const) {
       await introduceYourself(page);
       await addContact(page, "Invalid draft link", "incomplete");
     } else {
-      await page.getByRole("checkbox", { name: "Presentación", exact: true }).check();
+      await showSectionOrganizer(page);
+      await page
+        .getByRole("checkbox", { name: "Presentación", exact: true, includeHidden: true })
+        .check();
       await page
         .getByRole("textbox", { name: "Nombre para mostrar", exact: true })
         .fill("Sol Ejemplo");
-      await page.getByRole("checkbox", { name: "Contacto", exact: true }).check();
+      await showSectionOrganizer(page);
+      await page
+        .getByRole("checkbox", { name: "Contacto", exact: true, includeHidden: true })
+        .check();
       await openSection(page, "Contacto");
       await page.getByRole("button", { name: "Agregar red social", exact: true }).click();
       await page

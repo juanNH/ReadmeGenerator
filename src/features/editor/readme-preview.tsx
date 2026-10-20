@@ -47,8 +47,8 @@ export function ReadmePreview({
 
   return (
     <div className="overflow-hidden rounded-lg border border-border bg-surface shadow-panel">
-      <div className="flex items-center justify-between gap-3 border-b border-border bg-surface-raised/50 px-5 py-3.5">
-        <span className="flex items-center gap-2 font-mono text-xs text-muted-foreground">
+      <div className="flex min-w-0 flex-wrap items-center justify-between gap-3 border-b border-border bg-surface-raised/50 px-5 py-3.5">
+        <span className="flex min-w-0 items-center gap-2 font-mono text-xs wrap-anywhere text-muted-foreground">
           <FileText className="size-3.5" aria-hidden="true" />
           README.md
         </span>

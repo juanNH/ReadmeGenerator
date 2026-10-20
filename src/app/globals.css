@@ -16,6 +16,7 @@
     color: var(--foreground);
     font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
     text-rendering: optimizeLegibility;
+    overflow-wrap: anywhere;
     -webkit-font-smoothing: antialiased;
   }
   button:not(:disabled),

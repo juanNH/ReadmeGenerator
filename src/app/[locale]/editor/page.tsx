@@ -29,20 +29,25 @@ export default async function EditorPage({ params }: EditorPageProps) {
 
   return (
     <>
-      <SiteHeader />
+      <SiteHeader variant="editor" />
       <main
         id="main-content"
         tabIndex={-1}
-        className="mx-auto max-w-[1600px] px-5 pt-6 pb-16 sm:px-8 lg:px-10"
+        className="mx-auto max-w-[1600px] px-4 pt-4 pb-12 sm:px-8 sm:pt-6 lg:px-10"
       >
-        <div className="mb-6 max-w-4xl space-y-2">
-          <p className="font-mono text-xs tracking-[0.14em] text-muted-foreground uppercase">
+        <div className="mb-2 max-w-4xl space-y-1 sm:mb-6 sm:space-y-2">
+          <p className="hidden font-mono text-xs tracking-[0.14em] text-muted-foreground uppercase sm:block">
             {t("pageEyebrow")}
           </p>
           <h1 className="text-2xl leading-tight font-semibold tracking-tight sm:text-3xl">
             {t("pageTitle")}
           </h1>
-          <p className="text-sm leading-6 text-muted-foreground">{t("pageDescription")}</p>
+          <p className="text-sm leading-5 text-muted-foreground sm:hidden">
+            {t("pageCompactDescription")}
+          </p>
+          <p className="hidden text-sm leading-6 text-muted-foreground sm:block">
+            {t("pageDescription")}
+          </p>
         </div>
         <NextIntlClientProvider
           messages={{

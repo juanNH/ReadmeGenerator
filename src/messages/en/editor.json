@@ -4,6 +4,7 @@
   "pageEyebrow": "Your profile, your story",
   "pageTitle": "Your GitHub profile",
   "pageDescription": "Choose a section, shape your story and drag to set the order. Every section is optional.",
+  "pageCompactDescription": "Choose what to share. Every section is optional.",
   "workspaceTitle": "Make it yours",
   "workspaceDescription": "Choose what you want to share. A few words are enough to start.",
   "sectionsTitle": "1. Choose your sections",
@@ -17,7 +18,7 @@
   },
   "hiddenHelp": "Unchecking a section hides it from your README and keeps everything you wrote.",
   "settings": {
-    "sections": "Sections",
+    "controls": "Editor controls",
     "viewLabel": "Workspace view",
     "edit": "Edit",
     "preview": "Preview",
@@ -31,8 +32,6 @@
     "sectionHidden": "{module} is hidden from the README. Its settings and writing are still available here."
   },
   "composition": {
-    "moveUp": "Move {module} up",
-    "moveDown": "Move {module} down",
     "moved": "{module} moved to position {position} of {total}.",
     "errorSummary": "Some fields need your attention.",
     "review": "Review fields",
@@ -45,6 +44,7 @@
     "hidden": "GitHub cards are excluded. Their saved settings have been kept."
   },
   "custom": {
+    "addAction": "Add custom section",
     "untitled": "Custom section {number}",
     "namedInstance": "{title} · custom {number}",
     "duplicate": "Duplicate section",

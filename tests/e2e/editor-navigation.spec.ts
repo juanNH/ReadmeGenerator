@@ -1,3 +1,4 @@
+import { showSectionOrganizer } from "./editor-test-helpers";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Locator, type Page } from "@playwright/test";
 import { createEmptyProfile } from "../../src/core/profile/profile-operations";
@@ -64,7 +65,12 @@ function navigationProfile() {
   ];
   return profile;
 }
-async function openEditor(page: Page, profile?: ProfileDocument, locale: "en" | "es" = "en") {
+async function openEditor(
+  page: Page,
+  profile?: ProfileDocument,
+  locale: "en" | "es" = "en",
+  organize = true,
+) {
   if (profile) {
     await page.goto(`/${locale}`);
     await page.evaluate(({ key, value }) => localStorage.setItem(key, value), {
@@ -80,6 +86,7 @@ async function openEditor(page: Page, profile?: ProfileDocument, locale: "en" | 
       includeHidden: true,
     }),
   ).toBeEnabled();
+  if (organize) await showSectionOrganizer(page);
 }
 
 async function storedProfile(page: Page): Promise<ProfileDocument> {
@@ -114,9 +121,9 @@ async function moveMouseDrag(page: Page, source: Locator, target: Locator) {
   await expect
     .poll(async () => {
       const box = await target.boundingBox();
-      return box ? Math.sign(box.y - targetBox.y) : 0;
+      return box ? Math.sign(box.x - targetBox.x) : 0;
     })
-    .toBe(start.y < end.y ? -1 : 1);
+    .toBe(start.x < end.x ? -1 : 1);
 }
 
 async function mouseDrag(page: Page, source: Locator, target: Locator) {
@@ -128,7 +135,11 @@ async function expectNavigationOrder(
   page: Page,
   order = ["technologies", "projects", "contributions"],
 ) {
-  const navigation = page.getByRole("navigation", { name: "Your sections", exact: true });
+  const navigation = page.getByRole("navigation", {
+    name: "Your sections",
+    exact: true,
+    includeHidden: true,
+  });
   await expect
     .poll(() =>
       navigation
@@ -140,67 +151,51 @@ async function expectNavigationOrder(
     .toEqual(order);
 }
 
-test("one configuration panel identifies the active section and keeps settings beside its fields", async ({
+test("the permanent section row keeps one active configuration and preserves inclusion independently", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
-  const profile = createEmptyProfile("en");
-
-  await openEditor(page, profile);
+  await openEditor(page, createEmptyProfile("en"), "en", false);
   const navigation = page.getByRole("navigation", { name: "Your sections", exact: true });
-  await navigation.getByRole("button", { name: "Add and edit About you", exact: true }).click();
+  async function choose(label: string) {
+    const choice = navigation
+      .getByRole("button", { name: label, exact: true })
+      .or(navigation.getByRole("button", { name: `Add and edit ${label}`, exact: true }));
+    await choice.click();
+    await expect(navigation.getByRole("button", { name: label, exact: true })).toBeFocused();
+  }
+  await choose("About you");
   const heading = page.locator("#editor-section-title");
   await expect(heading).toHaveText("About you");
-  await expect(heading).toBeFocused();
-  await expect(navigation.getByRole("checkbox", { name: "About you", exact: true })).toBeChecked();
-  await expect(navigation.getByRole("button", { name: "About you", exact: true })).toHaveAttribute(
-    "aria-current",
-    "step",
-  );
-  await expect(navigation.getByText("Editing now", { exact: true })).toBeVisible();
   const displayName = page.getByRole("textbox", { name: "Display name", exact: true });
   await displayName.fill("Alex Example");
-  await navigation.getByRole("button", { name: "Add and edit Projects", exact: true }).click();
+  await choose("Projects");
   await expect(heading).toHaveText("Projects");
-  await expect(heading).toBeFocused();
   await expect(displayName).toHaveCount(0);
   await page.getByRole("button", { name: "Add project", exact: true }).click();
   await page.getByRole("textbox", { name: "Project name", exact: true }).fill("Clear forms");
-  await expect(navigation.locator('[aria-current="step"]')).toHaveCount(1);
-  await navigation.getByRole("button", { name: "About you", exact: true }).click();
-  await expect(heading).toBeFocused();
+  await choose("About you");
   await expect(displayName).toHaveValue("Alex Example");
-  await expect(page.getByRole("textbox", { name: "Project name", exact: true })).toHaveCount(0);
   const preview = page.getByRole("article", { name: "README preview", exact: true });
   await expect(preview).toContainText("Alex Example");
   await expect(preview).toContainText("Clear forms");
+  await showSectionOrganizer(page);
   const inclusion = navigation.getByRole("checkbox", { name: "About you", exact: true });
   await inclusion.uncheck();
   await expect(inclusion).toBeFocused();
   await expect(heading).toHaveText("About you");
   await expect(displayName).toHaveValue("Alex Example");
-  await expect(page.getByText("Not included in README", { exact: true })).toBeVisible();
   await expect(preview).not.toContainText("Alex Example");
   await displayName.fill("Alex Updated");
   await expect(preview).not.toContainText("Alex Updated");
-  await navigation.getByRole("button", { name: "Add and edit About you", exact: true }).click();
-  await expect(heading).toBeFocused();
+  await choose("About you");
   await expect(displayName).toHaveValue("Alex Updated");
   await expect(preview).toContainText("Alex Updated");
-  const navigationBox = await navigation.boundingBox();
   const fieldBox = await displayName.boundingBox();
-  const languageBox = await page
-    .getByRole("combobox", { name: "README language", exact: true })
-    .boundingBox();
   const previewBox = await preview.boundingBox();
-  if (!navigationBox || !fieldBox || !languageBox || !previewBox)
-    throw new Error("All three desktop columns must be visible.");
-  expect(navigationBox.x + navigationBox.width).toBeLessThanOrEqual(fieldBox.x);
+  if (!fieldBox || !previewBox) throw new Error("Both desktop columns must be visible.");
   expect(fieldBox.x + fieldBox.width).toBeLessThanOrEqual(previewBox.x);
-  expect(languageBox.x).toBeGreaterThanOrEqual(navigationBox.x + navigationBox.width);
-  expect(languageBox.x + languageBox.width).toBeLessThanOrEqual(previewBox.x);
   await expect(page.getByText("Saved on this browser", { exact: true })).toBeVisible();
-  await page.screenshot({ path: "work/previews/navigation-desktop.png", fullPage: true });
 });
 
 test("pointer dragging reorders visible sections while preserving hidden slots, values and the active editor", async ({
@@ -209,7 +204,11 @@ test("pointer dragging reorders visible sections while preserving hidden slots, 
   await page.setViewportSize({ width: 1440, height: 1000 });
   const profile = navigationProfile();
   await openEditor(page, profile);
-  const navigation = page.getByRole("navigation", { name: "Your sections", exact: true });
+  const navigation = page.getByRole("navigation", {
+    name: "Your sections",
+    exact: true,
+    includeHidden: true,
+  });
   await mouseDrag(
     page,
     navigation.getByRole("button", { name: "Drag Technologies & tools to reorder", exact: true }),
@@ -263,15 +262,14 @@ test("touch dragging uses the browser pointer pipeline and saves the new visible
   try {
     const page = await context.newPage();
     const profile = navigationProfile();
-    await openEditor(page, profile);
+    await openEditor(page, profile, "en", false);
     expect(await page.evaluate(() => navigator.maxTouchPoints)).toBeGreaterThan(0);
-    await page.getByRole("button", { name: "Sections", exact: true }).tap();
     const source = page.getByRole("button", {
       name: "Drag Technologies & tools to reorder",
       exact: true,
     });
     const target = page.getByRole("button", {
-      name: "Drag Activity & contributions to reorder",
+      name: "Drag Projects to reorder",
       exact: true,
     });
     await target.scrollIntoViewIfNeeded();
@@ -302,11 +300,7 @@ test("touch dragging uses the browser pointer pipeline and saves the new visible
     }
     await session.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
     const order = [...profile.sectionOrder];
-    [order[2], order[5], order[6]] = [
-      { kind: "module", moduleId: "projects" },
-      { kind: "module", moduleId: "contributions" },
-      { kind: "module", moduleId: "technologies" },
-    ];
+    [order[2], order[5]] = [order[5]!, order[2]!];
     await expectStoredOrder(page, order);
     expect((await storedProfile(page)).data).toEqual(profile.data);
     await page.reload();
@@ -363,7 +357,7 @@ test("keyboard dragging moves a section with Space and arrows and preserves the 
       .getByRole("status")
       .filter({ hasText: "Picked up Technologies & tools, position 1 of 3." }),
   ).toBeVisible();
-  await page.keyboard.press("ArrowDown");
+  await page.keyboard.press("ArrowRight");
   await page.keyboard.press("Space");
   const order = [...profile.sectionOrder];
   [order[2], order[5]] = [
@@ -388,7 +382,7 @@ test("Escape cancels an in-progress keyboard drag without changing the saved pro
   });
   await handle.focus();
   await page.keyboard.press("Space");
-  await page.keyboard.press("ArrowDown");
+  await page.keyboard.press("ArrowRight");
   await page.keyboard.press("Escape");
   await expect(handle).toBeFocused();
   await expectNavigationOrder(page);
@@ -425,7 +419,7 @@ for (const locale of ["en", "es"] as const) {
   }) => {
     await page.setViewportSize({ width: 360, height: 800 });
     const profile = navigationProfile();
-    await openEditor(page, profile, locale);
+    await openEditor(page, profile, locale, false);
     const labels =
       locale === "en"
         ? {
@@ -450,24 +444,26 @@ for (const locale of ["en", "es"] as const) {
             document: "Vista previa del README",
             navigation: "Tus secciones",
           };
-    const sections = page.getByRole("button", { name: labels.sections, exact: true });
-    const navigation = page.getByRole("navigation", { name: labels.navigation, exact: true });
-    await expect(sections).toHaveAttribute("aria-expanded", "false");
-    await expect(navigation).toBeHidden();
+    const navigation = page.getByRole("navigation", {
+      name: labels.navigation,
+      exact: true,
+      includeHidden: true,
+    });
+    await expect(navigation).toBeVisible();
     const search = page.getByRole("combobox", { name: labels.search, exact: true });
     await expect(search).toBeVisible();
     await expect(page.getByRole("textbox", { name: labels.name, exact: true })).toHaveCount(0);
-    await sections.click();
     await expect(navigation).toBeVisible();
     await expect(navigation.getByRole("checkbox")).toHaveCount(5);
     await expect(
       navigation.getByRole("button", { name: labels.technologies, exact: true }),
     ).toHaveAttribute("aria-current", "step");
     await navigation.getByRole("button", { name: labels.projects, exact: true }).click();
-    await expect(sections).toHaveAttribute("aria-expanded", "false");
-    await expect(navigation).toBeHidden();
+    await expect(navigation).toBeVisible();
     await expect(page.locator("#editor-section-title")).toHaveText(labels.projects);
-    await expect(page.locator("#editor-section-title")).toBeFocused();
+    await expect(
+      navigation.getByRole("button", { name: labels.projects, exact: true }),
+    ).toBeFocused();
     await expect(search).toHaveCount(0);
     const name = page.getByRole("textbox", { name: labels.name, exact: true });
     await name.fill("A notebook for community ideas");

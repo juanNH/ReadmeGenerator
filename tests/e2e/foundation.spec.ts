@@ -7,13 +7,43 @@ test("defaults to English and keeps the page, query and anchor when switching la
   await page.goto("/");
   await expect(page).toHaveURL(/\/en$/);
   await expect(page.locator("html")).toHaveAttribute("lang", "en");
-  await page.goto("/en/design-system?example=profile#modules");
-  await page.getByRole("combobox", { name: "Language", exact: true }).selectOption("es");
-  await expect(page).toHaveURL(/\/es\/design-system\?example=profile#modules$/);
-  await expect(page.locator("html")).toHaveAttribute("lang", "es");
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("estructura");
-  await page.getByRole("combobox", { name: "Idioma", exact: true }).selectOption("en");
-  await expect(page).toHaveURL(/\/en\/design-system\?example=profile#modules$/);
+  const destinations = [
+    "/editor?example=profile&tool=React&tool=TypeScript#main-content",
+    "/editor?example=profile#intro%20notes",
+    "/editor?example=profile",
+  ];
+  for (const destination of destinations) {
+    await page.goto(`/en${destination}`);
+    for (const locale of ["es", "en", "es", "en"]) {
+      const currentLocale = locale === "en" ? "es" : "en";
+      const language = page.getByRole("combobox", {
+        name: currentLocale === "en" ? "Language" : "Idioma",
+        exact: true,
+      });
+      await language.focus();
+      await language.selectOption(locale);
+      await expect
+        .poll(() => {
+          const url = new URL(page.url());
+          return `${url.pathname}${url.search}${url.hash}`;
+        })
+        .toBe(`/${locale}${destination}`);
+      await expect(page.locator("html")).toHaveAttribute("lang", locale);
+      await expect(
+        page.getByRole("combobox", { name: locale === "en" ? "Language" : "Idioma", exact: true }),
+      ).toBeFocused();
+      await expect(page.getByRole("heading", { level: 1 })).toContainText(
+        locale === "en" ? "Your GitHub profile" : "Tu perfil de GitHub",
+      );
+    }
+  }
+  await page.goBack();
+  await expect
+    .poll(() => {
+      const url = new URL(page.url());
+      return `${url.pathname}${url.search}${url.hash}`;
+    })
+    .toBe("/en/editor?example=profile#intro%20notes");
 });
 
 test("theme choice persists across reloads", async ({ page }) => {
@@ -27,27 +57,6 @@ test("theme choice persists across reloads", async ({ page }) => {
   await expect(theme).toHaveAttribute("aria-pressed", "true");
 });
 
-test("optional modules can be toggled with the keyboard and fields explain errors", async ({
-  page,
-}) => {
-  await page.goto("/en/design-system");
-  const technologies = page.getByRole("checkbox", { name: "Show technologies", exact: true });
-  await expect(page.getByTestId("demo-technologies-module")).toBeVisible();
-  await technologies.focus();
-  await page.keyboard.press("Space");
-  await expect(page.getByTestId("demo-technologies-module")).toHaveCount(0);
-  await page.keyboard.press("Space");
-  await expect(page.getByTestId("demo-technologies-module")).toBeVisible();
-  const activity = page.getByRole("checkbox", { name: "Show activity", exact: true });
-  await expect(page.getByTestId("demo-activity-module")).toHaveCount(0);
-  await activity.check();
-  await expect(page.getByTestId("demo-activity-module")).toBeVisible();
-  const contact = page.getByRole("textbox", { name: "Contact link", exact: true });
-  await expect(contact).toHaveAttribute("aria-invalid", "true");
-  await expect(contact).toHaveAccessibleDescription(/Enter a complete link/);
-  await expect(page.getByRole("button", { name: "Publish profile", exact: true })).toBeDisabled();
-});
-
 test("skip link moves keyboard focus to main content", async ({ page }) => {
   await page.goto("/en");
   await page.keyboard.press("Tab");
@@ -58,7 +67,7 @@ test("skip link moves keyboard focus to main content", async ({ page }) => {
 });
 
 for (const locale of ["en", "es"]) {
-  for (const route of ["", "/design-system"]) {
+  for (const route of [""]) {
     test(`accessibility: ${locale}${route || "/"} has no detected WCAG AA violations`, async ({
       page,
     }) => {
@@ -72,19 +81,23 @@ for (const locale of ["en", "es"]) {
   }
 }
 
-test("accessibility: dark design system has no detected WCAG AA violations", async ({ page }) => {
-  await page.goto("/en/design-system");
-  await page.getByRole("button", { name: "Toggle dark mode", exact: true }).click();
-  await expect(page.locator("html")).toHaveClass(/dark/);
-  const results = await new AxeBuilder({ page })
-    .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
-    .analyze();
-  expect(results.violations).toEqual([]);
+test("the internal design kit is unavailable in production and is absent from public navigation", async ({
+  page,
+}) => {
+  for (const locale of ["en", "es"]) {
+    await page.goto(`/${locale}`);
+    await expect(page.locator('a[href*="/design-system"]')).toHaveCount(0);
+    const response = await page.goto(`/${locale}/design-system`);
+    expect(response?.status()).toBe(404);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+      locale === "en" ? "This page isn't here." : "Esta página no está acá.",
+    );
+  }
 });
 
 test("mobile pages fit a narrow viewport", async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 800 });
-  for (const route of ["/en", "/es", "/en/design-system", "/es/design-system"]) {
+  for (const route of ["/en", "/es"]) {
     await page.goto(route);
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     const hasOverflow = await page.evaluate(

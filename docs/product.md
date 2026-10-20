@@ -56,7 +56,7 @@ Conocimientos, formación y actualidad están retirados de la navegación, los f
 
 Si se eligieron tarjetas, su exportación requiere que la aplicación tenga un origen HTTPS público configurado para alojarlas. En un entorno local se revisan las mismas imágenes mediante rutas locales y se muestra el requisito antes de copiar o descargar; desmarcarlas permite terminar un perfil manual. No se solicitan tokens ni tareas de despliegue dentro del recorrido de creación del perfil.
 
-En pantallas amplias, navegación, configuración y vista previa ocupan tres paneles. En pantallas angostas se despliega la navegación y se alterna Editar/Vista previa. La sección en edición está identificada. La aplicación muestra instrucciones para usar el archivo en GitHub; no publica por la persona.
+La barra superior mantiene las secciones en una sola fila horizontal, con la activa identificada. La fila se desplaza lateralmente sin ensanchar la página. Sus casillas incluyen u ocultan; los tiradores y las flechas izquierda/derecha ordenan las incluidas. En pantallas amplias, configuración y vista previa ocupan dos paneles; en pantallas angostas se alterna Editar/Vista previa. Las muestras de bloques se despliegan desde «Agregar bloque» para conservar acceso directo al contenido existente. La aplicación muestra instrucciones para usar el archivo en GitHub; no publica por la persona. El kit de componentes y Playwright son herramientas internas de desarrollo, sin navegación pública al catálogo.
 
 El borrador se guarda en el navegador. Si el almacenamiento falla, el aviso permite distinguir que se continúa en memoria y exportar un README válido. Los datos incompatibles no se reemplazan automáticamente. Ver [editor](editor.md).
 

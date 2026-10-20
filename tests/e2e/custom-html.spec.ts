@@ -1,3 +1,4 @@
+import { showSectionOrganizer } from "./editor-test-helpers";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 import { readFile } from "node:fs/promises";
@@ -219,14 +220,21 @@ test("HTML errors focus the code field and hidden blocks preserve invalid URLs w
     await expect(page.getByRole("button", { name: "Download README", exact: true })).toBeDisabled();
     await expect(page.getByRole("list", { name: "HTML problems", exact: true })).not.toBeEmpty();
   }
-  await page.getByRole("checkbox", { name: "About you", exact: true }).check();
+  await showSectionOrganizer(page);
+  await page.getByRole("checkbox", { name: "About you", exact: true, includeHidden: true }).check();
+  await showSectionOrganizer(page);
   await page.getByRole("button", { name: "About you", exact: true }).click();
+  await showSectionOrganizer(page);
   await page.getByRole("button", { name: "Review fields in My corner", exact: true }).click();
   await expect(code).toBeFocused();
-  await page.getByRole("checkbox", { name: "My corner", exact: true }).uncheck();
+  await showSectionOrganizer(page);
+  await page
+    .getByRole("checkbox", { name: "My corner", exact: true, includeHidden: true })
+    .uncheck();
   await expect(page.getByRole("button", { name: "Download README", exact: true })).toBeEnabled();
   expect(await downloadReadme(page)).not.toContain("details");
-  await page.getByRole("checkbox", { name: "My corner", exact: true }).check();
+  await showSectionOrganizer(page);
+  await page.getByRole("checkbox", { name: "My corner", exact: true, includeHidden: true }).check();
   await code.fill("<p>Now valid.</p>");
   await expect(page.getByRole("button", { name: "Download README", exact: true })).toBeEnabled();
   expect(requests).toEqual([]);

@@ -90,7 +90,7 @@ export function ContactForm({ value, errors, onChange }: ContactFormProps) {
         return (
           <fieldset key={link.id} className="min-w-0 space-y-4 rounded-lg border border-border p-4">
             <legend className="max-w-full px-1 text-sm font-medium">
-              <span className="inline-flex items-center gap-2">
+              <span className="inline-flex max-w-full min-w-0 flex-wrap items-center gap-2">
                 <span
                   className="inline-flex size-8 shrink-0 items-center justify-center rounded-md bg-white text-slate-800"
                   aria-hidden="true"

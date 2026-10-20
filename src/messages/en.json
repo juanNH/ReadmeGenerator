@@ -8,7 +8,6 @@
     "main": "Main navigation",
     "modules": "Modules",
     "howItWorks": "How it works",
-    "designSystem": "Design system",
     "editor": "Create your profile",
     "skip": "Skip to content"
   },
@@ -31,7 +30,7 @@
     "titleAccent": "On your terms.",
     "description": "Say hello, pick your tools and share what you love making. A few lines can say a lot.",
     "primary": "Create your profile",
-    "secondary": "Explore the design system",
+    "secondary": "Explore the sections",
     "note": "No account needed. Pick what you want to share; leave the rest out.",
     "previewLabel": "Example profile",
     "previewName": "Alex Rivera",
@@ -91,7 +90,7 @@
     },
     "closingTitle": "A little space. A better first impression.",
     "closingDescription": "Clear content, purposeful details and a design that leaves room for you.",
-    "closingAction": "See the visual foundations",
+    "closingAction": "Create your profile",
     "footer": "Built around people, at every stage.",
     "footerNote": "Independent project. Not affiliated with GitHub."
   },

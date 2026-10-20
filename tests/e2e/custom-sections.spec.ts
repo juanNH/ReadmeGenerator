@@ -1,3 +1,4 @@
+import { showCustomBlockPicker, showSectionOrganizer } from "./editor-test-helpers";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 import { readFile } from "node:fs/promises";
@@ -54,6 +55,7 @@ test("custom sections compose, duplicate independently, hide, reorder and recove
   await page.setViewportSize({ width: 1600, height: 1100 });
   await openEditor(page);
   await addSection(page);
+  await showCustomBlockPicker(page);
   await page.getByRole("button", { name: "Add text", exact: true }).click();
   await page.getByRole("textbox", { name: "Text", exact: true }).fill("- ");
   const first = page.getByRole("textbox", { name: "List item 1", exact: true });
@@ -63,9 +65,11 @@ test("custom sections compose, duplicate independently, hide, reorder and recove
   await first.press("Enter");
   await expect(page.getByRole("textbox", { name: "List item 2", exact: true })).toBeFocused();
   await page.getByRole("textbox", { name: "List item 2", exact: true }).fill("Share useful notes");
+  await showCustomBlockPicker(page);
   await page.getByRole("button", { name: "Add link", exact: true }).click();
   await page.getByRole("textbox", { name: "Link label", exact: true }).fill("My notes");
   await page.getByRole("textbox", { name: "URL", exact: true }).fill("https://example.com/notes");
+  await showCustomBlockPicker(page);
   await page.getByRole("button", { name: "Add numbered list", exact: true }).click();
   const ordered = page.getByRole("group", { name: "Numbered list 3", exact: true });
   await ordered.getByRole("textbox", { name: "List item 1", exact: true }).fill("Explore an idea");
@@ -76,19 +80,26 @@ test("custom sections compose, duplicate independently, hide, reorder and recove
   await page.getByRole("button", { name: "Duplicate section", exact: true }).click();
   await expect(page.getByRole("textbox", { name: "Section title", exact: true })).toBeFocused();
   await expect(
-    page.getByRole("checkbox", { name: "How I work · custom 1", exact: true }),
-  ).toBeVisible();
+    page.getByRole("checkbox", { name: "How I work · custom 1", exact: true, includeHidden: true }),
+  ).toBeEnabled();
   await expect(
-    page.getByRole("checkbox", { name: "How I work · custom 2", exact: true }),
-  ).toBeVisible();
+    page.getByRole("checkbox", { name: "How I work · custom 2", exact: true, includeHidden: true }),
+  ).toBeEnabled();
   await page.getByRole("textbox", { name: "Section title", exact: true }).fill("Exploring");
   await page
     .getByRole("group", { name: "Bullet list 1", exact: true })
     .getByRole("textbox", { name: "List item 1", exact: true })
     .fill("An independent copy");
-  await page.getByRole("checkbox", { name: "How I work", exact: true }).uncheck();
-  await page.getByRole("checkbox", { name: "Technologies & tools", exact: true }).check();
-  await page.getByRole("button", { name: "Move Exploring up", exact: true }).click();
+  await showSectionOrganizer(page);
+  await page
+    .getByRole("checkbox", { name: "How I work", exact: true, includeHidden: true })
+    .uncheck();
+  await showSectionOrganizer(page);
+  await page
+    .getByRole("checkbox", { name: "Technologies & tools", exact: true, includeHidden: true })
+    .check();
+  await showSectionOrganizer(page);
+  await page.getByRole("button", { name: "Move Exploring left", exact: true }).click();
   await expect.poll(async () => (await storedProfile(page))?.customSections.length).toBe(2);
   const saved = await storedProfile(page);
   expect(saved.customSections[0]).toEqual({ ...original, visible: false });
@@ -103,6 +114,7 @@ test("custom sections compose, duplicate independently, hide, reorder and recove
         true,
       );
   }
+  await showSectionOrganizer(page);
   await page.getByRole("button", { name: "Technologies & tools", exact: true }).click();
   await page.getByRole("combobox", { name: "Add technologies", exact: true }).fill("React");
   await page.getByRole("option", { name: "React", exact: true }).click();
@@ -120,7 +132,10 @@ test("custom sections compose, duplicate independently, hide, reorder and recove
     )
     .toBe(true);
   await page.reload();
-  await expect(page.getByRole("checkbox", { name: "How I work", exact: true })).not.toBeChecked();
+  await expect(
+    page.getByRole("checkbox", { name: "How I work", exact: true, includeHidden: true }),
+  ).not.toBeChecked();
+  await showSectionOrganizer(page);
   await page.getByRole("button", { name: "Exploring", exact: true }).click();
   await expect(
     page
@@ -137,6 +152,7 @@ test("custom lists support paste, Enter to finish, format conversion and block o
   await page.setViewportSize({ width: 1600, height: 1100 });
   await openEditor(page);
   await addSection(page, "");
+  await showCustomBlockPicker(page);
   await page.getByRole("button", { name: "Add bullet list", exact: true }).click();
   const first = page.getByRole("textbox", { name: "List item 1", exact: true });
   await first.fill("Keep suffix");
@@ -186,8 +202,9 @@ test("custom links show exact errors, hiding preserves them and deletion affects
   await openEditor(page);
   await addSection(page, "Contact");
   await expect(
-    page.getByRole("checkbox", { name: "Contact · custom 1", exact: true }),
-  ).toBeVisible();
+    page.getByRole("checkbox", { name: "Contact · custom 1", exact: true, includeHidden: true }),
+  ).toBeEnabled();
+  await showCustomBlockPicker(page);
   await page.getByRole("button", { name: "Add link", exact: true }).click();
   const url = page.getByRole("textbox", { name: "URL", exact: true });
   await url.fill("javascript:alert(1)");
@@ -196,11 +213,15 @@ test("custom links show exact errors, hiding preserves them and deletion affects
   await page.getByRole("button", { name: "Duplicate section", exact: true }).click();
   await page.getByRole("textbox", { name: "Section title", exact: true }).fill("Notes");
   await page.getByRole("textbox", { name: "URL", exact: true }).fill("https://example.com");
+  await showSectionOrganizer(page);
   await page
     .getByRole("button", { name: "Review fields in Contact · custom 1", exact: true })
     .click();
   await expect(url).toBeFocused();
-  await page.getByRole("checkbox", { name: "Contact · custom 1", exact: true }).uncheck();
+  await showSectionOrganizer(page);
+  await page
+    .getByRole("checkbox", { name: "Contact · custom 1", exact: true, includeHidden: true })
+    .uncheck();
   await expect(page.getByRole("button", { name: "Download README", exact: true })).toBeEnabled();
   expect(await downloadReadme(page)).toContain("https://example.com");
   page.once("dialog", (dialog) => dialog.dismiss());
@@ -277,6 +298,7 @@ test("an invalid current draft never falls back to a legacy copy", async ({ page
   await expect(page.getByText("We could not open the saved draft", { exact: true })).toBeVisible();
   await expect(page.getByText("Do not restore stale data", { exact: true })).toHaveCount(0);
   await addSection(page, "In memory");
+  await showCustomBlockPicker(page);
   await page.getByRole("button", { name: "Add text", exact: true }).click();
   await page.getByRole("textbox", { name: "Text", exact: true }).fill("Still able to write");
   await page.getByRole("combobox", { name: "Language", exact: true }).selectOption("es");
@@ -299,6 +321,7 @@ test("custom content stays exportable in memory across languages when the browse
   }, draftKey);
   await openEditor(page);
   await addSection(page, "Personal notes");
+  await showCustomBlockPicker(page);
   await page.getByRole("button", { name: "Add bullet list", exact: true }).click();
   await page
     .getByRole("textbox", { name: "List item 1", exact: true })
@@ -325,6 +348,7 @@ test("long custom titles and text wrap within the mobile editor and preview", as
   await page.setViewportSize({ width: 360, height: 900 });
   await openEditor(page);
   await addSection(page, "A".repeat(140));
+  await showCustomBlockPicker(page);
   await page.getByRole("button", { name: "Add text", exact: true }).click();
   await page.getByRole("textbox", { name: "Text", exact: true }).fill("B".repeat(200));
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
@@ -358,8 +382,9 @@ test("authored titles cannot collide with provisional or disambiguated navigatio
     "Custom section 2 · custom 1 · custom 3",
   ];
   for (const [index, label] of labels.entries()) {
-    const checkbox = page.getByRole("checkbox", { name: label, exact: true });
+    const checkbox = page.getByRole("checkbox", { name: label, exact: true, includeHidden: true });
     await expect(checkbox).toHaveCount(1);
+    await showSectionOrganizer(page);
     await page.getByRole("button", { name: label, exact: true }).click();
     await expect(page.getByRole("textbox", { name: "Section title", exact: true })).toHaveValue(
       profile.customSections[index]!.title,
@@ -443,6 +468,7 @@ test("Spanish list choices explain points and automatic numbering before writing
   await openEditor(page, undefined, "es");
   await page.getByRole("button", { name: "Agregar sección personalizada", exact: true }).click();
   await page.getByRole("textbox", { name: "Título de la sección", exact: true }).fill("Mis ideas");
+  await showCustomBlockPicker(page);
   await page.getByRole("button", { name: "Agregar lista con puntos", exact: true }).click();
   const points = page.getByRole("group", { name: "Lista con puntos 1", exact: true });
   const item = points.getByRole("textbox", { name: "Elemento de lista 1", exact: true });
@@ -451,6 +477,7 @@ test("Spanish list choices explain points and automatic numbering before writing
     /Cada elemento lleva un punto \(•\).*Los puntos se agregan automáticamente/,
   );
   await item.fill("Compartir lo que aprendo");
+  await showCustomBlockPicker(page);
   await page.getByRole("button", { name: "Agregar lista numerada", exact: true }).click();
   const numbers = page.getByRole("group", { name: "Lista numerada 2", exact: true });
   const step = numbers.getByRole("textbox", { name: "Elemento de lista 1", exact: true });
@@ -481,9 +508,7 @@ for (const locale of ["en", "es"] as const) {
       profile.customSections[1]!.visible = true;
       profile.contentLocale = locale;
       await openEditor(page, profile, locale);
-      await page
-        .getByRole("button", { name: locale === "en" ? "Sections" : "Secciones", exact: true })
-        .click();
+      await showSectionOrganizer(page);
       const title = profile.customSections[0]!.title;
       const label = locale === "en" ? `${title} · custom 1` : `${title} · personalizada 1`;
       await page.getByRole("button", { name: label, exact: true }).click();

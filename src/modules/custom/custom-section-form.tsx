@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import { AlignLeft, ArrowDown, ArrowUp, Plus, Trash2 } from "lucide-react";
+import { AlignLeft, ArrowDown, ArrowUp, ChevronDown, Plus, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
@@ -60,16 +60,17 @@ export function CustomSectionForm({ value, errors, onChange }: CustomSectionForm
   const itemControls = useRef(new Map<string, Map<string, TextControl>>());
   const composingParagraphs = useRef(new Map<string, boolean>());
   const composingItems = useRef(new Map<string, Set<string>>());
-  const addTextRef = useRef<HTMLButtonElement>(null);
+  const addBlockRef = useRef<HTMLButtonElement>(null);
   const pendingFocus = useRef<FocusRequest | null>(null);
   const [announcement, setAnnouncement] = useState("");
+  const [pickerOpen, setPickerOpen] = useState(() => value.blocks.length === 0);
 
   useEffect(() => {
     const request = pendingFocus.current;
     if (request === null) return;
     const control =
       request.kind === "add"
-        ? addTextRef.current
+        ? addBlockRef.current
         : request.kind === "heading"
           ? headings.current.get(request.blockId)
           : request.kind === "item"
@@ -155,6 +156,7 @@ export function CustomSectionForm({ value, errors, onChange }: CustomSectionForm
                 ? { id, type: "link", label: "", url: "" }
                 : { id, type: "list", style: kind, items: [{ id: crypto.randomUUID(), text: "" }] };
     pendingFocus.current = { kind: "block", blockId: id };
+    setPickerOpen(false);
     onChange({ ...value, blocks: [...value.blocks, block] });
     setAnnouncement(t("blockAdded", { name: blockLabel(block, value.blocks.length) }));
   }
@@ -162,6 +164,7 @@ export function CustomSectionForm({ value, errors, onChange }: CustomSectionForm
   function removeBlock(index: number) {
     const next = value.blocks[index + 1] ?? value.blocks[index - 1];
     pendingFocus.current = next ? { kind: "block", blockId: next.id } : { kind: "add" };
+    if (!next) setPickerOpen(true);
     onChange({ ...value, blocks: value.blocks.filter((_, position) => position !== index) });
     setAnnouncement(t("blockRemoved"));
   }
@@ -308,8 +311,26 @@ export function CustomSectionForm({ value, errors, onChange }: CustomSectionForm
           onChange={(event) => onChange({ ...value, title: event.target.value })}
         />
       </Field>
-      <p className="text-sm leading-6 text-muted-foreground">{t("intro")}</p>
-      <CustomBlockPicker addTextRef={addTextRef} onAdd={addBlock} />
+      <div className="min-w-0 space-y-3">
+        <Button
+          ref={addBlockRef}
+          variant="outline"
+          aria-expanded={pickerOpen}
+          aria-controls={`${baseId}-block-picker`}
+          onClick={() => setPickerOpen(!pickerOpen)}
+          className="w-full justify-between text-left"
+        >
+          <span className="flex min-w-0 items-center gap-2">
+            <Plus aria-hidden="true" />
+            <span className="min-w-0 wrap-anywhere">{t("addBlock")}</span>
+          </span>
+          <ChevronDown aria-hidden="true" className={pickerOpen ? "rotate-180" : undefined} />
+        </Button>
+        <div id={`${baseId}-block-picker`} hidden={!pickerOpen} className="min-w-0 space-y-3">
+          <p className="text-sm leading-6 text-muted-foreground">{t("intro")}</p>
+          <CustomBlockPicker onAdd={addBlock} />
+        </div>
+      </div>
       {value.blocks.length === 0 && (
         <p className="rounded-md border border-dashed border-border px-4 py-5 text-sm leading-6 text-muted-foreground">
           {t("empty")}
@@ -355,11 +376,11 @@ export function CustomSectionForm({ value, errors, onChange }: CustomSectionForm
                   if (heading) headings.current.set(block.id, heading);
                   else headings.current.delete(block.id);
                 }}
-                className="min-w-0 text-sm font-semibold focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:outline-none"
+                className="min-w-0 text-sm font-semibold wrap-anywhere focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:outline-none"
               >
                 {name}
               </h3>
-              <div className="flex items-center gap-1">
+              <div className="flex max-w-full min-w-0 flex-wrap items-center gap-1">
                 <Button
                   variant="ghost"
                   size="icon"

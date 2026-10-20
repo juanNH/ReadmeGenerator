@@ -16,8 +16,9 @@ pnpm dev
 - Aplicación en inglés: [http://127.0.0.1:3000/en](http://127.0.0.1:3000/en).
 - Aplicación en español: [http://127.0.0.1:3000/es](http://127.0.0.1:3000/es).
 - Editor: [inglés](http://127.0.0.1:3000/en/editor) y [español](http://127.0.0.1:3000/es/editor).
-- Kit visual: [inglés](http://127.0.0.1:3000/en/design-system) y [español](http://127.0.0.1:3000/es/design-system).
+- Kit interno, solo con `pnpm dev`: [inglés](http://127.0.0.1:3000/en/design-system) y [español](http://127.0.0.1:3000/es/design-system). No se expone en producción.
 - Comprobaciones locales: `pnpm check`.
+- Interfaz interna de pruebas: `pnpm test:e2e:ui` (Playwright).
 - Compilación para producción: `pnpm build` y luego `pnpm start`.
 
 Consultá la [guía operativa](docs/development.md) para conocer todos los comandos y el estado de la validación.
@@ -28,7 +29,7 @@ El editor ofrece presentación, tecnologías, proyectos, actividad y contribucio
 
 La introducción permite contar quién sos, qué te interesa o qué estás aprendiendo sin repetirlo en otras secciones. Conocimientos, formación y actualidad están retirados del producto, también para borradores anteriores. Sus datos heredados de v1 permanecen guardados internamente, sin edición ni exportación y sin fusionarlos con la presentación.
 
-El recorrido funciona sin cuenta: elegir qué compartir, configurar una sección a la vez, revisar y copiar o descargar `README.md`. En pantallas amplias, las secciones están a la izquierda, la configuración en el centro y la vista previa a la derecha. En pantallas angostas, la navegación es plegable y se alterna Editar/Vista previa. Tecnologías ofrece búsqueda y autocompletado sobre un catálogo local de 358 herramientas, además de texto propio. Incluye frameworks, ORMs, bases de datos, mensajería, infraestructura e IA, como Drizzle, TypeORM, Hono, TanStack, Claude, Codex y LangGraph. Su selección no integra esos servicios ni asigna un nivel de habilidad.
+El recorrido funciona sin cuenta: elegir qué compartir, configurar una sección a la vez, revisar y copiar o descargar `README.md`. Las secciones están siempre visibles en una fila superior con desplazamiento horizontal; sus casillas permiten incluir u ocultar y sus tiradores ordenarlas de izquierda a derecha. Dos flechas permiten ordenar la sección activa sin arrastrar. En pantallas amplias, configuración y vista previa aparecen juntas. En pantallas angostas se alterna Editar/Vista previa. «Agregar bloque» despliega las muestras sin alejar el contenido existente. Tecnologías ofrece búsqueda y autocompletado sobre un catálogo local de 358 herramientas, además de texto propio. Incluye frameworks, ORMs, bases de datos, mensajería, infraestructura e IA, como Drizzle, TypeORM, Hono, TanStack, Claude, Codex y LangGraph. Su selección no integra esos servicios ni asigna un nivel de habilidad.
 
 Las tecnologías muestran icono y nombre en filas adaptables, con categorías sugeridas que se pueden renombrar, crear, ordenar o dejar sin título. También se pueden mover y ordenar las herramientas. Los borradores anteriores conservan su organización hasta que la persona decide cambiarla. Contacto ofrece 13 servicios conocidos, como LinkedIn, LeetCode, HackerRank y YouTube, y permite agregar varias webs, portfolios o correos propios y repetir servicios. Cada enlace conserva su nombre y URL; la etiqueta es opcional y el icono corresponde al dominio de la URL. No hace falta empleo, proyecto ni actividad pública para crear un perfil útil.
 
