@@ -6,6 +6,7 @@ export function activityFixture() {
       user: {
         login: "octocat",
         userViewType: "PUBLIC",
+        isViewer: false,
         contributionsCollection: {
           restrictedContributionsCount: 0,
           totalCommitContributions: 7,

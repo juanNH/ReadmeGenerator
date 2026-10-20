@@ -93,43 +93,139 @@ describe("GitHub public activity client", () => {
     );
   });
 
-  it("rejects a private user view even with empty reported scopes", async () => {
+  it.each(["", "public_repo"])(
+    "allows the verified token owner's view with public scopes: %s",
+    async (scope) => {
+      const activity = activityFixture();
+      activity.data.user.login = "OctoCat";
+      activity.data.user.userViewType = "PRIVATE";
+      activity.data.user.isViewer = true;
+      respond(
+        githubResponse(activity, { "x-oauth-scopes": scope }),
+        githubResponse(languagesFixture(), { "x-oauth-scopes": scope }),
+      );
+      const snapshot = await fetchGitHubActivity("octocat", "fixture-token", fixtureNow);
+      expect(snapshot.username).toBe("OctoCat");
+      expect(snapshot.summary).toEqual({ commits: 7, pullRequests: 2, issues: 1, reviews: 3 });
+      expect(snapshot.calendar.total).toBe(5);
+      expect(snapshot.languages.repositoriesAnalyzed).toBe(1);
+      expect(snapshot.highlights).toHaveLength(2);
+      expect(snapshot).not.toHaveProperty("isViewer");
+      expect(snapshot).not.toHaveProperty("userViewType");
+    },
+  );
+
+  it("rejects a private view of someone other than the token owner", async () => {
     const activity = activityFixture();
     activity.data.user.userViewType = "PRIVATE";
-    respond(githubResponse(activity));
+    const fetchMock = respond(githubResponse(activity));
     await expect(fetchGitHubActivity("octocat", "fixture-token", fixtureNow)).rejects.toMatchObject(
       {
         code: "unavailable",
       },
     );
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
-  it("keeps publicized restricted counts anonymous and excludes private candidates", async () => {
+  it("requires an explicit owner flag instead of inferring it from the private view", async () => {
     const activity = activityFixture();
-    activity.data.user.contributionsCollection.restrictedContributionsCount = 3;
-    activity.data.user.contributionsCollection.issueContributions.nodes[0]!.issue.repository.isPrivate = true;
-    activity.data.user.contributionsCollection.pullRequestContributions.nodes[0]!.isRestricted = true;
-    respond(githubResponse(activity), githubResponse(languagesFixture()));
-    const result = await fetchGitHubActivity("octocat", "fixture-token", fixtureNow);
-    expect(result.calendar.includesPrivateCounts).toBe(true);
-    expect(result.highlights).toEqual([]);
-    expect(JSON.stringify(result)).not.toContain("community/project");
+    activity.data.user.userViewType = "PRIVATE";
+    const fetchMock = respond(
+      githubResponse({ data: { user: { ...activity.data.user, isViewer: undefined } } }),
+    );
+    await expect(fetchGitHubActivity("octocat", "fixture-token", fixtureNow)).rejects.toMatchObject(
+      {
+        code: "unavailable",
+      },
+    );
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
-  it("filters private, fork and non-owned repositories defensively", async () => {
-    const languages = languagesFixture();
-    const repository = languages.data.user.repositories.nodes[0]!;
-    languages.data.user.repositories.nodes.push(
-      { ...repository, isPrivate: true },
-      { ...repository, visibility: "INTERNAL" },
-      { ...repository, isFork: true },
-      { ...repository, owner: { login: "someone-else" } },
+  it.each(["PUBLIC", "PRIVATE"])("rejects a mismatched login in the %s view", async (view) => {
+    const activity = activityFixture();
+    activity.data.user.login = "someone-else";
+    activity.data.user.userViewType = view;
+    activity.data.user.isViewer = view === "PRIVATE";
+    const fetchMock = respond(githubResponse(activity));
+    await expect(fetchGitHubActivity("octocat", "fixture-token", fixtureNow)).rejects.toMatchObject(
+      {
+        code: "unavailable",
+      },
     );
-    respond(githubResponse(activityFixture()), githubResponse(languages));
-    const result = await fetchGitHubActivity("octocat", "fixture-token", fixtureNow);
-    expect(result.languages.repositoriesAnalyzed).toBe(1);
-    expect(result.languages.items[0]?.bytes).toBe(150);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
+
+  it.each(["repo", "read:user", "public_repo, read:user", null])(
+    "rejects broad or unverifiable credentials even for the token owner: %s",
+    async (scope) => {
+      const activity = activityFixture();
+      activity.data.user.userViewType = "PRIVATE";
+      activity.data.user.isViewer = true;
+      const fetchMock = respond(
+        scope === null
+          ? Response.json(activity)
+          : githubResponse(activity, { "x-oauth-scopes": scope }),
+      );
+      await expect(
+        fetchGitHubActivity("octocat", "fixture-token", fixtureNow),
+      ).rejects.toMatchObject({ code: "not_configured" });
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    },
+  );
+
+  it.each(["PUBLIC", "PRIVATE"])(
+    "keeps shared restricted counts anonymous and excludes private candidates in the %s view",
+    async (view) => {
+      const activity = activityFixture();
+      activity.data.user.userViewType = view;
+      activity.data.user.isViewer = view === "PRIVATE";
+      const collection = activity.data.user.contributionsCollection;
+      collection.restrictedContributionsCount = 3;
+      collection.issueContributions.nodes[0]!.issue.repository.isPrivate = true;
+      collection.pullRequestContributions.nodes[0]!.isRestricted = true;
+      const internalIssue = collection.issueContributions.nodes[0]!;
+      collection.issueContributions.nodes.push({
+        ...internalIssue,
+        issue: {
+          ...internalIssue.issue,
+          id: "internal-issue",
+          title: "Internal-only title",
+          repository: {
+            ...internalIssue.issue.repository,
+            isPrivate: false,
+            visibility: "INTERNAL",
+          },
+        },
+      });
+      respond(githubResponse(activity), githubResponse(languagesFixture()));
+      const result = await fetchGitHubActivity("octocat", "fixture-token", fixtureNow);
+      expect(result.calendar.includesPrivateCounts).toBe(true);
+      expect(result.highlights).toEqual([]);
+      expect(JSON.stringify(result)).not.toContain("community/project");
+      expect(JSON.stringify(result)).not.toContain("Internal-only title");
+    },
+  );
+
+  it.each(["PUBLIC", "PRIVATE"])(
+    "filters private, fork and non-owned repositories defensively in the %s view",
+    async (view) => {
+      const activity = activityFixture();
+      activity.data.user.userViewType = view;
+      activity.data.user.isViewer = view === "PRIVATE";
+      const languages = languagesFixture();
+      const repository = languages.data.user.repositories.nodes[0]!;
+      languages.data.user.repositories.nodes.push(
+        { ...repository, isPrivate: true },
+        { ...repository, visibility: "INTERNAL" },
+        { ...repository, isFork: true },
+        { ...repository, owner: { login: "someone-else" } },
+      );
+      respond(githubResponse(activity), githubResponse(languages));
+      const result = await fetchGitHubActivity("octocat", "fixture-token", fixtureNow);
+      expect(result.languages.repositoriesAnalyzed).toBe(1);
+      expect(result.languages.items[0]?.bytes).toBe(150);
+    },
+  );
 
   it("paginates at most 300 repositories and discloses truncation", async () => {
     const pages = [1, 2, 3].map((page) => {

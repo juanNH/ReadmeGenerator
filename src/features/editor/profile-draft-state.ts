@@ -3,10 +3,12 @@ import type { ContentLocale, ProfileDocument } from "@/core/profile/profile-sche
 import type { ProfileDraftReadResult } from "./draft-storage";
 import type { ImportBackup, ImportBackupReadResult } from "./import-backup";
 import type { ClearProfileDraftResult } from "./clear-profile-draft";
+import type { ProjectBackup, ProjectBackupReadResult } from "./project-backup";
 export type ProfileDraftStorageStatus =
   "new" | "restored" | "saving" | "saved" | "invalid" | "unavailable";
 
 export type ImportBackupStatus = "loading" | ImportBackupReadResult["status"];
+export type ProjectBackupStatus = "loading" | ProjectBackupReadResult["status"];
 export type DraftState = {
   document: ProfileDocument;
   hydration: "loading" | "ready";
@@ -16,11 +18,19 @@ export type DraftState = {
   revision: number;
   importBackup: ImportBackup | null;
   importBackupStatus: ImportBackupStatus;
+  projectBackup: ProjectBackup | null;
+  projectBackupStatus: ProjectBackupStatus;
+  /** Shared autosave protection for memory-only Markdown imports and JSON project replacements. */
   importMemoryOnly: boolean;
 };
 
 export type DraftAction =
-  | { type: "hydrated"; result: ProfileDraftReadResult; backup: ImportBackupReadResult }
+  | {
+      type: "hydrated";
+      result: ProfileDraftReadResult;
+      backup: ImportBackupReadResult;
+      projectBackup: ProjectBackupReadResult;
+    }
   | { type: "resumed"; state: DraftState }
   | { type: "updated"; document: ProfileDocument }
   | { type: "persisted"; revision: number; success: boolean }
@@ -32,6 +42,17 @@ export type DraftAction =
       memoryOnly: boolean;
     }
   | { type: "cleared"; result: ClearProfileDraftResult }
+  | {
+      type: "project_write_blocked";
+      backup?: ProjectBackup;
+      protection?: "invalid" | "unavailable";
+    }
+  | {
+      type: "project_replaced";
+      document: ProfileDocument;
+      backup: ProjectBackup;
+      memoryOnly: boolean;
+    }
   | { type: "restarted" };
 
 export function createDraftState(initialLocale: ContentLocale): DraftState {
@@ -44,6 +65,8 @@ export function createDraftState(initialLocale: ContentLocale): DraftState {
     revision: 0,
     importBackup: null,
     importBackupStatus: "loading",
+    projectBackup: null,
+    projectBackupStatus: "loading",
     importMemoryOnly: false,
   };
 }
@@ -63,6 +86,9 @@ export function reduceDraft(state: DraftState, action: DraftAction): DraftState 
         recoveryBlocked: result.status === "invalid" || result.status === "unavailable",
         importBackup: action.backup.status === "available" ? action.backup.backup : null,
         importBackupStatus: action.backup.status,
+        projectBackup:
+          action.projectBackup.status === "available" ? action.projectBackup.backup : null,
+        projectBackupStatus: action.projectBackup.status,
       };
     }
     case "updated": {
@@ -93,6 +119,39 @@ export function reduceDraft(state: DraftState, action: DraftAction): DraftState 
       };
     case "backup_available":
       return { ...state, importBackup: action.backup, importBackupStatus: "available" };
+    case "project_write_blocked":
+      if (state.hydration !== "ready") return state;
+      return {
+        ...state,
+        ...(action.backup === undefined
+          ? {}
+          : { projectBackup: action.backup, projectBackupStatus: "available" as const }),
+        // Cancel stale debounce/pagehide writes while the user decides whether to continue.
+        importMemoryOnly: true,
+        dirty: false,
+        revision: state.revision + 1,
+        recoveryBlocked: state.recoveryBlocked || action.protection !== undefined,
+        storageStatus: state.recoveryBlocked
+          ? state.storageStatus
+          : (action.protection ?? "unavailable"),
+      };
+    case "project_replaced":
+      if (state.hydration !== "ready") return state;
+      return {
+        ...state,
+        document: action.document,
+        projectBackup: action.backup,
+        projectBackupStatus: "available",
+        importMemoryOnly: action.memoryOnly,
+        dirty: false,
+        revision: state.revision + 1,
+        recoveryBlocked: action.memoryOnly ? state.recoveryBlocked : false,
+        storageStatus: action.memoryOnly
+          ? state.recoveryBlocked
+            ? state.storageStatus
+            : "unavailable"
+          : "saved",
+      };
     case "replaced":
       return {
         ...state,

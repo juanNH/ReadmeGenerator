@@ -2,10 +2,10 @@
   "description": "Choose GitHub activity or share a contribution in your own words.",
   "help": "Choose what to share. GitHub activity is optional, and you can add a contribution without connecting an account.",
   "highlightsTitle": "Featured contributions",
-  "highlightsHelp": "A small improvement, a review, documentation, or helping a community all count. A title, a link, or a short note is enough.",
+  "highlightsHelp": "A small improvement, a review, documentation, or helping a community all count. Choose a contribution and add context in your own words; your explanation will appear in the README.",
   "activity": {
     "title": "GitHub activity (optional)",
-    "help": "Add an optional calendar, summary, or repository languages. Your public activity does not measure what you know.",
+    "help": "Choose optional activity cards and customize their appearance. Your public activity does not measure what you know.",
     "username": "GitHub username",
     "usernameHelp": "Only the username, with or without @. We query GitHub when you choose to.",
     "usernamePlaceholder": "your-username",
@@ -14,8 +14,13 @@
     "retry": "Try GitHub again",
     "loadingButton": "Checking GitHub…",
     "loading": "Loading available GitHub activity…",
-    "queryFirst": "Check your username to enable the optional cards. Nothing is selected automatically.",
+    "queryFirst": "Check your GitHub username to enable profile cards. Resource cards can be configured separately below. Nothing is selected automatically.",
     "choose": "What would you like to include?",
+    "groups": {
+      "own": "Our activity cards",
+      "extended": "GitHub Stats Extended layouts"
+    },
+    "extendedAttribution": "Cards adapted from <project>GitHub Stats Extended</project> under the MIT license. This site renders them locally using public data. Configure statistics, languages, resources, and appearance below.",
     "cards": {
       "calendar": {
         "label": "Contribution calendar",
@@ -28,6 +33,232 @@
       "languages": {
         "label": "Repository languages",
         "help": "Languages by code size in your public, non-fork repositories. This is not a skills assessment."
+      },
+      "panorama": {
+        "label": "Activity panorama",
+        "help": "Calendar and summary for the period, alongside the current language distribution of your public repositories."
+      },
+      "monthly": {
+        "label": "Activity by month",
+        "help": "Monthly contribution counts from the calendar. The first and last months may cover only part of the month."
+      },
+      "extended-stats": {
+        "label": "Extended activity summary",
+        "help": "Choose public activity counters, repository filters, and an optional activity rank. A rank is not a skills assessment."
+      },
+      "extended-languages": {
+        "label": "Extended repository languages",
+        "help": "Choose language layouts, filters, weights, and display options for public repositories. This is not a skills assessment."
+      }
+    },
+    "appearance": {
+      "title": "Card appearance",
+      "help": "These choices apply to all selected cards and are saved in your project. The card theme is independent of the editor theme.",
+      "theme": {
+        "label": "Card theme",
+        "light": "Light",
+        "dark": "Dark"
+      },
+      "palette": {
+        "label": "Color palette",
+        "forest": "Forest",
+        "ocean": "Ocean",
+        "violet": "Violet"
+      },
+      "design": {
+        "label": "Layout",
+        "classic": "Classic",
+        "panels": "Panels",
+        "minimal": "Minimal"
+      },
+      "size": {
+        "label": "Card width",
+        "compact": "Compact",
+        "wide": "Wide",
+        "help": "Cards fit the available space in the preview."
+      },
+      "samples": "Layout sketches without profile data:",
+      "reset": "Reset card appearance",
+      "preset": {
+        "label": "Extended color theme",
+        "help": "Theme names come from GitHub Stats Extended. Custom colors below take precedence. The base theme uses the theme and palette above.",
+        "base": "Base theme and palette"
+      },
+      "advanced": {
+        "title": "Advanced appearance",
+        "help": "These options apply to supported parts of the selected cards. Custom text is published in the README card. Review color contrast in the preview.",
+        "customTitle": "Custom card title",
+        "customTitleHelp": "Optional, up to 100 characters. Leave empty for the card's title.",
+        "borderRadius": "Corner radius (0–30)",
+        "width": "SVG width (700–1200)",
+        "widthHelp": "The image still fits the available space in the preview.",
+        "lineHeight": "Line height (22–50)",
+        "numberPrecision": "Decimal places (0–2)",
+        "numberError": "Enter a number between {min} and {max}.",
+        "numberFormat": {
+          "label": "Number format",
+          "short": "Compact (1.2k)",
+          "long": "Full number"
+        },
+        "visibility": "Card details",
+        "hideTitle": "Hide the card title",
+        "hideBorder": "Hide the border",
+        "showIcons": "Show metric icons",
+        "textBold": "Use bold text",
+        "colorsTitle": "Custom colors and gradient",
+        "colorsHelp": "Optional colors use #RRGGBB. Clear a field and apply to use its theme color. Custom colors override theme colors.",
+        "titleColor": "Title color",
+        "textColor": "Text color",
+        "iconColor": "Icon color",
+        "borderColor": "Border color",
+        "backgroundColor": "Background color",
+        "colorError": "Use a six-digit hexadecimal color, such as #336699, or leave empty.",
+        "gradientColors": "Background gradient colors",
+        "gradientHelp": "Two to ten #RRGGBB colors, separated by commas or new lines. Clear the list and apply to remove the gradient.",
+        "gradientAngle": "Gradient angle (0–360 degrees)",
+        "gradientError": "Use two to ten valid #RRGGBB colors and an angle between 0 and 360.",
+        "applyColors": "Apply colors and gradient",
+        "draftHelp": "Color text is saved only after applying valid values. Invalid text stays here for correction."
+      }
+    },
+    "extended": {
+      "title": "Extended statistics and language options",
+      "help": "Settings are saved in your project. Editing does not query GitHub; selected card images request their configured data. Some counters cover different periods, and filters may make a metric unavailable or partial.",
+      "statsTitle": "Statistics and optional rank",
+      "statsItems": "Counters to display",
+      "statsItemsHelp": "Choose at least one. Missing public data is shown as unavailable rather than zero.",
+      "stats": {
+        "stars": "Stars received",
+        "commits": "Commits",
+        "pullRequests": "Pull requests",
+        "issues": "Issues",
+        "reviews": "Reviews",
+        "repositoriesContributedTo": "Repositories contributed to in the period",
+        "allTimeContributions": "All-time contributions",
+        "allTimeRepositoriesContributedTo": "All-time repositories contributed to",
+        "discussionsStarted": "Discussions started",
+        "discussionsAnswered": "Discussions answered",
+        "mergedPullRequests": "Merged pull requests",
+        "mergedPullRequestPercentage": "Merged pull request percentage",
+        "authoredPullRequests": "Authored pull requests",
+        "commentedPullRequests": "Commented pull requests",
+        "reviewedPullRequests": "Reviewed pull requests",
+        "authoredIssues": "Authored issues",
+        "commentedIssues": "Commented issues",
+        "followers": "Followers"
+      },
+      "commitsPeriod": {
+        "label": "Commit period",
+        "period": "Current contribution period",
+        "year": "Specific calendar year",
+        "all": "All available history"
+      },
+      "year": "Calendar year (2008–2100)",
+      "includeOwn": "Include own repositories in contributed repository counts",
+      "includeOwnHelp": "Extended excludes your own repositories from those counters by default.",
+      "showRank": "Show the optional activity rank",
+      "rankHelp": "The letter or percentile comes from Extended's activity formula. It is not an official GitHub rating and does not measure ability, experience, or code quality. It is hidden when the required public data is unavailable.",
+      "rankIcon": {
+        "label": "Rank display",
+        "letter": "Letter",
+        "percentile": "Formula percentage index",
+        "github": "GitHub symbol"
+      },
+      "languagesTitle": "Language distribution",
+      "languageLayout": {
+        "label": "Language layout",
+        "normal": "Bars",
+        "compact": "Compact",
+        "donut": "Donut",
+        "donut-vertical": "Vertical donut",
+        "pie": "Pie"
+      },
+      "languageFormat": {
+        "label": "Language values",
+        "percentages": "Percentages",
+        "bytes": "Code size in bytes"
+      },
+      "languageCount": "Number of languages (1–20)",
+      "sizeWeight": "Code size weight (0–2)",
+      "countWeight": "Repository count weight (0–2)",
+      "weightHelp": "Weights change the distribution formula, not skill levels. Defaults: code size 1, repository count 0.",
+      "weightError": "Use weights between 0 and 2, with at least one weight greater than zero.",
+      "hideProgress": "Hide language progress bars",
+      "hideValues": "Hide language values",
+      "hiddenLanguages": "Languages to hide",
+      "languageListHelp": "Up to 20 language names, separated by commas or new lines. Apply to save; an empty list removes this filter.",
+      "languageListError": "Enter up to 20 distinct language names, each up to 100 characters.",
+      "numberError": "Enter a number between {min} and {max}.",
+      "apply": "Apply list changes",
+      "filters": {
+        "title": "Public repository filters",
+        "help": "Filters apply where GitHub supports them. Historical totals can be limited or partial; cards identify those cases. Only public repositories are used.",
+        "repositories": "Include these repositories",
+        "repositoriesHelp": "Up to 20 owner/repository pairs, separated by commas or new lines. Leave empty for the available repository set.",
+        "owners": "Include these owners",
+        "ownersHelp": "Up to 20 GitHub user or organization names, separated by commas or new lines.",
+        "excludeRepositories": "Exclude repository names",
+        "excludeRepositoriesHelp": "Up to 20 repository names without owner/. For statistics this affects stars; for languages it affects the language sample.",
+        "error": "Check the lists: up to 20 distinct entries each. Repositories use owner/name; owners and excluded names must be valid GitHub names.",
+        "roles": "Relationship filter (optional for statistics)",
+        "role": {
+          "OWNER": "Owner",
+          "ORGANIZATION_MEMBER": "Organization member",
+          "COLLABORATOR": "Collaborator"
+        }
+      }
+    },
+    "resources": {
+      "title": "Extended repository, Gist, and WakaTime cards",
+      "help": "Configure public resources independently of your GitHub profile username. Apply a target before selecting its card. Selected images query that public resource; editing these fields does not query it.",
+      "apply": "Apply resource targets",
+      "missingTarget": "Add and apply a valid target for this selected card, or deselect the card.",
+      "numberError": "Enter a number between {min} and {max}.",
+      "contributions": {
+        "title": "A user's contributions in each repository",
+        "help": "Add optional public history counters to each repository card. Commented and reviewed counters exclude items authored by that user. Results may be limited by GitHub's available public history. Editing does not query GitHub; apply valid settings to save them.",
+        "username": "GitHub username for repository contributions",
+        "usernameHelp": "Optional and independent of the profile username. Use a GitHub username without @. Choose counters below, or clear them all to leave out contributions.",
+        "stats": "Repository contribution counters",
+        "usernameRequired": "Enter a GitHub username to apply the selected contribution counters.",
+        "invalidUsername": "Enter a valid GitHub username of up to 39 letters, digits, or single hyphens between them, without @.",
+        "apply": "Apply repository contribution settings"
+      },
+      "repositories": {
+        "title": "Public repositories",
+        "label": "Repository targets",
+        "help": "Up to 12 distinct owner/repository pairs, separated by commas or new lines. One card is generated per repository.",
+        "error": "Use up to 12 distinct valid owner/repository pairs.",
+        "include": "Include repository cards",
+        "cardHelp": "Public repository descriptions, language, stars, and forks. No private repositories are requested."
+      },
+      "gists": {
+        "title": "Public Gists",
+        "label": "Gist IDs",
+        "help": "Up to 12 distinct hexadecimal Gist IDs, separated by commas or new lines. Use the ID from the public Gist URL, not the whole URL.",
+        "error": "Use up to 12 distinct hexadecimal Gist IDs of 5–64 characters.",
+        "include": "Include Gist cards",
+        "cardHelp": "One card per public Gist. Secret Gists are not displayed."
+      },
+      "wakatimeUsername": {
+        "title": "Public WakaTime activity",
+        "label": "WakaTime username",
+        "help": "Use your existing WakaTime username (letters, digits, underscores, or hyphens; up to 64 characters), not the alias current. Its public coding activity and public languages must already be enabled in WakaTime. This site does not create an account or request a WakaTime token.",
+        "error": "Use an explicit WakaTime username of 1–64 letters, digits, underscores, or hyphens. The alias current is not supported.",
+        "include": "Include the WakaTime card",
+        "cardHelp": "Uses public coding activity from WakaTime. This username is independent of your GitHub username."
+      },
+      "options": {
+        "title": "Resource card details",
+        "showOwner": "Show the repository or Gist owner",
+        "descriptionLines": "Description lines (1–3)",
+        "displayFormat": { "label": "WakaTime values", "time": "Time", "percent": "Percentages" },
+        "layout": { "label": "WakaTime layout", "default": "Default", "compact": "Compact" },
+        "languageCount": "WakaTime language count (1–20)",
+        "hideProgress": "Hide WakaTime progress bars",
+        "hideLanguages": "WakaTime languages to hide",
+        "hideLanguagesHelp": "Up to 20 distinct language names, separated by commas or new lines. Apply to save; an empty list removes the filter.",
+        "hideLanguagesError": "Use up to 20 distinct language names of up to 100 characters."
       }
     },
     "scope": "Cards use the activity GitHub makes available. They can be left out or removed at any time.",
@@ -59,7 +290,7 @@
   "titleHelp": "Name your contribution, or leave this empty and describe it below.",
   "titlePlaceholder": "Documentation improvements",
   "descriptionLabel": "How you contributed",
-  "descriptionHelp": "Optional. A short note about your contribution is enough.",
+  "descriptionHelp": "Optional. Explain what you contributed or why it matters to you. This text is published in the README.",
   "descriptionPlaceholder": "Reviewed setup instructions and helped new learners get started.",
   "url": "Contribution link",
   "urlHelp": "Optional. Use a full http:// or https:// address, without spaces or sign-in credentials.",

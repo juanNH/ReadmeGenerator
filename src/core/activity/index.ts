@@ -1,6 +1,11 @@
-import { metricCardIds, type MetricCardId } from "../profile/module-content";
+import {
+  profileActivityCardIds,
+  type CardAppearance,
+  type MetricCardId,
+} from "../profile/module-content";
 import type { ContentLocale } from "../profile/profile-schema";
 import { normalizeGitHubUsername } from "./github-username";
+import { cardQuery, parseCardOptions, type ProfileCardOptions } from "./card-options";
 
 export { normalizeGitHubUsername } from "./github-username";
 export { activitySnapshotSchema, activityErrorCodes } from "./activity-types";
@@ -37,24 +42,58 @@ export function activityCardUrl(
   card: MetricCardId,
   locale: ContentLocale,
   baseUrl?: string,
+  appearance?: CardAppearance,
+  extended?: ProfileCardOptions["extended"],
 ): string | null {
   const normalized = normalizeGitHubUsername(username);
   if (!normalized) return null;
+  if (!(profileActivityCardIds as readonly string[]).includes(card)) return null;
   const origin = baseUrl === undefined ? "" : normalizeActivityBaseUrl(baseUrl);
   if (origin === null) return null;
-  return `${origin}/cards/github/${normalized}/${card}.svg?locale=${locale}`;
+  const cardOptions =
+    card === "extended-stats"
+      ? { stats: extended?.stats }
+      : card === "extended-languages"
+        ? { languages: extended?.languages }
+        : undefined;
+  const result = `${origin}/cards/github/${normalized}/${card}.svg?${cardQuery(locale, appearance, cardOptions)}`;
+  return result.length <= 12_000 ? result : null;
 }
 
 /** Only our exact card paths and configured origin may become preview images. */
 export function parseActivityCardUrl(value: string, baseUrl?: string) {
-  for (const card of metricCardIds) {
-    for (const locale of ["en", "es"] as const) {
-      const origin = baseUrl === undefined ? "" : normalizeActivityBaseUrl(baseUrl);
-      if (origin === null || !value.startsWith(`${origin}/cards/github/`)) continue;
-      const username = value.slice(`${origin}/cards/github/`.length).split("/")[0];
-      if (username && activityCardUrl(username, card, locale, baseUrl) === value) {
-        return { username, card, locale, localUrl: activityCardUrl(username, card, locale)! };
-      }
+  const origin = baseUrl === undefined ? "" : normalizeActivityBaseUrl(baseUrl);
+  if (origin === null || !value.startsWith(`${origin}/cards/github/`)) return null;
+  const query = value.split("?")[1];
+  if (!query) return null;
+  const options = parseCardOptions(new URLSearchParams(query));
+  if (!options) return null;
+  for (const card of profileActivityCardIds) {
+    const username = value.slice(`${origin}/cards/github/`.length).split("/")[0];
+    if (
+      username &&
+      activityCardUrl(
+        username,
+        card,
+        options.locale,
+        baseUrl,
+        options.appearance,
+        options.extended,
+      ) === value
+    ) {
+      return {
+        username,
+        card,
+        ...options,
+        localUrl: activityCardUrl(
+          username,
+          card,
+          options.locale,
+          undefined,
+          options.appearance,
+          options.extended,
+        )!,
+      };
     }
   }
   return null;

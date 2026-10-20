@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { metricCardIds } from "../profile/module-content";
+import { profileActivityCardIds as metricCardIds } from "../profile/module-content";
 import type { ActivitySnapshot } from "./activity-types";
 import { renderActivityCard, renderActivityUnavailable } from "./render-card";
 

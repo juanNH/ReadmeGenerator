@@ -10,6 +10,7 @@ import {
   Download,
   Eye,
   FileUp,
+  FolderOpen,
   Globe2,
   PenLine,
   Plus,
@@ -64,6 +65,20 @@ const ReadmeImportPanel = dynamic(
   { loading: ImportLoading },
 );
 
+function ProjectLoading() {
+  const t = useTranslations("Editor");
+  return (
+    <p role="status" className="p-4 text-sm text-muted-foreground">
+      {t("project.loading")}
+    </p>
+  );
+}
+
+const ProjectPanel = dynamic(
+  () => import("./project-panel").then((module) => module.ProjectPanel),
+  { loading: ProjectLoading },
+);
+
 type ExportFeedback = "idle" | "copying" | "copied" | "copyError" | "downloaded" | "downloadError";
 
 // Changed only by browser events. Locale navigation may remount the workspace.
@@ -92,6 +107,10 @@ export function EditorWorkspace({
     importMemoryOnly,
     replaceWithImport,
     restoreImportBackup,
+    projectBackup,
+    projectBackupStatus,
+    replaceWithProject,
+    restoreProjectBackup,
   } = useProfileDraft(initialContentLocale);
   const [exportFeedback, setExportFeedback] = useState<ExportFeedback>("idle");
   const [selectedId, setSelectedId] = useState<EditableSectionId | null>(null);
@@ -99,6 +118,8 @@ export function EditorWorkspace({
   const [clearFeedback, setClearFeedback] = useState<"saved" | "memory_only" | null>(null);
   const [compactView, setCompactView] = useState<"edit" | "preview">("edit");
   const [importOpen, setImportOpen] = useState(false);
+  const [projectOpen, setProjectOpen] = useState(false);
+  const projectTriggerRef = useRef<HTMLButtonElement>(null);
   const importTriggerRef = useRef<HTMLButtonElement>(null);
   const [toolbarSize, setToolbarSize] = useState({ height: 0, sticky: true });
   const toolbarRef = useRef<HTMLDivElement>(null);
@@ -161,6 +182,9 @@ export function EditorWorkspace({
       profile.customSections[error.path[1]]?.blocks[error.path[3]]?.type === "image",
   );
   const hasInvalidUsername = readmeErrors.some((error) => error.code === "invalid_username");
+  const hasInvalidActivityOptions = readmeErrors.some(
+    (error) => error.code === "invalid_activity_options",
+  );
   const hasMissingImageAlt = readmeErrors.some((error) => error.code === "missing_image_alt");
   const hasHtmlErrors = readmeErrors.some((error) => error.code === "invalid_html");
   const hasCodeErrors = readmeErrors.some((error) => error.code === "invalid_code");
@@ -170,21 +194,23 @@ export function EditorWorkspace({
     ? t("storage.loading")
     : isEmpty
       ? t("export.empty")
-      : hasInvalidUsername
-        ? t("export.invalidUsername")
-        : hasCodeErrors
-          ? t("export.invalidCode")
-          : hasHtmlErrors
-            ? t("export.invalidHtml")
-            : hasImageUrlErrors
-              ? t("export.invalidImages")
-              : hasMissingImageAlt
-                ? t("export.missingImageDescription")
-                : hasUrlErrors
-                  ? t("export.invalidLinks")
-                  : hasLocalCards
-                    ? t("export.localCards")
-                    : t("export.ready");
+      : hasInvalidActivityOptions
+        ? t("export.invalidActivityOptions")
+        : hasInvalidUsername
+          ? t("export.invalidUsername")
+          : hasCodeErrors
+            ? t("export.invalidCode")
+            : hasHtmlErrors
+              ? t("export.invalidHtml")
+              : hasImageUrlErrors
+                ? t("export.invalidImages")
+                : hasMissingImageAlt
+                  ? t("export.missingImageDescription")
+                  : hasUrlErrors
+                    ? t("export.invalidLinks")
+                    : hasLocalCards
+                      ? t("export.localCards")
+                      : t("export.ready");
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -442,6 +468,7 @@ export function EditorWorkspace({
       setExportFeedback("idle");
       setSelectedId(null);
       setCompactView("edit");
+      setProjectOpen(false);
       startNewDraft();
     }
   }
@@ -452,6 +479,7 @@ export function EditorWorkspace({
     if (cleared.status === "not_ready") return;
     pendingReadmeImportOpen = false;
     setImportOpen(false);
+    setProjectOpen(false);
     setSelectedId(null);
     setCompactView("edit");
     setExportFeedback("idle");
@@ -467,6 +495,7 @@ export function EditorWorkspace({
     setExportFeedback("idle");
     pendingReadmeImportOpen = false;
     setImportOpen(false);
+    setProjectOpen(false);
     setCompactView("edit");
     const id = visibleEditableSections(next)[0] ?? null;
     setSelectedId(id);
@@ -476,9 +505,33 @@ export function EditorWorkspace({
   }
 
   function changeImportOpen(open: boolean) {
+    if (open) setProjectOpen(false);
     pendingReadmeImportOpen = open;
     setImportOpen(open);
     if (!open) importTriggerRef.current?.focus();
+  }
+
+  function changeProjectOpen(open: boolean) {
+    if (open) {
+      pendingReadmeImportOpen = false;
+      setImportOpen(false);
+    }
+    setProjectOpen(open);
+    if (!open) projectTriggerRef.current?.focus();
+  }
+
+  function completeProject(next: ProfileDocument) {
+    setClearFeedback(null);
+    setExportFeedback("idle");
+    setProjectOpen(false);
+    setCompactView("edit");
+    pendingFocus.current = null;
+    pendingViewScroll.current = null;
+    const id = visibleEditableSections(next)[0] ?? null;
+    setSelectedId(id);
+    if (id) pendingFocus.current = { id, kind: "settings" };
+    else pendingWorkspaceFocus.current = true;
+    setAnnouncement(t("project.completed"));
   }
 
   return (
@@ -486,7 +539,8 @@ export function EditorWorkspace({
       className="@container/editor min-w-0 space-y-3 [&_input]:scroll-mt-[var(--editor-toolbar-offset)] [&_select]:scroll-mt-[var(--editor-toolbar-offset)] [&_textarea]:scroll-mt-[var(--editor-toolbar-offset)]"
       style={
         {
-          "--editor-toolbar-offset": toolbarSize.sticky ? `${toolbarSize.height + 16}px` : "1rem",
+          "--editor-toolbar-offset":
+            toolbarSize.sticky && !projectOpen ? `${toolbarSize.height + 16}px` : "1rem",
         } as CSSProperties
       }
     >
@@ -504,6 +558,21 @@ export function EditorWorkspace({
             <Save className="size-3.5 shrink-0" aria-hidden="true" />
             {isLoading ? t("storage.loading") : t(`storage.${storageStatus}`)}
           </p>
+          <Button
+            ref={projectTriggerRef}
+            variant={projectOpen ? "secondary" : "ghost"}
+            size="icon"
+            className="shrink-0 sm:w-auto sm:px-3"
+            disabled={isLoading}
+            aria-label={t("project.action")}
+            title={t("project.action")}
+            aria-controls="project-panel"
+            aria-expanded={projectOpen}
+            onClick={() => changeProjectOpen(!projectOpen)}
+          >
+            <FolderOpen aria-hidden="true" />
+            <span className="hidden sm:inline">{t("project.action")}</span>
+          </Button>
           <Button
             variant="ghost"
             size="icon"
@@ -586,7 +655,7 @@ export function EditorWorkspace({
         aria-label={t("settings.controls")}
         className={cn(
           "z-20 min-w-0 rounded-lg border border-border bg-background p-2 shadow-soft",
-          toolbarSize.sticky && "sticky top-0",
+          toolbarSize.sticky && !projectOpen && "sticky top-0",
         )}
       >
         <EditorSectionNavigation
@@ -670,6 +739,20 @@ export function EditorWorkspace({
             </div>
           }
         />
+      </div>
+      <div id="project-panel" hidden={!projectOpen}>
+        {projectOpen && (
+          <ProjectPanel
+            profile={profile}
+            isLoading={isLoading}
+            projectBackup={projectBackup}
+            projectBackupStatus={projectBackupStatus}
+            onReplace={replaceWithProject}
+            onRestore={restoreProjectBackup}
+            onComplete={completeProject}
+            onClose={() => changeProjectOpen(false)}
+          />
+        )}
       </div>
       <div id="readme-import-panel" hidden={!importOpen}>
         {importOpen && (

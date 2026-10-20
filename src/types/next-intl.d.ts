@@ -9,6 +9,7 @@ import type projects from "@/messages/en/modules/projects.json";
 import type custom from "@/messages/en/modules/custom.json";
 import type readmeImport from "@/messages/en/readme-import.json";
 import type codeEditor from "@/messages/en/code-editor.json";
+import type project from "@/messages/en/project.json";
 import type { AppLocale } from "@/i18n/routing";
 
 declare module "next-intl" {
@@ -21,6 +22,7 @@ declare module "next-intl" {
       ContactProviders: typeof contactProviders;
       ReadmeImport: typeof readmeImport;
       CodeEditor: typeof codeEditor;
+      Project: typeof project;
       EditorModules: {
         contributions: typeof contributions;
         technologies: typeof technologies;

@@ -37,6 +37,7 @@ const activityResponseSchema = z.object({
     .object({
       login: z.string().min(1).max(39),
       userViewType: z.enum(["PUBLIC", "PRIVATE"]),
+      isViewer: z.boolean(),
       contributionsCollection: z.object({
         restrictedContributionsCount: countSchema,
         totalCommitContributions: countSchema,
@@ -140,6 +141,7 @@ const activityQuery = `query ProfileActivity($login: String!, $from: DateTime!, 
   user(login: $login) {
     login
     userViewType
+    isViewer
     contributionsCollection(from: $from, to: $to) {
       restrictedContributionsCount
       totalCommitContributions
@@ -205,7 +207,7 @@ function retryDate(headers: Headers, now: number): string {
   return new Date(now + 60_000).toISOString();
 }
 
-async function readBoundedJson(response: Response): Promise<unknown> {
+export async function readBoundedJson(response: Response): Promise<unknown> {
   const length = Number(response.headers.get("content-length"));
   if (length > maximumResponseBytes || !response.body) {
     throw new GitHubActivityError("unavailable");
@@ -235,10 +237,10 @@ async function readBoundedJson(response: Response): Promise<unknown> {
   }
 }
 
-async function queryGitHub(
+export async function queryGitHub(
   token: string,
   query: string,
-  variables: Record<string, string | null>,
+  variables: Record<string, unknown>,
   signal: AbortSignal,
   now: number,
 ): Promise<unknown> {
@@ -393,7 +395,13 @@ export async function fetchGitHubActivity(
   if (!parsed.success) throw new GitHubActivityError("unavailable");
   if (!parsed.data.user) throw new GitHubActivityError("not_found");
   const user = parsed.data.user;
-  if (user.userViewType !== "PUBLIC" || user.login.toLowerCase() !== username.toLowerCase()) {
+  // PRIVATE describes the authenticated view, including the token owner's own user.
+  // ContributionsCollection excludes private/internal details without read:user,
+  // which queryGitHub rejects before consuming data; repository filters still apply.
+  if (
+    user.login.toLowerCase() !== username.toLowerCase() ||
+    (user.userViewType === "PRIVATE" && !user.isViewer)
+  ) {
     throw new GitHubActivityError("unavailable");
   }
   const collection = user.contributionsCollection;

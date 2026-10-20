@@ -2,10 +2,10 @@
   "description": "Elegí actividad de GitHub o contá un aporte con tus palabras.",
   "help": "Elegí qué compartir. La actividad de GitHub es opcional y podés agregar un aporte sin conectar una cuenta.",
   "highlightsTitle": "Aportes destacados",
-  "highlightsHelp": "Una mejora, una revisión, documentación o ayudar a una comunidad también cuentan. Alcanza con un título, un enlace o una nota breve.",
+  "highlightsHelp": "Una mejora, una revisión, documentación o ayudar a una comunidad también cuentan. Elegí un aporte y agregá contexto con tus palabras; tu explicación aparecerá en el README.",
   "activity": {
     "title": "Actividad de GitHub (opcional)",
-    "help": "Agregá un calendario, un resumen o los lenguajes de tus repositorios. La actividad pública no mide lo que sabés.",
+    "help": "Elegí tarjetas de actividad opcionales y personalizá su apariencia. La actividad pública no mide lo que sabés.",
     "username": "Usuario de GitHub",
     "usernameHelp": "Solo el nombre de usuario, con o sin @. Consultamos GitHub cuando vos lo elegís.",
     "usernamePlaceholder": "tu-usuario",
@@ -14,8 +14,13 @@
     "retry": "Reintentar en GitHub",
     "loadingButton": "Consultando GitHub…",
     "loading": "Buscando la actividad disponible en GitHub…",
-    "queryFirst": "Consultá tu usuario para habilitar las tarjetas opcionales. No seleccionamos ninguna automáticamente.",
+    "queryFirst": "Consultá tu usuario de GitHub para habilitar las tarjetas del perfil. Podés configurar las tarjetas de recursos por separado más abajo. No seleccionamos ninguna automáticamente.",
     "choose": "¿Qué te gustaría incluir?",
+    "groups": {
+      "own": "Tarjetas propias",
+      "extended": "Diseños de GitHub Stats Extended"
+    },
+    "extendedAttribution": "Tarjetas adaptadas de <project>GitHub Stats Extended</project> con licencia MIT. Este sitio las genera localmente con datos públicos. Configurá estadísticas, lenguajes, recursos y apariencia más abajo.",
     "cards": {
       "calendar": {
         "label": "Calendario de contribuciones",
@@ -28,6 +33,240 @@
       "languages": {
         "label": "Lenguajes de repositorios",
         "help": "Lenguajes por tamaño del código en tus repositorios públicos propios, sin forks. No mide tus conocimientos."
+      },
+      "panorama": {
+        "label": "Panorama de actividad",
+        "help": "Calendario y resumen del período, junto con la distribución actual de lenguajes de tus repositorios públicos."
+      },
+      "monthly": {
+        "label": "Actividad por mes",
+        "help": "Cantidades mensuales de contribuciones del calendario. El primer mes y el último pueden cubrir solo parte del mes."
+      },
+      "extended-stats": {
+        "label": "Resumen de actividad Extended",
+        "help": "Elegí contadores de actividad pública, filtros de repositorios y un ranking de actividad opcional. El ranking no evalúa conocimientos."
+      },
+      "extended-languages": {
+        "label": "Lenguajes de repositorios Extended",
+        "help": "Elegí diseños, filtros, pesos y opciones de presentación de lenguajes en repositorios públicos. No evalúa conocimientos."
+      }
+    },
+    "appearance": {
+      "title": "Apariencia de las tarjetas",
+      "help": "Estas opciones se aplican a todas las tarjetas elegidas y se guardan en tu proyecto. El tema de las tarjetas es independiente del tema del editor.",
+      "theme": {
+        "label": "Tema de las tarjetas",
+        "light": "Claro",
+        "dark": "Oscuro"
+      },
+      "palette": {
+        "label": "Paleta de colores",
+        "forest": "Bosque",
+        "ocean": "Océano",
+        "violet": "Violeta"
+      },
+      "design": {
+        "label": "Diseño",
+        "classic": "Clásico",
+        "panels": "Paneles",
+        "minimal": "Minimalista"
+      },
+      "size": {
+        "label": "Ancho de las tarjetas",
+        "compact": "Compacto",
+        "wide": "Amplio",
+        "help": "Las tarjetas se ajustan al espacio disponible en la vista previa."
+      },
+      "samples": "Muestras de distribución sin datos del perfil:",
+      "reset": "Restablecer apariencia de las tarjetas",
+      "preset": {
+        "label": "Tema de colores Extended",
+        "help": "Los nombres de los temas provienen de GitHub Stats Extended. Los colores propios de abajo tienen prioridad. El tema base usa el tema y la paleta de arriba.",
+        "base": "Tema y paleta base"
+      },
+      "advanced": {
+        "title": "Apariencia avanzada",
+        "help": "Estas opciones se aplican a las partes compatibles de las tarjetas elegidas. El texto propio se publica en la tarjeta del README. Revisá el contraste de colores en la vista previa.",
+        "customTitle": "Título propio de las tarjetas",
+        "customTitleHelp": "Opcional, hasta 100 caracteres. Dejalo vacío para usar el título de cada tarjeta.",
+        "borderRadius": "Radio de las esquinas (0–30)",
+        "width": "Ancho del SVG (700–1200)",
+        "widthHelp": "La imagen sigue ajustándose al espacio disponible en la vista previa.",
+        "lineHeight": "Altura de línea (22–50)",
+        "numberPrecision": "Cantidad de decimales (0–2)",
+        "numberError": "Ingresá un número entre {min} y {max}.",
+        "numberFormat": {
+          "label": "Formato de números",
+          "short": "Abreviado (1,2k)",
+          "long": "Número completo"
+        },
+        "visibility": "Detalles de las tarjetas",
+        "hideTitle": "Ocultar el título de las tarjetas",
+        "hideBorder": "Ocultar el borde",
+        "showIcons": "Mostrar iconos de métricas",
+        "textBold": "Usar texto en negrita",
+        "colorsTitle": "Colores propios y degradado",
+        "colorsHelp": "Los colores opcionales usan #RRGGBB. Vaciá un campo y aplicá para usar el color del tema. Los colores propios tienen prioridad sobre el tema.",
+        "titleColor": "Color del título",
+        "textColor": "Color del texto",
+        "iconColor": "Color de los iconos",
+        "borderColor": "Color del borde",
+        "backgroundColor": "Color del fondo",
+        "colorError": "Usá un color hexadecimal de seis dígitos, como #336699, o dejalo vacío.",
+        "gradientColors": "Colores del degradado de fondo",
+        "gradientHelp": "De dos a diez colores #RRGGBB, separados por comas o saltos de línea. Vaciá la lista y aplicá para quitar el degradado.",
+        "gradientAngle": "Ángulo del degradado (0–360 grados)",
+        "gradientError": "Usá entre dos y diez colores #RRGGBB válidos y un ángulo entre 0 y 360.",
+        "applyColors": "Aplicar colores y degradado",
+        "draftHelp": "Los colores se guardan solo después de aplicar valores válidos. El texto inválido queda acá para corregirlo."
+      }
+    },
+    "extended": {
+      "title": "Opciones Extended de estadísticas y lenguajes",
+      "help": "Las opciones se guardan en tu proyecto. Editar no consulta GitHub; las imágenes elegidas solicitan sus datos configurados. Algunos contadores cubren distintos períodos y los filtros pueden dejar métricas no disponibles o parciales.",
+      "statsTitle": "Estadísticas y ranking opcional",
+      "statsItems": "Contadores para mostrar",
+      "statsItemsHelp": "Elegí al menos uno. Los datos públicos faltantes se muestran como no disponibles en lugar de cero.",
+      "stats": {
+        "stars": "Estrellas recibidas",
+        "commits": "Commits",
+        "pullRequests": "Pull requests",
+        "issues": "Issues",
+        "reviews": "Revisiones",
+        "repositoriesContributedTo": "Repositorios con aportes en el período",
+        "allTimeContributions": "Contribuciones de todo el historial",
+        "allTimeRepositoriesContributedTo": "Repositorios con aportes de todo el historial",
+        "discussionsStarted": "Discusiones iniciadas",
+        "discussionsAnswered": "Discusiones respondidas",
+        "mergedPullRequests": "Pull requests fusionadas",
+        "mergedPullRequestPercentage": "Porcentaje de pull requests fusionadas",
+        "authoredPullRequests": "Pull requests creadas",
+        "commentedPullRequests": "Pull requests comentadas",
+        "reviewedPullRequests": "Pull requests revisadas",
+        "authoredIssues": "Issues creadas",
+        "commentedIssues": "Issues comentadas",
+        "followers": "Seguidores"
+      },
+      "commitsPeriod": {
+        "label": "Período de commits",
+        "period": "Período actual de contribuciones",
+        "year": "Año calendario específico",
+        "all": "Todo el historial disponible"
+      },
+      "year": "Año calendario (2008–2100)",
+      "includeOwn": "Incluir repositorios propios en los contadores de repositorios con aportes",
+      "includeOwnHelp": "Extended excluye tus repositorios propios de esos contadores por defecto.",
+      "showRank": "Mostrar el ranking de actividad opcional",
+      "rankHelp": "La letra o el percentil proviene de la fórmula de actividad de Extended. No es una calificación oficial de GitHub ni mide habilidad, experiencia o calidad del código. Se oculta si faltan los datos públicos necesarios.",
+      "rankIcon": {
+        "label": "Presentación del ranking",
+        "letter": "Letra",
+        "percentile": "Índice porcentual de la fórmula",
+        "github": "Símbolo de GitHub"
+      },
+      "languagesTitle": "Distribución de lenguajes",
+      "languageLayout": {
+        "label": "Diseño de lenguajes",
+        "normal": "Barras",
+        "compact": "Compacto",
+        "donut": "Anillo",
+        "donut-vertical": "Anillo vertical",
+        "pie": "Circular"
+      },
+      "languageFormat": {
+        "label": "Valores de lenguajes",
+        "percentages": "Porcentajes",
+        "bytes": "Tamaño del código en bytes"
+      },
+      "languageCount": "Cantidad de lenguajes (1–20)",
+      "sizeWeight": "Peso del tamaño del código (0–2)",
+      "countWeight": "Peso de la cantidad de repositorios (0–2)",
+      "weightHelp": "Los pesos cambian la fórmula de distribución, no niveles de habilidad. Valores iniciales: tamaño 1, cantidad de repositorios 0.",
+      "weightError": "Usá pesos entre 0 y 2, con al menos uno mayor que cero.",
+      "hideProgress": "Ocultar barras de lenguajes",
+      "hideValues": "Ocultar valores de lenguajes",
+      "hiddenLanguages": "Lenguajes para ocultar",
+      "languageListHelp": "Hasta 20 nombres de lenguajes, separados por comas o saltos de línea. Aplicá para guardar; una lista vacía quita el filtro.",
+      "languageListError": "Ingresá hasta 20 nombres de lenguajes distintos, de hasta 100 caracteres cada uno.",
+      "numberError": "Ingresá un número entre {min} y {max}.",
+      "apply": "Aplicar cambios de listas",
+      "filters": {
+        "title": "Filtros de repositorios públicos",
+        "help": "Los filtros se aplican donde GitHub los admite. Los totales históricos pueden ser limitados o parciales; las tarjetas identifican esos casos. Solo se usan repositorios públicos.",
+        "repositories": "Incluir estos repositorios",
+        "repositoriesHelp": "Hasta 20 pares propietario/repositorio, separados por comas o saltos de línea. Dejalo vacío para usar el conjunto de repositorios disponible.",
+        "owners": "Incluir estos propietarios",
+        "ownersHelp": "Hasta 20 nombres de usuarios u organizaciones de GitHub, separados por comas o saltos de línea.",
+        "excludeRepositories": "Excluir nombres de repositorios",
+        "excludeRepositoriesHelp": "Hasta 20 nombres de repositorios sin propietario/. En estadísticas afecta las estrellas; en lenguajes afecta la muestra de lenguajes.",
+        "error": "Revisá las listas: hasta 20 entradas distintas en cada una. Los repositorios usan propietario/nombre; los propietarios y los nombres excluidos deben ser nombres válidos de GitHub.",
+        "roles": "Filtro por relación (opcional en estadísticas)",
+        "role": {
+          "OWNER": "Propietario",
+          "ORGANIZATION_MEMBER": "Integrante de la organización",
+          "COLLABORATOR": "Colaborador"
+        }
+      }
+    },
+    "resources": {
+      "title": "Tarjetas Extended de repositorios, Gists y WakaTime",
+      "help": "Configurá recursos públicos independientes de tu usuario de GitHub. Aplicá un destino antes de elegir su tarjeta. Las imágenes elegidas consultan ese recurso público; editar estos campos no lo consulta.",
+      "apply": "Aplicar destinos de recursos",
+      "missingTarget": "Agregá y aplicá un destino válido para esta tarjeta elegida, o desmarcala.",
+      "numberError": "Ingresá un número entre {min} y {max}.",
+      "contributions": {
+        "title": "Aportes de un usuario en cada repositorio",
+        "help": "Agregá contadores opcionales del historial público a cada tarjeta de repositorio. Los contadores de comentarios y revisiones excluyen entradas creadas por ese usuario. Los resultados pueden estar limitados por el historial público disponible en GitHub. Editar no consulta GitHub; aplicá opciones válidas para guardarlas.",
+        "username": "Usuario de GitHub para los aportes en repositorios",
+        "usernameHelp": "Opcional e independiente del usuario del perfil. Usá un usuario de GitHub sin @. Elegí contadores abajo o desmarcalos todos para dejar afuera los aportes.",
+        "stats": "Contadores de aportes en repositorios",
+        "usernameRequired": "Ingresá un usuario de GitHub para aplicar los contadores de aportes elegidos.",
+        "invalidUsername": "Ingresá un usuario de GitHub válido de hasta 39 letras, números o guiones simples entre ellos, sin @.",
+        "apply": "Aplicar opciones de aportes en repositorios"
+      },
+      "repositories": {
+        "title": "Repositorios públicos",
+        "label": "Destinos de repositorios",
+        "help": "Hasta 12 pares propietario/repositorio distintos, separados por comas o saltos de línea. Se genera una tarjeta por repositorio.",
+        "error": "Usá hasta 12 pares propietario/repositorio distintos y válidos.",
+        "include": "Incluir tarjetas de repositorios",
+        "cardHelp": "Descripción, lenguaje, estrellas y forks de repositorios públicos. No se solicitan repositorios privados."
+      },
+      "gists": {
+        "title": "Gists públicos",
+        "label": "IDs de Gists",
+        "help": "Hasta 12 IDs hexadecimales distintos, separados por comas o saltos de línea. Usá el ID de la URL del Gist público, no la URL completa.",
+        "error": "Usá hasta 12 IDs hexadecimales distintos de entre 5 y 64 caracteres.",
+        "include": "Incluir tarjetas de Gists",
+        "cardHelp": "Una tarjeta por Gist público. Los Gists secretos no se muestran."
+      },
+      "wakatimeUsername": {
+        "title": "Actividad pública de WakaTime",
+        "label": "Usuario de WakaTime",
+        "help": "Usá tu usuario existente de WakaTime (letras, números, guiones o guiones bajos; hasta 64 caracteres), no el alias current. Su actividad de código y sus lenguajes públicos ya deben estar habilitados en WakaTime. Este sitio no crea una cuenta ni pide un token de WakaTime.",
+        "error": "Usá un usuario explícito de WakaTime de entre 1 y 64 letras, números, guiones o guiones bajos. No se admite el alias current.",
+        "include": "Incluir la tarjeta de WakaTime",
+        "cardHelp": "Usa actividad pública de código de WakaTime. Este usuario es independiente de tu usuario de GitHub."
+      },
+      "options": {
+        "title": "Detalles de las tarjetas de recursos",
+        "showOwner": "Mostrar el propietario del repositorio o Gist",
+        "descriptionLines": "Líneas de descripción (1–3)",
+        "displayFormat": {
+          "label": "Valores de WakaTime",
+          "time": "Tiempo",
+          "percent": "Porcentajes"
+        },
+        "layout": {
+          "label": "Diseño de WakaTime",
+          "default": "Predeterminado",
+          "compact": "Compacto"
+        },
+        "languageCount": "Cantidad de lenguajes de WakaTime (1–20)",
+        "hideProgress": "Ocultar barras de WakaTime",
+        "hideLanguages": "Lenguajes de WakaTime para ocultar",
+        "hideLanguagesHelp": "Hasta 20 nombres de lenguajes distintos, separados por comas o saltos de línea. Aplicá para guardar; una lista vacía quita el filtro.",
+        "hideLanguagesError": "Usá hasta 20 nombres de lenguajes distintos de hasta 100 caracteres."
       }
     },
     "scope": "Las tarjetas usan la actividad que GitHub permite consultar. Podés dejarlas afuera o quitarlas cuando quieras.",
@@ -59,7 +298,7 @@
   "titleHelp": "Nombrá tu aporte, o dejá este campo vacío y describilo abajo.",
   "titlePlaceholder": "Mejoras en la documentación",
   "descriptionLabel": "Cómo contribuiste",
-  "descriptionHelp": "Opcional. Alcanza con una nota breve sobre tu aporte.",
+  "descriptionHelp": "Opcional. Contá qué aportaste o por qué es importante para vos. Este texto se publica en el README.",
   "descriptionPlaceholder": "Revisé instrucciones de instalación y ayudé a personas que estaban empezando.",
   "url": "Enlace de la contribución",
   "urlHelp": "Opcional. Usá una dirección completa http:// o https://, sin espacios ni credenciales de acceso.",

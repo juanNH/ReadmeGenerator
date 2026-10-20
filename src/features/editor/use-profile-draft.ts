@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { ContentLocale, ProfileDocument } from "@/core/profile/profile-schema";
 import { parseProfileDocument } from "@/core/profile/profile-validation";
+import { serializeProjectFile } from "@/core/project";
 import { readProfileDraft, writeProfileDraft, type ProfileDraftReadResult } from "./draft-storage";
 import {
   createImportBackup,
@@ -14,15 +15,28 @@ import {
 } from "./import-backup";
 import { clearProfileDraft } from "./clear-profile-draft";
 import {
+  createProjectBackup,
+  readProjectBackup,
+  replaceProfileDraftWithProject,
+  restoreProfileDraftFromProjectBackup,
+  type ProjectBackup,
+  type ProjectBackupReadResult,
+} from "./project-backup";
+import {
   createDraftState,
   reduceDraft,
   type DraftState,
   type DraftAction,
   type ProfileDraftStorageStatus,
   type ImportBackupStatus,
+  type ProjectBackupStatus,
 } from "./profile-draft-state";
 
-export type { ProfileDraftStorageStatus, ImportBackupStatus } from "./profile-draft-state";
+export type {
+  ProfileDraftStorageStatus,
+  ImportBackupStatus,
+  ProjectBackupStatus,
+} from "./profile-draft-state";
 
 export type ClearReadmeResult = { status: "saved" | "memory_only" | "not_ready" };
 
@@ -86,6 +100,14 @@ function readBrowserImportBackup(): ImportBackupReadResult {
   }
 }
 
+function readBrowserProjectBackup(): ProjectBackupReadResult {
+  try {
+    return readProjectBackup(window.localStorage);
+  } catch {
+    return { status: "unavailable" };
+  }
+}
+
 export type ProfileDraft = {
   document: ProfileDocument;
   updateDocument: (next: ProfileDocument) => void;
@@ -94,6 +116,9 @@ export type ProfileDraft = {
   recoveryBlocked: boolean;
   importBackup: ImportBackup | null;
   importBackupStatus: ImportBackupStatus;
+  projectBackup: ProjectBackup | null;
+  projectBackupStatus: ProjectBackupStatus;
+  /** Autosave stays disabled after any confirmed memory-only import or project replacement. */
   importMemoryOnly: boolean;
   /** The caller confirms replacement; a failed durable write never applies the import. */
   replaceWithImport: (
@@ -103,6 +128,13 @@ export type ProfileDraft = {
   ) => ImportOperationResult;
   /** The caller confirms restoration; the recovery record itself stays intact. */
   restoreImportBackup: (allowMemoryOnly?: boolean) => ImportOperationResult;
+  /** The caller reviews and confirms; the latest active profile is backed up before replacement. */
+  replaceWithProject: (
+    candidate: ProfileDocument,
+    allowMemoryOnly?: boolean,
+  ) => ImportOperationResult;
+  /** The caller confirms restoration; both Markdown and project backup records are retained. */
+  restoreProjectBackup: (allowMemoryOnly?: boolean) => ImportOperationResult;
   /** The caller confirms clearing the active README; protected storage and backups remain intact. */
   clearReadme: () => ClearReadmeResult;
   /** Call only after the user confirms replacement of their existing draft. */
@@ -124,6 +156,7 @@ export function useProfileDraft(initialLocale: ContentLocale): ProfileDraft {
           type: "hydrated",
           result: readBrowserDraft(),
           backup: readBrowserImportBackup(),
+          projectBackup: readBrowserProjectBackup(),
         });
       }
     }, 0);
@@ -284,6 +317,105 @@ export function useProfileDraft(initialLocale: ContentLocale): ProfileDraft {
     return { status: result.status };
   }
 
+  function replaceWithProject(
+    candidate: ProfileDocument,
+    allowMemoryOnly = false,
+  ): ImportOperationResult {
+    const latest = latestState.current;
+    if (latest.hydration !== "ready") return { status: "not_ready" };
+    const backup = createProjectBackup(latest.document);
+    const parsed = parseProfileDocument(candidate);
+    if (
+      !backup.success ||
+      !parsed.success ||
+      candidate.schemaVersion !== 2 ||
+      !serializeProjectFile(parsed.data).success
+    )
+      return { status: "invalid" };
+    if (!allowMemoryOnly) {
+      if (
+        latest.recoveryBlocked ||
+        latest.importMemoryOnly ||
+        latest.storageStatus === "unavailable"
+      ) {
+        applyDraftAction(latestState, setState, { type: "project_write_blocked" });
+        return { status: "needs_memory_confirmation" };
+      }
+      try {
+        const result = replaceProfileDraftWithProject(
+          window.localStorage,
+          parsed.data,
+          backup.backup,
+        );
+        if (result.status !== "saved") {
+          if (result.status === "needs_memory_confirmation")
+            applyDraftAction(latestState, setState, {
+              type: "project_write_blocked",
+              ...(result.backupPersisted ? { backup: backup.backup } : {}),
+              ...(result.protection === undefined ? {} : { protection: result.protection }),
+            });
+          return { status: result.status };
+        }
+      } catch {
+        applyDraftAction(latestState, setState, {
+          type: "project_write_blocked",
+          protection: "unavailable",
+        });
+        return { status: "needs_memory_confirmation" };
+      }
+    }
+    applyDraftAction(latestState, setState, {
+      type: "project_replaced",
+      document: parsed.data,
+      backup: backup.backup,
+      memoryOnly: allowMemoryOnly,
+    });
+    return { status: allowMemoryOnly ? "memory_only" : "saved" };
+  }
+
+  function restoreProjectBackup(allowMemoryOnly = false): ImportOperationResult {
+    const latest = latestState.current;
+    if (latest.hydration !== "ready") return { status: "not_ready" };
+    if (latest.projectBackup === null) return { status: "invalid" };
+    const validated = createProjectBackup(latest.projectBackup.previousDocument);
+    if (!validated.success) return { status: "invalid" };
+    const backup = validated.backup;
+    if (!allowMemoryOnly) {
+      if (
+        latest.recoveryBlocked ||
+        latest.importMemoryOnly ||
+        latest.storageStatus === "unavailable"
+      ) {
+        applyDraftAction(latestState, setState, { type: "project_write_blocked" });
+        return { status: "needs_memory_confirmation" };
+      }
+      try {
+        const result = restoreProfileDraftFromProjectBackup(window.localStorage, backup);
+        if (result.status !== "saved") {
+          if (result.status === "needs_memory_confirmation")
+            applyDraftAction(latestState, setState, {
+              type: "project_write_blocked",
+              ...(result.protection === undefined ? {} : { protection: result.protection }),
+            });
+          return { status: result.status };
+        }
+      } catch {
+        applyDraftAction(latestState, setState, {
+          type: "project_write_blocked",
+          protection: "unavailable",
+        });
+        return { status: "needs_memory_confirmation" };
+      }
+    }
+    applyDraftAction(latestState, setState, {
+      type: "project_replaced",
+      document: backup.previousDocument,
+      backup,
+      memoryOnly: allowMemoryOnly,
+    });
+    return { status: allowMemoryOnly ? "memory_only" : "saved" };
+  }
+
   return {
     document: state.document,
     updateDocument: (document) =>
@@ -293,9 +425,13 @@ export function useProfileDraft(initialLocale: ContentLocale): ProfileDraft {
     recoveryBlocked: state.recoveryBlocked,
     importBackup: state.importBackup,
     importBackupStatus: state.importBackupStatus,
+    projectBackup: state.projectBackup,
+    projectBackupStatus: state.projectBackupStatus,
     importMemoryOnly: state.importMemoryOnly,
     replaceWithImport,
     restoreImportBackup,
+    replaceWithProject,
+    restoreProjectBackup,
     clearReadme,
     startNewDraft: () => applyDraftAction(latestState, setState, { type: "restarted" }),
   };

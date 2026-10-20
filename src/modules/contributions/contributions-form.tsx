@@ -2,9 +2,11 @@ import { useId, useState } from "react";
 import {
   CalendarDays,
   ChartColumn,
+  ChartNoAxesCombined,
   Check,
   Code2,
   GitPullRequest,
+  LayoutDashboard,
   LoaderCircle,
   Plus,
   Trash2,
@@ -20,12 +22,29 @@ import type { MetricCardId, ProfileModuleData } from "@/core/profile/module-cont
 import type { ReadmeIssue } from "@/core/readme";
 import { hasUrlError } from "@/modules/shared/has-url-error";
 import { useEntryFocus } from "@/modules/shared/use-entry-focus";
+import { CardAppearanceFields } from "./card-appearance-fields";
+import { ExtendedOptionsFields } from "./extended-options-fields";
+import { ResourceCardFields } from "./resource-card-fields";
 import { useGitHubActivity } from "./use-github-activity";
 
-const activityCards = [
-  { id: "calendar", icon: CalendarDays },
-  { id: "summary", icon: ChartColumn },
-  { id: "languages", icon: Code2 },
+const activityCardGroups = [
+  {
+    id: "own",
+    cards: [
+      { id: "calendar", icon: CalendarDays },
+      { id: "summary", icon: ChartColumn },
+      { id: "languages", icon: Code2 },
+      { id: "panorama", icon: LayoutDashboard },
+      { id: "monthly", icon: ChartNoAxesCombined },
+    ],
+  },
+  {
+    id: "extended",
+    cards: [
+      { id: "extended-stats", icon: ChartColumn },
+      { id: "extended-languages", icon: Code2 },
+    ],
+  },
 ] as const;
 
 type ContributionsFormProps = {
@@ -191,44 +210,89 @@ export function ContributionsForm({
             )}
           {snapshot && snapshot.calendar.total === 0 && <p>{t("activity.empty")}</p>}
         </div>
-        <fieldset className="space-y-1">
+        <fieldset className="min-w-0 space-y-4">
           <legend className="pb-2 text-sm font-medium">{t("activity.choose")}</legend>
-          {activityCards.map(({ id, icon: Icon }) => {
-            const selected = metrics.cards.includes(id);
-            const checked = (metricsVisible || !sectionIncluded) && selected;
-            const enabled = selected || activity.status === "success";
-            return (
-              <div
-                key={id}
-                className="flex min-w-0 items-start gap-1 rounded-md p-1 hover:bg-surface-raised/60"
-              >
-                <Checkbox
-                  id={`${baseId}-${id}`}
-                  checked={checked}
-                  disabled={!enabled}
-                  aria-label={t(`activity.cards.${id}.label`)}
-                  aria-describedby={`${baseId}-${id}-help`}
-                  onCheckedChange={(next) => toggleCard(id, next === true)}
-                />
-                <label
-                  htmlFor={`${baseId}-${id}`}
-                  className="min-w-0 flex-1 cursor-pointer py-2 text-sm"
-                >
-                  <span className="flex items-center gap-2 font-medium">
-                    <Icon aria-hidden="true" className="size-4 shrink-0 text-muted-foreground" />
-                    {t(`activity.cards.${id}.label`)}
-                  </span>
-                  <span
-                    id={`${baseId}-${id}-help`}
-                    className="mt-1 block text-xs leading-5 text-muted-foreground"
+          {activityCardGroups.map((group) => (
+            <fieldset key={group.id} className="min-w-0 space-y-1">
+              <legend className="pb-1 text-xs font-semibold text-muted-foreground">
+                {t(`activity.groups.${group.id}`)}
+              </legend>
+              {group.id === "extended" && (
+                <p className="pb-2 text-xs leading-5 text-muted-foreground">
+                  {t.rich("activity.extendedAttribution", {
+                    project: (chunks) => (
+                      <a
+                        href="https://github.com/stats-organization/github-stats-extended"
+                        className="rounded-sm text-accent underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
+                      >
+                        {chunks}
+                      </a>
+                    ),
+                  })}
+                </p>
+              )}
+              {group.cards.map(({ id, icon: Icon }) => {
+                const selected = metrics.cards.includes(id);
+                const checked = (metricsVisible || !sectionIncluded) && selected;
+                const enabled = selected || activity.status === "success";
+                return (
+                  <div
+                    key={id}
+                    className="flex min-w-0 items-start gap-1 rounded-md p-1 hover:bg-surface-raised/60"
                   >
-                    {t(`activity.cards.${id}.help`)}
-                  </span>
-                </label>
-              </div>
-            );
-          })}
+                    <Checkbox
+                      id={`${baseId}-${id}`}
+                      checked={checked}
+                      disabled={!enabled}
+                      aria-label={t(`activity.cards.${id}.label`)}
+                      aria-describedby={`${baseId}-${id}-help`}
+                      onCheckedChange={(next) => toggleCard(id, next === true)}
+                    />
+                    <label
+                      htmlFor={`${baseId}-${id}`}
+                      className="min-w-0 flex-1 cursor-pointer py-2 text-sm"
+                    >
+                      <span className="flex items-center gap-2 font-medium">
+                        <Icon
+                          aria-hidden="true"
+                          className="size-4 shrink-0 text-muted-foreground"
+                        />
+                        {t(`activity.cards.${id}.label`)}
+                      </span>
+                      <span
+                        id={`${baseId}-${id}-help`}
+                        className="mt-1 block text-xs leading-5 text-muted-foreground"
+                      >
+                        {t(`activity.cards.${id}.help`)}
+                      </span>
+                    </label>
+                  </div>
+                );
+              })}
+            </fieldset>
+          ))}
         </fieldset>
+        <ExtendedOptionsFields
+          value={metrics.extended}
+          onChange={(extended) => onActivityChange({ ...metrics, extended }, metricsVisible)}
+        />
+        <ResourceCardFields
+          value={metrics.extended}
+          cards={metrics.cards}
+          metricsVisible={metricsVisible}
+          sectionIncluded={sectionIncluded}
+          onChange={(extended) => onActivityChange({ ...metrics, extended }, metricsVisible)}
+          onToggle={toggleCard}
+        />
+        <CardAppearanceFields
+          value={metrics.appearance}
+          onChange={(appearance) => {
+            const next = { ...metrics };
+            if (appearance) next.appearance = appearance;
+            else delete next.appearance;
+            onActivityChange(next, metricsVisible);
+          }}
+        />
         <p className="text-xs leading-5 text-muted-foreground">{t("activity.scope")}</p>
         {snapshot && (
           <div className="space-y-2 border-t border-border pt-3 text-xs leading-5 text-muted-foreground">

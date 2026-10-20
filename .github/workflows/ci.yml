@@ -34,6 +34,8 @@ jobs:
           cache-dependency-path: pnpm-lock.yaml
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      - name: Generate dependency license notices for this platform
+        run: pnpm licenses:generate
       - name: Check code, translations and documentation
         run: pnpm check
       - name: Build production app

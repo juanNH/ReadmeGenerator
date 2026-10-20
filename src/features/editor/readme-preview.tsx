@@ -13,6 +13,7 @@ import { normalizePublicImageUrl } from "@/core/readme/public-image";
 import { findTechnology, findTechnologyByIconUrl } from "@/core/technologies";
 import { findContactProviderByIconUrl } from "@/core/contact";
 import { parseActivityCardUrl } from "@/core/activity";
+import { parseResourceCardUrl } from "@/core/activity/resource-urls";
 import { findCountryByIconUrl } from "@/core/location";
 import { remarkProfileIcons } from "./remark-profile-icons";
 import { wrapNamedTechnologyLabels } from "./named-technology-labels";
@@ -183,16 +184,21 @@ const PreviewImage: Components["img"] = ({ src, alt }) => {
   const authoredImage = customImages.find((entry) => entry.src === src && entry.alt === alt);
   if (authoredImage && normalizePublicImageUrl(authoredImage.src) === authoredImage.src)
     return <PublicProfileImage key={authoredImage.src} {...authoredImage} />;
-  const card = typeof src === "string" ? parseActivityCardUrl(src, activityCardBaseUrl) : null;
+  const card =
+    typeof src === "string"
+      ? (parseActivityCardUrl(src, activityCardBaseUrl) ??
+        parseResourceCardUrl(src, activityCardBaseUrl))
+      : null;
   if (card)
     return (
       <Image
         src={card.localUrl}
         alt={alt ?? ""}
-        width={700}
+        width={card.appearance?.width ?? (card.appearance?.size === "wide" ? 1000 : 700)}
         height={260}
         unoptimized
-        className="block h-auto w-full max-w-full rounded-lg border border-border bg-white"
+        referrerPolicy="no-referrer"
+        className="block h-auto max-w-full rounded-lg"
       />
     );
   const country = typeof src === "string" ? findCountryByIconUrl(src) : undefined;

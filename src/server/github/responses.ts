@@ -2,7 +2,8 @@ import "server-only";
 
 import { normalizeGitHubUsername } from "@/core/activity";
 import type { ActivityResult } from "@/core/activity/activity-types";
-import { metricCardIds, type MetricCardId } from "@/core/profile/module-content";
+import { parseCardOptions } from "@/core/activity/card-options";
+import { profileActivityCardIds } from "@/core/profile/module-content";
 
 export function parseActivityRequest(url: URL): string | null {
   if (
@@ -14,24 +15,14 @@ export function parseActivityRequest(url: URL): string | null {
   return normalizeGitHubUsername(url.searchParams.get("username") ?? "");
 }
 
-export function parseCardRequest(
-  username: string,
-  cardFilename: string,
-  url: URL,
-): { username: string; card: MetricCardId; locale: "en" | "es" } | null {
+export function parseCardRequest(username: string, cardFilename: string, url: URL) {
   const normalizedUsername = normalizeGitHubUsername(username);
-  const locale = url.searchParams.get("locale") ?? "en";
-  const card = metricCardIds.find((id) => `${id}.svg` === cardFilename);
-  if (
-    !normalizedUsername ||
-    !card ||
-    !["en", "es"].includes(locale) ||
-    url.searchParams.getAll("locale").length > 1 ||
-    [...url.searchParams.keys()].some((key) => key !== "locale")
-  ) {
+  const options = parseCardOptions(url.searchParams);
+  const card = profileActivityCardIds.find((id) => `${id}.svg` === cardFilename);
+  if (!normalizedUsername || !card || !options) {
     return null;
   }
-  return { username: normalizedUsername, card, locale: locale as "en" | "es" };
+  return { username: normalizedUsername, card, ...options };
 }
 
 export function activityJsonResponse(result: ActivityResult): Response {

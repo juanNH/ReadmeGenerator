@@ -18,6 +18,7 @@ const loadMessages = {
       custom,
       readmeImport,
       codeEditor,
+      project,
     ] = await Promise.all([
       import("@/messages/en.json"),
       import("@/messages/en/design-system.json"),
@@ -30,6 +31,7 @@ const loadMessages = {
       import("@/messages/en/modules/custom.json"),
       import("@/messages/en/readme-import.json"),
       import("@/messages/en/code-editor.json"),
+      import("@/messages/en/project.json"),
     ]);
     return {
       ...common.default,
@@ -39,6 +41,7 @@ const loadMessages = {
       ContactProviders: contactProviders.default,
       ReadmeImport: readmeImport.default,
       CodeEditor: codeEditor.default,
+      Project: project.default,
       EditorModules: {
         contributions: contributions.default,
         technologies: technologies.default,
@@ -60,6 +63,7 @@ const loadMessages = {
       custom,
       readmeImport,
       codeEditor,
+      project,
     ] = await Promise.all([
       import("@/messages/es.json"),
       import("@/messages/es/design-system.json"),
@@ -72,6 +76,7 @@ const loadMessages = {
       import("@/messages/es/modules/custom.json"),
       import("@/messages/es/readme-import.json"),
       import("@/messages/es/code-editor.json"),
+      import("@/messages/es/project.json"),
     ]);
     return {
       ...common.default,
@@ -81,6 +86,7 @@ const loadMessages = {
       ContactProviders: contactProviders.default,
       ReadmeImport: readmeImport.default,
       CodeEditor: codeEditor.default,
+      Project: project.default,
       EditorModules: {
         contributions: contributions.default,
         technologies: technologies.default,

@@ -2,10 +2,12 @@
   "name": "github-profile-generator",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
+  "author": "Juan Nicolas Herrera",
   "type": "module",
   "scripts": {
     "dev": "next dev --hostname 127.0.0.1",
-    "build": "next build",
+    "build": "node scripts/check-licenses.mjs --write && next build",
     "start": "next start",
     "lint": "eslint . --max-warnings=0",
     "lint:fix": "eslint . --fix",
@@ -18,7 +20,9 @@
     "test:e2e:ui": "playwright test --ui",
     "test:a11y": "playwright test --grep accessibility",
     "docs:check": "node scripts/check-doc-links.mjs",
-    "check": "pnpm lint && pnpm typecheck && pnpm format:check && pnpm docs:check && pnpm test"
+    "licenses:check": "node scripts/check-licenses.mjs",
+    "licenses:generate": "node scripts/check-licenses.mjs --write",
+    "check": "pnpm licenses:check && pnpm lint && pnpm typecheck && pnpm format:check && pnpm docs:check && pnpm test"
   },
   "dependencies": {
     "@codemirror/commands": "6.11.1",

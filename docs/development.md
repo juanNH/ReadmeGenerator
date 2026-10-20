@@ -122,6 +122,8 @@ Las variables del proceso tienen prioridad sobre los archivos. Después se consu
 
 Reiniciar el servicio después de guardar los valores. En desarrollo, abrir **Actividad y contribuciones**, ingresar un usuario y elegir **Consultar actividad de GitHub**. La primera consulta correcta habilita la selección de calendario, resumen y lenguajes. Un token ausente, rechazado o incompatible mantiene el estado no configurado; una plantilla vacía no habilita la integración.
 
+El propietario del token puede consultar su propio usuario con la misma credencial admitida. El cliente valida el usuario solicitado e `isViewer`; acepta la vista `PUBLIC` y también `PRIVATE` cuando corresponde al propietario autenticado. Conserva la verificación de scopes, los repositorios públicos propios no forks y los destacados públicos no restringidos. GitHub exige `read:user` para incluir contribuciones privadas/internas, y este cliente lo rechaza; solo admite recuentos anónimos restringidos que la persona eligió compartir públicamente. `userViewType` no permite detectar un ajuste de perfil privado y sus valores no se exponen en el snapshot. Ver [ADR 0022](decisions/0022-token-owner-public-activity.md).
+
 Producción debe ejecutar la aplicación Next.js con sus rutas API y SVG y permitir que GitHub acceda públicamente a las tarjetas. El origen debe estar disponible también al iniciar el servidor; no alcanza con definirlo solo durante la compilación. Una vez publicado, desarrollo puede usar ese mismo `APP_URL` para exportar un README con tarjetas alojadas en producción. La vista previa conserva sus solicitudes locales; las URLs del Markdown exportado apuntan al origen público configurado. Sin un despliegue público operativo, dejar `APP_URL` vacío y revisar las tarjetas localmente.
 
 ### Rutas y estados de actividad
@@ -547,3 +549,64 @@ La revisión independiente comprobó almacenamiento protegido, revisiones pendie
 La primera regresión encontró que el botón global agregaba 24 px y dejaba parte del primer campo personalizado fuera de 320 × 568. Se compactó el espaciado móvil del encabezado, manteniendo los botones de 44 px y el diseño de escritorio. Los casos EN/ES y sus capturas se repitieron sobre la compilación corregida sin relajar la comprobación del primer campo.
 
 Se inspeccionaron capturas de C# en escritorio, Presentación centrada en móvil y botón de borrado en 320 × 568. Las pruebas usan contextos aislados y no vacían el borrador real del usuario. La revisión de accesibilidad automática no sustituye una evaluación completa con lectores de pantalla o dispositivos físicos.
+
+## Validación de archivos de proyecto y recuperación
+
+El 20 de octubre de 2026 se incorporaron descarga y apertura de proyectos JSON completos, revisión inerte, confirmación y respaldo independiente del perfil activo. Ver [ADR 0021](decisions/0021-project-files-and-recovery.md) y [recorrido de Proyecto](editor.md#guardar-y-abrir-proyectos).
+
+- `pnpm check`: 1.202 pruebas en 42 suites, lint, tipos, formato y enlaces de 37 documentos correctos.
+- `pnpm build`: compilación correcta con la protección del respaldo y la revisión móvil finales.
+- Recorridos dirigidos de Chromium: 63/63 correctos sobre la compilación final.
+- Regresión completa final de Chromium: 297/297 correctos en 4,8 minutos, sin exclusiones ni reintentos automáticos.
+
+Se revisaron los contratos de 4 MiB UTF-8, profundidad y complejidad, migración v1, conservación de campos/fuentes y recuperación. La revisión independiente detectó dos problemas corregidos: un archivo compacto admitido podía superar el límite al volver a guardarlo con sangría, y el aviso de memoria podía prometer un respaldo que no existía. La salida usa formato compacto cuando hace falta y el aviso condiciona la disponibilidad de recuperación. También se aplica el límite de complejidad antes de validar un respaldo local corrupto.
+
+La revisión visual encontró una superposición de la barra fija durante la revisión de proyectos largos. Mientras Proyecto está abierto, la fila conserva su posición normal; al cerrarlo recupera el comportamiento del editor. La prueba móvil verifica alcance de encabezados de revisión/confirmación antes de interactuar.
+
+La validación usa perfiles ficticios en contextos aislados y producción local en el puerto 3100. Las credenciales y el origen de tarjetas se vacían únicamente en ese proceso para evitar consultas autenticadas reales; no se modifican archivos de entorno ni el servicio que ocupa 3000. Los primeros intentos fallidos por caché de navegador o permisos de red del sandbox ocurrieron antes de navegar y se descartan como evidencia de producto. No se incorporaron dependencias ni servicios.
+
+La primera corrida general terminó con 296/297 casos correctos: Chromium informó `ERR_NO_BUFFER_SPACE` al cargar un chunk y ese contexto no hidrató. El caso pasó aislado sin cambios; luego se repitió toda la suite, con 297/297 correctos sobre el mismo producto. Las aserciones mantienen el orden de escrituras y el contenido completo, comparando objetos JSON en vez de su orden de propiedades.
+
+Los 33 casos nuevos cubren descarga del documento actual, apertura revisable, confirmación, respaldo y restauración, v1, UTF-8 y archivos incompatibles, revisión inerte, cuotas, almacenamiento protegido, guardados pendientes y lecturas tardías. Se revisaron capturas de escritorio y móvil EN/ES, temas claro/oscuro, primer campo en 320 × 568 y foco de revisión/confirmación sin solapes; los análisis axe ejecutados no detectaron infracciones. Esta evidencia corresponde a Chromium y emulación: quedan dispositivos físicos, Safari y evaluación completa con lectores de pantalla. El borrador local no sincroniza pestañas y el perfil anterior debe caber en el contrato para poder respaldarse. Cambios locales, sin commit, push ni despliegue en esta entrega.
+
+## Validación de actividad del propietario del token
+
+El 20 de octubre de 2026 se corrigió el rechazo de la vista del propietario mediante `isViewer`, conservando los scopes admitidos y los filtros públicos. Ver [ADR 0022](decisions/0022-token-owner-public-activity.md).
+
+- `pnpm test src/server/github src/core/activity`: 112 pruebas correctas en cinco suites. Incluyen propietario confirmado, identidad incorrecta, flag ausente, credenciales amplias o no verificables y exclusión de candidatos y repositorios privados/internos en ambas vistas.
+- `pnpm lint`, `pnpm typecheck` y `pnpm build`: correctos. También pasaron formato focal, enlaces de documentación y revisión de whitespace del diff.
+- Consulta autenticada real: respuesta HTTP 200 para el propietario con su propio token y para una cuenta pública de control. El snapshot omite `isViewer` y `userViewType`.
+- Las tres tarjetas del propietario devolvieron HTTP 200, SVG pasivo y estado `ready`.
+- Chromium en español, con almacenamiento aislado: consulta correcta, opciones inicialmente desmarcadas, tres imágenes cargadas y ningún error de página. Las solicitudes del navegador a la actividad y las tarjetas no llevan el encabezado de autenticación del proveedor.
+
+El servidor local se reinició con la configuración de desarrollo. `APP_URL` permanece vacío: la consulta y la vista previa funcionan, mientras copia y descarga con tarjetas siguen bloqueadas hasta configurar un origen público HTTPS. Esta comprobación no publica la aplicación ni modifica el borrador real; las pruebas habituales mantienen respuestas controladas y no requieren la credencial real.
+
+## Validación de la familia de tarjetas personalizables
+
+El 20 de octubre de 2026 se incorporaron Panorama, actividad mensual y dos diseños adaptados de GitHub Stats Extended, con tema, paleta, diseño y ancho opcionales. Ver [ADR 0023](decisions/0023-customizable-activity-cards.md). No se agregaron dependencias, servicios, scopes ni credenciales.
+
+- `pnpm lint`, `pnpm typecheck` y `pnpm build`: correctos. La generación de tipos y el build requieren ejecutar fuera del sandbox de Windows para cargar el binding SWC existente.
+- Prettier focal, enlaces de 39 documentos y `git diff --check`: correctos.
+- Inspección local con datos públicos reales: 42 combinaciones de siete tarjetas, tres diseños y dos temas devolvieron HTTP 200, estado `ready` y SVG pasivos. Ningún texto salió del viewBox. Se inspeccionaron capturas de Panorama, mensual y ambos diseños Extended.
+- Las rutas rechazaron con HTTP 400 idioma, tema, paleta o tamaño inválidos, parámetros duplicados y una URL arbitraria.
+- Chromium aislado: siete opciones inicialmente apagadas; selección de las cuatro nuevas, personalización, imágenes cargadas, guardado y recuperación correctos. Restablecer eliminó únicamente `appearance` y conservó usuario y selecciones. Sin errores de página ni encabezados de autenticación del proveedor en las solicitudes del navegador.
+- Revisión EN/ES en escritorio y teléfono emulado de 390 × 844: sin desbordamiento horizontal; controles alcanzables mediante desplazamiento, y Tab de tema a paleta. El campo de usuario empezó debajo del viewport al abrir el bloque largo, por lo que no se afirma que todo el formulario sea visible sin desplazarse. No es una prueba en dispositivo físico ni una auditoría completa de accesibilidad.
+
+Se conservó la licencia MIT íntegra de la revisión fijada de Extended y se revisaron los cambios de contrato y SVG de forma independiente. En esta ampliación no se agregaron casos a las suites de pruebas ni se ejecutaron las suites unitarias o E2E completas; las inspecciones dirigidas mediante scripts locales y los controles estáticos no las sustituyen. `APP_URL` sigue pendiente para exportar tarjetas desde un origen público; la integración local usa el token de desarrollo existente.
+
+## Validación de la suite pública Extended y MIT
+
+El 20 de octubre de 2026 se ampliaron las adaptaciones a las cinco familias Extended: estadísticas, lenguajes, repositorio, Gist y WakaTime. Se incorporaron 18 contadores, ranking opcional inicialmente apagado, cinco diseños de lenguajes, filtros, pesos, 79 temas y apariencia avanzada. El alcance y las diferencias se registran en [la matriz compatible](github-stats-extended.md) y [ADR 0024](decisions/0024-extended-public-suite-and-mit.md). El titular autorizó MIT con `Copyright (c) 2026 Juan Nicolas Herrera`; se agregaron licencia, metadatos y avisos sin incorporar dependencias nuevas.
+
+- `pnpm lint`, `pnpm typecheck`, `pnpm format:check`, `pnpm docs:check` y `pnpm build`: correctos. Se comprobaron enlaces de 42 documentos Markdown. Tipos y compilación requieren ejecutar fuera del sandbox de Windows para cargar SWC. Una comprobación de formato inicial detectó la matriz todavía en edición; se formateó y la ejecución final pasó.
+- `pnpm licenses:check` y la generación incluida en el build: correctos para 597 versiones instaladas y 224 raíces de dependencias de ejecución. Se conservaron 2.326.553 bytes de avisos. Hay 20 advertencias por paquetes sin archivo raíz de licencia/aviso, con contexto disponible en el inventario; no equivalen a una revisión jurídica cerrada ni a un artefacto binario listo para redistribuir. Ver [distribución open source](open-source.md).
+- Consultas reales con el token de desarrollo: estadísticas básicas y selección de los 18 contadores para `juannh`, incluidos datos históricos y ranking, devolvieron HTTP 200. Repositorio público, Gist público y estadísticas públicas WakaTime devolvieron snapshots válidos. Los resultados ausentes o parciales conservan su estado; esta consulta no verifica todos los filtros o cuentas posibles.
+- Inspección dirigida de 13 variantes SVG y los 79 temas: HTTP 200 y estado `ready`, sin recursos activos, texto fuera del viewBox ni superposiciones de texto detectadas en las variantes. Se revisaron capturas de estadísticas, anillo de lenguajes y repositorio con los cinco contadores de aportes.
+- Seis repositorios públicos distintos solicitados simultáneamente devolvieron seis tarjetas `ready` tras incorporar la cola compartida. Ocho entradas inválidas —parámetros desconocidos o duplicados, pesos nulos, destino arbitrario, aportes sin usuario y alias WakaTime `current`— devolvieron HTTP 400. Un identificador antiguo de React fue rechazado por redirección; se repitió con su identificador actual, sin relajar la validación de identidad ni permitir redirecciones.
+- Chromium aislado: 20 comprobaciones correctas en EN/ES. Incluyen ranking apagado, ausencia de consultas al abrir/escribir, edición de opciones en distinto orden sin perder imágenes, listas/degradados inválidos que conservan la configuración válida, guardado/recuperación y tres recursos sin usuario GitHub del perfil. No hubo errores de página ni encabezados Authorization del proveedor en el navegador.
+
+La revisión independiente corrigió la serialización canónica de opciones, los defaults visibles, la eliminación del filtro opcional por relación, las fechas y estados de los aportes por repositorio y su alternativa textual. Se sustituyó el rechazo inmediato de la quinta consulta por una cola compartida acotada y se limitó cada tarjeta a sus propios datos para evitar consultas de otra tarjeta desactivada. La revisión final de esos cambios no encontró hallazgos accionables nuevos.
+
+La revisión móvil fue emulación de 390 × 844, sin desbordamiento horizontal y con controles profundos alcanzables por teclado. El campo inicial empezó en `y=931`, debajo del viewport, medido antes de enfocarlo o desplazarlo; requiere bajar. Se inspeccionaron capturas de recursos en escritorio y foco móvil. No se afirma accesibilidad completa ni cobertura de dispositivos físicos, Safari o lectores de pantalla.
+
+No se agregaron ni ejecutaron suites unitarias o E2E en esta ampliación. Los scripts efímeros y capturas están en `work/`, ignorado; las comprobaciones dirigidas no sustituyen una regresión completa. `APP_URL` permanece vacío en desarrollo: vista previa y consultas locales disponibles, copia/descarga con tarjetas bloqueadas hasta configurar un origen público HTTPS. No se modificó el borrador real ni se hizo commit, push o despliegue.

@@ -46,7 +46,13 @@ function legacyContributor(): ProfileDocumentV1 {
   const current = createContributorExampleProfile();
   return {
     ...createEmptyProfileV1(current.contentLocale),
-    data: current.data,
+    data: {
+      ...current.data,
+      metrics: {
+        username: current.data.metrics.username,
+        cards: ["calendar", "summary", "languages"],
+      },
+    },
     visibility: current.visibility,
     moduleOrder: [...moduleIds].reverse(),
   };

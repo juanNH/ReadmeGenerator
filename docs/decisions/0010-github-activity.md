@@ -30,6 +30,8 @@ Configurar exclusivamente en servidor un PAT classic dedicado mediante `GITHUB_T
 
 Rechazar perfiles privados y filtrar repositorios públicos propios no forks y destacados no restringidos. Admitir únicamente recuentos privados anónimos que la persona haya compartido públicamente, sin detalles. Los lenguajes son bytes de repositorios analizados, no conocimientos ni actividad del período del calendario. Limitar a 300 repositorios, 20 lenguajes por repositorio y 100 agregados, con indicador de muestra parcial.
 
+**Actualización del 2026-10-20:** la regla inicial de rechazo se implementó exigiendo `userViewType: PUBLIC`, pero ese campo representa una vista y no identifica un ajuste de perfil privado. [ADR 0022](0022-token-owner-public-activity.md) permite también la vista `PRIVATE` del propietario autenticado, validada con `isViewer` y el usuario solicitado, conservando la verificación de scopes y los filtros de datos públicos. El párrafo anterior conserva el contexto de esta decisión inicial.
+
 ### Caché y alojamiento
 
 Limitar las consultas a 15 s y las respuestas a 2 MiB. La caché del proceso admite 512 snapshots y 512 fallos, frescura de 30 minutos y último resultado válido hasta 24 horas ante fallos transitorios; deduplica consultas y limita a cuatro distintas simultáneas y 60 por minuto. Respetar cuotas y Retry-After; no servir stale ante inexistencia o configuración inválida. Los límites son por proceso, sin prometer protección distribuida.

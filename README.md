@@ -2,9 +2,11 @@
 
 GitHub Profile Generator es un generador visual de README para perfiles de GitHub. Permite crear una presentación personal breve, elegir tecnologías con sus iconos y compartir proyectos, aportes o contacto, aunque haya poca actividad pública.
 
-El repositorio incluye un editor bilingüe con cinco secciones fijas y secciones personalizadas repetibles, navegación, configuración estable, vista previa, exportación, borrador local y kit visual. Las secciones incluidas se ordenan mediante arrastre, teclado o botones. Actividad y contribuciones reúne aportes manuales y tarjetas opcionales de GitHub: calendario, resumen y lenguajes. La consulta necesita configuración del servidor; el recorrido manual funciona sin credenciales. `ProfileDocument` versión 2 conserva las estructuras heredadas y usa un orden mixto de secciones. No hay asistencia con IA.
+El repositorio incluye un editor bilingüe con cinco secciones fijas y secciones personalizadas repetibles, navegación, configuración estable, vista previa, exportación, borrador local y kit visual. Las secciones incluidas se ordenan mediante arrastre, teclado o botones. Actividad y contribuciones reúne aportes manuales y diez tipos de tarjetas opcionales: cinco propias y las familias de estadísticas, lenguajes, repositorio, Gist y WakaTime adaptadas de GitHub Stats Extended. Las consultas GitHub necesitan configuración del servidor; WakaTime usa estadísticas públicas de una cuenta independiente y el recorrido manual funciona sin credenciales. `ProfileDocument` versión 2 conserva las estructuras heredadas y usa un orden mixto de secciones. No hay asistencia con IA.
 
 Presentación permite elegir niveles de título y alineación sin escribir etiquetas. El editor de fuentes resalta todos los lenguajes sugeridos y ofrece un ejemplo JSON opcional. El botón «Borrar README» vacía el perfil actual con confirmación y conserva los respaldos existentes. Consultá [el editor](docs/editor.md) para conocer las opciones y sus límites.
+
+Desde **Proyecto** podés descargar el perfil completo en JSON y abrirlo para continuar en otro navegador. La apertura incluye revisión y confirmación con respaldo independiente del perfil actual; conserva también el contenido oculto y el trabajo incompleto.
 
 ## Ejecutar el proyecto
 
@@ -47,7 +49,9 @@ Las imágenes propias se agregan mediante su bloque, con una URL HTTPS pública 
 
 El bloque HTML permite composiciones breves con encabezados centrados, imágenes enlazadas, tablas o desplegables. Conserva el código original y muestra avisos sobre lo filtrado y el HTML que se exportará. Admite etiquetas y atributos concretos, sin CSS ni JavaScript; los enlaces deben ser HTTP/HTTPS absolutos y las imágenes, HTTPS públicas con atributo `alt` explícito. No interpreta Markdown dentro del código ni importa un README completo. La vista previa aproxima el resultado: GitHub aplica filtros y estilos propios. Ver [uso de HTML](docs/editor.md#html-explícito) y [decisión de HTML explícito](docs/decisions/0015-explicit-profile-html.md).
 
-Actividad y contribuciones permite escribir aportes propios sin usuario de GitHub. El bloque opcional de GitHub consulta información pública tras una acción explícita y permite elegir las tarjetas y sugerencias que se quieren mostrar. El formulario no consulta al escribir ni recuperar; las imágenes de tarjetas ya elegidas sí se actualizan al mostrarse. Cero actividad y falta de datos son estados distintos; no se asignan rankings ni niveles de conocimiento. Los snapshots consultados no se guardan en el borrador: solo el usuario, las tarjetas y los aportes elegidos.
+Actividad y contribuciones permite escribir aportes propios sin usuario de GitHub. Las consultas del formulario son explícitas y todas las tarjetas empiezan desactivadas. Panorama combina los datos disponibles y actividad mensual agrupa el calendario por mes, señalando períodos parciales. La suite Extended agrega 18 contadores seleccionables, ranking opcional explicado, cinco diseños de lenguajes, tarjetas repetibles de repositorios y Gists públicos y estadísticas públicas WakaTime de los últimos siete días. Ofrece 79 temas nombrados, colores y degradados validados, títulos, bordes y formato numérico junto a los presets propios. Los SVG se generan localmente conservando la licencia MIT y los avisos del código adaptado; no requieren el servicio alojado de Extended. Ver [funciones compatibles y límites](docs/github-stats-extended.md), [ADR 0024](docs/decisions/0024-extended-public-suite-and-mit.md) y [atribución](THIRD_PARTY_NOTICES.md#github-stats-extended-tarjetas-de-estadísticas-y-lenguajes).
+
+El formulario no consulta al escribir ni recuperar; las imágenes de tarjetas ya elegidas sí se actualizan al mostrarse. Cero actividad, dato parcial y falta de datos son estados distintos. El ranking opcional aplica la fórmula de Extended, sin medir habilidad ni un percentil de población observado, y se oculta si faltan sus entradas completas. Los snapshots no se guardan en el borrador: se conservan usuarios y destinos públicos, tarjetas, opciones y aportes elegidos. Los aportes manuales permiten agregar contexto con título, descripción y enlace, sin publicar el borrador en una tarjeta dinámica.
 
 El borrador actual se guarda bajo `github-profile-generator.profile.v2` en el navegador, sin sincronización entre dispositivos. Si falta esa clave, un borrador v1 válido se migra en memoria, sin escribir hasta editar y conservando intacto su original. Un v2 inválido no se sustituye con v1 automáticamente. Los flags heredados de contribuciones y métricas se presentan como una única sección; ocultarla conserva ambos contenidos. Ver [secciones personalizadas y migración](docs/decisions/0013-custom-sections.md). La actividad de GitHub no se usa para medir conocimientos.
 
@@ -57,9 +61,13 @@ El editor manual no requiere variables de entorno. Para habilitar consultas, la 
 
 Para exportar tarjetas también se necesita `APP_URL`: el origen HTTPS público de este despliegue, que aloja sus SVG. Se lee en ejecución; cambiarlo requiere reiniciar el servicio, sin recompilar. Sin ese origen se pueden revisar tarjetas mediante rutas locales, pero copia y descarga permanecen deshabilitadas mientras haya tarjetas seleccionadas. Desmarcarlas permite exportar el contenido manual. No alcanza con un servidor en localhost para que GitHub pueda cargar imágenes.
 
-Las tarjetas se actualizan desde la aplicación según caché; no dependen de un servicio externo de gráficos. La consulta usa GraphQL de GitHub, filtra datos públicos y distingue límites de uso, errores y último resultado válido. La integración está preparada; habilitar un servidor con credenciales y verificarlo contra GitHub son pasos operativos explícitos. Ver [.env.example](.env.example), [arquitectura](docs/architecture.md) y [ADR 0010](docs/decisions/0010-github-activity.md).
+Las tarjetas se actualizan desde la aplicación según caché; no dependen de un servicio externo de gráficos. Las consultas usan endpoints fijos de GitHub o estadísticas públicas de WakaTime, filtran datos públicos y distinguen límites, errores, muestras parciales y último resultado válido. La integración está preparada; habilitar un servidor con credenciales y verificarlo contra GitHub son pasos operativos explícitos. Ver [.env.example](.env.example), [arquitectura](docs/architecture.md) y [ADR 0010](docs/decisions/0010-github-activity.md).
 
 La base incluye inglés como idioma predeterminado y español, con un selector de idioma funcional. La ruta `/` redirige a `/en`. La dirección visual busca claridad, jerarquía, controles reconocibles y opciones avanzadas que se muestran cuando hacen falta, tomando como referencia la sobriedad de Linear y Vercel sin copiar sus interfaces.
+
+## Licencia y contribuciones
+
+El código propio se publica bajo [MIT](LICENSE), con `Copyright (c) 2026 Juan Nicolas Herrera`. Permite reutilizar, modificar y distribuir, también comercialmente, conservando el aviso de copyright y permiso. Los materiales de terceros conservan sus licencias y atribuciones. Consultá la [guía open source](docs/open-source.md), [recursos de terceros](THIRD_PARTY_NOTICES.md) y [cómo contribuir](CONTRIBUTING.md) antes de preparar una distribución o aportar código. Los derechos del contenido de un README generado pertenecen a sus respectivos titulares.
 
 ## Documentación
 
@@ -69,6 +77,8 @@ La base incluye inglés como idioma predeterminado y español, con un selector d
 - [Arquitectura y límites del código](docs/architecture.md).
 - [Contrato del perfil y API del núcleo](docs/profile-model.md).
 - [Uso y límites del editor](docs/editor.md).
+- [Funciones compatibles de GitHub Stats Extended](docs/github-stats-extended.md).
+- [Licencia, atribuciones y distribución open source](docs/open-source.md).
 - [Kit de diseño y criterios de accesibilidad](docs/design-system.md).
 - [Guía de trabajo con IA y subagentes](docs/ai-development.md).
 - [Cómo contribuir](CONTRIBUTING.md).

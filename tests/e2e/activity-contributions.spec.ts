@@ -4,7 +4,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { readFile } from "node:fs/promises";
 import type { ActivitySnapshot } from "../../src/core/activity/activity-types";
 import { renderActivityCard } from "../../src/core/activity/render-card";
-import { metricCardIds } from "../../src/core/profile/module-content";
+import { profileActivityCardIds as metricCardIds } from "../../src/core/profile/module-content";
 import { createEmptyProfile } from "../../src/core/profile/profile-operations";
 import type { ProfileDocument } from "../../src/core/profile/profile-schema";
 

@@ -32,7 +32,7 @@ export function createEmptyProfileV1(contentLocale: ContentLocale): ProfileDocum
       current: moduleRegistry.current.createEmptyData(),
       projects: moduleRegistry.projects.createEmptyData(),
       contributions: moduleRegistry.contributions.createEmptyData(),
-      metrics: moduleRegistry.metrics.createEmptyData(),
+      metrics: { username: "", cards: [] },
       contact: moduleRegistry.contact.createEmptyData(),
     },
     moduleOrder: [...defaultModuleOrder],

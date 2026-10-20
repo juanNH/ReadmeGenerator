@@ -21,6 +21,8 @@ import englishImport from "@/messages/en/readme-import.json";
 import spanishImport from "@/messages/es/readme-import.json";
 import englishCodeEditor from "@/messages/en/code-editor.json";
 import spanishCodeEditor from "@/messages/es/code-editor.json";
+import englishProject from "@/messages/en/project.json";
+import spanishProject from "@/messages/es/project.json";
 
 function messageEntries(value: object, prefix = ""): Array<[string, string]> {
   return Object.entries(value).flatMap(([key, message]) => {
@@ -46,6 +48,7 @@ describe("translation contracts", () => {
     ["custom sections", englishCustom, spanishCustom],
     ["README import", englishImport, spanishImport],
     ["code editor", englishCodeEditor, spanishCodeEditor],
+    ["project files", englishProject, spanishProject],
   ])("keeps complete English and Spanish messages for %s", (_name, en, es) => {
     const englishEntries = messageEntries(en);
     const spanishEntries = new Map(messageEntries(es));

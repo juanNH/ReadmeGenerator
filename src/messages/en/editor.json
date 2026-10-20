@@ -130,7 +130,7 @@
     "startNew": "Start a new saved draft",
     "resetConfirmation": "Start a new saved draft? This clears the profile currently on screen and replaces any previous draft saved by this app in this browser. Download your README first if you want to keep it.",
     "privacy": "Your draft is stored in this browser only. It is not synced to other devices, and clearing browser data removes it. Export before leaving if saving is unavailable.",
-    "importMemoryHelp": "This imported profile is available only in this tab. Open Import README to download the previous profile and the original README. Download your work before reloading or closing this page."
+    "importMemoryHelp": "Automatic saving is paused. Download your current project from Project before reloading or closing the page. If a recovery copy is available, you can find it in the corresponding project or README import panel."
   },
   "preview": {
     "codePlain": "Plain text",
@@ -161,6 +161,7 @@
     "invalidImages": "Check the highlighted image addresses. Use a direct, public HTTPS URL and Review fields to open its settings.",
     "missingImageDescription": "Add a description to the highlighted images so everyone can understand them. Use Review fields to open their settings.",
     "invalidUsername": "Check the GitHub username in Activity & contributions, or exclude the GitHub cards to export your writing.",
+    "invalidActivityOptions": "Check the public repository, Gist or WakaTime settings in Activity & contributions, or exclude those cards.",
     "localCards": "You can review these cards locally. Exporting them needs this app's public address. Exclude the cards to export your writing now.",
     "ready": "Ready when you are. Copy the Markdown or download your README.md file.",
     "copy": "Copy README",
@@ -177,6 +178,11 @@
     "title": "Bring it to your GitHub profile",
     "instructions": "In a public repository named exactly like your GitHub username, place README.md at the root. Paste your copied text or upload the downloaded file. Review it before publishing.",
     "guide": "Read GitHub’s profile README guide"
+  },
+  "project": {
+    "action": "Project",
+    "loading": "Loading project options…",
+    "completed": "Project opened. You can continue editing."
   },
   "reset": {
     "action": "Clear README",

@@ -130,7 +130,7 @@
     "startNew": "Empezar un nuevo borrador guardado",
     "resetConfirmation": "¿Querés empezar un nuevo borrador guardado? Se vaciará el perfil que ves en pantalla y se reemplazará cualquier borrador anterior de esta aplicación en este navegador. Descargá el README antes si querés conservarlo.",
     "privacy": "Tu borrador se guarda solo en este navegador. No se sincroniza entre dispositivos y se elimina si borrás los datos del navegador. Exportalo antes de salir si no se puede guardar.",
-    "importMemoryHelp": "Este perfil importado está disponible solo en esta pestaña. Abrí Importar README para descargar el perfil anterior y el README original. Descargá tu trabajo antes de recargar o cerrar esta página."
+    "importMemoryHelp": "El guardado automático está pausado. Descargá tu proyecto actual desde Proyecto antes de recargar o cerrar la página. Si hay una copia de recuperación disponible, la encontrarás en el panel de Proyecto o Importar README correspondiente."
   },
   "preview": {
     "codePlain": "Texto plano",
@@ -161,6 +161,7 @@
     "invalidImages": "Revisá las direcciones de imagen señaladas. Usá una URL HTTPS pública y directa, y Revisar campos para abrir su configuración.",
     "missingImageDescription": "Agregá una descripción a las imágenes señaladas para que todos puedan entenderlas. Usá Revisar campos para abrir su configuración.",
     "invalidUsername": "Revisá el usuario de GitHub en Actividad y contribuciones, o excluí las tarjetas de GitHub para exportar tus textos.",
+    "invalidActivityOptions": "Revisá los datos públicos de repositorios, Gists o WakaTime en Actividad y contribuciones, o excluí esas tarjetas.",
     "localCards": "Podés revisar las tarjetas localmente. Exportarlas necesita una dirección pública de esta aplicación. Excluí las tarjetas para exportar tus textos ahora.",
     "ready": "Todo listo. Copiá el Markdown o descargá tu archivo README.md.",
     "copy": "Copiar README",
@@ -177,6 +178,11 @@
     "title": "Llevalo a tu perfil de GitHub",
     "instructions": "En un repositorio público con el mismo nombre que tu usuario de GitHub, colocá README.md en la raíz. Pegá el texto copiado o subí el archivo descargado. Revisalo antes de publicarlo.",
     "guide": "Ver la guía de README de perfil de GitHub"
+  },
+  "project": {
+    "action": "Proyecto",
+    "loading": "Cargando las opciones del proyecto…",
+    "completed": "Proyecto abierto. Podés seguir editando."
   },
   "reset": {
     "action": "Borrar README",

@@ -17,8 +17,17 @@ Creá una rama para el cambio y mantené cada propuesta enfocada en un objetivo.
 - Mantener todos los módulos de perfil opcionales. Ocultar una sección debe conservar sus datos.
 - Conservar el recorrido manual sin cuenta y distinguir los conocimientos declarados de las métricas públicas.
 - Documentar como planificada cualquier función que todavía no esté disponible.
+- Incorporar dependencias y adaptaciones de proyectos con mantenimiento activo verificado en sus fuentes oficiales. Fijar la revisión de los recursos copiados y conservar su procedencia, licencias y avisos.
 
 Los contratos de perfil y las salidas generadas necesitan pruebas de comportamiento. Para cambios visuales o de interacción, revisá también el navegador, el teclado y los estados relevantes. Elegí comprobaciones que cubran el cambio sin duplicar pruebas que solo reproduzcan su implementación.
+
+## Licencia de las contribuciones
+
+El código propio de este proyecto se publica bajo [MIT](LICENSE), con el aviso de copyright de Juan Nicolas Herrera. Al enviar una contribución de código propio, ofrecela bajo esa misma licencia y asegurate de tener autorización para aportarla. Cada persona conserva la titularidad de su contribución; no se solicita una cesión de derechos.
+
+Cuando reutilices código, fuentes, iconos, datos u otros recursos, conservá sus avisos originales y documentá la fuente, versión o commit, licencia y modificaciones en [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). La licencia MIT del proyecto no sustituye la licencia de esos materiales ni concede derechos sobre marcas. No copies código con condiciones desconocidas ni sustituyas avisos ajenos por el copyright del proyecto.
+
+Para cambios de dependencias o recursos de terceros, seguí el [procedimiento de licencias y distribución](docs/open-source.md), regenerá los avisos y revisá el diff. No hace falta una cuenta adicional ni firmar un acuerdo separado para contribuir.
 
 ## Validación de una propuesta
 
@@ -26,6 +35,8 @@ Los contratos de perfil y las salidas generadas necesitan pruebas de comportamie
 pnpm check
 pnpm build
 ```
+
+Si cambiaste dependencias o recursos distribuidos, ejecutá también `pnpm licenses:generate` y `pnpm licenses:check`; revisá las advertencias del inventario y los avisos incluidos en el artefacto de destino.
 
 Cuando el cambio afecta pantallas o componentes, agregá las comprobaciones que correspondan:
 

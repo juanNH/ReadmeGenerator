@@ -9,6 +9,7 @@ export type ReadmeIssue = {
     | "invalid_html"
     | "invalid_code"
     | "invalid_username"
+    | "invalid_activity_options"
     | "activity_not_configured";
   readonly path: readonly (string | number)[];
 };
