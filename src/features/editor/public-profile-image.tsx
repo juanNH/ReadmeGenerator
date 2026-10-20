@@ -5,7 +5,21 @@ import { ImageOff } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
 /** User image requests stay in the browser; no server-side optimizer or image proxy. */
-export function PublicProfileImage({ src, alt }: { src: string; alt: string }) {
+export function PublicProfileImage({
+  src,
+  alt,
+  width,
+  height,
+  inline = false,
+  linked = false,
+}: {
+  src: string;
+  alt: string;
+  width?: number | string;
+  height?: number;
+  inline?: boolean;
+  linked?: boolean;
+}) {
   const t = useTranslations("Editor.preview");
   const locale = useLocale();
   const [failed, setFailed] = useState(false);
@@ -14,7 +28,9 @@ export function PublicProfileImage({ src, alt }: { src: string; alt: string }) {
     return (
       <span
         lang={locale}
-        role="status"
+        role={linked ? undefined : "status"}
+        aria-live="polite"
+        aria-atomic="true"
         className="inline-flex w-full min-w-0 flex-col gap-2 rounded-lg border border-border bg-surface-raised p-4 text-sm text-muted-foreground"
       >
         <span className="inline-flex items-center gap-2 font-medium">
@@ -23,9 +39,11 @@ export function PublicProfileImage({ src, alt }: { src: string; alt: string }) {
         </span>
         <span>{alt}</span>
         <span className="text-xs leading-5">{t("imageLoadHelp")}</span>
-        <a href={src} target="_blank" rel="noopener noreferrer" className="self-start">
-          {t("openImage")}
-        </a>
+        {!linked && (
+          <a href={src} target="_blank" rel="noopener noreferrer" className="self-start">
+            {t("openImage")}
+          </a>
+        )}
       </span>
     );
 
@@ -34,11 +52,18 @@ export function PublicProfileImage({ src, alt }: { src: string; alt: string }) {
     <img
       src={src}
       alt={alt}
+      width={width}
+      height={height}
       loading="lazy"
       decoding="async"
       referrerPolicy="no-referrer"
       onError={() => setFailed(true)}
-      className="block h-auto max-w-full rounded-lg"
+      className={
+        inline
+          ? "inline-block max-w-full object-contain align-middle"
+          : "block h-auto max-w-full rounded-lg"
+      }
+      style={inline ? { width, height: height ?? "auto" } : undefined}
     />
   );
 }

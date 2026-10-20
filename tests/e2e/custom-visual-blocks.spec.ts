@@ -79,7 +79,7 @@ test("visual choices have local samples and create empty blocks with the right f
   await openEditor(page);
   await page.getByRole("button", { name: "Add custom section", exact: true }).click();
   const picker = page.getByRole("group", { name: "Add section content", exact: true });
-  await expect(picker.getByRole("button")).toHaveCount(8);
+  await expect(picker.getByRole("button")).toHaveCount(9);
   for (const name of [
     "Add subtitle",
     "Add divider",
@@ -338,7 +338,7 @@ for (const locale of ["en", "es"] as const) {
         name: locale === "en" ? "Add section content" : "Agregar contenido a la sección",
         exact: true,
       });
-      await expect(picker.getByRole("button")).toHaveCount(8);
+      await expect(picker.getByRole("button")).toHaveCount(9);
       expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
         true,

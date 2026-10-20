@@ -13,6 +13,7 @@
   "addDivider": "Add divider",
   "addQuote": "Add highlighted quote",
   "addImage": "Add image / banner",
+  "addHtml": "Add HTML",
   "pickerTextHelp": "A paragraph for your own words.",
   "pickerBulletHelp": "A list with a point beside each item.",
   "pickerNumberedHelp": "A list with automatic numbers for its items.",
@@ -21,6 +22,7 @@
   "pickerDividerHelp": "A horizontal line that separates your content.",
   "pickerQuoteHelp": "A short phrase set apart with a vertical line.",
   "pickerImageHelp": "An image or banner from a public HTTPS address, with an accessible description.",
+  "pickerHtmlHelp": "Your own HTML, with supported formatting and optional examples.",
   "empty": "Your section is ready. Choose a type of content to get started.",
   "paragraphLabel": "Text block {number}",
   "unorderedLabel": "Bullet list {number}",
@@ -30,6 +32,7 @@
   "dividerLabel": "Divider {number}",
   "quoteLabel": "Highlighted quote {number}",
   "imageLabel": "Image / banner {number}",
+  "htmlLabel": "HTML block {number}",
   "subtitle": "Subtitle",
   "subtitleHelp": "Introduce the content that follows. This is a smaller heading inside your section.",
   "highlightedQuote": "Highlighted quote",
@@ -74,5 +77,54 @@
   "itemsPasted": "Pasted {count} list items.",
   "convertedToList": "Converted to a bullet list. You can use Convert to text to undo the format.",
   "convertedToText": "Converted to text. Item text and markers have been kept.",
-  "continuedAsText": "List finished. Continue writing in the new text block."
+  "continuedAsText": "List finished. Continue writing in the new text block.",
+  "html": {
+    "code": "HTML code",
+    "help": "Use HTML inside this block. Your original is saved; the preview and README use supported HTML. Markdown syntax here stays literal.",
+    "invalid": "Review the HTML problems below before exporting. Your original code has been kept.",
+    "documentLimit": "The included HTML blocks exceed {limit, number} characters in total. Shorten some HTML code or hide a section to export. Your original code has been kept.",
+    "characterCount": "{count, number} of {limit, number} characters per block",
+    "problems": "HTML problems",
+    "noticesTitle": "Changes in supported HTML",
+    "supported": "Supported HTML",
+    "formats": "Use paragraphs, headings, bold or italic text, lists, links, tables, details and summaries, block quotes, code and horizontal dividers. Text alignment can be left, centered or right.",
+    "linksAndImages": "Web links need full HTTP or HTTPS addresses. Images need public HTTPS addresses and an accessible description in alt. Scripts, styles, forms, embedded pages and event handlers are removed.",
+    "limits": "Each block supports up to {length, number} characters, {nodes, number} nodes and {depth, number} nesting levels. Included HTML blocks support up to {documentLength, number} characters in total. GitHub may display supported formatting differently.",
+    "examplesTitle": "HTML examples",
+    "examplesHelp": "These local examples are starting points. They are added only when you choose Use this example, and you can edit them afterwards.",
+    "useExample": "Use this example",
+    "useNamedExample": "Use this example: {name}",
+    "replaceConfirmation": "Replace the code in this HTML block with the example? The current code in this block will be removed. Other blocks will be kept.",
+    "exampleApplied": "HTML example added. You can edit its code now.",
+    "exported": "HTML exported",
+    "exportedHelp": "This is the supported HTML used by the preview and README. Your original code above stays unchanged. Fix any listed problems before exporting.",
+    "notices": {
+      "unsupported_elements": "Unsupported elements were removed from the output. Their readable content is kept when possible.",
+      "unsupported_attributes": "Unsupported attributes were removed from the output.",
+      "comments_removed": "HTML comments were removed from the output.",
+      "repaired_html": "The HTML structure was repaired for the output. Check the exported HTML below."
+    },
+    "errors": {
+      "too_large": "This HTML block is too long. Shorten it or divide it into smaller blocks.",
+      "too_complex": "This HTML has too many nodes or nesting levels. Simplify its structure.",
+      "invalid_url": "Check the links and image addresses. Use full HTTP/HTTPS links and public HTTPS image addresses.",
+      "missing_image_alt": "Add a meaningful alt description to every image.",
+      "invalid_structure": "Review the HTML structure, especially tables, lists and nested elements.",
+      "empty_html": "There is no supported content to export. Add text or supported HTML, or clear this block."
+    },
+    "examples": {
+      "centered": {
+        "title": "Centered introduction",
+        "source": "<div align=\"center\">\n  <h2>Hi, I'm Alex</h2>\n  <p>I enjoy building useful things.</p>\n</div>"
+      },
+      "table": {
+        "title": "A small table",
+        "source": "<table>\n  <thead>\n    <tr><th>What I enjoy</th><th>What I am exploring</th></tr>\n  </thead>\n  <tbody>\n    <tr><td>Accessible interfaces</td><td>Creative tools</td></tr>\n  </tbody>\n</table>"
+      },
+      "details": {
+        "title": "Expandable details",
+        "source": "<details>\n  <summary>A little more about me</summary>\n  <p>I learn by making and sharing.</p>\n</details>"
+      }
+    }
+  }
 }

@@ -126,12 +126,14 @@
     "reviewDescription": "Review the message below to prepare your README for export.",
     "imageLoadFailure": "This image could not be loaded",
     "imageLoadHelp": "Check that the URL opens the image directly and works without signing in. The address is kept in your draft and README.",
-    "openImage": "Open image address"
+    "openImage": "Open image address",
+    "htmlTable": "Table: scroll horizontally if needed"
   },
   "export": {
     "empty": "Choose a section and add at least some text or a link to enable copy and download.",
     "unsupported": "This draft includes a visible section this editor cannot export yet. The saved content has been kept, but export is unavailable for this draft.",
     "invalidLinks": "Check the highlighted links before copying or downloading. Use Review fields in your sections to open the affected settings. No content has been removed.",
+    "invalidHtml": "Review the highlighted HTML blocks before copying or downloading. Open their settings with Review fields to see what needs attention.",
     "invalidImages": "Check the highlighted image addresses. Use a direct, public HTTPS URL and Review fields to open its settings.",
     "missingImageDescription": "Add a description to the highlighted images so everyone can understand them. Use Review fields to open their settings.",
     "invalidUsername": "Check the GitHub username in Activity & contributions, or exclude the GitHub cards to export your writing.",

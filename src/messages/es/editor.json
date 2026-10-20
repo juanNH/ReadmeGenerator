@@ -126,12 +126,14 @@
     "reviewDescription": "Revisá el mensaje de abajo para preparar tu README para exportar.",
     "imageLoadFailure": "No se pudo cargar esta imagen",
     "imageLoadHelp": "Revisá que la URL abra la imagen directamente y funcione sin iniciar sesión. La dirección se conserva en tu borrador y README.",
-    "openImage": "Abrir dirección de la imagen"
+    "openImage": "Abrir dirección de la imagen",
+    "htmlTable": "Tabla: desplazate horizontalmente si hace falta"
   },
   "export": {
     "empty": "Elegí una sección y agregá algo de texto o un enlace para habilitar la copia y descarga.",
     "unsupported": "Este borrador tiene una sección visible que el editor todavía no puede exportar. El contenido guardado se conserva, pero la exportación no está disponible para este borrador.",
     "invalidLinks": "Revisá los enlaces marcados antes de copiar o descargar. Usá Revisar campos en tus secciones para abrir la configuración que necesita atención. No se eliminó contenido.",
+    "invalidHtml": "Revisá los bloques HTML marcados antes de copiar o descargar. Usá Revisar campos para abrir su configuración y ver qué necesita atención.",
     "invalidImages": "Revisá las direcciones de imagen señaladas. Usá una URL HTTPS pública y directa, y Revisar campos para abrir su configuración.",
     "missingImageDescription": "Agregá una descripción a las imágenes señaladas para que todos puedan entenderlas. Usá Revisar campos para abrir su configuración.",
     "invalidUsername": "Revisá el usuario de GitHub en Actividad y contribuciones, o excluí las tarjetas de GitHub para exportar tus textos.",

@@ -4,7 +4,15 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 
 export type AddBlockKind =
-  "paragraph" | "unordered" | "ordered" | "link" | "heading" | "divider" | "quote" | "image";
+  | "paragraph"
+  | "unordered"
+  | "ordered"
+  | "link"
+  | "heading"
+  | "divider"
+  | "quote"
+  | "image"
+  | "html";
 
 const options = [
   { kind: "paragraph", label: "addText", description: "pickerTextHelp" },
@@ -15,6 +23,7 @@ const options = [
   { kind: "divider", label: "addDivider", description: "pickerDividerHelp" },
   { kind: "quote", label: "addQuote", description: "pickerQuoteHelp" },
   { kind: "image", label: "addImage", description: "pickerImageHelp" },
+  { kind: "html", label: "addHtml", description: "pickerHtmlHelp" },
 ] as const;
 
 type CustomBlockPickerProps = {
@@ -137,6 +146,20 @@ function BlockSample({ kind }: { kind: AddBlockKind }) {
           />
           <circle cx="112" cy="11" r="4" fill="currentColor" fillOpacity="0.6" />
           <path d="M8 33 38 12 65 31 87 19 125 33Z" fill="currentColor" fillOpacity="0.4" />
+        </svg>
+      )}
+      {kind === "html" && (
+        <svg
+          viewBox="0 0 64 32"
+          style={{ width: "100%", height: "2rem" }}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          focusable="false"
+        >
+          <path d="m21 8-9 8 9 8m22-16 9 8-9 8M36 5l-8 22" />
         </svg>
       )}
     </span>

@@ -234,6 +234,7 @@ function SectionNavigationItem({
     transition: null,
   });
   const hasErrors = sectionHasErrors(profile, id, errors);
+  const stateDescriptionId = useId();
 
   return (
     <li
@@ -252,36 +253,44 @@ function SectionNavigationItem({
           aria-label={label}
           onCheckedChange={(checked) => onVisibility(id, checked === true)}
         />
-        <button
-          ref={(node) => buttonRef(id, node)}
-          type="button"
-          aria-label={included ? label : t("addAndEdit", { module: label })}
-          aria-current={active ? "step" : undefined}
-          disabled={disabled}
-          onClick={() => onSelect(id)}
-          className={cn(
-            "flex min-h-11 min-w-0 flex-col justify-center rounded-sm px-1 py-2 text-left focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:outline-none disabled:opacity-45",
-            !included && "col-span-2",
+        <div className={cn("relative min-w-0", !included && "col-span-2")}>
+          <button
+            ref={(node) => buttonRef(id, node)}
+            type="button"
+            aria-label={included ? label : t("addAndEdit", { module: label })}
+            aria-current={active ? "step" : undefined}
+            aria-describedby={stateDescriptionId}
+            disabled={disabled}
+            onClick={() => onSelect(id)}
+            className="flex min-h-14 w-full min-w-0 flex-col justify-center rounded-sm px-1 pt-2 pb-7 text-left focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:outline-none disabled:opacity-45"
+          >
+            <span
+              className={cn(
+                "min-w-0 text-sm leading-5 font-medium break-words",
+                included && "pl-5",
+              )}
+            >
+              {label}
+            </span>
+          </button>
+          {included && (
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute top-2 left-1 text-xs leading-5 text-muted-foreground"
+            >
+              {index + 1}.
+            </span>
           )}
-        >
-          <span className="flex min-w-0 items-start gap-2 text-sm leading-5 font-medium">
-            {included && (
-              <span aria-hidden="true" className="shrink-0 text-xs leading-5 text-muted-foreground">
-                {index + 1}.
-              </span>
-            )}
-            <span className="min-w-0 break-words">{label}</span>
-          </span>
           <span
-            aria-hidden="true"
+            id={stateDescriptionId}
             className={cn(
-              "mt-1 text-[11px] leading-4",
+              "pointer-events-none absolute bottom-2 left-1 text-[11px] leading-4",
               active ? "font-medium text-accent" : "text-muted-foreground",
             )}
           >
             {active ? t("editing") : included ? t("included") : t("available")}
           </span>
-        </button>
+        </div>
         <Button
           ref={handleRef}
           variant="ghost"

@@ -65,6 +65,11 @@ export const customBlockSchema = z.discriminatedUnion("type", [
     url: z.string(),
     alt: z.string(),
   }),
+  z.strictObject({
+    id: customEntryIdSchema,
+    type: z.literal("html"),
+    source: z.string(),
+  }),
 ]);
 
 export const customSectionSchema = z.strictObject({

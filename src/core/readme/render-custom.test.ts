@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { toHtml } from "hast-util-to-html";
+import type { Root } from "hast";
 import type { CustomBlock, CustomSection } from "../profile/custom-content";
 import { createEmptyProfile } from "../profile/profile-operations";
 import type { ContentLocale, ProfileDocument } from "../profile/profile-schema";
@@ -6,6 +8,7 @@ import { parseProfileDocument } from "../profile/profile-validation";
 import { generateReadme } from "./generate-readme";
 import { renderCustomSection, renderCustomSectionWithListIndex } from "./render-custom";
 import type { CustomImageSource, ReadmeIssue, ReadmeResult } from "./readme-result";
+import { PROFILE_HTML_MAX_DOCUMENT_LENGTH, PROFILE_HTML_MAX_LENGTH } from "./profile-html";
 
 function section(blocks: CustomBlock[], overrides: Partial<CustomSection> = {}): CustomSection {
   return { id: "custom", title: "My section", visible: true, blocks, ...overrides };
@@ -32,6 +35,285 @@ function freezeDeep<T>(value: T): T {
   }
   return value;
 }
+
+function canonicalHtml(tree: Root) {
+  return toHtml(tree).replace(/\r/g, "&#13;").replace(/\n/g, "&#10;");
+}
+
+describe("explicit sanitized HTML and exact exported ranges", () => {
+  it.each([
+    ["", 3],
+    ["Section title", 4],
+  ] as const)(
+    "wraps an HTML block and supplies relative ranges with title %j",
+    (title, headingLevel) => {
+      const custom = section(
+        [{ id: "html", type: "html", source: "<h1>Hello</h1><p>My words</p>" }],
+        { title },
+      );
+      const errors: ReadmeIssue[] = [];
+      const rendered = renderCustomSectionWithListIndex(freezeDeep(custom), 2, errors, 5);
+      expect(errors).toEqual([]);
+      expect(rendered.nextListIndex).toBe(5);
+      expect(rendered.htmlFragments).toHaveLength(1);
+      const fragment = rendered.htmlFragments![0]!;
+      expect(fragment.headingLevel).toBe(headingLevel);
+      expect(fragment.html).toBe("<div><h1>Hello</h1><p>My words</p></div>");
+      expect(canonicalHtml(fragment.tree)).toBe(fragment.html);
+      expect(rendered.markdown.slice(fragment.start, fragment.end)).toBe(fragment.html);
+      expect(fragment.start).toBe(title ? "## Section title\n\n".length : 0);
+      expect(renderCustomSection(custom, 2, [])).toBe(rendered.markdown);
+    },
+  );
+
+  it("keeps absolute UTF16 ranges exact across repeated HTML, Unicode, module output and escaped titles", () => {
+    const repeated = "<details><summary>More 🌱</summary>\n\n<p>Repeated content</p></details>";
+    const profile = profileFor([
+      section(
+        [
+          { id: "before", type: "paragraph", text: "Before 🌈 and **plain**" },
+          { id: "html-one", type: "html", source: repeated },
+          { id: "empty", type: "html", source: " \n " },
+          {
+            id: "middle",
+            type: "list",
+            style: "ordered",
+            items: [{ id: "item", text: "Between" }],
+          },
+          { id: "html-two", type: "html", source: repeated },
+        ],
+        { id: "one", title: "A 🌱 [title]" },
+      ),
+      section([{ id: "last", type: "html", source: "<p>Last block 🌸</p>" }], {
+        id: "two",
+        title: "",
+      }),
+    ]);
+    profile.visibility.presentation = true;
+    profile.data.presentation.displayName = "Alex 🌟";
+    profile.sectionOrder = [
+      { kind: "custom", sectionId: "two" },
+      { kind: "module", moduleId: "presentation" },
+      { kind: "custom", sectionId: "one" },
+      ...profile.sectionOrder.filter(
+        (entry) => entry.kind === "module" && entry.moduleId !== "presentation",
+      ),
+    ];
+    const original = structuredClone(profile);
+    const result = generateReadme(freezeDeep(profile));
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.customHtml).toHaveLength(3);
+    expect(result.customHtml!.map((entry) => entry.headingLevel)).toEqual([3, 4, 4]);
+    expect(result.customHtml![0]!.start).toBe(0);
+    let previousEnd = -1;
+    for (const fragment of result.customHtml!) {
+      expect(fragment.start).toBeGreaterThan(previousEnd);
+      expect(result.markdown.slice(fragment.start, fragment.end)).toBe(fragment.html);
+      expect(canonicalHtml(fragment.tree)).toBe(fragment.html);
+      previousEnd = fragment.end;
+    }
+    expect(result.customHtml![1]!.html).toBe(result.customHtml![2]!.html);
+    expect(result.customHtml![1]!.start).not.toBe(result.customHtml![2]!.start);
+    expect(result.markdown).toContain("# Alex 🌟\n\n## A 🌱 \\[title\\]\n\n");
+    expect(generateReadme(profile)).toEqual(result);
+    expect(profile).toEqual(original);
+  });
+
+  it("reports original source paths when custom storage and output orders differ", () => {
+    const profile = profileFor([
+      section([{ id: "a", type: "html", source: '<a href="#fragment">Saved</a>' }], { id: "one" }),
+      section(
+        [
+          { id: "p", type: "paragraph", text: "Valid content" },
+          { id: "b", type: "html", source: '<img src="https://images.example.com/x">' },
+        ],
+        { id: "two" },
+      ),
+    ]);
+    profile.sectionOrder.reverse();
+    expect(generateReadme(profile)).toEqual({
+      success: false,
+      errors: [
+        { code: "invalid_html", path: ["customSections", 1, "blocks", 1, "source"] },
+        { code: "invalid_html", path: ["customSections", 0, "blocks", 0, "source"] },
+      ],
+    });
+  });
+
+  it.each([
+    "<script>Only removed content</script>",
+    "<details><p>Missing summary</p></details>",
+    "<p></p>",
+  ])("rejects visible nonexportable HTML without partial output or metadata: %s", (source) => {
+    const profile = profileFor([
+      section([
+        { id: "valid", type: "html", source: "<p>Valid HTML</p>" },
+        { id: "image", type: "image", url: "https://images.example.com/x", alt: "Valid image" },
+        { id: "invalid", type: "html", source },
+      ]),
+    ]);
+    expect(generateReadme(profile)).toEqual({
+      success: false,
+      errors: [{ code: "invalid_html", path: ["customSections", 0, "blocks", 2, "source"] }],
+    });
+  });
+
+  it("omits blank HTML and never adds empty metadata properties to existing output", () => {
+    const profile = profileFor([
+      section(
+        [
+          { id: "blank", type: "html", source: " \n\t " },
+          { id: "plain", type: "paragraph", text: "Useful words" },
+        ],
+        { title: "" },
+      ),
+    ]);
+    expect(generateReadme(profile)).toEqual({ success: true, markdown: "Useful words\n" });
+  });
+
+  it("omits hidden malformed and oversized HTML without changing the source or ranges", () => {
+    const hidden = section(
+      [
+        { id: "unsafe", type: "html", source: '<img src="javascript:alert(1)">' },
+        { id: "oversized", type: "html", source: "x".repeat(PROFILE_HTML_MAX_DOCUMENT_LENGTH + 1) },
+      ],
+      { visible: false, id: "hidden" },
+    );
+    const profile = profileFor([
+      hidden,
+      section([{ id: "plain", type: "paragraph", text: "Visible" }], { id: "shown", title: "" }),
+    ]);
+    const original = structuredClone(profile);
+    expect(generateReadme(freezeDeep(profile))).toEqual({ success: true, markdown: "Visible\n" });
+    expect(profile).toEqual(original);
+  });
+
+  it("keeps sanitized HTML images in the HTML tree without changing customImages", () => {
+    const profile = profileFor([
+      section(
+        [
+          {
+            id: "html",
+            type: "html",
+            source:
+              '<p align="center"><img src="https://images.example.com/icon" alt="" width="40" height="40"></p>',
+          },
+        ],
+        { title: "" },
+      ),
+    ]);
+    const result = generateReadme(profile);
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.customImages).toBeUndefined();
+    expect(result.customHtml).toHaveLength(1);
+    expect(result.markdown).toContain('width="40"');
+    expect(result.markdown).toContain('alt=""');
+    expect(canonicalHtml(result.customHtml![0]!.tree)).toBe(result.customHtml![0]!.html);
+  });
+
+  it("retains original HTML and publishes only its sanitized canonical form", () => {
+    const source =
+      '<p class="hero" onclick="alert(1)">Keep &copy;</p><script>never publish</script>';
+    const profile = profileFor([section([{ id: "html", type: "html", source }], { title: "" })]);
+    const result = generateReadme(freezeDeep(profile));
+    expect(markdown(result)).toBe("<div><p>Keep ©</p></div>\n");
+    expect(profile.customSections[0]!.blocks[0]).toEqual({ id: "html", type: "html", source });
+  });
+
+  it("does not reparse expanded canonical output under source-size limits", () => {
+    const source = `<p>${"&".repeat(10_000)}</p>`;
+    const result = generateReadme(
+      profileFor([section([{ id: "html", type: "html", source }], { title: "" })]),
+    );
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    const fragment = result.customHtml![0]!;
+    expect(fragment.html.length).toBeGreaterThan(PROFILE_HTML_MAX_LENGTH);
+    expect(canonicalHtml(fragment.tree)).toBe(fragment.html);
+    expect(result.markdown.slice(fragment.start, fragment.end)).toBe(fragment.html);
+  });
+
+  it("encodes semantic line breaks so HTML text cannot open another Markdown block", () => {
+    const source =
+      "<div>\n\n![No image request](http://localhost/private)\n\n[No executable link](javascript:alert(1))\n\n# Not a Markdown heading\n\n---\n\n1. Not a list\n\n</div><pre><code>first\n\nsecond</code></pre>";
+    const result = generateReadme(
+      profileFor([section([{ id: "html", type: "html", source }], { title: "" })]),
+    );
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    const fragment = result.customHtml![0]!;
+    expect(fragment.html).not.toContain("\n");
+    expect(fragment.html).toContain("&#10;&#10;");
+    expect(canonicalHtml(fragment.tree)).toBe(fragment.html);
+    expect(fragment.html).toContain("![No image request](http://localhost/private)");
+    expect(fragment.html).toContain("[No executable link](javascript:alert(1))");
+    expect(fragment.html).toContain("<pre><code>first&#10;&#10;second</code></pre>");
+  });
+
+  it("checks the aggregate visible HTML source budget before rendering any fragment", () => {
+    const profile = profileFor([
+      section(
+        Array.from({ length: 6 }, (_, index) => ({
+          id: `html-${index}`,
+          type: "html" as const,
+          source: `<p>${"x".repeat(26_000)}</p>`,
+        })),
+        { title: "" },
+      ),
+    ]);
+    expect(generateReadme(profile)).toEqual({
+      success: false,
+      errors: [{ code: "invalid_html", path: ["customSections", 0, "blocks", 5, "source"] }],
+    });
+  });
+
+  it("accepts the exact aggregate source limit with independent trees and offsets", () => {
+    const source = `<p>${"x".repeat(PROFILE_HTML_MAX_LENGTH - 7)}</p>`;
+    const profile = profileFor([
+      section(
+        Array.from({ length: 5 }, (_, index) => ({
+          id: `html-${index}`,
+          type: "html" as const,
+          source,
+        })),
+        { title: "" },
+      ),
+    ]);
+    expect(source.length * 5).toBe(PROFILE_HTML_MAX_DOCUMENT_LENGTH);
+    const result = generateReadme(profile);
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.customHtml).toHaveLength(5);
+    expect(result.customHtml![0]!.tree).not.toBe(result.customHtml![1]!.tree);
+    for (const fragment of result.customHtml!)
+      expect(result.markdown.slice(fragment.start, fragment.end)).toBe(fragment.html);
+  });
+
+  it("preserves list alternation and activity restrictions around HTML fragments", () => {
+    const profile = profileFor([
+      section(
+        [
+          { id: "before", type: "list", style: "unordered", items: [{ id: "a", text: "Before" }] },
+          { id: "html", type: "html", source: "<hr>" },
+          { id: "after", type: "list", style: "ordered", items: [{ id: "b", text: "After" }] },
+        ],
+        { title: "" },
+      ),
+    ]);
+    profile.visibility.metrics = true;
+    profile.data.metrics = { username: "alex", cards: ["summary"] };
+    const result = generateReadme(profile);
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.markdown).toContain("+ Before\n\n<div><hr></div>\n\n1) After\n");
+    expect(result.exportIssues).toEqual([
+      { code: "activity_not_configured", path: ["data", "metrics"] },
+    ]);
+    expect(result.customHtml).toHaveLength(1);
+  });
+});
 
 describe("plain custom blocks", () => {
   it("combines authored paragraphs, a list and a link without inventing labels", () => {

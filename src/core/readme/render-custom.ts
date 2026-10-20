@@ -1,13 +1,16 @@
+import type { ElementContent, Root } from "hast";
 import type { CustomSection } from "../profile/custom-content";
 import { escapeInlineText, escapeParagraphText, normalizeInlineText } from "./escape-markdown";
 import { normalizePublicImageUrl } from "./public-image";
-import { joinBlocks, renderLink, renderSection } from "./render-helpers";
-import type { CustomImageSource, ReadmeIssue } from "./readme-result";
+import { analyzeProfileHtml } from "./profile-html";
+import { renderLink } from "./render-helpers";
+import type { CustomHtmlFragment, CustomImageSource, ReadmeIssue } from "./readme-result";
 import { escapeLinkDestination } from "./web-url";
 
 export type CustomSectionRenderResult = {
   readonly markdown: string;
   readonly nextListIndex: number;
+  readonly htmlFragments?: readonly CustomHtmlFragment[];
 };
 
 /** Alternate emitted list markers so CommonMark keeps independently authored lists separate. */
@@ -21,6 +24,7 @@ export function renderCustomSectionWithListIndex(
   let nextListIndex = initialListIndex;
   if (!section.visible) return { markdown: "", nextListIndex };
   const title = escapeInlineText(section.title);
+  const htmlBlocks = new Map<number, Root>();
   const blocks = section.blocks.map((block, blockIndex) => {
     switch (block.type) {
       case "paragraph":
@@ -53,6 +57,29 @@ export function renderCustomSectionWithListIndex(
         images?.push({ src, alt });
         return `![${escapeInlineText(alt)}](${escapeLinkDestination(src)})`;
       }
+      case "html": {
+        const analyzed = analyzeProfileHtml(block.source);
+        if (analyzed.errors.length > 0) {
+          errors.push({
+            code: "invalid_html",
+            path: ["customSections", sectionIndex, "blocks", blockIndex, "source"],
+          });
+          return "";
+        }
+        if (!analyzed.html) return "";
+        htmlBlocks.set(blockIndex, {
+          type: "root",
+          children: [
+            {
+              type: "element",
+              tagName: "div",
+              properties: {},
+              children: analyzed.tree.children as ElementContent[],
+            },
+          ],
+        });
+        return `<div>${analyzed.html}</div>`;
+      }
       case "list": {
         const items = block.items.map((item) => escapeParagraphText(item.text)).filter(Boolean);
         if (items.length === 0) return "";
@@ -76,9 +103,31 @@ export function renderCustomSectionWithListIndex(
         );
     }
   });
-  const content = joinBlocks(blocks);
+  const prefix = title ? `## ${title}\n\n` : "";
+  const htmlFragments: CustomHtmlFragment[] = [];
+  let content = "";
+  blocks.forEach((text, blockIndex) => {
+    if (!text) return;
+    if (content) content += "\n\n";
+    const tree = htmlBlocks.get(blockIndex);
+    if (tree) {
+      const start = prefix.length + content.length;
+      htmlFragments.push({
+        html: text,
+        tree,
+        start,
+        end: start + text.length,
+        headingLevel: title ? 4 : 3,
+      });
+    }
+    content += text;
+  });
   if (!content) return { markdown: "", nextListIndex };
-  return { markdown: title ? renderSection(title, content) : content, nextListIndex };
+  return {
+    markdown: `${prefix}${content}`,
+    nextListIndex,
+    ...(htmlFragments.length ? { htmlFragments } : {}),
+  };
 }
 
 /** Standalone callers start a fresh list sequence; all authored text remains escaped. */

@@ -9,6 +9,13 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import type { CustomBlock, CustomSection } from "@/core/profile/custom-content";
 import type { ReadmeIssue } from "@/core/readme";
+import {
+  analyzeProfileHtml,
+  PROFILE_HTML_MAX_DEPTH,
+  PROFILE_HTML_MAX_DOCUMENT_LENGTH,
+  PROFILE_HTML_MAX_LENGTH,
+  PROFILE_HTML_MAX_NODES,
+} from "@/core/readme/profile-html";
 import { CustomBlockPicker, type AddBlockKind } from "./custom-block-picker";
 
 type ListBlock = Extract<CustomBlock, { type: "list" }>;
@@ -125,9 +132,11 @@ export function CustomSectionForm({ value, errors, onChange }: CustomSectionForm
                 ? "quoteLabel"
                 : block.type === "image"
                   ? "imageLabel"
-                  : block.style === "ordered"
-                    ? "orderedLabel"
-                    : "unorderedLabel";
+                  : block.type === "html"
+                    ? "htmlLabel"
+                    : block.style === "ordered"
+                      ? "orderedLabel"
+                      : "unorderedLabel";
     return t(key, { number: index + 1 });
   }
 
@@ -140,9 +149,11 @@ export function CustomSectionForm({ value, errors, onChange }: CustomSectionForm
           ? { id, type: "divider" }
           : kind === "image"
             ? { id, type: "image", url: "", alt: "" }
-            : kind === "link"
-              ? { id, type: "link", label: "", url: "" }
-              : { id, type: "list", style: kind, items: [{ id: crypto.randomUUID(), text: "" }] };
+            : kind === "html"
+              ? { id, type: "html", source: "" }
+              : kind === "link"
+                ? { id, type: "link", label: "", url: "" }
+                : { id, type: "list", style: kind, items: [{ id: crypto.randomUUID(), text: "" }] };
     pendingFocus.current = { kind: "block", blockId: id };
     onChange({ ...value, blocks: [...value.blocks, block] });
     setAnnouncement(t("blockAdded", { name: blockLabel(block, value.blocks.length) }));
@@ -472,6 +483,32 @@ export function CustomSectionForm({ value, errors, onChange }: CustomSectionForm
                 </Field>
               </div>
             )}
+            {block.type === "html" && (
+              <HtmlBlockFields
+                controlId={controlId}
+                source={block.source}
+                inputRef={controlRef(block.id)}
+                hasExportError={errors.some(
+                  (error) =>
+                    error.code === "invalid_html" &&
+                    error.path[0] === "customSections" &&
+                    error.path[2] === "blocks" &&
+                    error.path[3] === blockIndex &&
+                    error.path[4] === "source",
+                )}
+                onChange={(source) => replaceBlock({ ...block, source })}
+                onUseExample={(source) => {
+                  if (block.source.trim() && !window.confirm(t("html.replaceConfirmation"))) return;
+                  pendingFocus.current = {
+                    kind: "block",
+                    blockId: block.id,
+                    selection: { start: source.length, end: source.length },
+                  };
+                  replaceBlock({ ...block, source });
+                  setAnnouncement(t("html.exampleApplied"));
+                }}
+              />
+            )}
             {block.type === "list" && (
               <div className="space-y-4">
                 <p
@@ -612,6 +649,168 @@ export function CustomSectionForm({ value, errors, onChange }: CustomSectionForm
       <p role="status" aria-live="polite" aria-atomic="true" className="sr-only">
         {announcement}
       </p>
+    </div>
+  );
+}
+
+type HtmlBlockFieldsProps = {
+  controlId: string;
+  source: string;
+  inputRef: (control: TextControl | null) => void;
+  hasExportError: boolean;
+  onChange: (source: string) => void;
+  onUseExample: (source: string) => void;
+};
+
+function HtmlBlockFields({
+  controlId,
+  source,
+  inputRef,
+  hasExportError,
+  onChange,
+  onUseExample,
+}: HtmlBlockFieldsProps) {
+  const t = useTranslations("EditorModules.custom");
+  const analysis = analyzeProfileHtml(source);
+  const hasProblems = analysis.errors.length > 0;
+  const examples = ["centered", "table", "details"] as const;
+  const describedBy = [
+    `${controlId}-html-count`,
+    hasProblems ? `${controlId}-html-problems` : undefined,
+    analysis.notices.length > 0 ? `${controlId}-html-notices` : undefined,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  return (
+    <div className="min-w-0 space-y-4">
+      <Field
+        htmlFor={`${controlId}-source`}
+        label={t("html.code")}
+        description={t("html.help")}
+        error={
+          hasProblems
+            ? t("html.invalid")
+            : hasExportError
+              ? t("html.documentLimit", { limit: PROFILE_HTML_MAX_DOCUMENT_LENGTH })
+              : undefined
+        }
+      >
+        <Textarea
+          ref={inputRef}
+          value={source}
+          rows={8}
+          spellCheck={false}
+          autoCorrect="off"
+          autoCapitalize="off"
+          aria-describedby={describedBy}
+          className="min-h-56 font-mono"
+          onChange={(event) => onChange(event.target.value)}
+        />
+      </Field>
+      <p id={`${controlId}-html-count`} className="text-xs leading-5 text-muted-foreground">
+        {t("html.characterCount", { count: source.length, limit: PROFILE_HTML_MAX_LENGTH })}
+      </p>
+      {hasProblems && (
+        <ul
+          id={`${controlId}-html-problems`}
+          aria-label={t("html.problems")}
+          className="list-disc space-y-1 pl-5 text-xs leading-5 text-destructive"
+        >
+          {analysis.errors.map((problem, index) => (
+            <li key={`${problem.code}-${index}`}>{t(`html.errors.${problem.code}`)}</li>
+          ))}
+        </ul>
+      )}
+      {analysis.notices.length > 0 && (
+        <div className="space-y-2 rounded-md border border-border bg-surface-raised p-3">
+          <p className="text-xs font-medium">{t("html.noticesTitle")}</p>
+          <ul
+            id={`${controlId}-html-notices`}
+            aria-label={t("html.noticesTitle")}
+            className="list-disc space-y-1 pl-5 text-xs leading-5 text-muted-foreground"
+          >
+            {analysis.notices.map((notice, index) => (
+              <li key={`${notice.code}-${index}`}>{t(`html.notices.${notice.code}`)}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      <details className="min-w-0 rounded-md border border-border p-3">
+        <summary className="cursor-pointer rounded-sm text-sm font-medium focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:outline-none">
+          {t("html.supported")}
+        </summary>
+        <div className="mt-3 min-w-0 space-y-3 text-xs leading-5 text-muted-foreground">
+          <p>{t("html.formats")}</p>
+          <p>{t("html.linksAndImages")}</p>
+          <p>
+            {t("html.limits", {
+              length: PROFILE_HTML_MAX_LENGTH,
+              nodes: PROFILE_HTML_MAX_NODES,
+              depth: PROFILE_HTML_MAX_DEPTH,
+              documentLength: PROFILE_HTML_MAX_DOCUMENT_LENGTH,
+            })}
+          </p>
+          <details className="min-w-0 rounded-md border border-border bg-surface-raised p-3">
+            <summary className="cursor-pointer rounded-sm font-medium text-foreground focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:outline-none">
+              {t("html.examplesTitle")}
+            </summary>
+            <div className="mt-3 min-w-0 space-y-5">
+              <p>{t("html.examplesHelp")}</p>
+              {examples.map((example, index) => {
+                const title = t(`html.examples.${example}.title`);
+                const exampleSource: string = t.raw(`html.examples.${example}.source`);
+                const titleId = `${controlId}-html-example-${index}`;
+                return (
+                  <div
+                    key={example}
+                    role="group"
+                    aria-labelledby={titleId}
+                    className="min-w-0 space-y-2"
+                  >
+                    <h4 id={titleId} className="font-medium text-foreground">
+                      {title}
+                    </h4>
+                    <pre
+                      tabIndex={0}
+                      role="region"
+                      aria-labelledby={titleId}
+                      className="max-h-52 min-w-0 overflow-auto rounded-md border border-border bg-surface p-3 font-mono text-[11px] leading-5 wrap-anywhere whitespace-pre-wrap text-foreground focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:outline-none"
+                    >
+                      <code>{exampleSource}</code>
+                    </pre>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      aria-label={t("html.useNamedExample", { name: title })}
+                      className="max-w-full whitespace-normal"
+                      onClick={() => onUseExample(exampleSource)}
+                    >
+                      {t("html.useExample")}
+                    </Button>
+                  </div>
+                );
+              })}
+            </div>
+          </details>
+        </div>
+      </details>
+      {source.trim() && analysis.html && (
+        <details className="min-w-0 rounded-md border border-border p-3">
+          <summary className="cursor-pointer rounded-sm text-sm font-medium focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:outline-none">
+            {t("html.exported")}
+          </summary>
+          <p className="mt-3 text-xs leading-5 text-muted-foreground">{t("html.exportedHelp")}</p>
+          <pre
+            tabIndex={0}
+            role="region"
+            aria-label={t("html.exported")}
+            className="mt-3 max-h-72 min-w-0 overflow-auto rounded-md bg-surface-raised p-3 font-mono text-xs leading-5 wrap-anywhere whitespace-pre-wrap focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:outline-none"
+          >
+            <code>{analysis.html}</code>
+          </pre>
+        </details>
+      )}
     </div>
   );
 }

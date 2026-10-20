@@ -3,7 +3,13 @@ import { parseCountryLocation } from "../location";
 import { countryFlagMarkup } from "./country-flags";
 import { escapeInlineText, escapeParagraphText } from "./escape-markdown";
 import { readmeLabels } from "./readme-labels";
-import type { CustomImageSource, ReadmeIssue, ReadmeResult } from "./readme-result";
+import type {
+  CustomHtmlFragment,
+  CustomImageSource,
+  ReadmeIssue,
+  ReadmeResult,
+} from "./readme-result";
+import { PROFILE_HTML_MAX_DOCUMENT_LENGTH } from "./profile-html";
 import { renderActivity } from "./render-activity";
 import { renderContact } from "./render-contact";
 import { renderCustomSectionWithListIndex } from "./render-custom";
@@ -43,8 +49,39 @@ export function generateReadme(
   const errors: ReadmeIssue[] = [];
   const exportIssues: ReadmeIssue[] = [];
   const customImages: CustomImageSource[] = [];
+  const customHtml: CustomHtmlFragment[] = [];
   const labels = readmeLabels[document.contentLocale];
   let customListIndex = 0;
+  let cursor = 0;
+  let htmlSourceLength = 0;
+  for (const [sectionIndex, section] of document.customSections.entries()) {
+    if (!section.visible) continue;
+    for (const [blockIndex, block] of section.blocks.entries()) {
+      if (block.type !== "html") continue;
+      htmlSourceLength += block.source.length;
+      if (htmlSourceLength > PROFILE_HTML_MAX_DOCUMENT_LENGTH) {
+        return {
+          success: false,
+          errors: [
+            {
+              code: "invalid_html",
+              path: ["customSections", sectionIndex, "blocks", blockIndex, "source"],
+            },
+          ],
+        };
+      }
+    }
+  }
+
+  function append(markdown: string, htmlFragments: readonly CustomHtmlFragment[] = []) {
+    if (!markdown) return;
+    if (sections.length > 0) cursor += 2;
+    for (const fragment of htmlFragments) {
+      customHtml.push({ ...fragment, start: cursor + fragment.start, end: cursor + fragment.end });
+    }
+    sections.push(markdown);
+    cursor += markdown.length;
+  }
 
   for (const reference of document.sectionOrder) {
     if (reference.kind === "custom") {
@@ -61,7 +98,7 @@ export function generateReadme(
           customImages,
         );
         customListIndex = rendered.nextListIndex;
-        if (rendered.markdown) sections.push(rendered.markdown);
+        append(rendered.markdown, rendered.htmlFragments);
       }
       continue;
     }
@@ -99,7 +136,7 @@ export function generateReadme(
         content = renderContact(document.data.contact, labels, errors);
         break;
     }
-    if (content) sections.push(content);
+    append(content);
   }
 
   if (errors.length > 0) return { success: false, errors };
@@ -111,5 +148,6 @@ export function generateReadme(
     markdown: `${sections.join("\n\n")}\n`,
     ...(exportIssues.length > 0 ? { exportIssues } : {}),
     ...(customImages.length > 0 ? { customImages } : {}),
+    ...(customHtml.length > 0 ? { customHtml } : {}),
   };
 }

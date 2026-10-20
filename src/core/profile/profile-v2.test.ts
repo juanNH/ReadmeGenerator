@@ -264,6 +264,11 @@ describe("additive custom block types in version two", () => {
       url: "https://cdn.example.com/render?size=640",
       alt: "A project preview",
     },
+    {
+      id: "html-\ud800",
+      type: "html",
+      source: '<div align="center">\r\n<script>kept in draft</script>&copy;</div>',
+    },
   ];
 
   it.each(addedBlocks)(
@@ -331,6 +336,7 @@ describe("additive custom block types in version two", () => {
     [{ id: "q", type: "quote" }, "text"],
     [{ id: "i", type: "image", url: "https://cdn.example.com/image" }, "alt"],
     [{ id: "i", type: "image", alt: "Description" }, "url"],
+    [{ id: "html", type: "html" }, "source"],
   ])(
     "requires the declared string fields even while permitting empty drafts: %j",
     (block, field) => {
@@ -390,6 +396,11 @@ describe("additive custom block types in version two", () => {
     image.alt = "Changed in the copy only";
     const quote = copy.blocks.find((block) => block.type === "quote")!;
     quote.text = "Changed quote";
+    const html = copy.blocks.find((block) => block.type === "html")!;
+    html.source = "Changed HTML in the copy only";
+    expect(source.blocks.find((block) => block.type === "html")!.source).toBe(
+      '<div align="center">\r\n<script>kept in draft</script>&copy;</div>',
+    );
     expect(source.blocks.find((block) => block.type === "image")!.alt).toBe("A project preview");
     expect(source.blocks.find((block) => block.type === "quote")!.text).toBe(
       "Own words\n\nA second paragraph",

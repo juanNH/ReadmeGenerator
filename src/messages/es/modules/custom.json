@@ -13,6 +13,7 @@
   "addDivider": "Agregar separador",
   "addQuote": "Agregar frase destacada",
   "addImage": "Agregar imagen / banner",
+  "addHtml": "Agregar HTML",
   "pickerTextHelp": "Un párrafo para escribir con tus palabras.",
   "pickerBulletHelp": "Una lista con un punto junto a cada elemento.",
   "pickerNumberedHelp": "Una lista con números automáticos para sus elementos.",
@@ -21,6 +22,7 @@
   "pickerDividerHelp": "Una línea horizontal que separa tu contenido.",
   "pickerQuoteHelp": "Una frase breve que se destaca con una línea vertical.",
   "pickerImageHelp": "Una imagen o un banner desde una dirección HTTPS pública, con una descripción accesible.",
+  "pickerHtmlHelp": "Tu propio HTML, con formato compatible y ejemplos opcionales.",
   "empty": "Tu sección está lista. Elegí un tipo de contenido para empezar.",
   "paragraphLabel": "Bloque de texto {number}",
   "unorderedLabel": "Lista con puntos {number}",
@@ -30,6 +32,7 @@
   "dividerLabel": "Separador {number}",
   "quoteLabel": "Frase destacada {number}",
   "imageLabel": "Imagen / banner {number}",
+  "htmlLabel": "Bloque HTML {number}",
   "subtitle": "Subtítulo",
   "subtitleHelp": "Presentá el contenido que sigue. Es un título más pequeño dentro de tu sección.",
   "highlightedQuote": "Frase destacada",
@@ -74,5 +77,54 @@
   "itemsPasted": "Se pegaron {count} elementos de lista.",
   "convertedToList": "Se convirtió a lista con puntos (•). Podés usar Convertir a texto para deshacer el formato.",
   "convertedToText": "Se convirtió a texto. Se conservaron el contenido y los marcadores de los elementos.",
-  "continuedAsText": "Terminó la lista. Seguí escribiendo en el nuevo bloque de texto."
+  "continuedAsText": "Terminó la lista. Seguí escribiendo en el nuevo bloque de texto.",
+  "html": {
+    "code": "Código HTML",
+    "help": "Usá HTML dentro de este bloque. Tu código original se guarda; la vista previa y el README usan el HTML compatible. La sintaxis de Markdown se conserva como texto literal.",
+    "invalid": "Revisá los problemas de HTML de abajo antes de exportar. Tu código original se conservó.",
+    "documentLimit": "Los bloques HTML incluidos superan los {limit, number} caracteres en total. Acortá parte del código HTML u ocultá una sección para exportar. Tu código original se conservó.",
+    "characterCount": "{count, number} de {limit, number} caracteres por bloque",
+    "problems": "Problemas de HTML",
+    "noticesTitle": "Cambios en el HTML compatible",
+    "supported": "HTML compatible",
+    "formats": "Podés usar párrafos, títulos, negrita o cursiva, listas, enlaces, tablas, detalles desplegables con resumen, citas, código y separadores. El texto se puede alinear a la izquierda, al centro o a la derecha.",
+    "linksAndImages": "Los enlaces web necesitan direcciones HTTP o HTTPS completas. Las imágenes necesitan direcciones HTTPS públicas y una descripción accesible en alt. Se quitan scripts, estilos, formularios, páginas incrustadas y manejadores de eventos.",
+    "limits": "Cada bloque admite hasta {length, number} caracteres, {nodes, number} nodos y {depth, number} niveles de anidación. Los bloques HTML incluidos admiten hasta {documentLength, number} caracteres en total. GitHub puede mostrar el formato compatible de otra manera.",
+    "examplesTitle": "Ejemplos de HTML",
+    "examplesHelp": "Estos ejemplos locales sirven como punto de partida. Solo se agregan cuando elegís Usar este ejemplo y después podés editarlos.",
+    "useExample": "Usar este ejemplo",
+    "useNamedExample": "Usar este ejemplo: {name}",
+    "replaceConfirmation": "¿Reemplazar el código de este bloque HTML con el ejemplo? Se quitará el código actual de este bloque. Los demás bloques se conservarán.",
+    "exampleApplied": "Se agregó el ejemplo de HTML. Ya podés editar su código.",
+    "exported": "HTML exportado",
+    "exportedHelp": "Este es el HTML compatible que usan la vista previa y el README. Tu código original de arriba no cambia. Corregí los problemas indicados antes de exportar.",
+    "notices": {
+      "unsupported_elements": "Se quitaron elementos no compatibles de la salida. Su contenido legible se conserva cuando es posible.",
+      "unsupported_attributes": "Se quitaron atributos no compatibles de la salida.",
+      "comments_removed": "Se quitaron los comentarios HTML de la salida.",
+      "repaired_html": "Se corrigió la estructura del HTML para la salida. Revisá el HTML exportado de abajo."
+    },
+    "errors": {
+      "too_large": "Este bloque HTML es demasiado largo. Acortalo o dividilo en bloques más pequeños.",
+      "too_complex": "Este HTML tiene demasiados nodos o niveles de anidación. Simplificá su estructura.",
+      "invalid_url": "Revisá los enlaces y las direcciones de imágenes. Usá enlaces HTTP/HTTPS completos e imágenes con direcciones HTTPS públicas.",
+      "missing_image_alt": "Agregá una descripción significativa en alt a cada imagen.",
+      "invalid_structure": "Revisá la estructura del HTML, en especial las tablas, listas y elementos anidados.",
+      "empty_html": "No hay contenido compatible para exportar. Agregá texto o HTML compatible, o vaciá este bloque."
+    },
+    "examples": {
+      "centered": {
+        "title": "Presentación centrada",
+        "source": "<div align=\"center\">\n  <h2>Hola, soy Alex</h2>\n  <p>Disfruto crear cosas útiles.</p>\n</div>"
+      },
+      "table": {
+        "title": "Una tabla pequeña",
+        "source": "<table>\n  <thead>\n    <tr><th>Qué disfruto</th><th>Qué estoy explorando</th></tr>\n  </thead>\n  <tbody>\n    <tr><td>Interfaces accesibles</td><td>Herramientas creativas</td></tr>\n  </tbody>\n</table>"
+      },
+      "details": {
+        "title": "Detalles desplegables",
+        "source": "<details>\n  <summary>Un poco más sobre mí</summary>\n  <p>Aprendo creando y compartiendo.</p>\n</details>"
+      }
+    }
+  }
 }

@@ -129,6 +129,7 @@ export function EditorWorkspace({
   );
   const hasInvalidUsername = readmeErrors.some((error) => error.code === "invalid_username");
   const hasMissingImageAlt = readmeErrors.some((error) => error.code === "missing_image_alt");
+  const hasHtmlErrors = readmeErrors.some((error) => error.code === "invalid_html");
   const hasLocalCards = result.success && Boolean(result.exportIssues?.length);
   const canExport = !isLoading && result.success && !hasLocalCards;
   const exportGuidance = isLoading
@@ -137,15 +138,17 @@ export function EditorWorkspace({
       ? t("export.empty")
       : hasInvalidUsername
         ? t("export.invalidUsername")
-        : hasImageUrlErrors
-          ? t("export.invalidImages")
-          : hasMissingImageAlt
-            ? t("export.missingImageDescription")
-            : hasUrlErrors
-              ? t("export.invalidLinks")
-              : hasLocalCards
-                ? t("export.localCards")
-                : t("export.ready");
+        : hasHtmlErrors
+          ? t("export.invalidHtml")
+          : hasImageUrlErrors
+            ? t("export.invalidImages")
+            : hasMissingImageAlt
+              ? t("export.missingImageDescription")
+              : hasUrlErrors
+                ? t("export.invalidLinks")
+                : hasLocalCards
+                  ? t("export.localCards")
+                  : t("export.ready");
 
   useEffect(() => {
     if (pendingWorkspaceFocus.current) {
@@ -280,6 +283,8 @@ export function EditorWorkspace({
           case "heading":
           case "quote":
             return Boolean(block.text.trim());
+          case "html":
+            return Boolean(block.source.trim());
           case "link":
             return Boolean(block.label.trim() || block.url.trim());
           case "image":
@@ -651,6 +656,7 @@ export function EditorWorkspace({
             hasErrors={!isEmpty && readmeErrors.length > 0}
             activityCardBaseUrl={activityCardBaseUrl}
             customImages={result.success ? result.customImages : undefined}
+            customHtml={result.success ? result.customHtml : undefined}
           />
           <div className="space-y-4">
             <p

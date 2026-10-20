@@ -7,7 +7,7 @@ import { FileText, PenLine } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { ContentLocale } from "@/core/profile/profile-schema";
-import type { CustomImageSource } from "@/core/readme";
+import type { CustomHtmlFragment, CustomImageSource } from "@/core/readme";
 import { normalizePublicImageUrl } from "@/core/readme/public-image";
 import { findTechnology, findTechnologyByIconUrl } from "@/core/technologies";
 import { findContactProviderByIconUrl } from "@/core/contact";
@@ -16,11 +16,14 @@ import { findCountryByIconUrl } from "@/core/location";
 import { remarkProfileIcons } from "./remark-profile-icons";
 import { wrapNamedTechnologyLabels } from "./named-technology-labels";
 import { PublicProfileImage } from "./public-profile-image";
+import { ProfileHtmlPreview } from "./profile-html-preview";
+import { remarkCustomHtml } from "./remark-custom-html";
 
 const PreviewImagesContext = createContext<{
   customImages: readonly CustomImageSource[];
+  customHtml: readonly CustomHtmlFragment[];
   activityCardBaseUrl?: string;
-}>({ customImages: [] });
+}>({ customImages: [], customHtml: [] });
 type ReadmePreviewProps = {
   markdown: string | null;
   contentLocale: ContentLocale;
@@ -28,6 +31,7 @@ type ReadmePreviewProps = {
   hasErrors: boolean;
   activityCardBaseUrl?: string;
   customImages?: readonly CustomImageSource[];
+  customHtml?: readonly CustomHtmlFragment[];
 };
 
 export function ReadmePreview({
@@ -37,6 +41,7 @@ export function ReadmePreview({
   hasErrors,
   activityCardBaseUrl,
   customImages = [],
+  customHtml = [],
 }: ReadmePreviewProps) {
   const t = useTranslations("Editor.preview");
 
@@ -62,10 +67,10 @@ export function ReadmePreview({
           aria-label={t("documentLabel")}
           className="min-h-72 p-6 text-sm leading-7 wrap-anywhere sm:p-8 [&_a]:text-accent [&_a]:underline [&_a]:underline-offset-4 [&_li]:pl-1 [&_ol]:my-4 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:my-4 [&_strong]:font-semibold [&_ul]:my-4 [&_ul]:list-disc [&_ul]:pl-5"
         >
-          <PreviewImagesContext.Provider value={{ customImages, activityCardBaseUrl }}>
+          <PreviewImagesContext.Provider value={{ customImages, customHtml, activityCardBaseUrl }}>
             <ReactMarkdown
               skipHtml
-              remarkPlugins={[remarkProfileIcons]}
+              remarkPlugins={[[remarkCustomHtml, { fragments: customHtml }], remarkProfileIcons]}
               allowedElements={[
                 "h1",
                 "h2",
@@ -81,10 +86,12 @@ export function ReadmePreview({
                 "img",
                 "hr",
                 "blockquote",
+                "div",
               ]}
               components={{
                 img: PreviewImage,
                 p: PreviewParagraph,
+                div: PreviewHtmlSlot,
                 h1: ({ children }) => (
                   <h3 className="mt-1 mb-5 border-b border-border pb-4 text-2xl leading-tight font-semibold tracking-tight">
                     {children}
@@ -200,4 +207,12 @@ const PreviewParagraph: Components["p"] = ({ node, children }) => {
       {wrapNamedTechnologyLabels(children)}
     </p>
   );
+};
+
+const PreviewHtmlSlot: Components["div"] = ({ node }) => {
+  const { customHtml } = useContext(PreviewImagesContext);
+  const index = node?.properties.dataProfileHtmlIndex;
+  if (typeof index !== "string" || !/^\d+$/.test(index)) return null;
+  const fragment = customHtml[Number(index)];
+  return fragment ? <ProfileHtmlPreview fragment={fragment} /> : null;
 };
