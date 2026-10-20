@@ -29,7 +29,10 @@
     "chooseTitle": "Choose a section to start",
     "chooseHelp": "Choose a section and make it yours. A few lines are enough to start.",
     "languageHelp": "Changes generated headings. Your writing and the app language stay unchanged.",
-    "sectionHidden": "{module} is hidden from the README. Its settings and writing are still available here."
+    "sectionHidden": "{module} is hidden from the README. Its settings and writing are still available here.",
+    "importReadme": "Import README",
+    "importLoading": "Opening README importer…",
+    "importCompleted": "Your profile is ready in the editor."
   },
   "composition": {
     "moved": "{module} moved to position {position} of {total}.",
@@ -112,7 +115,8 @@
     "writeFailureHelp": "Your changes are still here, including when you switch app languages, but this browser could not save them. Download your README before reloading or closing this page to keep your work.",
     "startNew": "Start a new saved draft",
     "resetConfirmation": "Start a new saved draft? This clears the profile currently on screen and replaces any previous draft saved by this app in this browser. Download your README first if you want to keep it.",
-    "privacy": "Your draft is stored in this browser only. It is not synced to other devices, and clearing browser data removes it. Export before leaving if saving is unavailable."
+    "privacy": "Your draft is stored in this browser only. It is not synced to other devices, and clearing browser data removes it. Export before leaving if saving is unavailable.",
+    "importMemoryHelp": "This imported profile is available only in this tab. Open Import README to download the previous profile and the original README. Download your work before reloading or closing this page."
   },
   "preview": {
     "title": "Preview & export",

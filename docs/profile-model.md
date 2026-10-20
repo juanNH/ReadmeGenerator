@@ -163,6 +163,14 @@ Ejemplos de rutas: `["data", "projects", "items", 0, "id"]`, `["sectionOrder", 2
 
 Las operaciones requieren un documento válido procedente de la fábrica o del parser y validan sus argumentos; `reorderSections` comprueba el documento candidato con su orden mixto. Una aserción de TypeScript sobre datos externos no cumple ese requisito. No mutan el original; pueden compartir ramas no modificadas, por lo que se deben tratar como inmutables. La fábrica produce estructuras independientes y duplicar una instancia copia sus objetos anidados.
 
+## Importación desde Markdown
+
+El importador no modifica el esquema v2. `analyzeReadmeImport(source, contentLocale)` analiza Markdown completo y devuelve secciones candidatas, rangos UTF-16 de la fuente exacta y diagnósticos. `buildImportedProfile(analysis, selectedSectionIds)` acepta identidades válidas de esa propuesta, conserva el orden original y produce un documento validado y generado, o errores sin reemplazo parcial. Sus secciones son personalizadas; las referencias fijas permanecen presentes y ocultas. Los datos ocultos del perfil anterior no se mezclan con el contenido importado.
+
+Los bloques reutilizan `paragraph`, `list`, `link`, `heading`, `divider`, `quote`, `image` y `html`, sin un bloque de Markdown crudo. El HTML convertido se somete a la política existente. El análisis permite 100.000 unidades UTF-16, 6.000 nodos y profundidad 32; el HTML mantiene además sus propios límites. Referencias, anclas, rutas relativas y construcciones incompatibles se revisan antes de aplicar.
+
+El registro de respaldo del adaptador está fuera de `ProfileDocument`: `{ schemaVersion: 1, previousDocument, originalSource }`. Su lectura estricta no escribe ni migra registros incompatibles. Conserva un único perfil anterior completo y el original independiente de la selección. Las descargas no implican una API general de importación de configuración JSON. Ver [ADR 0018](decisions/0018-readme-import-with-backup.md).
+
 ## Límites de validación
 
 El parser recibe un valor de JavaScript: no interpreta cadenas JSON ni captura errores de `JSON.parse`. Esa frontera debe controlar fallos de lectura o sintaxis. La única migración implementada es v1 validado a v2; no corrige estructuras incompatibles.

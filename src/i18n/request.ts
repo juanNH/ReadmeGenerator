@@ -16,6 +16,7 @@ const loadMessages = {
       editorNavigation,
       contactProviders,
       custom,
+      readmeImport,
     ] = await Promise.all([
       import("@/messages/en.json"),
       import("@/messages/en/design-system.json"),
@@ -26,6 +27,7 @@ const loadMessages = {
       import("@/messages/en/editor-navigation.json"),
       import("@/messages/en/contact-providers.json"),
       import("@/messages/en/modules/custom.json"),
+      import("@/messages/en/readme-import.json"),
     ]);
     return {
       ...common.default,
@@ -33,6 +35,7 @@ const loadMessages = {
       Editor: editor.default,
       EditorNavigation: editorNavigation.default,
       ContactProviders: contactProviders.default,
+      ReadmeImport: readmeImport.default,
       EditorModules: {
         contributions: contributions.default,
         technologies: technologies.default,
@@ -52,6 +55,7 @@ const loadMessages = {
       editorNavigation,
       contactProviders,
       custom,
+      readmeImport,
     ] = await Promise.all([
       import("@/messages/es.json"),
       import("@/messages/es/design-system.json"),
@@ -62,6 +66,7 @@ const loadMessages = {
       import("@/messages/es/editor-navigation.json"),
       import("@/messages/es/contact-providers.json"),
       import("@/messages/es/modules/custom.json"),
+      import("@/messages/es/readme-import.json"),
     ]);
     return {
       ...common.default,
@@ -69,6 +74,7 @@ const loadMessages = {
       Editor: editor.default,
       EditorNavigation: editorNavigation.default,
       ContactProviders: contactProviders.default,
+      ReadmeImport: readmeImport.default,
       EditorModules: {
         contributions: contributions.default,
         technologies: technologies.default,

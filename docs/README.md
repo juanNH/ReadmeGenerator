@@ -29,6 +29,7 @@ La documentación de GitHub Profile Generator describe el producto, el estado di
 | [HTML explícito](decisions/0015-explicit-profile-html.md)                                 | Fuente conservada, HTML filtrado, límites y vista previa del mismo Markdown.         |
 | [Navegación superior y herramientas](decisions/0016-top-navigation-and-internal-tools.md) | Organización plegable, acceso móvil a campos y kit solo en desarrollo.               |
 | [Fila horizontal de secciones](decisions/0017-horizontal-section-navigation.md)           | Secciones permanentes, orden horizontal y desplazamiento dentro de la fila.          |
+| [Importación con respaldo](decisions/0018-readme-import-with-backup.md)                   | Análisis local, revisión, HTML compatible y reemplazo explícito recuperable.         |
 | [Recursos de terceros](../THIRD_PARTY_NOTICES.md)                                         | Procedencia y licencias de iconos y banderas locales.                                |
 | [Contribuir](../CONTRIBUTING.md)                                                          | Flujo de trabajo, expectativas para cambios y pull requests.                         |
 

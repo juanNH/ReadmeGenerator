@@ -56,6 +56,7 @@ export default async function EditorPage({ params }: EditorPageProps) {
             EditorModules: messages.EditorModules,
             EditorNavigation: messages.EditorNavigation,
             ContactProviders: messages.ContactProviders,
+            ReadmeImport: messages.ReadmeImport,
           }}
         >
           <EditorWorkspace

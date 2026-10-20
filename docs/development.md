@@ -11,6 +11,8 @@ El proyecto usa Next.js `16.4.2`, React `19.3.1`, TypeScript, Tailwind CSS 4 y `
 
 Las dependencias directas y el lockfile fijan las versiones de la base. En una copia limpia, `pnpm install --frozen-lockfile` reproduce esa resolución. Hay una advertencia de peers de tres plugins transitivos con ESLint 10; la decisión y sus límites están registrados en [ADR 0002](decisions/0002-toolchain.md).
 
+El importador declara directamente unified `11.0.5`, remark-parse `11.0.0`, remark-gfm `4.0.1` y mdast-util-to-hast `13.2.1`, con `@types/mdast` `4.0.4` para desarrollo. Reutiliza el analizador y serializador HTML existentes. El parser se carga al abrir el importador; no incorpora servicios, cuentas ni claves adicionales. El soporte GFM permite analizar tablas y otras estructuras, pero su conversión sigue limitada por los bloques y la política HTML del editor.
+
 ## Instalación y ejecución
 
 Desde la raíz del repositorio:
@@ -460,3 +462,30 @@ Los casos de teclado comprueban un desplazamiento por flecha, recorrido fuera de
 La revisión corrigió textos ocultos que escapaban del contenedor, desplazamiento entre pointerdown y pointerup, revelado de controles con letra ampliada y restauración de foco de la biblioteca. No se oculta el desbordamiento global ni se modifica la dependencia. Los análisis axe no detectaron infracciones de las reglas ejecutadas. Revisiones independientes cerradas sin hallazgos accionables. Ver [ADR 0017](decisions/0017-horizontal-section-navigation.md).
 
 No cambia el documento, la persistencia ni la generación del README, y no se incorporan dependencias. Las comprobaciones automáticas de accesibilidad no equivalen a una revisión completa: quedan dispositivos físicos, Safari, teclado móvil del sistema, lectores de pantalla y zoom nativo. Los cambios siguen locales, sin commit, push ni despliegue.
+
+## Validación de importación de README con respaldo
+
+Entrega local del **2026-10-20** con Node.js 24.21.0, pnpm 11.25.0 y Chromium contra producción local. Permite pegar o abrir `.md` UTF-8, revisar secciones y confirmar con un último respaldo local del perfil anterior y el original. El panel se carga bajo demanda. Ver [uso del importador](editor.md#importar-un-readme-existente) y [ADR 0018](decisions/0018-readme-import-with-backup.md).
+
+| Comprobación                           | Resultado observado                                                                            |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `pnpm check`                           | Correcto: lint, tipos, formato, enlaces de 34 documentos y 909 pruebas unitarias en 29 suites. |
+| `pnpm build`                           | Correcto con el código final.                                                                  |
+| `pnpm test:e2e`                        | 229 recorridos correctos en la ejecución completa, sin fallos ni reintentos.                   |
+| Importador sobre la última compilación | 21 recorridos correctos en EN/ES.                                                              |
+
+La suite completa se ejecutó antes de extraer la limpieza de la sesión a una función de módulo para cumplir lint, sin cambiar su comportamiento. Después de esa extracción se recompiló y se repitieron los 21 casos del importador sobre el artefacto final. Una ejecución previa interrumpida deliberadamente no se cuenta como validación completa.
+
+Se verificaron fuente UTF-8 con BOM/CRLF, cancelación y exclusiones sin escritura, edición que invalida la propuesta, HTML inerte, descarga y restauración, datos protegidos y v1, fallos de cuota y lectura, decisión explícita de memoria, cambio de idioma, debounce y `pagehide`. Al cerrar y reabrir se conservan fuente y selección sin reanudar la confirmación; al terminar una importación o restauración se limpia esa sesión. La regresión completa incluye navegación horizontal, arrastre, tecnologías y exportación existentes.
+
+Los cuatro casos del importador de accesibilidad móvil revisan fuente, revisión y confirmación a 320 × 568 en EN/ES y temas claro/oscuro, con doce análisis axe sin infracciones detectadas. Hay 22 capturas locales, de las que se inspeccionaron muestras de escritorio y móvil, incluido el respaldo. La revisión independiente de integración no encontró defectos bloqueantes. La cobertura es Chromium y emulación: quedan dispositivos físicos, Safari, lectores de pantalla y zoom nativo; no demuestra accesibilidad completa ni compatibilidad con cualquier README.
+
+La entrada se convierte en secciones personalizadas y usa la política HTML existente. Rutas relativas, anclas y formatos incompatibles requieren corrección o exclusión consciente. No hay carga general de JSON, clasificación automática en módulos, IA ni historial remoto. Los cambios permanecen locales, sin commit, push ni despliegue.
+
+### Corrección de detección de secciones HTML
+
+Se ajustó la detección tras recibir un README que combinaba encabezados HTML, una lista Markdown, enlaces con iconos e imágenes de estadísticas. El analizador ahora reconoce encabezados HTML raíz con cierre explícito y conserva la cabecera inicial junta. Un H2 usado como frase inicial no desactiva la separación posterior por H3. Las estructuras inciertas siguen como HTML unido; no se infieren módulos fijos.
+
+La inspección local del caso proporcionado pasó de una sección genérica a tres secciones con sus encabezados: cabecera, enlaces y herramientas. La salida conservó 19 imágenes, 18 enlaces y cuatro énfasis fuertes, con cobertura exacta del original por los rangos. También se inspeccionaron las variantes de frase inicial H2 y archivo con BOM/CRLF. Se corrigió el desplazamiento de offsets causado por el BOM y se evitó introducir otro párrafo alrededor de enlaces HTML separados por líneas vacías.
+
+Esta corrección tiene inspección directa del analizador y revisión independiente, con lint, tipos, formato, enlaces de documentación y compilación correctos. No se añadieron ni ejecutaron suites de pruebas en esta iteración. Los resultados de 909 pruebas unitarias y 229 recorridos anteriores corresponden a la entrega previa, no a una regresión de este ajuste.

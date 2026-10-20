@@ -1,6 +1,6 @@
 # Editor de README
 
-El editor permite crear un perfil breve con cinco secciones fijas opcionales: presentación, tecnologías, proyectos, actividad y contribuciones, y contacto. También permite agregar varias secciones personalizadas con texto, listas, enlaces, subtítulos, separadores, frases destacadas, imágenes públicas y HTML explícito. El recorrido manual funciona sin cuenta ni conexión con GitHub. Actividad permite consultar información pública y elegir tres tarjetas si el servidor está configurado; métricas no tiene sección aparte. No hay asistencia con IA ni importación de README.
+El editor permite crear un perfil breve con cinco secciones fijas opcionales: presentación, tecnologías, proyectos, actividad y contribuciones, y contacto. También permite agregar varias secciones personalizadas con texto, listas, enlaces, subtítulos, separadores, frases destacadas, imágenes públicas y HTML explícito. El recorrido manual funciona sin cuenta ni conexión con GitHub. Actividad permite consultar información pública y elegir tres tarjetas si el servidor está configurado; métricas no tiene sección aparte. Incluye importación local de README con revisión y respaldo antes de reemplazar. No hay asistencia con IA.
 
 ## Usarlo
 
@@ -17,6 +17,24 @@ Un perfil breve puede estar listo con una sola sección. No necesitás nombre, e
 La fila no salta de línea al agregar secciones y sus controles tienen superficies de al menos 44 px. Los títulos largos se acotan visualmente; su nombre accesible permanece completo. El foco y la sección activa se mantienen a la vista mediante desplazamiento horizontal local. La barra superior permanece disponible al desplazarse cuando deja suficiente espacio de edición; con letra muy grande o poco alto útil deja de fijarse. El editor adapta sus columnas al espacio y a la letra. Una sección personalizada tiene un encabezado breve; su título real se conserva completo en su campo y README, además del nombre accesible y la ayuda de su botón en la fila.
 
 «Agregar bloque» despliega las nueve opciones con muestras. Empieza abierto en una sección vacía y cerrado al recuperar contenido existente; elegir una opción lo cierra y enfoca el nuevo campo. Así se puede editar lo que ya escribiste sin atravesar todas las muestras. Quitar el último bloque abre las opciones y vuelve al botón estable.
+
+## Importar un README existente
+
+1. Pulsá «Importar README» en la barra del editor; en móvil es el icono de archivo. Pegá Markdown o abrí un archivo `.md` UTF-8. La lectura y el análisis ocurren localmente, sin cuenta ni envío del documento a un servidor.
+2. Analizá y revisá las secciones detectadas. Cada una muestra cómo quedará representada, sus avisos y sus problemas. Podés inspeccionar el original y el Markdown resultante como código: durante esta revisión no se renderizan imágenes ni HTML ni se consultan tarjetas.
+3. Conservá las secciones que quieras. Si alguna tiene un problema, corregí la fuente y volvé a analizar, o excluí esa sección explícitamente. La confirmación informa las exclusiones; no se aplica una parte inválida a escondidas.
+4. Revisá la confirmación y marcá que entendés el reemplazo del perfil. Antes de aplicarlo se guarda el perfil anterior completo y el Markdown original. Cerrar, volver atrás, analizar o cambiar una casilla no reemplaza el borrador.
+5. El perfil importado queda abierto en el editor. Volvé a «Importar README» y desplegá el respaldo para descargar `previous-profile.json` o `imported-original.md`, o restaurar el perfil anterior con una nueva confirmación. El respaldo se conserva al restaurar.
+
+Esta entrega crea **secciones personalizadas**, con su orden de lectura. No asigna automáticamente el contenido a presentación, tecnologías, proyectos o contacto. El README publicado no contiene las identidades, secciones ocultas ni toda la configuración del editor: importarlo no reconstruye esa información. La configuración anterior se recupera mediante el respaldo, no desde el Markdown.
+
+Los párrafos, listas y otros contenidos sencillos se convierten a bloques visuales cuando conservan su contenido. El formato enriquecido, tablas, código o listas anidadas puede convertirse a HTML permitido, con aviso. Se revisan referencias globales antes de separar secciones; un contenedor HTML que cruza límites puede mantener el documento agrupado para conservar su contexto. No se promete igualdad visual con GitHub. Los metadatos de código se omiten con aviso; listas de tareas y otros formatos incompatibles necesitan corrección o exclusión. Las rutas relativas y anclas deben corregirse a direcciones admitidas; no se adivina el repositorio de origen.
+
+En README basados en HTML se detectan encabezados completos al nivel raíz y se usan para nombrar la revisión. Un nombre seguido de una frase inicial se conserva junto, aunque usen distintos niveles de encabezado. Los separadores H2 marcan la jerarquía; cuando no existen, se pueden separar por H3. Los títulos dentro de una tabla, un desplegable o un contenedor siguen dentro de ese contenido. Si no se puede separar con certeza, se conserva una sección personalizada HTML. Las imágenes de estadísticas externas permanecen como imágenes, donde las colocó el autor; no activan tarjetas ni consultas propias. Los atributos no admitidos siguen mostrando avisos.
+
+El límite de entrada es de 100.000 unidades UTF-16 y el archivo no puede superar 400.000 bytes. También hay límites de nodos y profundidad, además de los del HTML. El archivo debe ser UTF-8; BOM y saltos CRLF se conservan en el original. Las imágenes y enlaces mantienen las políticas del editor: una URL no válida o una descripción alternativa faltante requiere revisión antes de aplicar.
+
+Existe **un único último respaldo** en este navegador y origen. Si el almacenamiento falla o contiene un valor protegido, la importación no se aplica automáticamente: se ofrece continuar solo en memoria mediante una acción adicional. Esa elección conserva los datos guardados y desactiva la escritura automática del perfil importado; descargá los respaldos y el README antes de recargar o cerrar. No hay historial remoto ni importación general del JSON descargado. Ver [decisión de importación](decisions/0018-readme-import-with-backup.md).
 
 ## Contenido y composición
 
@@ -144,7 +162,7 @@ Si el borrador está dañado, es incompatible o no se puede leer, no se reemplaz
 
 El trabajo en memoria se conserva al cambiar el idioma de la interfaz dentro de la misma pestaña, incluido el idioma del README y el estado del error. Esta recuperación temporal no sobrevive a una recarga completa ni al cierre de la pestaña: si el guardado falla, descargá el README antes de recargar o cerrar.
 
-No hay sincronización entre dispositivos, copia de seguridad remota, historial ni importación/exportación de configuración. Cambiar host, puerto o protocolo usa otro almacenamiento; ver [guía operativa](development.md). Un cierre abrupto puede impedir guardar los últimos cambios.
+No hay sincronización entre dispositivos, copia de seguridad remota ni historial. El importador ofrece un último respaldo local descargable y restaurable; no hay importación general de configuración JSON. Cambiar host, puerto o protocolo usa otro almacenamiento; ver [guía operativa](development.md). Un cierre abrupto puede impedir guardar los últimos cambios.
 
 ## Compatibilidad del documento
 

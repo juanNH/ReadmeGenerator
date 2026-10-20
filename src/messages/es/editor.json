@@ -29,7 +29,10 @@
     "chooseTitle": "Elegí una sección para empezar",
     "chooseHelp": "Elegí una sección y dale tu toque. Unas pocas líneas alcanzan para empezar.",
     "languageHelp": "Cambia los títulos generados. Tus textos y el idioma de la aplicación se conservan.",
-    "sectionHidden": "{module} está oculta en el README. Su configuración y sus textos siguen disponibles acá."
+    "sectionHidden": "{module} está oculta en el README. Su configuración y sus textos siguen disponibles acá.",
+    "importReadme": "Importar README",
+    "importLoading": "Abriendo el importador de README…",
+    "importCompleted": "Tu perfil está listo en el editor."
   },
   "composition": {
     "moved": "{module} pasó a la posición {position} de {total}.",
@@ -112,7 +115,8 @@
     "writeFailureHelp": "Tus cambios siguen acá, incluso al cambiar el idioma de la aplicación, pero este navegador no pudo guardarlos. Descargá el README antes de recargar o cerrar esta página para conservar tu trabajo.",
     "startNew": "Empezar un nuevo borrador guardado",
     "resetConfirmation": "¿Querés empezar un nuevo borrador guardado? Se vaciará el perfil que ves en pantalla y se reemplazará cualquier borrador anterior de esta aplicación en este navegador. Descargá el README antes si querés conservarlo.",
-    "privacy": "Tu borrador se guarda solo en este navegador. No se sincroniza entre dispositivos y se elimina si borrás los datos del navegador. Exportalo antes de salir si no se puede guardar."
+    "privacy": "Tu borrador se guarda solo en este navegador. No se sincroniza entre dispositivos y se elimina si borrás los datos del navegador. Exportalo antes de salir si no se puede guardar.",
+    "importMemoryHelp": "Este perfil importado está disponible solo en esta pestaña. Abrí Importar README para descargar el perfil anterior y el README original. Descargá tu trabajo antes de recargar o cerrar esta página."
   },
   "preview": {
     "title": "Revisá y exportá",

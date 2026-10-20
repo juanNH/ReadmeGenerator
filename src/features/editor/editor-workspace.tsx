@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type CSSProperties } from "react";
+import dynamic from "next/dynamic";
 import {
   ArrowUpRight,
   Check,
@@ -8,6 +9,7 @@ import {
   Copy,
   Download,
   Eye,
+  FileUp,
   Globe2,
   PenLine,
   Plus,
@@ -48,7 +50,24 @@ import {
 import { ReadmePreview } from "./readme-preview";
 import { useProfileDraft } from "./use-profile-draft";
 
+function ImportLoading() {
+  const t = useTranslations("Editor");
+  return (
+    <p role="status" className="p-4 text-sm text-muted-foreground">
+      {t("settings.importLoading")}
+    </p>
+  );
+}
+
+const ReadmeImportPanel = dynamic(
+  () => import("./readme-import-panel").then((module) => module.ReadmeImportPanel),
+  { loading: ImportLoading },
+);
+
 type ExportFeedback = "idle" | "copying" | "copied" | "copyError" | "downloaded" | "downloadError";
+
+// Changed only by browser events. Locale navigation may remount the workspace.
+let pendingReadmeImportOpen = false;
 
 export function EditorWorkspace({
   initialContentLocale,
@@ -67,11 +86,18 @@ export function EditorWorkspace({
     storageStatus,
     recoveryBlocked,
     startNewDraft,
+    importBackup,
+    importBackupStatus,
+    importMemoryOnly,
+    replaceWithImport,
+    restoreImportBackup,
   } = useProfileDraft(initialContentLocale);
   const [exportFeedback, setExportFeedback] = useState<ExportFeedback>("idle");
   const [selectedId, setSelectedId] = useState<EditableSectionId | null>(null);
   const [announcement, setAnnouncement] = useState("");
   const [compactView, setCompactView] = useState<"edit" | "preview">("edit");
+  const [importOpen, setImportOpen] = useState(false);
+  const importTriggerRef = useRef<HTMLButtonElement>(null);
   const [toolbarSize, setToolbarSize] = useState({ height: 0, sticky: true });
   const toolbarRef = useRef<HTMLDivElement>(null);
   const pendingViewScroll = useRef<"edit" | "preview" | null>(null);
@@ -154,6 +180,13 @@ export function EditorWorkspace({
                 : hasLocalCards
                   ? t("export.localCards")
                   : t("export.ready");
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      if (pendingReadmeImportOpen) setImportOpen(true);
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const toolbar = toolbarRef.current;
@@ -404,6 +437,24 @@ export function EditorWorkspace({
     }
   }
 
+  function completeImport(next: ProfileDocument) {
+    setExportFeedback("idle");
+    pendingReadmeImportOpen = false;
+    setImportOpen(false);
+    setCompactView("edit");
+    const id = visibleEditableSections(next)[0] ?? null;
+    setSelectedId(id);
+    if (id) pendingFocus.current = { id, kind: "settings" };
+    else pendingWorkspaceFocus.current = true;
+    setAnnouncement(t("settings.importCompleted"));
+  }
+
+  function changeImportOpen(open: boolean) {
+    pendingReadmeImportOpen = open;
+    setImportOpen(open);
+    if (!open) importTriggerRef.current?.focus();
+  }
+
   return (
     <div
       className="@container/editor min-w-0 space-y-3 [&_input]:scroll-mt-[var(--editor-toolbar-offset)] [&_select]:scroll-mt-[var(--editor-toolbar-offset)] [&_textarea]:scroll-mt-[var(--editor-toolbar-offset)]"
@@ -510,11 +561,11 @@ export function EditorWorkspace({
             else moveRefs.current.delete(`${id}-${direction}`);
           }}
           actions={
-            <div className="ml-auto flex max-w-full min-w-0 flex-wrap items-center justify-end gap-1 sm:gap-2">
+            <div className="ml-auto flex max-w-full min-w-0 flex-wrap items-center justify-end gap-0 sm:gap-2">
               <div
                 role="group"
                 aria-label={t("settings.viewLabel")}
-                className="inline-flex max-w-full min-w-0 flex-wrap gap-1 rounded-md border border-border bg-surface @min-[75em]/editor:hidden"
+                className="inline-flex max-w-full min-w-0 flex-wrap gap-0 rounded-md border border-border bg-surface sm:gap-1 @min-[75em]/editor:hidden"
               >
                 <Button
                   size="icon"
@@ -542,6 +593,21 @@ export function EditorWorkspace({
                 </Button>
               </div>
               <Button
+                ref={importTriggerRef}
+                variant="outline"
+                size="icon"
+                className="sm:w-auto sm:px-3"
+                disabled={isLoading}
+                aria-label={t("settings.importReadme")}
+                title={t("settings.importReadme")}
+                aria-controls="readme-import-panel"
+                aria-expanded={importOpen}
+                onClick={() => changeImportOpen(!importOpen)}
+              >
+                <FileUp aria-hidden="true" />
+                <span className="hidden sm:inline">{t("settings.importReadme")}</span>
+              </Button>
+              <Button
                 variant="outline"
                 size="icon"
                 className="sm:w-auto sm:px-3"
@@ -557,6 +623,29 @@ export function EditorWorkspace({
           }
         />
       </div>
+      <div id="readme-import-panel" hidden={!importOpen}>
+        {importOpen && (
+          <ReadmeImportPanel
+            open
+            onOpenChange={changeImportOpen}
+            currentLocale={profile.contentLocale}
+            disabled={isLoading}
+            backup={importBackup}
+            backupStatus={importBackupStatus}
+            onReplace={replaceWithImport}
+            onRestore={restoreImportBackup}
+            onImported={completeImport}
+          />
+        )}
+      </div>
+      {importMemoryOnly && (
+        <p
+          role="status"
+          className="rounded-md border border-warning/30 bg-warning-soft p-3 text-sm text-warning"
+        >
+          {t("storage.importMemoryHelp")}
+        </p>
+      )}
       <div className="grid min-w-0 items-start gap-5 @min-[75em]/editor:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] @min-[75em]/editor:gap-6">
         <div
           className={cn(

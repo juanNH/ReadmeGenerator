@@ -7,6 +7,7 @@ import type contributions from "@/messages/en/modules/contributions.json";
 import type technologies from "@/messages/en/modules/technologies.json";
 import type projects from "@/messages/en/modules/projects.json";
 import type custom from "@/messages/en/modules/custom.json";
+import type readmeImport from "@/messages/en/readme-import.json";
 import type { AppLocale } from "@/i18n/routing";
 
 declare module "next-intl" {
@@ -17,6 +18,7 @@ declare module "next-intl" {
       Editor: typeof editor;
       EditorNavigation: typeof editorNavigation;
       ContactProviders: typeof contactProviders;
+      ReadmeImport: typeof readmeImport;
       EditorModules: {
         contributions: typeof contributions;
         technologies: typeof technologies;

@@ -339,8 +339,8 @@ export function EditorSectionNavigation(props: EditorSectionNavigationProps) {
           ))}
         </ul>
       </DragDropProvider>
-      <div className="flex min-w-0 flex-wrap items-center justify-between gap-x-2 gap-y-1">
-        <div key={activeId ?? "none"} className="flex shrink-0 items-center gap-1">
+      <div className="flex min-w-0 flex-wrap items-center justify-between gap-x-0 gap-y-1 sm:gap-x-2">
+        <div key={activeId ?? "none"} className="flex shrink-0 items-center gap-0 sm:gap-1">
           <Button
             ref={(node) => {
               if (activeId) props.moveButtonRef(activeId, "up", node);

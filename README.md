@@ -25,6 +25,8 @@ Consultá la [guía operativa](docs/development.md) para conocer todos los coman
 
 ## La propuesta de producto
 
+Para continuar un README existente, «Importar README» permite pegar Markdown o abrir un `.md` UTF-8 local, revisar las secciones detectadas y confirmar cuáles conservar. Se convierten a secciones personalizadas editables; las estructuras complejas usan HTML permitido con avisos. Antes de reemplazar se guarda el perfil anterior completo y el Markdown original, descargables por separado, con restauración confirmada. No se cargan imágenes durante la revisión. Ver [recorrido y límites de importación](docs/editor.md#importar-un-readme-existente).
+
 El editor ofrece presentación, tecnologías, proyectos, actividad y contribuciones, y contacto. Todas son opcionales. También podés agregar varias secciones propias con título opcional, párrafos, listas con viñetas o numeradas, enlaces web, subtítulos, separadores, frases destacadas, imágenes o banners y un bloque explícito de HTML. Un selector con nueve muestras pequeñas permite elegir el contenido; los bloques nuevos empiezan sin datos de ejemplo. Se pueden duplicar como copias independientes, ocultar sin perder contenido o eliminar. Las listas y sus ayudas de teclado pertenecen a estas secciones; los campos de texto ordinarios siguen siendo texto plano.
 
 La introducción permite contar quién sos, qué te interesa o qué estás aprendiendo sin repetirlo en otras secciones. Conocimientos, formación y actualidad están retirados del producto, también para borradores anteriores. Sus datos heredados de v1 permanecen guardados internamente, sin edición ni exportación y sin fusionarlos con la presentación.

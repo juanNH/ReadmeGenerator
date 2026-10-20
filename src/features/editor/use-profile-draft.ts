@@ -1,12 +1,29 @@
 "use client";
 
-import { useEffect, useReducer, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createEmptyProfile } from "@/core/profile/profile-operations";
 import type { ContentLocale, ProfileDocument } from "@/core/profile/profile-schema";
+import { parseProfileDocument } from "@/core/profile/profile-validation";
 import { readProfileDraft, writeProfileDraft, type ProfileDraftReadResult } from "./draft-storage";
+import {
+  createImportBackup,
+  readImportBackup,
+  replaceProfileDraftWithImport,
+  restoreProfileDraftFromImportBackup,
+  type ImportBackup,
+  type ImportBackupReadResult,
+} from "./import-backup";
 
 export type ProfileDraftStorageStatus =
   "new" | "restored" | "saving" | "saved" | "invalid" | "unavailable";
+
+export type ImportBackupStatus = "loading" | ImportBackupReadResult["status"];
+export type ImportOperationResult =
+  | { status: "saved" }
+  | { status: "memory_only" }
+  | { status: "needs_memory_confirmation" }
+  | { status: "invalid" }
+  | { status: "not_ready" };
 
 type DraftState = {
   document: ProfileDocument;
@@ -15,17 +32,27 @@ type DraftState = {
   recoveryBlocked: boolean;
   dirty: boolean;
   revision: number;
+  importBackup: ImportBackup | null;
+  importBackupStatus: ImportBackupStatus;
+  importMemoryOnly: boolean;
 };
 
-// Written only from client effects. Keeps unsaved work across client navigation in this tab,
+// Written only from client effects and events. Keeps unsaved work across navigation in this tab,
 // including locale changes, but cannot survive a full reload when browser storage fails.
 let inMemoryDraft: DraftState | null = null;
 
 type DraftAction =
-  | { type: "hydrated"; result: ProfileDraftReadResult }
+  | { type: "hydrated"; result: ProfileDraftReadResult; backup: ImportBackupReadResult }
   | { type: "resumed"; state: DraftState }
   | { type: "updated"; document: ProfileDocument }
   | { type: "persisted"; revision: number; success: boolean }
+  | { type: "backup_available"; backup: ImportBackup }
+  | {
+      type: "replaced";
+      document: ProfileDocument;
+      backup: ImportBackup;
+      memoryOnly: boolean;
+    }
   | { type: "restarted" };
 
 function createDraftState(initialLocale: ContentLocale): DraftState {
@@ -36,6 +63,9 @@ function createDraftState(initialLocale: ContentLocale): DraftState {
     recoveryBlocked: false,
     dirty: false,
     revision: 0,
+    importBackup: null,
+    importBackupStatus: "loading",
+    importMemoryOnly: false,
   };
 }
 
@@ -52,11 +82,14 @@ function reduceDraft(state: DraftState, action: DraftAction): DraftState {
         hydration: "ready",
         storageStatus: result.status === "empty" ? "new" : result.status,
         recoveryBlocked: result.status === "invalid" || result.status === "unavailable",
+        importBackup: action.backup.status === "available" ? action.backup.backup : null,
+        importBackupStatus: action.backup.status,
       };
     }
     case "updated": {
       if (state.hydration !== "ready" || action.document === state.document) return state;
-      const canSave = !state.recoveryBlocked && state.storageStatus !== "unavailable";
+      const canSave =
+        !state.recoveryBlocked && !state.importMemoryOnly && state.storageStatus !== "unavailable";
       return {
         ...state,
         document: action.document,
@@ -66,13 +99,37 @@ function reduceDraft(state: DraftState, action: DraftAction): DraftState {
       };
     }
     case "persisted":
-      if (state.revision !== action.revision || !state.dirty || state.recoveryBlocked) {
+      if (
+        state.revision !== action.revision ||
+        !state.dirty ||
+        state.recoveryBlocked ||
+        state.importMemoryOnly
+      ) {
         return state;
       }
       return {
         ...state,
         dirty: false,
         storageStatus: action.success ? "saved" : "unavailable",
+      };
+    case "backup_available":
+      return { ...state, importBackup: action.backup, importBackupStatus: "available" };
+    case "replaced":
+      return {
+        ...state,
+        document: action.document,
+        importBackup: action.backup,
+        importBackupStatus: "available",
+        importMemoryOnly: action.memoryOnly,
+        dirty: false,
+        revision: state.revision + 1,
+        // A memory-only import never grants permission to overwrite protected recovery data.
+        recoveryBlocked: action.memoryOnly ? state.recoveryBlocked : false,
+        storageStatus: action.memoryOnly
+          ? state.recoveryBlocked
+            ? state.storageStatus
+            : "unavailable"
+          : "saved",
       };
     case "restarted":
       if (state.hydration !== "ready") return state;
@@ -83,8 +140,33 @@ function reduceDraft(state: DraftState, action: DraftAction): DraftState {
         dirty: true,
         revision: state.revision + 1,
         storageStatus: "saving",
+        importMemoryOnly: false,
       };
   }
+}
+
+function rememberDraft(state: DraftState) {
+  inMemoryDraft =
+    state.hydration === "ready" &&
+    (state.dirty ||
+      state.recoveryBlocked ||
+      state.importMemoryOnly ||
+      state.storageStatus === "unavailable")
+      ? state
+      : null;
+}
+
+/** Update the event/flush snapshot synchronously, before React commits the next render. */
+function applyDraftAction(
+  latestState: { current: DraftState },
+  setState: (state: DraftState) => void,
+  action: DraftAction,
+) {
+  const next = reduceDraft(latestState.current, action);
+  if (next === latestState.current) return;
+  latestState.current = next;
+  rememberDraft(next);
+  setState(next);
 }
 
 function readBrowserDraft(): ProfileDraftReadResult {
@@ -104,50 +186,81 @@ function persistBrowserDraft(document: ProfileDocument): boolean {
   }
 }
 
+function readBrowserImportBackup(): ImportBackupReadResult {
+  try {
+    return readImportBackup(window.localStorage);
+  } catch {
+    return { status: "unavailable" };
+  }
+}
+
 export type ProfileDraft = {
   document: ProfileDocument;
   updateDocument: (next: ProfileDocument) => void;
   hydration: DraftState["hydration"];
   storageStatus: ProfileDraftStorageStatus;
   recoveryBlocked: boolean;
+  importBackup: ImportBackup | null;
+  importBackupStatus: ImportBackupStatus;
+  importMemoryOnly: boolean;
+  /** The caller confirms replacement; a failed durable write never applies the import. */
+  replaceWithImport: (
+    candidate: ProfileDocument,
+    source: string,
+    allowMemoryOnly?: boolean,
+  ) => ImportOperationResult;
+  /** The caller confirms restoration; the recovery record itself stays intact. */
+  restoreImportBackup: (allowMemoryOnly?: boolean) => ImportOperationResult;
   /** Call only after the user confirms replacement of their existing draft. */
   startNewDraft: () => void;
 };
 
 export function useProfileDraft(initialLocale: ContentLocale): ProfileDraft {
   // The initializer runs only for this editor mount. UI locale changes never translate a draft.
-  const [state, dispatch] = useReducer(reduceDraft, initialLocale, createDraftState);
+  const [state, setState] = useState(() => createDraftState(initialLocale));
   const latestState = useRef(state);
-
-  useEffect(() => {
-    latestState.current = state;
-    if (state.hydration !== "ready") return;
-    if (state.recoveryBlocked || state.storageStatus === "unavailable") {
-      inMemoryDraft = state;
-    } else if (state.storageStatus === "saved" || state.storageStatus === "restored") {
-      inMemoryDraft = null;
-    }
-  }, [state]);
 
   useEffect(() => {
     // Keep the first server/client render identical and cancel Strict Mode's discarded read.
     const timer = window.setTimeout(() => {
       if (inMemoryDraft !== null) {
-        dispatch({ type: "resumed", state: inMemoryDraft });
+        applyDraftAction(latestState, setState, { type: "resumed", state: inMemoryDraft });
       } else {
-        dispatch({ type: "hydrated", result: readBrowserDraft() });
+        applyDraftAction(latestState, setState, {
+          type: "hydrated",
+          result: readBrowserDraft(),
+          backup: readBrowserImportBackup(),
+        });
       }
     }, 0);
     return () => window.clearTimeout(timer);
   }, []);
 
   useEffect(() => {
-    if (state.hydration !== "ready" || state.recoveryBlocked || !state.dirty) return;
+    if (
+      state.hydration !== "ready" ||
+      state.recoveryBlocked ||
+      state.importMemoryOnly ||
+      !state.dirty
+    )
+      return;
 
     const timer = window.setTimeout(() => {
-      const success = persistBrowserDraft(state.document);
-      inMemoryDraft = success ? null : { ...state, dirty: false, storageStatus: "unavailable" };
-      dispatch({ type: "persisted", revision: state.revision, success });
+      // Import, restore or a newer edit may have replaced this render before effect cleanup.
+      const latest = latestState.current;
+      if (
+        latest.revision !== state.revision ||
+        !latest.dirty ||
+        latest.recoveryBlocked ||
+        latest.importMemoryOnly
+      )
+        return;
+      const success = persistBrowserDraft(latest.document);
+      applyDraftAction(latestState, setState, {
+        type: "persisted",
+        revision: latest.revision,
+        success,
+      });
     }, 500);
 
     return () => window.clearTimeout(timer);
@@ -156,15 +269,18 @@ export function useProfileDraft(initialLocale: ContentLocale): ProfileDraft {
   useEffect(() => {
     function flushPendingDraft() {
       const latest = latestState.current;
-      if (latest.hydration === "ready" && latest.dirty && !latest.recoveryBlocked) {
+      if (
+        latest.hydration === "ready" &&
+        latest.dirty &&
+        !latest.recoveryBlocked &&
+        !latest.importMemoryOnly
+      ) {
         const success = persistBrowserDraft(latest.document);
-        latestState.current = {
-          ...latest,
-          dirty: false,
-          storageStatus: success ? "saved" : "unavailable",
-        };
-        inMemoryDraft = success ? null : latestState.current;
-        dispatch({ type: "persisted", revision: latest.revision, success });
+        applyDraftAction(latestState, setState, {
+          type: "persisted",
+          revision: latest.revision,
+          success,
+        });
       }
     }
 
@@ -182,12 +298,97 @@ export function useProfileDraft(initialLocale: ContentLocale): ProfileDraft {
     };
   }, []);
 
+  function replaceWithImport(
+    candidate: ProfileDocument,
+    source: string,
+    allowMemoryOnly = false,
+  ): ImportOperationResult {
+    const latest = latestState.current;
+    if (latest.hydration !== "ready") return { status: "not_ready" };
+    const backup = createImportBackup(latest.document, source);
+    const parsed = parseProfileDocument(candidate);
+    if (!backup.success || !parsed.success || candidate.schemaVersion !== 2)
+      return { status: "invalid" };
+    if (!allowMemoryOnly) {
+      if (
+        latest.recoveryBlocked ||
+        latest.importMemoryOnly ||
+        latest.storageStatus === "unavailable"
+      )
+        return { status: "needs_memory_confirmation" };
+      try {
+        const result = replaceProfileDraftWithImport(
+          window.localStorage,
+          parsed.data,
+          backup.backup,
+        );
+        if (result.status !== "saved") {
+          if (result.status === "needs_memory_confirmation" && result.backupPersisted)
+            applyDraftAction(latestState, setState, {
+              type: "backup_available",
+              backup: backup.backup,
+            });
+          return { status: result.status };
+        }
+      } catch {
+        return { status: "needs_memory_confirmation" };
+      }
+    }
+    applyDraftAction(latestState, setState, {
+      type: "replaced",
+      document: parsed.data,
+      backup: backup.backup,
+      memoryOnly: allowMemoryOnly,
+    });
+    return { status: allowMemoryOnly ? "memory_only" : "saved" };
+  }
+
+  function restoreImportBackup(allowMemoryOnly = false): ImportOperationResult {
+    const latest = latestState.current;
+    if (latest.hydration !== "ready") return { status: "not_ready" };
+    const storedBackup = latest.importBackup;
+    if (storedBackup === null) return { status: "invalid" };
+    const validatedBackup = createImportBackup(
+      storedBackup.previousDocument,
+      storedBackup.originalSource,
+    );
+    if (!validatedBackup.success) return { status: "invalid" };
+    const backup = validatedBackup.backup;
+    if (!allowMemoryOnly) {
+      if (
+        latest.recoveryBlocked ||
+        latest.importMemoryOnly ||
+        latest.storageStatus === "unavailable"
+      )
+        return { status: "needs_memory_confirmation" };
+      try {
+        const result = restoreProfileDraftFromImportBackup(window.localStorage, backup);
+        if (result.status !== "saved") return { status: result.status };
+      } catch {
+        return { status: "needs_memory_confirmation" };
+      }
+    }
+    applyDraftAction(latestState, setState, {
+      type: "replaced",
+      document: backup.previousDocument,
+      backup,
+      memoryOnly: allowMemoryOnly,
+    });
+    return { status: allowMemoryOnly ? "memory_only" : "saved" };
+  }
+
   return {
     document: state.document,
-    updateDocument: (document) => dispatch({ type: "updated", document }),
+    updateDocument: (document) =>
+      applyDraftAction(latestState, setState, { type: "updated", document }),
     hydration: state.hydration,
     storageStatus: state.storageStatus,
     recoveryBlocked: state.recoveryBlocked,
-    startNewDraft: () => dispatch({ type: "restarted" }),
+    importBackup: state.importBackup,
+    importBackupStatus: state.importBackupStatus,
+    importMemoryOnly: state.importMemoryOnly,
+    replaceWithImport,
+    restoreImportBackup,
+    startNewDraft: () => applyDraftAction(latestState, setState, { type: "restarted" }),
   };
 }
