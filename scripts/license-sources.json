@@ -1,0 +1,1065 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-20",
+  "scope": "Exact-version companion notices and source evidence for packages whose npm archives omit a root notice. Native binary component closure is not certified.",
+  "sources": [
+    {
+      "id": "cc0-1.0-legalcode",
+      "file": "public/licenses/supplemental/cc0-1.0-legalcode.txt",
+      "url": "https://creativecommons.org/publicdomain/zero/1.0/legalcode.txt",
+      "sha256": "a2010f343487d3f7618affe54f789f5487602331c0a8d03f49e9a7c547cf0499",
+      "kind": "reference-license"
+    },
+    {
+      "id": "client-only-0.0.1-error-js",
+      "file": "public/licenses/supplemental/client-only-0.0.1-error-js.txt",
+      "url": "https://registry.npmjs.org/client-only/-/client-only-0.0.1.tgz",
+      "upstreamFile": "package/error.js",
+      "sha256": "7d211552731db17e1ff8635eea0970ef57ecc91b04b95536b9fa5abbfafaec26",
+      "kind": "upstream-context"
+    },
+    {
+      "id": "client-only-0.0.1-index-js",
+      "file": "public/licenses/supplemental/client-only-0.0.1-index-js.txt",
+      "url": "https://registry.npmjs.org/client-only/-/client-only-0.0.1.tgz",
+      "upstreamFile": "package/index.js",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "upstream-context"
+    },
+    {
+      "id": "client-only-0.0.1-package-json",
+      "file": "public/licenses/supplemental/client-only-0.0.1-package-json.txt",
+      "url": "https://registry.npmjs.org/client-only/-/client-only-0.0.1.tgz",
+      "upstreamFile": "package/package.json",
+      "sha256": "4d6342705767832f299b9a59c28e4275bcf02db19472732f93f67d979441df8f",
+      "kind": "upstream-context"
+    },
+    {
+      "id": "definitelytyped-2016-license",
+      "file": "public/licenses/supplemental/definitelytyped-2016-license.txt",
+      "url": "https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/a5f4d50cccf025b6a8088093e76da2b20c1220f3/LICENSE",
+      "sha256": "0a48f63d7d32a49d196dce4b2e0cbc236c2cc8fef42cb20e005e4d5f813cc8f6",
+      "kind": "upstream-notice"
+    },
+    {
+      "id": "esrecurse-4.3.0-header",
+      "file": "public/licenses/supplemental/esrecurse-4.3.0-header.txt",
+      "url": "https://raw.githubusercontent.com/estools/esrecurse/8ceb63797813d9ac69572a671b95cf58ffdf35b6/esrecurse.js",
+      "sha256": "93a2af4d556efacc486b1b5863376a874463de44ae6f7e3e3d3d454a0589a374",
+      "kind": "upstream-notice",
+      "extraction": "Complete initial block comment, including delimiters; no edits."
+    },
+    {
+      "id": "humanfs-apache-license",
+      "file": "public/licenses/supplemental/humanfs-apache-license.txt",
+      "url": "https://raw.githubusercontent.com/humanwhocodes/humanfs/85069f193cbacc371c3beb649ce746f8c5a493be/packages/core/LICENSE",
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+      "kind": "upstream-notice"
+    },
+    {
+      "id": "humanfs-types-0.15.0-readme",
+      "file": "public/licenses/supplemental/humanfs-types-0.15.0-readme.txt",
+      "url": "https://registry.npmjs.org/@humanfs/types/-/types-0.15.0.tgz",
+      "upstreamFile": "package/README.md",
+      "sha256": "e1076e47ea96eef79e05496912ad03a9fa8031e1bf4847aab1a9554aef5cc5c0",
+      "kind": "upstream-context"
+    },
+    {
+      "id": "imurmurhash-0.1.4-license",
+      "file": "public/licenses/supplemental/imurmurhash-0.1.4-license.txt",
+      "url": "https://raw.githubusercontent.com/jensyt/imurmurhash-js/9f40361c7e2835a9b7b8eaa1cbab2a9f94ee22a2/LICENSE",
+      "sha256": "fa0943ddcaa857d901a9eb92254d89876297ecdfbc884d294a927df08ebcbbe8",
+      "kind": "upstream-notice"
+    },
+    {
+      "id": "keyv-4.5.4-license",
+      "file": "public/licenses/supplemental/keyv-4.5.4-license.txt",
+      "url": "https://raw.githubusercontent.com/jaredwray/keyv/e4d608eccdfc094b80f6e9545c5307ee0810af72/LICENSE",
+      "sha256": "1f7dca26d2d328c3dbb9b6fe3b15ec3cda08ffe2288e47b73d617454b256f959",
+      "kind": "upstream-notice"
+    },
+    {
+      "id": "language-subtag-registry-0.3.23-readme",
+      "file": "public/licenses/supplemental/language-subtag-registry-0.3.23-readme.txt",
+      "url": "https://raw.githubusercontent.com/mattcg/language-subtag-registry/1e7d67e7f9646f47f0766a04b08522f7df59e932/README.md",
+      "sha256": "98daea92387ea6066cff42edf7a3bd4c1a2d2b148082eaca91c85afdc1c3392f",
+      "kind": "upstream-context"
+    },
+    {
+      "id": "language-tags-1.0.9-readme",
+      "file": "public/licenses/supplemental/language-tags-1.0.9-readme.txt",
+      "url": "https://raw.githubusercontent.com/mattcg/language-tags/ea5aa61e53ced2a18e35783ff00bb2a533f6c77d/README.md",
+      "sha256": "53598f8f8440708d14c85396cb53213682b8018fc19151323e5a621102527adb",
+      "kind": "upstream-context"
+    },
+    {
+      "id": "language-tags-author-mit-license",
+      "file": "public/licenses/supplemental/language-tags-author-mit-license.txt",
+      "url": "https://mattcg.mit-license.org/license.txt",
+      "sha256": "40169c46abc7d91a7bde828fe8529d3a711f2023b68676754b89606bfb933c42",
+      "kind": "upstream-notice"
+    },
+    {
+      "id": "natural-compare-1.4.0-readme",
+      "file": "public/licenses/supplemental/natural-compare-1.4.0-readme.txt",
+      "url": "https://raw.githubusercontent.com/litejs/natural-compare-lite/eec83eee67cfac84d6db30cdd65363f155673770/README.md",
+      "sha256": "9a97891a8e69da238853b1a512ae6ea8797072e9aad5bb25449b798deaab986e",
+      "kind": "upstream-context"
+    },
+    {
+      "id": "natural-compare-author-mit-license",
+      "file": "public/licenses/supplemental/natural-compare-author-mit-license.txt",
+      "url": "https://lauri.rooden.ee/mit-license.txt",
+      "sha256": "353fe762ba595bf1ffe786acf0f5984bb164205901d74f258af195fc8228c67d",
+      "kind": "upstream-notice"
+    },
+    {
+      "id": "next-16.4.2-license",
+      "file": "public/licenses/supplemental/next-16.4.2-license.txt",
+      "url": "https://raw.githubusercontent.com/vercel/next.js/2864b1772c37242a9b40ab4d366eb7d368c2a070/license.md",
+      "sha256": "ee765244e2d59f5234d474f62e0766fa0c8b99af967fdd4c0cb8dcb0c76ea224",
+      "kind": "upstream-notice"
+    },
+    {
+      "id": "rolldown-1.2.14-license",
+      "file": "public/licenses/supplemental/rolldown-1.2.14-license.txt",
+      "url": "https://raw.githubusercontent.com/rolldown/rolldown/c9a8cda42bc0fdd84c7b4b4e6d7f95ae83e8b5f7/LICENSE",
+      "sha256": "23ecfff35a5a2e80d92142f75228912c3b1abc4b5a8337a821ff4397e2f9f734",
+      "kind": "upstream-notice"
+    },
+    {
+      "id": "rolldown-1.2.14-third-party",
+      "file": "public/licenses/supplemental/rolldown-1.2.14-third-party.txt",
+      "url": "https://raw.githubusercontent.com/rolldown/rolldown/c9a8cda42bc0fdd84c7b4b4e6d7f95ae83e8b5f7/THIRD-PARTY-LICENSE",
+      "sha256": "a877291d800ed43692f3f9ae09d8e01cc6f7293ad39d43896059c188ffbb8b7c",
+      "kind": "upstream-notice"
+    },
+    {
+      "id": "schummar-1.21.5-license",
+      "file": "public/licenses/supplemental/schummar-1.21.5-license.txt",
+      "url": "https://raw.githubusercontent.com/schummar/schummar-translate/de1cde15a76f4f60874dbe9b7c5395ae2d38b610/LICENSE",
+      "sha256": "872f31f366abf7225ef12fc28320977c6287ed01f6569f40070a48ac890186dd",
+      "kind": "upstream-notice"
+    },
+    {
+      "id": "server-only-0.0.1-empty-js",
+      "file": "public/licenses/supplemental/server-only-0.0.1-empty-js.txt",
+      "url": "https://registry.npmjs.org/server-only/-/server-only-0.0.1.tgz",
+      "upstreamFile": "package/empty.js",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "upstream-context"
+    },
+    {
+      "id": "server-only-0.0.1-index-js",
+      "file": "public/licenses/supplemental/server-only-0.0.1-index-js.txt",
+      "url": "https://registry.npmjs.org/server-only/-/server-only-0.0.1.tgz",
+      "upstreamFile": "package/index.js",
+      "sha256": "2c4720b71eb03e5f75a83d43e6fd83c0446aa172a58a4d6ffbd74ecad72ba7b5",
+      "kind": "upstream-context"
+    },
+    {
+      "id": "server-only-0.0.1-package-json",
+      "file": "public/licenses/supplemental/server-only-0.0.1-package-json.txt",
+      "url": "https://registry.npmjs.org/server-only/-/server-only-0.0.1.tgz",
+      "upstreamFile": "package/package.json",
+      "sha256": "e4b0cc01e2e0349c51c694fa97d8a642eb8322521ca1444b20bd1842594b4339",
+      "kind": "upstream-context"
+    },
+    {
+      "id": "spdx-mit-reference",
+      "file": "public/licenses/supplemental/spdx-mit-reference.txt",
+      "url": "https://raw.githubusercontent.com/spdx/license-list-data/31ba1a50e5397e00a304dbadc76531740e89ee48/text/MIT.txt",
+      "sha256": "b05785f9f18e6716bab63424b11454513b9943a222595b70411009202fc592b5",
+      "kind": "reference-license"
+    },
+    {
+      "id": "stable-hash-0.0.5-readme",
+      "file": "public/licenses/supplemental/stable-hash-0.0.5-readme.txt",
+      "url": "https://raw.githubusercontent.com/shuding/stable-hash/1b314f2cc3e9449bc8d49e417670175cf9afd42a/README.md",
+      "sha256": "391a9af6f5d0caf5f9437c339ce7927d2fb9a83142563e8f6abb6a4da5563345",
+      "kind": "upstream-context"
+    },
+    {
+      "id": "swc-counter-license",
+      "file": "public/licenses/supplemental/swc-counter-license.txt",
+      "url": "https://raw.githubusercontent.com/swc-project/pkgs/2cbd4700aaa6c28da488aad098b150c22ba56ff1/packages/counter/LICENSE.txt",
+      "sha256": "d96eba1f1881334d50ffc144276dfa98e147a415e7c591ecdfcb81680361dc91",
+      "kind": "upstream-notice"
+    },
+    {
+      "id": "types-json5-0.0.29-definition",
+      "file": "public/licenses/supplemental/types-json5-0.0.29-definition.txt",
+      "url": "https://registry.npmjs.org/@types/json5/-/json5-0.0.29.tgz",
+      "upstreamFile": "json5/index.d.ts",
+      "sha256": "c5a14bdeb170e0e67fb4200c54e0e02fd0ec94aca894c212c9d43c2916891542",
+      "kind": "upstream-context"
+    },
+    {
+      "id": "unrs-resolver-1.12.2-license",
+      "file": "public/licenses/supplemental/unrs-resolver-1.12.2-license.txt",
+      "url": "https://raw.githubusercontent.com/unrs/unrs-resolver/ccb26d205e2938b16069c64a28996b48ee97ff94/LICENSE",
+      "sha256": "a9e35996693bd619302922c731fa2f620ad12d5f50b19a37c8a3e0e078c9bd2f",
+      "kind": "upstream-notice"
+    }
+  ],
+  "packages": [
+    {
+      "name": "@humanfs/types",
+      "version": "0.15.0",
+      "license": "Apache-2.0",
+      "registry": {
+        "url": "https://registry.npmjs.org/@humanfs%2ftypes/0.15.0",
+        "integrity": "sha512-ZZ1w0aoQkwuUuC7Yf+7sdeaNfqQiiLcSRbfI08oAxqLtpXQr9AIVX7Ay7HLDuiLYAaFPu8oBYNq/QIi9URHJ3Q==",
+        "gitHead": "85069f193cbacc371c3beb649ce746f8c5a493be"
+      },
+      "notices": ["humanfs-apache-license", "humanfs-types-0.15.0-readme"],
+      "revision": "85069f193cbacc371c3beb649ce746f8c5a493be",
+      "note": "The exact package declares Apache-2.0. Its monorepo sibling core supplies the complete Apache terms at the same revision; no additional copyright is invented for the types package.",
+      "verifyFiles": [
+        {
+          "file": "README.md",
+          "sha256": "e1076e47ea96eef79e05496912ad03a9fa8031e1bf4847aab1a9554aef5cc5c0"
+        }
+      ],
+      "archiveSha256": "3c2942da7ba321f6ba27255a5faceee76eae502403129d8aa50d2dc8400a94d5"
+    },
+    {
+      "name": "@next/env",
+      "version": "16.4.2",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/@next%2fenv/16.4.2",
+        "integrity": "sha512-nTUTFH7G5/J/fmpkjVLegOkqyKOP0CEsJcMsyO4UCYeN1su+YMW/MfaSErnJskL7XM+UDK6aTvslxsRCyya/sA=="
+      },
+      "notices": ["next-16.4.2-license"],
+      "revision": "2864b1772c37242a9b40ab4d366eb7d368c2a070",
+      "releaseTag": "v16.4.2"
+    },
+    {
+      "name": "@next/eslint-plugin-next",
+      "version": "16.4.2",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/@next%2feslint-plugin-next/16.4.2",
+        "integrity": "sha512-gCTWlw0e+Y6kajpFyKKgA195jUJCRhlzJE0lV7ufe8a+ghIsANWZ0/FiJwg6DuOG1+OvRbcZDcFBoRh3mNJx0g=="
+      },
+      "notices": ["next-16.4.2-license"],
+      "revision": "2864b1772c37242a9b40ab4d366eb7d368c2a070",
+      "releaseTag": "v16.4.2"
+    },
+    {
+      "name": "@next/swc-darwin-arm64",
+      "version": "16.4.2",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/@next%2fswc-darwin-arm64/16.4.2",
+        "integrity": "sha512-ONkhFvZNFWlsEHOM/81AtxdyuJP2KRYKYR0JxPwvcu1AuPMMMgcL+wW2luldJvMtZwKtUxoSkCychW5wIeoYSw=="
+      },
+      "notices": ["next-16.4.2-license"],
+      "revision": "2864b1772c37242a9b40ab4d366eb7d368c2a070",
+      "note": "Native package wrapper/project notices. This does not certify the complete component list or source obligations of the compiled native binary."
+    },
+    {
+      "name": "@next/swc-darwin-x64",
+      "version": "16.4.2",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/@next%2fswc-darwin-x64/16.4.2",
+        "integrity": "sha512-luPCMbOsCoaF+kXJEUjmjmOZg1lC3BflhmUu+ZmW4tBu2vW/4AXak8JBFvePizGkxVmNiAw/r9ra+6UviCWtWQ=="
+      },
+      "notices": ["next-16.4.2-license"],
+      "revision": "2864b1772c37242a9b40ab4d366eb7d368c2a070",
+      "note": "Native package wrapper/project notices. This does not certify the complete component list or source obligations of the compiled native binary."
+    },
+    {
+      "name": "@next/swc-linux-arm64-gnu",
+      "version": "16.4.2",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/@next%2fswc-linux-arm64-gnu/16.4.2",
+        "integrity": "sha512-xhwFTAncJyaCNy5KqKKuKaIIdCy1/1ZV1s5S1G0hhT7wGMkDTlfJ6aQbfRFnIG/s3/kDrxQ8aycVe+c5QnP8ow=="
+      },
+      "notices": ["next-16.4.2-license"],
+      "revision": "2864b1772c37242a9b40ab4d366eb7d368c2a070",
+      "note": "Native package wrapper/project notices. This does not certify the complete component list or source obligations of the compiled native binary."
+    },
+    {
+      "name": "@next/swc-linux-arm64-musl",
+      "version": "16.4.2",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/@next%2fswc-linux-arm64-musl/16.4.2",
+        "integrity": "sha512-T1PNmfbPcxr5ndtWUL/3wQtLXsz808lq6sc2GrNT5k2oquF7UyqZddHSuAewHVsWsGXe6nsl9HoN1YNriVjuSg=="
+      },
+      "notices": ["next-16.4.2-license"],
+      "revision": "2864b1772c37242a9b40ab4d366eb7d368c2a070",
+      "note": "Native package wrapper/project notices. This does not certify the complete component list or source obligations of the compiled native binary."
+    },
+    {
+      "name": "@next/swc-linux-x64-gnu",
+      "version": "16.4.2",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/@next%2fswc-linux-x64-gnu/16.4.2",
+        "integrity": "sha512-N9cDUOCGtkJG5PNKDFZUF3xXndrJJcpLp121uAGjIGvO/U2p9tfdNOM9htj7+5f72l0m8rMw/cvYacUJBQoudg=="
+      },
+      "notices": ["next-16.4.2-license"],
+      "revision": "2864b1772c37242a9b40ab4d366eb7d368c2a070",
+      "note": "Native package wrapper/project notices. This does not certify the complete component list or source obligations of the compiled native binary."
+    },
+    {
+      "name": "@next/swc-linux-x64-musl",
+      "version": "16.4.2",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/@next%2fswc-linux-x64-musl/16.4.2",
+        "integrity": "sha512-yY2uh1YhX6ufuYy2FCbw1dqblbhI57GLYAJfCkqD9auTv6pLrH67Uccjc3QMKBeCYAG6lkgu08ExmX1bbjejjQ=="
+      },
+      "notices": ["next-16.4.2-license"],
+      "revision": "2864b1772c37242a9b40ab4d366eb7d368c2a070",
+      "note": "Native package wrapper/project notices. This does not certify the complete component list or source obligations of the compiled native binary."
+    },
+    {
+      "name": "@next/swc-win32-arm64-msvc",
+      "version": "16.4.2",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/@next%2fswc-win32-arm64-msvc/16.4.2",
+        "integrity": "sha512-j/ArWRIHpMMB6wYLMhr2puTguBt70lNU/Cmjl9p6dTDE8DGknYJMP9PdwPk2dqpCNL/KIX9yfngDvIesxJPmsg=="
+      },
+      "notices": ["next-16.4.2-license"],
+      "revision": "2864b1772c37242a9b40ab4d366eb7d368c2a070",
+      "note": "Native package wrapper/project notices. This does not certify the complete component list or source obligations of the compiled native binary."
+    },
+    {
+      "name": "@next/swc-win32-x64-msvc",
+      "version": "16.4.2",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/@next%2fswc-win32-x64-msvc/16.4.2",
+        "integrity": "sha512-AA4edyWHDko3NCSo0x6GomsdgFb0oR1J3MXU1b5xt6FRFg4AucrMPW3S0hCe/9onU0O1BbpGQBsqo1r0Gneu1g=="
+      },
+      "notices": ["next-16.4.2-license"],
+      "revision": "2864b1772c37242a9b40ab4d366eb7d368c2a070",
+      "note": "Native package wrapper/project notices. This does not certify the complete component list or source obligations of the compiled native binary."
+    },
+    {
+      "name": "@rolldown/binding-android-arm-eabi",
+      "version": "1.2.14",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/@rolldown%2fbinding-android-arm-eabi/1.2.14",
+        "integrity": "sha512-aWR+XKH9+rW7m5fWq/5360J3mHycrx/o6xZM2DQFdJnTMdyP7/WzxPjhtLbVWdKo2y612/4U1bWqb3HQhiF7vg=="
+      },
+      "notices": ["rolldown-1.2.14-license", "rolldown-1.2.14-third-party"],
+      "revision": "c9a8cda42bc0fdd84c7b4b4e6d7f95ae83e8b5f7",
+      "note": "Native package wrapper/project notices. This does not certify the complete component list or source obligations of the compiled native binary."
+    },
+    {
+      "name": "@rolldown/binding-android-arm64",
+      "version": "1.2.14",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/@rolldown%2fbinding-android-arm64/1.2.14",
+        "integrity": "sha512-QiVxHofl6A8lQU7WAtOUY4QMVZXohxwz7WJJoeh8NBEUyKfIkMRKhYyq8az/1RypNiIXzNTtiS6KwHz0erxYRQ=="
+      },
+      "notices": ["rolldown-1.2.14-license", "rolldown-1.2.14-third-party"],
+      "revision": "c9a8cda42bc0fdd84c7b4b4e6d7f95ae83e8b5f7",
+      "note": "Native package wrapper/project notices. This does not certify the complete component list or source obligations of the compiled native binary."
+    },
+    {
+      "name": "@rolldown/binding-darwin-arm64",
+      "version": "1.2.14",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/@rolldown%2fbinding-darwin-arm64/1.2.14",
+        "integrity": "sha512-lTQOzHuBIooh3jIr5XINQkjPGEuGy+Dsy0meXDr6Sjty0b99kYgGh4uBC/8mJX1T0kC8d6S0aPP1Y+bHkh6aBw=="
+      },
+      "notices": ["rolldown-1.2.14-license", "rolldown-1.2.14-third-party"],
+      "revision": "c9a8cda42bc0fdd84c7b4b4e6d7f95ae83e8b5f7",
+      "note": "Native package wrapper/project notices. This does not certify the complete component list or source obligations of the compiled native binary."
+    },
+    {
+      "name": "@rolldown/binding-darwin-x64",
+      "version": "1.2.14",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/@rolldown%2fbinding-darwin-x64/1.2.14",
+        "integrity": "sha512-hyMKEGatjmBYCs/Q4sbIcL/GqpFEqsX3wc+HYVQ/85A4rxc1o7rPm4DUI4GV4k/h0ITddwFSGpqQunI14GXjTA=="
+      },
+      "notices": ["rolldown-1.2.14-license", "rolldown-1.2.14-third-party"],
+      "revision": "c9a8cda42bc0fdd84c7b4b4e6d7f95ae83e8b5f7",
+      "note": "Native package wrapper/project notices. This does not certify the complete component list or source obligations of the compiled native binary."
+    },
+    {
+      "name": "@rolldown/binding-freebsd-x64",
+      "version": "1.2.14",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/@rolldown%2fbinding-freebsd-x64/1.2.14",
+        "integrity": "sha512-u371GbXoVXrEgP20PwzoGNOdAOqAMhzo19JzzY+V4YmmnC+DTOoqdbMu+O+54emM59Mik/UdrtWgcuEDKWRPKA=="
+      },
+      "notices": ["rolldown-1.2.14-license", "rolldown-1.2.14-third-party"],
+      "revision": "c9a8cda42bc0fdd84c7b4b4e6d7f95ae83e8b5f7",
+      "note": "Native package wrapper/project notices. This does not certify the complete component list or source obligations of the compiled native binary."
+    },
+    {
+      "name": "@rolldown/binding-linux-arm-gnueabihf",
+      "version": "1.2.14",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/@rolldown%2fbinding-linux-arm-gnueabihf/1.2.14",
+        "integrity": "sha512-BqwKsdZQf6EqVWr8fv2MrDYzAvOZ7+NYFSJESRGs87fkseEhs0TU9TXgRJTkZoRRkxTizyEg1LKUXfU3/78uqg=="
+      },
+      "notices": ["rolldown-1.2.14-license", "rolldown-1.2.14-third-party"],
+      "revision": "c9a8cda42bc0fdd84c7b4b4e6d7f95ae83e8b5f7",
+      "note": "Native package wrapper/project notices. This does not certify the complete component list or source obligations of the compiled native binary."
+    },
+    {
+      "name": "@rolldown/binding-linux-arm64-gnu",
+      "version": "1.2.14",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/@rolldown%2fbinding-linux-arm64-gnu/1.2.14",
+        "integrity": "sha512-SD9kY8M009x/7s57Z1dgUVlP5+uYBgKQK0Tkr1WIWngrtUJmRCW1RJFMY7QDla2khXhmg2i5Io7MUjcmZNZ/KQ=="
+      },
+      "notices": ["rolldown-1.2.14-license", "rolldown-1.2.14-third-party"],
+      "revision": "c9a8cda42bc0fdd84c7b4b4e6d7f95ae83e8b5f7",
+      "note": "Native package wrapper/project notices. This does not certify the complete component list or source obligations of the compiled native binary."
+    },
+    {
+      "name": "@rolldown/binding-linux-arm64-musl",
+      "version": "1.2.14",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/@rolldown%2fbinding-linux-arm64-musl/1.2.14",
+        "integrity": "sha512-BJ2CL19M6uuWesMgnqJzgxoI+N+eV7b0A9O9vLV42y+gitC41fNa8KElau1tHVzuLWX5GzEuxMPhAO0tQXQMkg=="
+      },
+      "notices": ["rolldown-1.2.14-license", "rolldown-1.2.14-third-party"],
+      "revision": "c9a8cda42bc0fdd84c7b4b4e6d7f95ae83e8b5f7",
+      "note": "Native package wrapper/project notices. This does not certify the complete component list or source obligations of the compiled native binary."
+    },
+    {
+      "name": "@rolldown/binding-linux-ppc64-gnu",
+      "version": "1.2.14",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/@rolldown%2fbinding-linux-ppc64-gnu/1.2.14",
+        "integrity": "sha512-4+Kl8daPV8NDHaD7mfCcc1pRM+Qg7ab8DyMm5FG5WoZgv4h2i3KFN1CybYBNbQqmuYm7ftJLvmMI1eHYJ22S/Q=="
+      },
+      "notices": ["rolldown-1.2.14-license", "rolldown-1.2.14-third-party"],
+      "revision": "c9a8cda42bc0fdd84c7b4b4e6d7f95ae83e8b5f7",
+      "note": "Native package wrapper/project notices. This does not certify the complete component list or source obligations of the compiled native binary."
+    },
+    {
+      "name": "@rolldown/binding-linux-s390x-gnu",
+      "version": "1.2.14",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/@rolldown%2fbinding-linux-s390x-gnu/1.2.14",
+        "integrity": "sha512-V/h8ePq1fKDrmtFMz6xcCN3DKvuvMRrwwD1q0PkBeeo4DpK64biaKvqWGVxqCeYKqeRk7gE7/iKPxLCn08O97A=="
+      },
+      "notices": ["rolldown-1.2.14-license", "rolldown-1.2.14-third-party"],
+      "revision": "c9a8cda42bc0fdd84c7b4b4e6d7f95ae83e8b5f7",
+      "note": "Native package wrapper/project notices. This does not certify the complete component list or source obligations of the compiled native binary."
+    },
+    {
+      "name": "@rolldown/binding-linux-x64-gnu",
+      "version": "1.2.14",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/@rolldown%2fbinding-linux-x64-gnu/1.2.14",
+        "integrity": "sha512-WxalXzgrLVpKC93xfpaJ3gCXUWzeCr+FRCbDVD2mUAy4L6Vo3lNVz0epUEUpxPWJkLNYUwM4OSIikv36OJ9mLg=="
+      },
+      "notices": ["rolldown-1.2.14-license", "rolldown-1.2.14-third-party"],
+      "revision": "c9a8cda42bc0fdd84c7b4b4e6d7f95ae83e8b5f7",
+      "note": "Native package wrapper/project notices. This does not certify the complete component list or source obligations of the compiled native binary."
+    },
+    {
+      "name": "@rolldown/binding-linux-x64-musl",
+      "version": "1.2.14",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/@rolldown%2fbinding-linux-x64-musl/1.2.14",
+        "integrity": "sha512-3G3tnAmTpdk9jO3GQtyHXqeFD2SlecfTws/Y3M2mmj9nMBwwuLT4kur8sZKeu7ENUHSpVO3cIsm5A52LEWWwlg=="
+      },
+      "notices": ["rolldown-1.2.14-license", "rolldown-1.2.14-third-party"],
+      "revision": "c9a8cda42bc0fdd84c7b4b4e6d7f95ae83e8b5f7",
+      "note": "Native package wrapper/project notices. This does not certify the complete component list or source obligations of the compiled native binary."
+    },
+    {
+      "name": "@rolldown/binding-openharmony-arm64",
+      "version": "1.2.14",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/@rolldown%2fbinding-openharmony-arm64/1.2.14",
+        "integrity": "sha512-qyr5XiNGxm2ytx17vvtcJ9nXn6v1gENETi503bJx3OGwZ1tSonj7BosxbMa/xeAfSl5iS9X6KjEWYXLu6v1L7Q=="
+      },
+      "notices": ["rolldown-1.2.14-license", "rolldown-1.2.14-third-party"],
+      "revision": "c9a8cda42bc0fdd84c7b4b4e6d7f95ae83e8b5f7",
+      "note": "Native package wrapper/project notices. This does not certify the complete component list or source obligations of the compiled native binary."
+    },
+    {
+      "name": "@rolldown/binding-win32-arm64-msvc",
+      "version": "1.2.14",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/@rolldown%2fbinding-win32-arm64-msvc/1.2.14",
+        "integrity": "sha512-oA4o5o0S2yB199YyYXDzKUv1Z56Rc+mgOjwm7Z/vJ9Z8igiDPYvoOuDyo6g7AK/ZaF09nPhDKVnGBcYHO11GXA=="
+      },
+      "notices": ["rolldown-1.2.14-license", "rolldown-1.2.14-third-party"],
+      "revision": "c9a8cda42bc0fdd84c7b4b4e6d7f95ae83e8b5f7",
+      "note": "Native package wrapper/project notices. This does not certify the complete component list or source obligations of the compiled native binary."
+    },
+    {
+      "name": "@rolldown/binding-win32-x64-msvc",
+      "version": "1.2.14",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/@rolldown%2fbinding-win32-x64-msvc/1.2.14",
+        "integrity": "sha512-9mE94bf2GZUaR/fUSXCMpBoWkctu421Mi0ORpm4zqfbkjKep7RxzPFa5etcGs5h+2KApoWBOA/hAJa/7saGgEQ=="
+      },
+      "notices": ["rolldown-1.2.14-license", "rolldown-1.2.14-third-party"],
+      "revision": "c9a8cda42bc0fdd84c7b4b4e6d7f95ae83e8b5f7",
+      "note": "Native package wrapper/project notices. This does not certify the complete component list or source obligations of the compiled native binary."
+    },
+    {
+      "name": "@schummar/icu-type-parser",
+      "version": "1.21.5",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/@schummar%2ficu-type-parser/1.21.5",
+        "integrity": "sha512-bXHSaW5jRTmke9Vd0h5P7BtWZG9Znqb8gSDxZnxaGSJnGwPLDPfS+3g0BKzeWqzgZPsIVZkM7m2tbo18cm5HBw==",
+        "gitHead": "de1cde15a76f4f60874dbe9b7c5395ae2d38b610"
+      },
+      "notices": ["schummar-1.21.5-license"],
+      "revision": "de1cde15a76f4f60874dbe9b7c5395ae2d38b610"
+    },
+    {
+      "name": "@swc/counter",
+      "version": "0.1.3",
+      "license": "Apache-2.0",
+      "registry": {
+        "url": "https://registry.npmjs.org/@swc%2fcounter/0.1.3",
+        "integrity": "sha512-e2BR4lsJkkRlKZ/qCHPw9ZaSxc0MVUd7gtbtaB7aMvHeJVYe8sOB8DBZkP2DtISHGSku9sCK6T6cnY0CtXrOCQ=="
+      },
+      "notices": ["swc-counter-license"],
+      "revision": "2cbd4700aaa6c28da488aad098b150c22ba56ff1",
+      "note": "The publisher's later source revision retains version 0.1.3 and byte-identical index.js, and supplies a complete Apache-2.0 notice. The license revision is not claimed to be the original publication commit.",
+      "verifyFiles": [
+        {
+          "file": "index.js",
+          "sha256": "d018ef4c9b3f87d1adc6822a0a549fc01bbb86eaf732a4b768bc89b904d21b46"
+        }
+      ]
+    },
+    {
+      "name": "@types/json5",
+      "version": "0.0.29",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/@types%2fjson5/0.0.29",
+        "integrity": "sha512-dRLjCWHYg4oaA77cxO64oO+7JwCwnIzkZPdrrC71jQmQtlhM556pwKo5bUzqvZndkVbeFLIIi+9TC40JNF5hNQ=="
+      },
+      "notices": ["definitelytyped-2016-license", "types-json5-0.0.29-definition"],
+      "revision": "a5f4d50cccf025b6a8088093e76da2b20c1220f3",
+      "note": "The published definition matches this historical source except for its UTF-8 BOM. The root license assigns copyright to each definition's named contributors; this definition identifies Jason Swearingen.",
+      "verifyFiles": [
+        {
+          "file": "index.d.ts",
+          "sha256": "c5a14bdeb170e0e67fb4200c54e0e02fd0ec94aca894c212c9d43c2916891542"
+        }
+      ],
+      "archiveSha256": "439d14e46f574bc1a62a72ad4598e7f22ebd8021410ab7d869723801c436e95d"
+    },
+    {
+      "name": "@unrs/resolver-binding-android-arm-eabi",
+      "version": "1.12.2",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/@unrs%2fresolver-binding-android-arm-eabi/1.12.2",
+        "integrity": "sha512-g5T90pqg1bo/7mytQx6F4iBNC0Wsh9cu+z9veDbFjc7HjpesJFWD7QMS0NGStXM075+7dJPPVvBbpZlnrdpi/w==",
+        "gitHead": "ccb26d205e2938b16069c64a28996b48ee97ff94"
+      },
+      "notices": ["unrs-resolver-1.12.2-license"],
+      "revision": "ccb26d205e2938b16069c64a28996b48ee97ff94",
+      "note": "Native package wrapper/project notices. This does not certify the complete component list or source obligations of the compiled native binary."
+    },
+    {
+      "name": "@unrs/resolver-binding-android-arm64",
+      "version": "1.12.2",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/@unrs%2fresolver-binding-android-arm64/1.12.2",
+        "integrity": "sha512-YGCRZv/9GLhwmz6mYDeTsm/92BAyR28l6c2ReweVW5pWgfsitWLY8upvfRlGdoyD8HjeTHSYJWyZGD4KJA/nFQ==",
+        "gitHead": "ccb26d205e2938b16069c64a28996b48ee97ff94"
+      },
+      "notices": ["unrs-resolver-1.12.2-license"],
+      "revision": "ccb26d205e2938b16069c64a28996b48ee97ff94",
+      "note": "Native package wrapper/project notices. This does not certify the complete component list or source obligations of the compiled native binary."
+    },
+    {
+      "name": "@unrs/resolver-binding-darwin-arm64",
+      "version": "1.12.2",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/@unrs%2fresolver-binding-darwin-arm64/1.12.2",
+        "integrity": "sha512-u9DiNT1auQMO20A9SyTuG3wUgQWB9Z7KjAg0uFuCDR1FsAY8A0CG2S6JpHS1xwm/w1G08bjXZDcyOCjv1WAm2w==",
+        "gitHead": "ccb26d205e2938b16069c64a28996b48ee97ff94"
+      },
+      "notices": ["unrs-resolver-1.12.2-license"],
+      "revision": "ccb26d205e2938b16069c64a28996b48ee97ff94",
+      "note": "Native package wrapper/project notices. This does not certify the complete component list or source obligations of the compiled native binary."
+    },
+    {
+      "name": "@unrs/resolver-binding-darwin-x64",
+      "version": "1.12.2",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/@unrs%2fresolver-binding-darwin-x64/1.12.2",
+        "integrity": "sha512-f7rPLi/T1HVKZu/u6t87lroib16n8vrSzcyxI7lg4BGO9UF26KhQL44sd9eOUgrTYhvRXtWOIZT5PejdPyJfUA==",
+        "gitHead": "ccb26d205e2938b16069c64a28996b48ee97ff94"
+      },
+      "notices": ["unrs-resolver-1.12.2-license"],
+      "revision": "ccb26d205e2938b16069c64a28996b48ee97ff94",
+      "note": "Native package wrapper/project notices. This does not certify the complete component list or source obligations of the compiled native binary."
+    },
+    {
+      "name": "@unrs/resolver-binding-freebsd-x64",
+      "version": "1.12.2",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/@unrs%2fresolver-binding-freebsd-x64/1.12.2",
+        "integrity": "sha512-BpcOjWCJub6nRZUS2zA20pmLvjtqAtGejETaIyRLiZiQf++cbrjltLA5NN/xaXfqeOBOSlMFbemIl5/S5tljmg==",
+        "gitHead": "ccb26d205e2938b16069c64a28996b48ee97ff94"
+      },
+      "notices": ["unrs-resolver-1.12.2-license"],
+      "revision": "ccb26d205e2938b16069c64a28996b48ee97ff94",
+      "note": "Native package wrapper/project notices. This does not certify the complete component list or source obligations of the compiled native binary."
+    },
+    {
+      "name": "@unrs/resolver-binding-linux-arm-gnueabihf",
+      "version": "1.12.2",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/@unrs%2fresolver-binding-linux-arm-gnueabihf/1.12.2",
+        "integrity": "sha512-vZTDvdSISZjJx66OzJqtsOhzifbqRjbmI1Mnu49fQDwog5GtDI4QidRiEAYbZCRj9C8YZEW+3ZjqsyS9GR4k2A==",
+        "gitHead": "ccb26d205e2938b16069c64a28996b48ee97ff94"
+      },
+      "notices": ["unrs-resolver-1.12.2-license"],
+      "revision": "ccb26d205e2938b16069c64a28996b48ee97ff94",
+      "note": "Native package wrapper/project notices. This does not certify the complete component list or source obligations of the compiled native binary."
+    },
+    {
+      "name": "@unrs/resolver-binding-linux-arm-musleabihf",
+      "version": "1.12.2",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/@unrs%2fresolver-binding-linux-arm-musleabihf/1.12.2",
+        "integrity": "sha512-BiPI+IrIlwcW4nLLMM21+B1dFPzd55yAVgVGrdgDjNef+ch03GdxrcyaIz8X9SsQirh/kCQ7mviyWlMxdh2D7g==",
+        "gitHead": "ccb26d205e2938b16069c64a28996b48ee97ff94"
+      },
+      "notices": ["unrs-resolver-1.12.2-license"],
+      "revision": "ccb26d205e2938b16069c64a28996b48ee97ff94",
+      "note": "Native package wrapper/project notices. This does not certify the complete component list or source obligations of the compiled native binary."
+    },
+    {
+      "name": "@unrs/resolver-binding-linux-arm64-gnu",
+      "version": "1.12.2",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/@unrs%2fresolver-binding-linux-arm64-gnu/1.12.2",
+        "integrity": "sha512-zJc0H99FEPoFfSrNpa91HYfxzfAJCr502oxNK1cfdC9hlaFI43RT+JFCann9JUgZmLzzntChHyn13Sgn9ljHNg==",
+        "gitHead": "ccb26d205e2938b16069c64a28996b48ee97ff94"
+      },
+      "notices": ["unrs-resolver-1.12.2-license"],
+      "revision": "ccb26d205e2938b16069c64a28996b48ee97ff94",
+      "note": "Native package wrapper/project notices. This does not certify the complete component list or source obligations of the compiled native binary."
+    },
+    {
+      "name": "@unrs/resolver-binding-linux-arm64-musl",
+      "version": "1.12.2",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/@unrs%2fresolver-binding-linux-arm64-musl/1.12.2",
+        "integrity": "sha512-KQ3Lki6l+Pz1k/eBipN41ES+YUK30beLGb9YqcB1O542cyLCNE6GaxrfcY3T6EezmGGk84wb5XyO9loTM9tkcA==",
+        "gitHead": "ccb26d205e2938b16069c64a28996b48ee97ff94"
+      },
+      "notices": ["unrs-resolver-1.12.2-license"],
+      "revision": "ccb26d205e2938b16069c64a28996b48ee97ff94",
+      "note": "Native package wrapper/project notices. This does not certify the complete component list or source obligations of the compiled native binary."
+    },
+    {
+      "name": "@unrs/resolver-binding-linux-loong64-gnu",
+      "version": "1.12.2",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/@unrs%2fresolver-binding-linux-loong64-gnu/1.12.2",
+        "integrity": "sha512-3SJGEh1DborhG6pyxvhPzCT4bbSIVihsvgJc13P1bHG7KLdNDaF9T3gsTwFc7Jw/5Y5/iWOjkEx7Zy0NvCGX3Q==",
+        "gitHead": "ccb26d205e2938b16069c64a28996b48ee97ff94"
+      },
+      "notices": ["unrs-resolver-1.12.2-license"],
+      "revision": "ccb26d205e2938b16069c64a28996b48ee97ff94",
+      "note": "Native package wrapper/project notices. This does not certify the complete component list or source obligations of the compiled native binary."
+    },
+    {
+      "name": "@unrs/resolver-binding-linux-loong64-musl",
+      "version": "1.12.2",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/@unrs%2fresolver-binding-linux-loong64-musl/1.12.2",
+        "integrity": "sha512-jiuG/Obbel7uw1PwHNFfrkiKhLAF6mnyZ6aWlOAVN9WqKm8v0OFGnciJIHu8+CMvXLQ8AD51LPzAoUfT21D5Ew==",
+        "gitHead": "ccb26d205e2938b16069c64a28996b48ee97ff94"
+      },
+      "notices": ["unrs-resolver-1.12.2-license"],
+      "revision": "ccb26d205e2938b16069c64a28996b48ee97ff94",
+      "note": "Native package wrapper/project notices. This does not certify the complete component list or source obligations of the compiled native binary."
+    },
+    {
+      "name": "@unrs/resolver-binding-linux-ppc64-gnu",
+      "version": "1.12.2",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/@unrs%2fresolver-binding-linux-ppc64-gnu/1.12.2",
+        "integrity": "sha512-q7xRvVpmcfeL+LlZg8Pbbo6QaTZwDU5BaGZbwfhkEsXJn3Was8xYfE0RBH266xZt0rM6B7i8xAYIvjthuUIWHg==",
+        "gitHead": "ccb26d205e2938b16069c64a28996b48ee97ff94"
+      },
+      "notices": ["unrs-resolver-1.12.2-license"],
+      "revision": "ccb26d205e2938b16069c64a28996b48ee97ff94",
+      "note": "Native package wrapper/project notices. This does not certify the complete component list or source obligations of the compiled native binary."
+    },
+    {
+      "name": "@unrs/resolver-binding-linux-riscv64-gnu",
+      "version": "1.12.2",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/@unrs%2fresolver-binding-linux-riscv64-gnu/1.12.2",
+        "integrity": "sha512-0CVdx6lcnT3Q9inOH8tsMIOJ6ImndllMjqJHg8RLVdB7Vq4SfkEXl9mCSsVNuNA4MCYycRicCUxPCabVHJRr6A==",
+        "gitHead": "ccb26d205e2938b16069c64a28996b48ee97ff94"
+      },
+      "notices": ["unrs-resolver-1.12.2-license"],
+      "revision": "ccb26d205e2938b16069c64a28996b48ee97ff94",
+      "note": "Native package wrapper/project notices. This does not certify the complete component list or source obligations of the compiled native binary."
+    },
+    {
+      "name": "@unrs/resolver-binding-linux-riscv64-musl",
+      "version": "1.12.2",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/@unrs%2fresolver-binding-linux-riscv64-musl/1.12.2",
+        "integrity": "sha512-iOwlRo9vnp6R6ohHQS11n0NnfdXx/omhkocmIfaPRpQhKZ+3BDMkkdRVh53qjkFkpPddf+FETA28NwGN7l5l+w==",
+        "gitHead": "ccb26d205e2938b16069c64a28996b48ee97ff94"
+      },
+      "notices": ["unrs-resolver-1.12.2-license"],
+      "revision": "ccb26d205e2938b16069c64a28996b48ee97ff94",
+      "note": "Native package wrapper/project notices. This does not certify the complete component list or source obligations of the compiled native binary."
+    },
+    {
+      "name": "@unrs/resolver-binding-linux-s390x-gnu",
+      "version": "1.12.2",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/@unrs%2fresolver-binding-linux-s390x-gnu/1.12.2",
+        "integrity": "sha512-HYJtLfXq94q8iZNFT1lknx258wlkkWhZeUXJRqzKBBUJ00CvZ+N33zgbCqimLjsyw5Va6uUxhVa12mI+kaveEw==",
+        "gitHead": "ccb26d205e2938b16069c64a28996b48ee97ff94"
+      },
+      "notices": ["unrs-resolver-1.12.2-license"],
+      "revision": "ccb26d205e2938b16069c64a28996b48ee97ff94",
+      "note": "Native package wrapper/project notices. This does not certify the complete component list or source obligations of the compiled native binary."
+    },
+    {
+      "name": "@unrs/resolver-binding-linux-x64-gnu",
+      "version": "1.12.2",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/@unrs%2fresolver-binding-linux-x64-gnu/1.12.2",
+        "integrity": "sha512-mPsUhunKKDih5O96Y6enDQyHc1SqBPlY1E/SfMWDM3EdJ95Z9CArPeCVwCCqbP45ljvivdEk8Fxn+SIb1rDAJQ==",
+        "gitHead": "ccb26d205e2938b16069c64a28996b48ee97ff94"
+      },
+      "notices": ["unrs-resolver-1.12.2-license"],
+      "revision": "ccb26d205e2938b16069c64a28996b48ee97ff94",
+      "note": "Native package wrapper/project notices. This does not certify the complete component list or source obligations of the compiled native binary."
+    },
+    {
+      "name": "@unrs/resolver-binding-linux-x64-musl",
+      "version": "1.12.2",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/@unrs%2fresolver-binding-linux-x64-musl/1.12.2",
+        "integrity": "sha512-azrt6+5ydLd8Vt210AAFis/lZevSfPw93EJRIJG+xPu4WCJ8K0kppCTpMyLPcKT7H15M4Jnt2tMp5bOvCkRC6A==",
+        "gitHead": "ccb26d205e2938b16069c64a28996b48ee97ff94"
+      },
+      "notices": ["unrs-resolver-1.12.2-license"],
+      "revision": "ccb26d205e2938b16069c64a28996b48ee97ff94",
+      "note": "Native package wrapper/project notices. This does not certify the complete component list or source obligations of the compiled native binary."
+    },
+    {
+      "name": "@unrs/resolver-binding-openharmony-arm64",
+      "version": "1.12.2",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/@unrs%2fresolver-binding-openharmony-arm64/1.12.2",
+        "integrity": "sha512-YZ9hP4O0X9PQb8eO980qmLNGH4zT3I9+SZTdt0Pr0YyuGQhYKoOZkV02VzrzyOZJ5xIJ3UFIenKkUkGg8GjgWQ==",
+        "gitHead": "ccb26d205e2938b16069c64a28996b48ee97ff94"
+      },
+      "notices": ["unrs-resolver-1.12.2-license"],
+      "revision": "ccb26d205e2938b16069c64a28996b48ee97ff94",
+      "note": "Native package wrapper/project notices. This does not certify the complete component list or source obligations of the compiled native binary."
+    },
+    {
+      "name": "@unrs/resolver-binding-wasm32-wasi",
+      "version": "1.12.2",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/@unrs%2fresolver-binding-wasm32-wasi/1.12.2",
+        "integrity": "sha512-tYFDIkMxSflfEc/h92ZWNsZlHSwgimbNHSO3PL2JWQHfCuC2q316jMyYU9TIWZsFK2bQwyK5VAdYgn8ygPj69A==",
+        "gitHead": "ccb26d205e2938b16069c64a28996b48ee97ff94"
+      },
+      "notices": ["unrs-resolver-1.12.2-license"],
+      "revision": "ccb26d205e2938b16069c64a28996b48ee97ff94",
+      "note": "Native package wrapper/project notices. This does not certify the complete component list or source obligations of the compiled native binary."
+    },
+    {
+      "name": "@unrs/resolver-binding-win32-arm64-msvc",
+      "version": "1.12.2",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/@unrs%2fresolver-binding-win32-arm64-msvc/1.12.2",
+        "integrity": "sha512-qzNyg3xL0VPQmCaUh+N5jSitce6k+uCBfMDesWRnlULOZaqUkaJ0ybdT+UqlAWJoQjuqfIU/0Ptx9bteN4D82g==",
+        "gitHead": "ccb26d205e2938b16069c64a28996b48ee97ff94"
+      },
+      "notices": ["unrs-resolver-1.12.2-license"],
+      "revision": "ccb26d205e2938b16069c64a28996b48ee97ff94",
+      "note": "Native package wrapper/project notices. This does not certify the complete component list or source obligations of the compiled native binary."
+    },
+    {
+      "name": "@unrs/resolver-binding-win32-ia32-msvc",
+      "version": "1.12.2",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/@unrs%2fresolver-binding-win32-ia32-msvc/1.12.2",
+        "integrity": "sha512-WD9sY00OfpHVGfsnHZoA8jVT+esS/Bg8z8jzxp5BnDCjjwsuKsPQrzswwpFy4J1AUJbXPRfkpcX0mXrzeXW79g==",
+        "gitHead": "ccb26d205e2938b16069c64a28996b48ee97ff94"
+      },
+      "notices": ["unrs-resolver-1.12.2-license"],
+      "revision": "ccb26d205e2938b16069c64a28996b48ee97ff94",
+      "note": "Native package wrapper/project notices. This does not certify the complete component list or source obligations of the compiled native binary."
+    },
+    {
+      "name": "@unrs/resolver-binding-win32-x64-msvc",
+      "version": "1.12.2",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/@unrs%2fresolver-binding-win32-x64-msvc/1.12.2",
+        "integrity": "sha512-nAB74NfSNKknqQ1RrYj6uz8FcXEomu/MATJZxh/x+BArzN2U3JbOYC0APYzUIGhVY3m5hRxA8VPNdPBoG8txlA==",
+        "gitHead": "ccb26d205e2938b16069c64a28996b48ee97ff94"
+      },
+      "notices": ["unrs-resolver-1.12.2-license"],
+      "revision": "ccb26d205e2938b16069c64a28996b48ee97ff94",
+      "note": "Native package wrapper/project notices. This does not certify the complete component list or source obligations of the compiled native binary."
+    },
+    {
+      "name": "client-only",
+      "version": "0.0.1",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/client-only/0.0.1",
+        "integrity": "sha512-IV3Ou0jSMzZrd3pZ48nLkT9DA7Ag1pnPzaiQhpW7c3RbcqqzvzzVu+L8gfqMp/8IM2MQtSiqaCxrrcfu8I8rMA=="
+      },
+      "notices": [
+        "spdx-mit-reference",
+        "client-only-0.0.1-package-json",
+        "client-only-0.0.1-index-js",
+        "client-only-0.0.1-error-js"
+      ],
+      "copyrightStatus": "not supplied upstream",
+      "note": "The exact npm release declares MIT but supplies no copyright notice, LICENSE file, repository or gitHead. Its complete readable source and manifest are preserved. SPDX's unchanged MIT template is a reference for the declared terms, not an original notice or an attribution to React, Meta, Vercel or the npm publisher.",
+      "verifyFiles": [
+        {
+          "file": "package.json",
+          "sha256": "4d6342705767832f299b9a59c28e4275bcf02db19472732f93f67d979441df8f"
+        },
+        {
+          "file": "index.js",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "file": "error.js",
+          "sha256": "7d211552731db17e1ff8635eea0970ef57ecc91b04b95536b9fa5abbfafaec26"
+        }
+      ],
+      "archiveSha256": "dcd7bc3868e2d3518d08944559952e4a68f581d89a84b6892de9fd8f40860b19"
+    },
+    {
+      "name": "eslint-config-next",
+      "version": "16.4.2",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/eslint-config-next/16.4.2",
+        "integrity": "sha512-P33vjcETMXc+qBjpF77TeJHZLzk6cPcTy8KjpxLucYB3mCIFIORMcZ+cBXcAiIYjE5RM7jyknEEOwMNdnx/ADQ=="
+      },
+      "notices": ["next-16.4.2-license"],
+      "revision": "2864b1772c37242a9b40ab4d366eb7d368c2a070",
+      "releaseTag": "v16.4.2"
+    },
+    {
+      "name": "esrecurse",
+      "version": "4.3.0",
+      "license": "BSD-2-Clause",
+      "registry": {
+        "url": "https://registry.npmjs.org/esrecurse/4.3.0",
+        "integrity": "sha512-KmfKL3b6G+RXvP8N1vr3Tq1kL/oCFgn2NYXEtqP8/L3pKapUA4G8cFVaoF3SU323CD4XypR/ffioHmkti6/Tag==",
+        "gitHead": "8ceb63797813d9ac69572a671b95cf58ffdf35b6"
+      },
+      "notices": ["esrecurse-4.3.0-header"],
+      "revision": "8ceb63797813d9ac69572a671b95cf58ffdf35b6",
+      "verifyFiles": [
+        {
+          "file": "esrecurse.js",
+          "sha256": "aa99847033c240a621fe987f0e06b754f388f22abd11a05bdf9cdd00794b7350"
+        }
+      ]
+    },
+    {
+      "name": "imurmurhash",
+      "version": "0.1.4",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/imurmurhash/0.1.4",
+        "integrity": "sha512-JmXMZ6wuvDmLiHEml9ykzqO6lwFbof0GG4IkcGaENdCRDDmMVnny7s5HsIgHCbaq0w2MyPhDqkhTUgS2LU2PHA=="
+      },
+      "notices": ["imurmurhash-0.1.4-license"],
+      "revision": "9f40361c7e2835a9b7b8eaa1cbab2a9f94ee22a2",
+      "releaseTag": "0.1.4"
+    },
+    {
+      "name": "keyv",
+      "version": "4.5.4",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/keyv/4.5.4",
+        "integrity": "sha512-oxVHkHR/EJf2CNXnWxRLW6mg7JyCCUcG0DtEGmL2ctUo1PNTin1PUil+r/+4r5MpVgC/fn1kjsx7mjSujKqIpw=="
+      },
+      "notices": ["keyv-4.5.4-license"],
+      "revision": "e4d608eccdfc094b80f6e9545c5307ee0810af72",
+      "note": "Official version-bump commit and package manifest identify keyv 4.5.4; the repository root supplies its complete MIT notices. This version is an extra directory in the installed pnpm store, absent from the current lockfile (which uses keyv 5.6.0). The official npm archive SHA-512 and every extracted package file were checked byte-for-byte; the inventory does not claim this extra is locked or used.",
+      "archiveSha256": "eb26f1c561e57af4a4365e6b54f5f3e745e3963747a93845af1f000a747b6098",
+      "verifyFiles": [
+        {
+          "file": "README.md",
+          "sha256": "c39e1b3f735bb9302eb3cbd84aeb48c4311db64381f9e0a1aa4a61ddf59ce890"
+        },
+        {
+          "file": "package.json",
+          "sha256": "e8afd30f2f2a40ef5023928b50fdaed3a3338aa7e1c4e86205413afb05e8a099"
+        },
+        {
+          "file": "src/index.d.ts",
+          "sha256": "42baf4ca38c38deaf411ea73f37bc39ff56c6e5c761a968b64ac1b25c92b5cd8"
+        },
+        {
+          "file": "src/index.js",
+          "sha256": "4987708b4b13159c654c09d239bd0c439533b0b792a6fd4e8769d8a509ad4da6"
+        }
+      ],
+      "scope": "installed-tree-only"
+    },
+    {
+      "name": "language-subtag-registry",
+      "version": "0.3.23",
+      "license": "CC0-1.0",
+      "registry": {
+        "url": "https://registry.npmjs.org/language-subtag-registry/0.3.23",
+        "integrity": "sha512-0K65Lea881pHotoGEa5gDlMxt3pctLi2RplBb7Ezh4rRdLEOtgi7n4EwK9lamnUCkKBqaeKRVebTq6BAxSkpXQ==",
+        "gitHead": "1e7d67e7f9646f47f0766a04b08522f7df59e932"
+      },
+      "notices": ["language-subtag-registry-0.3.23-readme", "cc0-1.0-legalcode"],
+      "revision": "1e7d67e7f9646f47f0766a04b08522f7df59e932",
+      "note": "The exact README applies CC0-1.0 to the JSON database and links Creative Commons' official legal code. The complete terms are preserved without adding copyright ownership."
+    },
+    {
+      "name": "language-tags",
+      "version": "1.0.9",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/language-tags/1.0.9",
+        "integrity": "sha512-MbjN408fEndfiQXbFQ1vnd+1NoLDsnQW41410oQBXiyXDMYH5z505juWa4KUE1LqxRC7DgOgZDbKLxHIwm27hA==",
+        "gitHead": "ea5aa61e53ced2a18e35783ff00bb2a533f6c77d"
+      },
+      "notices": ["language-tags-1.0.9-readme", "language-tags-author-mit-license"],
+      "revision": "ea5aa61e53ced2a18e35783ff00bb2a533f6c77d",
+      "note": "The exact release README retains its 2013 copyright notice and links the author's MIT license service. The current full text at that link is an unmodified dated snapshot, not a replacement of the original 2013 notice."
+    },
+    {
+      "name": "natural-compare",
+      "version": "1.4.0",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/natural-compare/1.4.0",
+        "integrity": "sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==",
+        "gitHead": "eec83eee67cfac84d6db30cdd65363f155673770"
+      },
+      "notices": ["natural-compare-1.4.0-readme", "natural-compare-author-mit-license"],
+      "revision": "eec83eee67cfac84d6db30cdd65363f155673770",
+      "note": "The exact README retains Copyright (c) 2012-2015 Lauri Rooden and links the author's complete MIT terms. Both original attribution and unmodified linked terms are retained."
+    },
+    {
+      "name": "server-only",
+      "version": "0.0.1",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/server-only/0.0.1",
+        "integrity": "sha512-qepMx2JxAa5jjfzxG79yPPq+8BuFToHd1hm7kI+Z4zAq1ftQiP7HcxMhDDItrbtwVeLg/cY2JnKnrcFkmiswNA=="
+      },
+      "notices": [
+        "spdx-mit-reference",
+        "server-only-0.0.1-package-json",
+        "server-only-0.0.1-index-js",
+        "server-only-0.0.1-empty-js"
+      ],
+      "copyrightStatus": "not supplied upstream",
+      "note": "The exact npm release declares MIT but supplies no copyright notice, LICENSE file, repository or gitHead. Its complete readable source and manifest are preserved. SPDX's unchanged MIT template is a reference for the declared terms, not an original notice or an attribution to React, Meta, Vercel or the npm publisher.",
+      "verifyFiles": [
+        {
+          "file": "package.json",
+          "sha256": "e4b0cc01e2e0349c51c694fa97d8a642eb8322521ca1444b20bd1842594b4339"
+        },
+        {
+          "file": "index.js",
+          "sha256": "2c4720b71eb03e5f75a83d43e6fd83c0446aa172a58a4d6ffbd74ecad72ba7b5"
+        },
+        {
+          "file": "empty.js",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "archiveSha256": "1e4047892103e8f81503c99fb88ad47394b8438088c999e683ae2e6987145271"
+    },
+    {
+      "name": "stable-hash",
+      "version": "0.0.5",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/stable-hash/0.0.5",
+        "integrity": "sha512-+L3ccpzibovGXFK+Ap/f8LOS0ahMrHTf3xu7mMLSpEGU0EO9ucaysSylKo9eRDFNhWve/y275iPmIZ4z39a9iA==",
+        "gitHead": "1b314f2cc3e9449bc8d49e417670175cf9afd42a"
+      },
+      "notices": ["stable-hash-0.0.5-readme", "spdx-mit-reference"],
+      "revision": "1b314f2cc3e9449bc8d49e417670175cf9afd42a",
+      "copyrightStatus": "not supplied upstream",
+      "note": "The exact README states Created by Shu Ding. Released under the MIT License. No separate copyright statement or LICENSE is supplied at the release revision. The author statement is retained verbatim; the unchanged SPDX MIT template supplies reference terms without inventing a copyright year or holder."
+    },
+    {
+      "name": "unrs-resolver",
+      "version": "1.12.2",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/unrs-resolver/1.12.2",
+        "integrity": "sha512-dmlRxBJJayXjqTwC+JtF1HhJmgf3ftQ3YejFcZrf4+KKtJv0qDsK1pjqaaVjG7wJ5NJ6UVP1OqRMQ71Z4C3rxQ==",
+        "gitHead": "ccb26d205e2938b16069c64a28996b48ee97ff94"
+      },
+      "notices": ["unrs-resolver-1.12.2-license"],
+      "revision": "ccb26d205e2938b16069c64a28996b48ee97ff94"
+    }
+  ]
+}

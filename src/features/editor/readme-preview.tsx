@@ -23,6 +23,7 @@ import { remarkCustomHtml } from "./remark-custom-html";
 import { remarkPreviewHeadings } from "./remark-preview-headings";
 import { CodePreview } from "./code-preview";
 import { readGeneratedCodeSource } from "./code-preview-source";
+import { ActivityCardPreview } from "./activity-card-preview";
 
 const PreviewImagesContext = createContext<{
   customImages: readonly CustomImageSource[];
@@ -133,11 +134,7 @@ export function ReadmePreview({
                     {children}
                   </blockquote>
                 ),
-                a: ({ href, children }) => (
-                  <a href={href} target="_blank" rel="noopener noreferrer">
-                    {children}
-                  </a>
-                ),
+                a: PreviewLink,
               }}
             >
               {markdown}
@@ -191,14 +188,16 @@ const PreviewImage: Components["img"] = ({ src, alt }) => {
       : null;
   if (card)
     return (
-      <Image
+      <ActivityCardPreview
+        key={
+          "username" in card
+            ? `profile:${card.username}:${card.card}`
+            : `resource:${card.kind}:${card.target}`
+        }
         src={card.localUrl}
+        href={src as string}
         alt={alt ?? ""}
         width={card.appearance?.width ?? (card.appearance?.size === "wide" ? 1000 : 700)}
-        height={260}
-        unoptimized
-        referrerPolicy="no-referrer"
-        className="block h-auto max-w-full rounded-lg"
       />
     );
   const country = typeof src === "string" ? findCountryByIconUrl(src) : undefined;
@@ -238,6 +237,24 @@ const PreviewImage: Components["img"] = ({ src, alt }) => {
       }
     />
   ) : null;
+};
+
+const PreviewLink: Components["a"] = ({ href, children, node }) => {
+  const { activityCardBaseUrl } = useContext(PreviewImagesContext);
+  const image = node?.children.length === 1 ? node.children[0] : undefined;
+  const card =
+    href && image?.type === "element" && image.tagName === "img" && image.properties.src === href
+      ? (parseActivityCardUrl(href, activityCardBaseUrl) ??
+        parseResourceCardUrl(href, activityCardBaseUrl))
+      : null;
+  // The card owns its image link and retry control; avoid nesting a button inside this link.
+  return card ? (
+    <span className="block max-w-full min-w-0">{children}</span>
+  ) : (
+    <a href={href} target="_blank" rel="noopener noreferrer">
+      {children}
+    </a>
+  );
 };
 
 const PreviewParagraph: Components["p"] = ({ node, children }) => {

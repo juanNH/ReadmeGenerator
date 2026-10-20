@@ -2,3 +2,5 @@
 *.woff2 binary
 *.png binary
 *.ico binary
+# Preserve original bytes and whitespace in third-party license and notice texts.
+public/licenses/** -text -whitespace

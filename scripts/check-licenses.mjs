@@ -9,6 +9,7 @@ const modules = path.join(root, "node_modules");
 const write = process.argv.includes("--write");
 const publicFile = path.join(root, "public/licenses/dependencies.txt");
 const reportFile = path.join(root, "work/oss/dependency-licenses.json");
+const sourceCatalogFile = path.join(root, "scripts/license-sources.json");
 const problems = [];
 const warnings = [];
 const packageRoots = new Set();
@@ -17,6 +18,109 @@ const noticeName =
 const compare = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
 const relative = (target) => path.relative(root, target).split(path.sep).join("/");
 const hash = (source) => createHash("sha256").update(source).digest("hex");
+
+async function reviewedSources(lockfile) {
+  const catalog = JSON.parse(await readFile(sourceCatalogFile, "utf8"));
+  if (
+    catalog.schemaVersion !== 1 ||
+    !Array.isArray(catalog.sources) ||
+    !Array.isArray(catalog.packages)
+  )
+    throw new Error("Invalid reviewed license source catalog.");
+  const sources = new Map();
+  for (const source of catalog.sources) {
+    if (
+      typeof source.id !== "string" ||
+      sources.has(source.id) ||
+      !/^public\/licenses\/supplemental\/[a-z\d][a-z\d.-]*\.txt$/.test(source.file) ||
+      !/^[a-f\d]{64}$/.test(source.sha256) ||
+      !["upstream-notice", "upstream-context", "reference-license"].includes(source.kind) ||
+      !source.url?.startsWith("https://")
+    )
+      throw new Error(`Invalid reviewed license source: ${source.id}`);
+    const text = await optionalRead(path.join(root, source.file));
+    if (text === undefined || hash(text) !== source.sha256)
+      problems.push(`Reviewed source missing or changed: ${source.file}`);
+    sources.set(source.id, { ...source, text: text ?? "" });
+  }
+  const packages = new Map();
+  for (const entry of catalog.packages) {
+    const key = `${entry.name}@${entry.version}`;
+    if (
+      !entry.name ||
+      !entry.version ||
+      !entry.license ||
+      packages.has(key) ||
+      !Array.isArray(entry.notices) ||
+      !entry.notices.length ||
+      entry.notices.some((id) => !sources.has(id)) ||
+      typeof entry.registry?.integrity !== "string"
+    )
+      throw new Error(`Invalid reviewed license package: ${key}`);
+    // The committed lockfile ties each resolution to the exact official npm
+    // artifact reviewed. A future version or platform name needs its own record.
+    const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const integrity = lockfile.match(
+      new RegExp(
+        `^  ['\"]?${escapedKey}['\"]?:\\r?\\n    resolution: \\{integrity: ([^}\\s,]+)`,
+        "m",
+      ),
+    )?.[1];
+    if (integrity !== undefined && integrity !== entry.registry.integrity)
+      problems.push(`Reviewed package integrity differs from lockfile: ${key}`);
+    packages.set(key, {
+      ...entry,
+      reviewedAt: catalog.reviewedAt,
+      lockfileIntegrity: integrity,
+      sources: entry.notices.map((id) => sources.get(id)),
+    });
+  }
+  return packages;
+}
+
+async function attachReviewedNotices(entry, directory, reviews) {
+  const key = `${entry.name}@${entry.version}`;
+  const review = reviews.get(key);
+  if (!review) {
+    const message = `${key}: no bundled root notice or exact-version reviewed source; resolve its upstream notices before distribution.`;
+    warnings.push(message);
+    problems.push(message);
+    return;
+  }
+  if (review.license !== entry.license)
+    problems.push(`Reviewed source license differs from installed package: ${key}`);
+  if (review.lockfileIntegrity === undefined && review.scope !== "installed-tree-only")
+    problems.push(`Reviewed installed package is absent from lockfile: ${key}`);
+  if (
+    review.scope === "installed-tree-only" &&
+    (!review.verifyFiles?.length || !/^[a-f\d]{64}$/.test(review.archiveSha256))
+  )
+    problems.push(`Installed extra requires exact archive and extracted-file evidence: ${key}`);
+  for (const expected of review.verifyFiles ?? []) {
+    if (!/^[a-z\d][a-z\d./-]*$/i.test(expected.file) || expected.file.split("/").includes(".."))
+      throw new Error(`Unsafe reviewed package file: ${key}/${expected.file}`);
+    const text = await optionalRead(path.join(directory, expected.file));
+    if (text === undefined || hash(text) !== expected.sha256)
+      problems.push(
+        `Reviewed upstream context differs from installed package: ${key}/${expected.file}`,
+      );
+  }
+  const { sources, ...metadata } = review;
+  delete metadata.verifyFiles;
+  delete metadata.lockfileIntegrity;
+  entry.noticeReview = metadata;
+  for (const source of sources) {
+    entry.notices.push({
+      file: source.file,
+      sha256: source.sha256,
+      text: source.text,
+      origin: source.kind,
+      sourceUrl: source.url,
+      ...(source.upstreamFile ? { upstreamFile: source.upstreamFile } : {}),
+      ...(source.extraction ? { extraction: source.extraction } : {}),
+    });
+  }
+}
 
 async function optionalRead(file) {
   try {
@@ -214,6 +318,8 @@ async function main() {
   if (process.argv.slice(2).some((argument) => argument !== "--write"))
     throw new Error("Usage: node scripts/check-licenses.mjs [--write]");
   const manifest = JSON.parse(await readFile(path.join(root, "package.json"), "utf8"));
+  const lockfile = await readFile(path.join(root, "pnpm-lock.yaml"), "utf8");
+  const reviews = await reviewedSources(lockfile);
   await stat(modules);
   await checkOwnedNotices(manifest);
   await collectModuleDirectory(modules);
@@ -280,18 +386,17 @@ async function main() {
     compare(`${a.name}@${a.version}`, `${b.name}@${b.version}`),
   );
   for (const entry of entries) {
-    entry.notices.sort((a, b) => compare(a.file, b.file));
     if (!entry.notices.some((notice) => !notice.file.includes("/"))) {
-      warnings.push(
-        `${entry.name}@${entry.version}: upstream package has no root license/notice file; inspect its declared license and source before redistributing it.`,
-      );
+      const directory = path.dirname(path.join(root, entry.manifests[0]));
+      await attachReviewedNotices(entry, directory, reviews);
     }
+    entry.notices.sort((a, b) => compare(a.file, b.file));
   }
   const report = {
     scope:
       "Installed pnpm tree, including development and platform-specific packages; not an artifact or compatibility audit.",
     platform: `${process.platform}-${process.arch}`,
-    lockfileSha256: hash(await readFile(path.join(root, "pnpm-lock.yaml"))),
+    lockfileSha256: hash(lockfile),
     packages: entries,
     warnings,
     problems,
@@ -307,11 +412,38 @@ async function main() {
         ? `Author metadata: ${typeof entry.author === "string" ? entry.author : JSON.stringify(entry.author)}`
         : "",
       entry.contributors ? `Contributors metadata: ${JSON.stringify(entry.contributors)}` : "",
+      entry.noticeReview
+        ? `Reviewed notice sources: scripts/license-sources.json (${entry.noticeReview.reviewedAt})`
+        : "",
+      entry.noticeReview ? `Official npm release: ${entry.noticeReview.registry.url}` : "",
+      entry.noticeReview ? `Official npm integrity: ${entry.noticeReview.registry.integrity}` : "",
+      entry.noticeReview?.archiveSha256
+        ? `Reviewed official npm archive SHA-256: ${entry.noticeReview.archiveSha256}`
+        : "",
+      entry.noticeReview?.scope ? `Review inclusion: ${entry.noticeReview.scope}` : "",
+      entry.noticeReview?.revision
+        ? `Reviewed source revision: ${entry.noticeReview.revision}`
+        : "",
+      entry.noticeReview?.copyrightStatus
+        ? `Copyright notice: ${entry.noticeReview.copyrightStatus} (this does not mean no copyright exists)`
+        : "",
+      entry.noticeReview?.note ? `Review scope: ${entry.noticeReview.note}` : "",
     ]
       .filter(Boolean)
       .join("\n");
     const notices = entry.notices
-      .map((notice) => `--- Upstream file: ${notice.file} ---\n${notice.text}`)
+      .map((notice) =>
+        [
+          `--- ${notice.origin === "reference-license" ? "Reference license terms (not a package-specific copyright notice)" : notice.origin === "upstream-context" ? "Original upstream context" : "Upstream notice"}: ${notice.file} ---`,
+          notice.sourceUrl ? `Official source: ${notice.sourceUrl}` : "",
+          notice.upstreamFile ? `Original archive file: ${notice.upstreamFile}` : "",
+          notice.extraction ? `Extraction: ${notice.extraction}` : "",
+          `SHA-256: ${notice.sha256}`,
+          notice.text,
+        ]
+          .filter((line) => line !== "")
+          .join("\n"),
+      )
       .join("\n\n");
     const fallback =
       notices ||
@@ -327,6 +459,8 @@ async function main() {
     "It preserves discovered upstream license/notice files, including embedded notices.",
     "A package license identifier alone does not prove complete redistribution compliance.",
     "Packages without bundled notices are explicitly identified, not silently relicensed.",
+    "Reviewed companion notices retain exact official source URLs and SHA-256 hashes.",
+    "Reference license templates never supply a missing package copyright attribution.",
     "See docs/open-source.md and THIRD_PARTY_NOTICES.md for scope and release review.",
     "",
     sections.join("\n\n======================================================================\n\n"),
