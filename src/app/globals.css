@@ -1,6 +1,54 @@
 @import "tailwindcss";
 @import "../styles/tokens.css";
 
+.profile-code .tok-keyword,
+.profile-code .tok-typeName,
+.profile-code .tok-className,
+.profile-code .tok-namespace {
+  color: var(--syntax-keyword);
+}
+.profile-code .tok-string,
+.profile-code .tok-string2,
+.profile-code .tok-inserted {
+  color: var(--syntax-string);
+}
+.profile-code .tok-number,
+.profile-code .tok-bool,
+.profile-code .tok-null,
+.profile-code .tok-atom,
+.profile-code .tok-deleted {
+  color: var(--syntax-number);
+}
+.profile-code .tok-comment,
+.profile-code .tok-meta {
+  color: var(--syntax-comment);
+  font-style: italic;
+}
+.profile-code .tok-variableName,
+.profile-code .tok-variableName2,
+.profile-code .tok-propertyName,
+.profile-code .tok-macroName,
+.profile-code .tok-labelName,
+.profile-code .tok-tagName,
+.profile-code .tok-attributeName {
+  color: var(--syntax-variable);
+}
+.profile-code .tok-heading {
+  color: var(--syntax-keyword);
+  font-weight: 600;
+}
+.profile-code .tok-emphasis {
+  font-style: italic;
+}
+.profile-code .tok-strong {
+  font-weight: 700;
+}
+.profile-code .tok-link,
+.profile-code .tok-url {
+  color: var(--syntax-variable);
+  text-decoration: underline;
+}
+
 @layer base {
   * {
     border-color: var(--border);

@@ -81,7 +81,21 @@
     "countrySuggestions": "Country suggestions",
     "countrySelected": "{name} selected. Its flag will appear in your README.",
     "countryNoResults": "No matching countries. You can keep this as your own location.",
-    "locationPlaceholder": "Argentina"
+    "locationPlaceholder": "Argentina",
+    "format": {
+      "options": "Visual format",
+      "help": "Choose the size and alignment of your introduction. These choices also apply to your exported README; GitHub may display it differently.",
+      "alignment": "Alignment",
+      "level": "Heading size",
+      "heading1": "Large heading (H1)",
+      "heading2": "Medium heading (H2)",
+      "heading3": "Small heading (H3)",
+      "left": "Left",
+      "center": "Center",
+      "right": "Right",
+      "reset": "Reset presentation format",
+      "invalid": "This formatted text exceeds the HTML output limits. Shorten it or use left alignment. Your writing has been kept."
+    }
   },
   "contact": {
     "description": "Add only the links you want to share publicly.",
@@ -119,6 +133,11 @@
     "importMemoryHelp": "This imported profile is available only in this tab. Open Import README to download the previous profile and the original README. Download your work before reloading or closing this page."
   },
   "preview": {
+    "codePlain": "Plain text",
+    "codeRegion": "Code block: {language}",
+    "copyCode": "Copy code",
+    "codeCopied": "Code copied",
+    "codeCopyError": "Could not copy. Select the code and copy it manually.",
     "title": "Preview & export",
     "description": "The same content goes into your copied and downloaded README. GitHub may display spacing and typography differently.",
     "fileLabel": "Live preview",
@@ -137,7 +156,8 @@
     "empty": "Choose a section and add at least some text or a link to enable copy and download.",
     "unsupported": "This draft includes a visible section this editor cannot export yet. The saved content has been kept, but export is unavailable for this draft.",
     "invalidLinks": "Check the highlighted links before copying or downloading. Use Review fields in your sections to open the affected settings. No content has been removed.",
-    "invalidHtml": "Review the highlighted HTML blocks before copying or downloading. Open their settings with Review fields to see what needs attention.",
+    "invalidHtml": "Review the highlighted HTML or formatted text before copying or downloading. Open its settings with Review fields to see what needs attention.",
+    "invalidCode": "Review the highlighted code blocks before copying or downloading. Check their source length and language in Review fields.",
     "invalidImages": "Check the highlighted image addresses. Use a direct, public HTTPS URL and Review fields to open its settings.",
     "missingImageDescription": "Add a description to the highlighted images so everyone can understand them. Use Review fields to open their settings.",
     "invalidUsername": "Check the GitHub username in Activity & contributions, or exclude the GitHub cards to export your writing.",
@@ -157,5 +177,11 @@
     "title": "Bring it to your GitHub profile",
     "instructions": "In a public repository named exactly like your GitHub username, place README.md at the root. Paste your copied text or upload the downloaded file. Review it before publishing.",
     "guide": "Read GitHub’s profile README guide"
+  },
+  "reset": {
+    "action": "Clear README",
+    "confirmation": "Clear all content from the current README, including hidden sections? You will start with an empty profile. This cannot be undone. Your previous import backup will be kept.",
+    "cleared": "Your README is empty. Choose a section to start again.",
+    "memoryOnly": "The current README was cleared in memory. The saved draft is protected or the browser could not save the change; reloading may restore the previous draft."
   }
 }

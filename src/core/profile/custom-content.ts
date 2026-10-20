@@ -1,5 +1,10 @@
 import { z } from "zod";
 
+export const customTextAlignmentSchema = z.enum(["left", "center", "right"]);
+export const customHeadingLevelSchema = z.union([z.literal(1), z.literal(2), z.literal(3)]);
+export type CustomTextAlignment = z.infer<typeof customTextAlignmentSchema>;
+export type CustomHeadingLevel = z.infer<typeof customHeadingLevelSchema>;
+
 /** IDs are opaque authored-document identities, not DOM IDs or required UUIDs. */
 export const customEntryIdSchema = z.string().refine((id) => id.trim().length > 0, {
   params: { profileCode: "invalid_id" },
@@ -32,6 +37,7 @@ export const customBlockSchema = z.discriminatedUnion("type", [
     id: customEntryIdSchema,
     type: z.literal("paragraph"),
     text: z.string(),
+    alignment: customTextAlignmentSchema.optional(),
   }),
   z.strictObject({
     id: customEntryIdSchema,
@@ -49,6 +55,8 @@ export const customBlockSchema = z.discriminatedUnion("type", [
     id: customEntryIdSchema,
     type: z.literal("heading"),
     text: z.string(),
+    level: customHeadingLevelSchema.optional(),
+    alignment: customTextAlignmentSchema.optional(),
   }),
   z.strictObject({
     id: customEntryIdSchema,
@@ -70,11 +78,19 @@ export const customBlockSchema = z.discriminatedUnion("type", [
     type: z.literal("html"),
     source: z.string(),
   }),
+  z.strictObject({
+    id: customEntryIdSchema,
+    type: z.literal("code"),
+    source: z.string(),
+    language: z.string(),
+  }),
 ]);
 
 export const customSectionSchema = z.strictObject({
   id: customEntryIdSchema,
   title: z.string(),
+  titleLevel: customHeadingLevelSchema.optional(),
+  titleAlignment: customTextAlignmentSchema.optional(),
   visible: z.boolean(),
   blocks: uniqueEntries(customBlockSchema),
 });

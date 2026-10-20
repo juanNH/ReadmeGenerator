@@ -2,6 +2,7 @@ import type { Definition, Nodes, Root, RootContent } from "mdast";
 import { unified } from "unified";
 import remarkParse from "remark-parse";
 import remarkGfm from "remark-gfm";
+import { normalizeCodeLanguage } from "../code";
 import type { CustomBlock, CustomSection } from "../profile/custom-content";
 import { createEmptyProfile } from "../profile/profile-operations";
 import type { ContentLocale, ProfileDocument } from "../profile/profile-schema";
@@ -129,7 +130,13 @@ function analyzeSegment(
     if (node.type === "listItem" && typeof node.checked === "boolean") {
       problem("unsupported_format", node, "task_list");
     }
-    if (node.type === "code" && (node.lang || node.meta)) notice("code_metadata_removed", node);
+    if (
+      node.type === "code" &&
+      (node.meta ||
+        (node.lang && (groupedHtml || !content.some((entry) => entry === node))) ||
+        normalizeCodeLanguage(node.lang ?? "") === null)
+    )
+      notice("code_metadata_removed", node);
     if (node.type === "linkReference" || node.type === "imageReference") {
       notice("references_resolved", node);
       if (!definitionFor(node, definitions))
@@ -167,12 +174,21 @@ function analyzeSegment(
     }
   }
 
-  if (containsHtml || groupedHtml) {
+  function codeBlock(node: Extract<RootContent, { type: "code" }>): void {
+    blocks.push({
+      id: nextBlockId(),
+      type: "code",
+      source: node.value,
+      language: normalizeCodeLanguage(node.lang ?? "") ?? "",
+    });
+  }
+
+  function retainHtml(nodes: readonly RootContent[]): void {
     // Keep raw sources intact when they are already HTML. Mixed fragments are converted together,
     // including all reference definitions, so containers cannot be broken at guessed headings.
     const onlyRawHtml =
-      content.length > 0 &&
-      content.every(
+      nodes.length > 0 &&
+      nodes.every(
         (node) =>
           node.type === "html" ||
           // Blank lines can make remark wrap inline image links in a paragraph. Keeping
@@ -182,8 +198,8 @@ function analyzeSegment(
               (child) => child.type === "html" || (child.type === "text" && !child.value.trim()),
             )),
       );
-    const firstOffset = content[0]?.position?.start.offset;
-    const lastOffset = content.at(-1)?.position?.end.offset;
+    const firstOffset = nodes[0]?.position?.start.offset;
+    const lastOffset = nodes.at(-1)?.position?.end.offset;
     const hasDefinitionBetween = segment.nodes.some(
       (node) =>
         node.type === "definition" &&
@@ -194,9 +210,29 @@ function analyzeSegment(
       onlyRawHtml && firstOffset !== undefined && lastOffset !== undefined && !hasDefinitionBetween
         ? source.slice(firstOffset, lastOffset)
         : undefined;
-    htmlBlock(content, original);
+    htmlBlock(nodes, original);
+  }
+
+  if (groupedHtml) {
+    retainHtml(content);
+  } else if (containsHtml) {
+    // Independent fenced blocks retain their language even beside explicit HTML. An open
+    // HTML container is handled above as one fragment so its semantics are never guessed.
+    let pending: RootContent[] = [];
+    for (const node of content) {
+      if (node.type === "code") {
+        if (pending.length) retainHtml(pending);
+        pending = [];
+        codeBlock(node);
+      } else pending.push(node);
+    }
+    if (pending.length) retainHtml(pending);
   } else {
     for (const node of content) {
+      if (node.type === "code") {
+        codeBlock(node);
+        continue;
+      }
       const blockId = nextBlockId();
       if (node.type === "paragraph" && plainText(node) !== null) {
         blocks.push({ id: blockId, type: "paragraph", text: plainText(node)! });

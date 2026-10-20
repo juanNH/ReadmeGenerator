@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { createEmptyProfile } from "@/core/profile/profile-operations";
 import type { ContentLocale, ProfileDocument } from "@/core/profile/profile-schema";
 import { parseProfileDocument } from "@/core/profile/profile-validation";
 import { readProfileDraft, writeProfileDraft, type ProfileDraftReadResult } from "./draft-storage";
@@ -13,11 +12,20 @@ import {
   type ImportBackup,
   type ImportBackupReadResult,
 } from "./import-backup";
+import { clearProfileDraft } from "./clear-profile-draft";
+import {
+  createDraftState,
+  reduceDraft,
+  type DraftState,
+  type DraftAction,
+  type ProfileDraftStorageStatus,
+  type ImportBackupStatus,
+} from "./profile-draft-state";
 
-export type ProfileDraftStorageStatus =
-  "new" | "restored" | "saving" | "saved" | "invalid" | "unavailable";
+export type { ProfileDraftStorageStatus, ImportBackupStatus } from "./profile-draft-state";
 
-export type ImportBackupStatus = "loading" | ImportBackupReadResult["status"];
+export type ClearReadmeResult = { status: "saved" | "memory_only" | "not_ready" };
+
 export type ImportOperationResult =
   | { status: "saved" }
   | { status: "memory_only" }
@@ -25,125 +33,9 @@ export type ImportOperationResult =
   | { status: "invalid" }
   | { status: "not_ready" };
 
-type DraftState = {
-  document: ProfileDocument;
-  hydration: "loading" | "ready";
-  storageStatus: ProfileDraftStorageStatus;
-  recoveryBlocked: boolean;
-  dirty: boolean;
-  revision: number;
-  importBackup: ImportBackup | null;
-  importBackupStatus: ImportBackupStatus;
-  importMemoryOnly: boolean;
-};
-
 // Written only from client effects and events. Keeps unsaved work across navigation in this tab,
 // including locale changes, but cannot survive a full reload when browser storage fails.
 let inMemoryDraft: DraftState | null = null;
-
-type DraftAction =
-  | { type: "hydrated"; result: ProfileDraftReadResult; backup: ImportBackupReadResult }
-  | { type: "resumed"; state: DraftState }
-  | { type: "updated"; document: ProfileDocument }
-  | { type: "persisted"; revision: number; success: boolean }
-  | { type: "backup_available"; backup: ImportBackup }
-  | {
-      type: "replaced";
-      document: ProfileDocument;
-      backup: ImportBackup;
-      memoryOnly: boolean;
-    }
-  | { type: "restarted" };
-
-function createDraftState(initialLocale: ContentLocale): DraftState {
-  return {
-    document: createEmptyProfile(initialLocale),
-    hydration: "loading",
-    storageStatus: "new",
-    recoveryBlocked: false,
-    dirty: false,
-    revision: 0,
-    importBackup: null,
-    importBackupStatus: "loading",
-    importMemoryOnly: false,
-  };
-}
-
-function reduceDraft(state: DraftState, action: DraftAction): DraftState {
-  switch (action.type) {
-    case "resumed":
-      return state.hydration === "loading" ? action.state : state;
-    case "hydrated": {
-      if (state.hydration !== "loading") return state;
-      const { result } = action;
-      return {
-        ...state,
-        document: result.status === "restored" ? result.document : state.document,
-        hydration: "ready",
-        storageStatus: result.status === "empty" ? "new" : result.status,
-        recoveryBlocked: result.status === "invalid" || result.status === "unavailable",
-        importBackup: action.backup.status === "available" ? action.backup.backup : null,
-        importBackupStatus: action.backup.status,
-      };
-    }
-    case "updated": {
-      if (state.hydration !== "ready" || action.document === state.document) return state;
-      const canSave =
-        !state.recoveryBlocked && !state.importMemoryOnly && state.storageStatus !== "unavailable";
-      return {
-        ...state,
-        document: action.document,
-        dirty: canSave,
-        revision: state.revision + 1,
-        storageStatus: canSave ? "saving" : state.storageStatus,
-      };
-    }
-    case "persisted":
-      if (
-        state.revision !== action.revision ||
-        !state.dirty ||
-        state.recoveryBlocked ||
-        state.importMemoryOnly
-      ) {
-        return state;
-      }
-      return {
-        ...state,
-        dirty: false,
-        storageStatus: action.success ? "saved" : "unavailable",
-      };
-    case "backup_available":
-      return { ...state, importBackup: action.backup, importBackupStatus: "available" };
-    case "replaced":
-      return {
-        ...state,
-        document: action.document,
-        importBackup: action.backup,
-        importBackupStatus: "available",
-        importMemoryOnly: action.memoryOnly,
-        dirty: false,
-        revision: state.revision + 1,
-        // A memory-only import never grants permission to overwrite protected recovery data.
-        recoveryBlocked: action.memoryOnly ? state.recoveryBlocked : false,
-        storageStatus: action.memoryOnly
-          ? state.recoveryBlocked
-            ? state.storageStatus
-            : "unavailable"
-          : "saved",
-      };
-    case "restarted":
-      if (state.hydration !== "ready") return state;
-      return {
-        ...state,
-        document: createEmptyProfile(state.document.contentLocale),
-        recoveryBlocked: false,
-        dirty: true,
-        revision: state.revision + 1,
-        storageStatus: "saving",
-        importMemoryOnly: false,
-      };
-  }
-}
 
 function rememberDraft(state: DraftState) {
   inMemoryDraft =
@@ -211,6 +103,8 @@ export type ProfileDraft = {
   ) => ImportOperationResult;
   /** The caller confirms restoration; the recovery record itself stays intact. */
   restoreImportBackup: (allowMemoryOnly?: boolean) => ImportOperationResult;
+  /** The caller confirms clearing the active README; protected storage and backups remain intact. */
+  clearReadme: () => ClearReadmeResult;
   /** Call only after the user confirms replacement of their existing draft. */
   startNewDraft: () => void;
 };
@@ -377,6 +271,19 @@ export function useProfileDraft(initialLocale: ContentLocale): ProfileDraft {
     return { status: allowMemoryOnly ? "memory_only" : "saved" };
   }
 
+  function clearReadme(): ClearReadmeResult {
+    const latest = latestState.current;
+    if (latest.hydration !== "ready") return { status: "not_ready" };
+    const result = clearProfileDraft(
+      latest.document.contentLocale,
+      () => window.localStorage,
+      latest.recoveryBlocked || latest.importMemoryOnly || latest.storageStatus === "unavailable",
+    );
+    // Update the synchronous flush snapshot before the caller can navigate or hide the page.
+    applyDraftAction(latestState, setState, { type: "cleared", result });
+    return { status: result.status };
+  }
+
   return {
     document: state.document,
     updateDocument: (document) =>
@@ -389,6 +296,7 @@ export function useProfileDraft(initialLocale: ContentLocale): ProfileDraft {
     importMemoryOnly: state.importMemoryOnly,
     replaceWithImport,
     restoreImportBackup,
+    clearReadme,
     startNewDraft: () => applyDraftAction(latestState, setState, { type: "restarted" }),
   };
 }

@@ -1,6 +1,7 @@
 "use client";
 
-import { createContext, useContext } from "react";
+import { createContext, createElement, useContext, type ReactNode } from "react";
+import type { Element } from "hast";
 import ReactMarkdown, { type Components } from "react-markdown";
 import Image from "next/image";
 import { FileText, PenLine } from "lucide-react";
@@ -18,12 +19,16 @@ import { wrapNamedTechnologyLabels } from "./named-technology-labels";
 import { PublicProfileImage } from "./public-profile-image";
 import { ProfileHtmlPreview } from "./profile-html-preview";
 import { remarkCustomHtml } from "./remark-custom-html";
+import { remarkPreviewHeadings } from "./remark-preview-headings";
+import { CodePreview } from "./code-preview";
+import { readGeneratedCodeSource } from "./code-preview-source";
 
 const PreviewImagesContext = createContext<{
   customImages: readonly CustomImageSource[];
   customHtml: readonly CustomHtmlFragment[];
   activityCardBaseUrl?: string;
-}>({ customImages: [], customHtml: [] });
+  markdown: string;
+}>({ customImages: [], customHtml: [], markdown: "" });
 type ReadmePreviewProps = {
   markdown: string | null;
   contentLocale: ContentLocale;
@@ -67,10 +72,16 @@ export function ReadmePreview({
           aria-label={t("documentLabel")}
           className="min-h-72 p-6 text-sm leading-7 wrap-anywhere sm:p-8 [&_a]:text-accent [&_a]:underline [&_a]:underline-offset-4 [&_li]:pl-1 [&_ol]:my-4 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:my-4 [&_strong]:font-semibold [&_ul]:my-4 [&_ul]:list-disc [&_ul]:pl-5"
         >
-          <PreviewImagesContext.Provider value={{ customImages, customHtml, activityCardBaseUrl }}>
+          <PreviewImagesContext.Provider
+            value={{ customImages, customHtml, activityCardBaseUrl, markdown }}
+          >
             <ReactMarkdown
               skipHtml
-              remarkPlugins={[[remarkCustomHtml, { fragments: customHtml }], remarkProfileIcons]}
+              remarkPlugins={[
+                [remarkCustomHtml, { fragments: customHtml }],
+                [remarkPreviewHeadings, { fragments: customHtml }],
+                remarkProfileIcons,
+              ]}
               allowedElements={[
                 "h1",
                 "h2",
@@ -87,23 +98,33 @@ export function ReadmePreview({
                 "hr",
                 "blockquote",
                 "div",
+                "pre",
+                "code",
               ]}
               components={{
                 img: PreviewImage,
                 p: PreviewParagraph,
                 div: PreviewHtmlSlot,
-                h1: ({ children }) => (
-                  <h3 className="mt-1 mb-5 border-b border-border pb-4 text-2xl leading-tight font-semibold tracking-tight">
+                pre: PreviewCodeBlock,
+                code: ({ children }) => (
+                  <code className="rounded bg-surface-raised px-1 font-mono text-[0.9em]">
                     {children}
-                  </h3>
+                  </code>
                 ),
-                h2: ({ children }) => (
-                  <h3 className="mt-6 mb-3 text-lg leading-7 font-semibold tracking-tight">
+                h1: ({ children, node }) => (
+                  <PreviewHeading depth={1} node={node}>
                     {children}
-                  </h3>
+                  </PreviewHeading>
                 ),
-                h3: ({ children }) => (
-                  <h4 className="mt-5 mb-3 text-base font-semibold">{children}</h4>
+                h2: ({ children, node }) => (
+                  <PreviewHeading depth={2} node={node}>
+                    {children}
+                  </PreviewHeading>
+                ),
+                h3: ({ children, node }) => (
+                  <PreviewHeading depth={3} node={node}>
+                    {children}
+                  </PreviewHeading>
                 ),
                 hr: () => <hr className="my-6 border-0 border-t border-border" />,
                 blockquote: ({ children }) => (
@@ -135,6 +156,25 @@ export function ReadmePreview({
       )}
     </div>
   );
+}
+
+function PreviewHeading({
+  depth,
+  node,
+  children,
+}: {
+  depth: 1 | 2 | 3;
+  node?: Element;
+  children?: ReactNode;
+}) {
+  const level = node?.properties.dataProfileHeadingLevel === "4" ? 4 : 3;
+  const className =
+    depth === 1
+      ? "mt-1 mb-5 border-b border-border pb-4 text-2xl leading-tight font-semibold tracking-tight"
+      : depth === 2
+        ? "mt-6 mb-3 text-lg leading-7 font-semibold tracking-tight"
+        : "mt-5 mb-3 text-base font-semibold";
+  return createElement(`h${level}`, { className }, children);
 }
 
 // Stable paragraph and image component identities preserve load failures across unrelated edits.
@@ -215,4 +255,27 @@ const PreviewHtmlSlot: Components["div"] = ({ node }) => {
   if (typeof index !== "string" || !/^\d+$/.test(index)) return null;
   const fragment = customHtml[Number(index)];
   return fragment ? <ProfileHtmlPreview fragment={fragment} /> : null;
+};
+
+const PreviewCodeBlock: Components["pre"] = ({ node, children }) => {
+  const { markdown } = useContext(PreviewImagesContext);
+  const code = node?.children.find((child) => child.type === "element" && child.tagName === "code");
+  if (!code || code.type !== "element") return <pre className="overflow-auto">{children}</pre>;
+  const classes = code.properties.className;
+  const language =
+    (Array.isArray(classes) ? classes : [])
+      .find((value): value is string => typeof value === "string" && value.startsWith("language-"))
+      ?.slice("language-".length) ?? "";
+  const parsedSource = code.children
+    .map((child) => (child.type === "text" ? child.value : ""))
+    .join("")
+    .replace(/\n$/, "");
+  const source =
+    readGeneratedCodeSource(
+      markdown,
+      node?.position?.start.offset,
+      node?.position?.end.offset,
+      language,
+    ) ?? parsedSource;
+  return <CodePreview source={source} language={language} />;
 };

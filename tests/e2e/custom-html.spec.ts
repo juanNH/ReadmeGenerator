@@ -1,4 +1,4 @@
-import { showSectionOrganizer } from "./editor-test-helpers";
+import { fillCodeSource, showSectionOrganizer } from "./editor-test-helpers";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 import { readFile } from "node:fs/promises";
@@ -215,7 +215,7 @@ test("HTML errors focus the code field and hidden blocks preserve invalid URLs w
     `<img src="${imageOrigin}/never-request.svg">`,
     "<details><p>A summary is missing</p></details>",
   ]) {
-    await code.fill(invalid);
+    await fillCodeSource(code, invalid);
     await expect(code).toHaveAttribute("aria-invalid", "true");
     await expect(page.getByRole("button", { name: "Download README", exact: true })).toBeDisabled();
     await expect(page.getByRole("list", { name: "HTML problems", exact: true })).not.toBeEmpty();
@@ -235,7 +235,7 @@ test("HTML errors focus the code field and hidden blocks preserve invalid URLs w
   expect(await downloadReadme(page)).not.toContain("details");
   await showSectionOrganizer(page);
   await page.getByRole("checkbox", { name: "My corner", exact: true, includeHidden: true }).check();
-  await code.fill("<p>Now valid.</p>");
+  await fillCodeSource(code, "<p>Now valid.</p>");
   await expect(page.getByRole("button", { name: "Download README", exact: true })).toBeEnabled();
   expect(requests).toEqual([]);
 });
@@ -258,10 +258,10 @@ test("failed linked HTML images avoid nested links and recover after changing th
   await expect(preview.getByRole("link", { name: /My notes/ })).toHaveCount(1);
   expect(await downloadReadme(page)).toContain("missing.svg");
   const requestsBeforeEdit = missingRequests;
-  await code.fill(broken.replace("Keep going.", "Keep writing."));
+  await fillCodeSource(code, broken.replace("Keep going.", "Keep writing."));
   await expect(preview.getByText("Keep writing.", { exact: true })).toBeVisible();
   expect(missingRequests).toBe(requestsBeforeEdit);
-  await code.fill(broken.replace("missing.svg", "recovered.svg"));
+  await fillCodeSource(code, broken.replace("missing.svg", "recovered.svg"));
   const image = preview.getByRole("img", { name: "My notes", exact: true });
   await expect
     .poll(() =>

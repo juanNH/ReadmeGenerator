@@ -10,7 +10,7 @@ La documentación de GitHub Profile Generator describe el producto, el estado di
 | [Desarrollo](development.md)                                                              | Preparación del entorno, comandos, rutas y registro de validación.                   |
 | [Arquitectura](architecture.md)                                                           | Responsabilidades, límites y actividad pública opcional de GitHub.                   |
 | [Modelo del perfil](profile-model.md)                                                     | Contrato v2, orden mixto, compatibilidad v1 y operaciones del núcleo.                |
-| [Editor](editor.md)                                                                       | Bloques visuales y HTML explícito, imágenes públicas, exportación y borrador local.  |
+| [Editor](editor.md)                                                                       | Bloques visuales, HTML, código, formato, importación y respaldo del borrador.        |
 | [Kit de diseño](design-system.md)                                                         | Herramienta interna, tokens, componentes y criterios de accesibilidad.               |
 | [Trabajo con IA](ai-development.md)                                                       | Contexto, delegación y revisión de cambios asistidos.                                |
 | [Decisión inicial](decisions/0001-architecture.md)                                        | Contexto y consecuencias de las decisiones de arquitectura de la base.               |
@@ -30,7 +30,9 @@ La documentación de GitHub Profile Generator describe el producto, el estado di
 | [Navegación superior y herramientas](decisions/0016-top-navigation-and-internal-tools.md) | Organización plegable, acceso móvil a campos y kit solo en desarrollo.               |
 | [Fila horizontal de secciones](decisions/0017-horizontal-section-navigation.md)           | Secciones permanentes, orden horizontal y desplazamiento dentro de la fila.          |
 | [Importación con respaldo](decisions/0018-readme-import-with-backup.md)                   | Análisis local, revisión, HTML compatible y reemplazo explícito recuperable.         |
-| [Recursos de terceros](../THIRD_PARTY_NOTICES.md)                                         | Procedencia y licencias de iconos y banderas locales.                                |
+| [Código y formato propios](decisions/0019-code-and-formatting.md)                         | Fuente literal, lenguajes, editor local y alineación con HTML derivado permitido.    |
+| [Formato de Presentación](decisions/0020-presentation-formatting.md)                      | Niveles y alineación opcionales, compatibilidad v1/v2 y HTML derivado compartido.    |
+| [Recursos de terceros](../THIRD_PARTY_NOTICES.md)                                         | Procedencia y licencias de iconos, banderas y editor de código.                      |
 | [Contribuir](../CONTRIBUTING.md)                                                          | Flujo de trabajo, expectativas para cambios y pull requests.                         |
 
 Para conocer la propuesta, empezá por producto. Para trabajar en el código, seguí desarrollo, revisá la arquitectura y acordá un objetivo de contribución concreto.

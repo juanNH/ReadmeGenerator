@@ -1,0 +1,14 @@
+{
+  "codeMode": "Editor de código",
+  "plainMode": "Texto simple",
+  "wrap": "Ajustar líneas",
+  "indent": "Agregar sangría a la selección",
+  "outdent": "Quitar sangría",
+  "loading": "Cargando el resaltado. Podés seguir escribiendo.",
+  "loadError": "No se pudo cargar el resaltado. Podés seguir editando como texto simple.",
+  "keyboardHelp": "Tab va al siguiente control. Usá los botones de sangría o Ctrl+] y Ctrl+[. En Mac, usá ⌘ en lugar de Ctrl.",
+  "plainHelp": "Texto simple usa un campo de texto estándar. Ambos modos editan la misma fuente.",
+  "htmlLabel": "Código HTML",
+  "codeLabel": "Código fuente",
+  "scrollRegion": "Área desplazable del editor de código"
+}

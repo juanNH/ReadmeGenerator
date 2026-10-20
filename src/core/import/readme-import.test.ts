@@ -144,14 +144,20 @@ describe("README import formatting and global context", () => {
     );
   });
 
-  it("converts tables, code, hard breaks, nested lists and non-1 list starts through allowed HTML", () => {
+  it("converts complex structures through HTML while preserving fenced code and its language", () => {
     const { analysis, result } = imported(
       "## Examples\n\n| Name | Value |\n| :--- | ---: |\n| Tool | 1 |\n\n```ts extra\nconst text = '<script>unsafe()</script>';\n- not a list\n```\n\nLine one  \nLine two\n\n- Parent\n  - Nested\n\n7. Seven\n8. Eight",
     );
     expect(result.readme.markdown).toContain("<table>");
-    expect(result.readme.markdown).toContain("<pre><code>");
-    expect(result.readme.markdown).toContain("&#x3C;script>");
-    expect(result.readme.markdown).not.toContain("<script>");
+    expect(result.readme.markdown).toContain(
+      "```typescript\nconst text = '<script>unsafe()</script>';",
+    );
+    expect(result.document.customSections[0]?.blocks).toContainEqual(
+      expect.objectContaining({ type: "code", language: "typescript" }),
+    );
+    expect(result.readme.customHtml?.every((fragment) => !fragment.html.includes("<script>"))).toBe(
+      true,
+    );
     expect(result.readme.markdown).toContain("<br>");
     expect(result.readme.markdown).toContain('<ol start="7">');
     expect(result.readme.markdown).toContain("Nested");

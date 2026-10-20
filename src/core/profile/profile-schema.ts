@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { moduleIds } from "../modules/module-ids";
-import { moduleContentSchemas } from "./module-content";
+import { moduleContentSchemas, moduleContentV1Schemas } from "./module-content";
 import { customEntryIdSchema, customSectionsSchema } from "./custom-content";
 
 export const contentLocaleSchema = z.enum(["en", "es"]);
@@ -44,7 +44,7 @@ const visibilitySchema = z.strictObject({
 export const profileDocumentV1Schema = z.strictObject({
   schemaVersion: z.literal(1),
   contentLocale: contentLocaleSchema,
-  data: z.strictObject(moduleContentSchemas),
+  data: z.strictObject(moduleContentV1Schemas),
   moduleOrder: moduleOrderSchema,
   visibility: visibilitySchema,
 });

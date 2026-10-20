@@ -18,6 +18,7 @@ const pickerNames = [
   "Add divider",
   "Add highlighted quote",
   "Add image / banner",
+  "Add code",
   "Add HTML",
 ];
 
@@ -45,13 +46,13 @@ async function storedProfile(page: Page): Promise<ProfileDocument> {
   return page.evaluate((key) => JSON.parse(localStorage.getItem(key) ?? "null"), draftKey);
 }
 
-test("all nine block cards keep their names and keyboard order, and a divider keeps focus when moved or removed", async ({
+test("all ten block cards keep their names and keyboard order, and a divider keeps focus when moved or removed", async ({
   page,
 }) => {
   const profile = visualProfile();
   await openEditor(page, profile);
   const picker = page.getByRole("group", { name: "Add section content", exact: true });
-  await expect(picker.getByRole("button")).toHaveCount(9);
+  await expect(picker.getByRole("button")).toHaveCount(10);
   await expect(picker.getByRole("button").first()).toHaveAccessibleName("Add text");
   await picker.getByRole("button", { name: pickerNames[0], exact: true }).focus();
   for (const [index, name] of pickerNames.entries()) {

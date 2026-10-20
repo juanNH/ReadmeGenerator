@@ -71,3 +71,63 @@ En total, el catálogo de tecnologías incluye 358 entradas y 358 SVG locales. B
 La ampliación incorpora frameworks, bibliotecas, ORMs, autenticación, plataformas de datos, infraestructura y herramientas de IA con identidades verificables en las colecciones fijadas. La clasificación es una sugerencia editorial modificable; no representa un ranking de uso, una recomendación técnica ni un nivel de habilidad.
 
 Las familias y funciones se contrastaron con documentación primaria, entre ellas [Drizzle ORM](https://orm.drizzle.team/docs/overview), [TypeORM](https://typeorm.io/docs/getting-started/), [Knex.js](https://knexjs.org/), [TanStack](https://tanstack.com/), [Hono](https://hono.dev/), [Pydantic](https://docs.pydantic.dev/latest/), [Better Auth](https://better-auth.com/docs/introduction), [Qdrant](https://qdrant.tech/documentation/) y [Temporal](https://docs.temporal.io/). El catálogo mantiene las rutas y contenidos de los iconos existentes. No se inventan logotipos para herramientas ausentes de las fuentes admitidas; siguen disponibles como texto propio.
+
+## CodeMirror y Lezer: edición y resaltado de código
+
+La aplicación utiliza [CodeMirror 6](https://github.com/codemirror/dev) para la edición de fuentes y [Lezer](https://github.com/lezer-parser/highlight) para análisis y resaltado local. Los paquetes directos y versiones exactas constan en `package.json`; el árbol completo está fijado en `pnpm-lock.yaml`. Incluye state, view, language, commands, gramáticas HTML/JavaScript/JSON/Python/Markdown/PHP, modos heredados seleccionados y highlight. Se cargan en el navegador bajo demanda; no envían la fuente a un servicio.
+
+Estos paquetes se distribuyen bajo licencia MIT por Marijn Haverbeke y otros colaboradores. Cada paquete instalado conserva su archivo `LICENSE` con los avisos y condiciones completos; las licencias también se publican en sus repositorios oficiales. La instalación no altera el período mínimo de antigüedad de paquetes del repositorio. El resaltado no modifica la licencia del contenido que escribe una persona ni la política del HTML admitido.
+
+### Avisos MIT conservados
+
+CodeMirror (`@codemirror/*`), copiado del paquete fijado:
+
+```text
+MIT License
+
+Copyright (C) 2018-2021 by Marijn Haverbeke <marijn@haverbeke.berlin> and others
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+```
+
+Lezer (`@lezer/highlight`), copiado del paquete fijado:
+
+```text
+MIT License
+
+Copyright (C) 2018 by Marijn Haverbeke <marijn@haverbeke.berlin> and others
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+```

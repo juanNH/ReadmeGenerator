@@ -4,6 +4,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { AlignLeft, ArrowDown, ArrowUp, ChevronDown, Plus, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
+import { CodeEditor, type CodeEditorHandle } from "@/components/ui/code-editor";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -17,6 +18,15 @@ import {
   PROFILE_HTML_MAX_NODES,
 } from "@/core/readme/profile-html";
 import { CustomBlockPicker, type AddBlockKind } from "./custom-block-picker";
+import { CodeBlockFields } from "./code-block-fields";
+import { CustomFormatFields } from "./custom-format-fields";
+import {
+  changeCustomTextAlignment,
+  changeCustomTextKind,
+  changeCustomTitleAlignment,
+  changeCustomTitleLevel,
+  getCustomTextKind,
+} from "./custom-text-formatting";
 
 type ListBlock = Extract<CustomBlock, { type: "list" }>;
 type ParagraphBlock = Extract<CustomBlock, { type: "paragraph" }>;
@@ -56,6 +66,7 @@ export function CustomSectionForm({ value, errors, onChange }: CustomSectionForm
   const t = useTranslations("EditorModules.custom");
   const baseId = useId();
   const controls = useRef(new Map<string, TextControl>());
+  const codeControls = useRef(new Map<string, CodeEditorHandle>());
   const headings = useRef(new Map<string, HTMLHeadingElement>());
   const itemControls = useRef(new Map<string, Map<string, TextControl>>());
   const composingParagraphs = useRef(new Map<string, boolean>());
@@ -75,12 +86,15 @@ export function CustomSectionForm({ value, errors, onChange }: CustomSectionForm
           ? headings.current.get(request.blockId)
           : request.kind === "item"
             ? itemControls.current.get(request.blockId)?.get(request.itemId)
-            : (controls.current.get(request.blockId) ?? headings.current.get(request.blockId));
+            : (controls.current.get(request.blockId) ??
+              codeControls.current.get(request.blockId) ??
+              headings.current.get(request.blockId));
     control?.focus();
     if (
       (request.kind === "item" || request.kind === "block") &&
       request.selection &&
-      (control instanceof HTMLInputElement || control instanceof HTMLTextAreaElement)
+      control &&
+      "setSelectionRange" in control
     ) {
       control.setSelectionRange(request.selection.start, request.selection.end);
     }
@@ -91,6 +105,13 @@ export function CustomSectionForm({ value, errors, onChange }: CustomSectionForm
     return (control: TextControl | null) => {
       if (control) controls.current.set(blockId, control);
       else controls.current.delete(blockId);
+    };
+  }
+
+  function codeControlRef(blockId: string) {
+    return (control: CodeEditorHandle | null) => {
+      if (control) codeControls.current.set(blockId, control);
+      else codeControls.current.delete(blockId);
     };
   }
 
@@ -135,9 +156,11 @@ export function CustomSectionForm({ value, errors, onChange }: CustomSectionForm
                   ? "imageLabel"
                   : block.type === "html"
                     ? "htmlLabel"
-                    : block.style === "ordered"
-                      ? "orderedLabel"
-                      : "unorderedLabel";
+                    : block.type === "code"
+                      ? "codeLabel"
+                      : block.style === "ordered"
+                        ? "orderedLabel"
+                        : "unorderedLabel";
     return t(key, { number: index + 1 });
   }
 
@@ -152,9 +175,16 @@ export function CustomSectionForm({ value, errors, onChange }: CustomSectionForm
             ? { id, type: "image", url: "", alt: "" }
             : kind === "html"
               ? { id, type: "html", source: "" }
-              : kind === "link"
-                ? { id, type: "link", label: "", url: "" }
-                : { id, type: "list", style: kind, items: [{ id: crypto.randomUUID(), text: "" }] };
+              : kind === "code"
+                ? { id, type: "code", source: "", language: "" }
+                : kind === "link"
+                  ? { id, type: "link", label: "", url: "" }
+                  : {
+                      id,
+                      type: "list",
+                      style: kind,
+                      items: [{ id: crypto.randomUUID(), text: "" }],
+                    };
     pendingFocus.current = { kind: "block", blockId: id };
     setPickerOpen(false);
     onChange({ ...value, blocks: [...value.blocks, block] });
@@ -304,13 +334,35 @@ export function CustomSectionForm({ value, errors, onChange }: CustomSectionForm
 
   return (
     <div className="min-w-0 space-y-5">
-      <Field htmlFor={`${baseId}-title`} label={t("title")} description={t("titleHelp")}>
+      <Field
+        htmlFor={`${baseId}-title`}
+        label={t("title")}
+        description={t("titleHelp")}
+        error={
+          errors.some(
+            (error) =>
+              error.code === "invalid_html" &&
+              error.path[0] === "customSections" &&
+              error.path[2] === "title",
+          )
+            ? t("format.tooLong")
+            : undefined
+        }
+      >
         <Input
           value={value.title}
           placeholder={t("titlePlaceholder")}
           onChange={(event) => onChange({ ...value, title: event.target.value })}
         />
       </Field>
+      <CustomFormatFields
+        id={`${baseId}-title-format`}
+        target="title"
+        level={value.titleLevel ?? 2}
+        alignment={value.titleAlignment ?? "left"}
+        onLevelChange={(level) => onChange(changeCustomTitleLevel(value, level))}
+        onAlignmentChange={(alignment) => onChange(changeCustomTitleAlignment(value, alignment))}
+      />
       <div className="min-w-0 space-y-3">
         <Button
           ref={addBlockRef}
@@ -360,6 +412,14 @@ export function CustomSectionForm({ value, errors, onChange }: CustomSectionForm
             error.path[2] === "blocks" &&
             error.path[3] === blockIndex &&
             error.path[4] === "alt",
+        );
+        const textFormatError = errors.some(
+          (error) =>
+            error.code === "invalid_html" &&
+            error.path[0] === "customSections" &&
+            error.path[2] === "blocks" &&
+            error.path[3] === blockIndex &&
+            error.path[4] === "text",
         );
         return (
           <div
@@ -413,7 +473,12 @@ export function CustomSectionForm({ value, errors, onChange }: CustomSectionForm
               </div>
             </div>
             {block.type === "paragraph" && (
-              <Field htmlFor={`${controlId}-text`} label={t("text")} description={t("textHelp")}>
+              <Field
+                htmlFor={`${controlId}-text`}
+                label={t("text")}
+                description={t("textHelp")}
+                error={textFormatError ? t("format.tooLong") : undefined}
+              >
                 <Textarea
                   ref={controlRef(block.id)}
                   value={block.text}
@@ -454,6 +519,7 @@ export function CustomSectionForm({ value, errors, onChange }: CustomSectionForm
                 htmlFor={`${controlId}-text`}
                 label={t(block.type === "heading" ? "subtitle" : "highlightedQuote")}
                 description={t(block.type === "heading" ? "subtitleHelp" : "quoteHelp")}
+                error={textFormatError ? t("format.tooLong") : undefined}
               >
                 <Textarea
                   ref={controlRef(block.id)}
@@ -463,6 +529,18 @@ export function CustomSectionForm({ value, errors, onChange }: CustomSectionForm
                   onChange={(event) => replaceBlock({ ...block, text: event.target.value })}
                 />
               </Field>
+            )}
+            {(block.type === "paragraph" || block.type === "heading") && (
+              <CustomFormatFields
+                id={`${controlId}-format`}
+                target="text"
+                kind={getCustomTextKind(block, value.title)}
+                alignment={block.alignment ?? "left"}
+                onKindChange={(kind) => replaceBlock(changeCustomTextKind(block, kind))}
+                onAlignmentChange={(alignment) =>
+                  replaceBlock(changeCustomTextAlignment(block, alignment))
+                }
+              />
             )}
             {block.type === "divider" && (
               <div className="space-y-3">
@@ -508,7 +586,7 @@ export function CustomSectionForm({ value, errors, onChange }: CustomSectionForm
               <HtmlBlockFields
                 controlId={controlId}
                 source={block.source}
-                inputRef={controlRef(block.id)}
+                inputRef={codeControlRef(block.id)}
                 hasExportError={errors.some(
                   (error) =>
                     error.code === "invalid_html" &&
@@ -527,6 +605,32 @@ export function CustomSectionForm({ value, errors, onChange }: CustomSectionForm
                   };
                   replaceBlock({ ...block, source });
                   setAnnouncement(t("html.exampleApplied"));
+                }}
+              />
+            )}
+            {block.type === "code" && (
+              <CodeBlockFields
+                controlId={controlId}
+                value={block}
+                inputRef={codeControlRef(block.id)}
+                hasSourceError={errors.some(
+                  (error) =>
+                    error.code === "invalid_code" &&
+                    error.path[0] === "customSections" &&
+                    error.path[2] === "blocks" &&
+                    error.path[3] === blockIndex &&
+                    error.path[4] === "source",
+                )}
+                onChange={replaceBlock}
+                onUseExample={(source) => {
+                  if (block.source && !window.confirm(t("code.replaceConfirmation"))) return;
+                  pendingFocus.current = {
+                    kind: "block",
+                    blockId: block.id,
+                    selection: { start: source.length, end: source.length },
+                  };
+                  replaceBlock({ ...block, source, language: "json" });
+                  setAnnouncement(t("code.exampleApplied"));
                 }}
               />
             )}
@@ -677,7 +781,7 @@ export function CustomSectionForm({ value, errors, onChange }: CustomSectionForm
 type HtmlBlockFieldsProps = {
   controlId: string;
   source: string;
-  inputRef: (control: TextControl | null) => void;
+  inputRef: (control: CodeEditorHandle | null) => void;
   hasExportError: boolean;
   onChange: (source: string) => void;
   onUseExample: (source: string) => void;
@@ -717,16 +821,13 @@ function HtmlBlockFields({
               : undefined
         }
       >
-        <Textarea
+        <CodeEditor
           ref={inputRef}
+          aria-label={t("html.code")}
           value={source}
-          rows={8}
-          spellCheck={false}
-          autoCorrect="off"
-          autoCapitalize="off"
+          language="html"
           aria-describedby={describedBy}
-          className="min-h-56 font-mono"
-          onChange={(event) => onChange(event.target.value)}
+          onChange={onChange}
         />
       </Field>
       <p id={`${controlId}-html-count`} className="text-xs leading-5 text-muted-foreground">
@@ -794,8 +895,8 @@ function HtmlBlockFields({
                     </h4>
                     <pre
                       tabIndex={0}
-                      role="region"
-                      aria-labelledby={titleId}
+                      role="group"
+                      aria-label={t("html.exampleCode", { name: title })}
                       className="max-h-52 min-w-0 overflow-auto rounded-md border border-border bg-surface p-3 font-mono text-[11px] leading-5 wrap-anywhere whitespace-pre-wrap text-foreground focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:outline-none"
                     >
                       <code>{exampleSource}</code>
@@ -824,7 +925,7 @@ function HtmlBlockFields({
           <p className="mt-3 text-xs leading-5 text-muted-foreground">{t("html.exportedHelp")}</p>
           <pre
             tabIndex={0}
-            role="region"
+            role="group"
             aria-label={t("html.exported")}
             className="mt-3 max-h-72 min-w-0 overflow-auto rounded-md bg-surface-raised p-3 font-mono text-xs leading-5 wrap-anywhere whitespace-pre-wrap focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:outline-none"
           >

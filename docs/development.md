@@ -107,6 +107,25 @@ Las variables están descritas en [.env.example](../.env.example). Por defecto q
 - `GITHUB_TOKEN`: PAT classic dedicado con únicamente `public_repo`, según la documentación actual de GraphQL. Ese permiso también admite escritura pública; el cliente implementado utiliza exclusivamente consultas constantes. El servidor verifica `X-OAuth-Scopes` en cada respuesta y acepta vacío o exactamente `public_repo`; rechaza otros permisos, mezclas o credenciales no verificables. No acepta tokens con acceso adicional a cuentas, repos privados o contribuciones privadas. No pegar secretos en chats, archivos públicos ni variables `NEXT_PUBLIC_`.
 - `APP_URL`: origen HTTPS público de este despliegue, que alojará los SVG. Se lee por solicitud y basta reiniciar el servicio después de cambiarlo. No se deriva de Host ni admite direcciones locales, credenciales, puertos, rutas, parámetros o fragmentos. Sin origen público, las tarjetas pueden revisarse localmente, pero el generador comunica `exportIssues` y la interfaz impide copiar o descargar esa salida. Excluir las tarjetas permite exportar lo manual.
 
+### Desarrollo y producción
+
+Next.js selecciona el entorno automáticamente: `pnpm dev` usa desarrollo; `pnpm build` y `pnpm start` usan producción, incluso al ejecutarlos en la computadora local. Los archivos de entorno van en la raíz del proyecto.
+
+| Entorno    | Configuración                                                                               | `GITHUB_TOKEN`                                             | `APP_URL`                                                                             |
+| ---------- | ------------------------------------------------------------------------------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| Desarrollo | Copiar `.env.example` como `.env.development.local`.                                        | Guardar el PAT classic dedicado con solo `public_repo`.    | Dejar vacío para consultar y previsualizar localmente.                                |
+| Producción | Variables del hosting; en un servidor propio también se puede usar `.env.production.local`. | Guardar una credencial admitida como secreto del servidor. | Origen HTTPS público real del despliegue, por ejemplo `https://profiles.example.com`. |
+
+Para crear la credencial, seguir la [guía de GitHub para tokens classic](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic) y seleccionar únicamente `public_repo`. Guardarla directamente en el archivo local o en los secretos del hosting; no enviarla por chat ni incluirla en el README. Quienes usen el generador solo ingresan su nombre de usuario: no necesitan crear tokens propios ni iniciar sesión.
+
+Las variables del proceso tienen prioridad sobre los archivos. Después se consulta `.env.development.local` o `.env.production.local`, luego `.env.local`, el archivo `.env.development` o `.env.production` y finalmente `.env`. Para mantener los dos entornos separados, definir ambas claves en el archivo específico y evitar `.env.local` para esta configuración. Los archivos `.env*.local` están excluidos de Git; `.env.example` conserva únicamente claves vacías y explicaciones.
+
+Reiniciar el servicio después de guardar los valores. En desarrollo, abrir **Actividad y contribuciones**, ingresar un usuario y elegir **Consultar actividad de GitHub**. La primera consulta correcta habilita la selección de calendario, resumen y lenguajes. Un token ausente, rechazado o incompatible mantiene el estado no configurado; una plantilla vacía no habilita la integración.
+
+Producción debe ejecutar la aplicación Next.js con sus rutas API y SVG y permitir que GitHub acceda públicamente a las tarjetas. El origen debe estar disponible también al iniciar el servidor; no alcanza con definirlo solo durante la compilación. Una vez publicado, desarrollo puede usar ese mismo `APP_URL` para exportar un README con tarjetas alojadas en producción. La vista previa conserva sus solicitudes locales; las URLs del Markdown exportado apuntan al origen público configurado. Sin un despliegue público operativo, dejar `APP_URL` vacío y revisar las tarjetas localmente.
+
+### Rutas y estados de actividad
+
 `GET /api/github/activity?username=...` devuelve snapshot validado o un código de error. `GET /cards/github/{username}/{calendar|summary|languages}.svg?locale=en|es` sirve imágenes propias que se actualizan con caché. El formulario consulta por botón; las tarjetas ya elegidas se cargan al mostrarse. Las imágenes tienen un enlace para abrirlas a tamaño completo. No se integra un servicio público de gráficos de terceros.
 
 Sin token, la consulta JSON devuelve `503 not_configured`; la imagen muestra un estado no disponible sin números, con HTTP 200 para evitar una imagen rota. Los datos cero reales pertenecen a una consulta correcta y no se usan para sustituir errores. Para fechas, cobertura, privacidad, límites y caché, consultar [arquitectura](architecture.md) y [ADR 0010](decisions/0010-github-activity.md). Las pruebas habituales usan respuestas controladas y no requieren credenciales.
@@ -489,3 +508,42 @@ Se ajustó la detección tras recibir un README que combinaba encabezados HTML, 
 La inspección local del caso proporcionado pasó de una sección genérica a tres secciones con sus encabezados: cabecera, enlaces y herramientas. La salida conservó 19 imágenes, 18 enlaces y cuatro énfasis fuertes, con cobertura exacta del original por los rangos. También se inspeccionaron las variantes de frase inicial H2 y archivo con BOM/CRLF. Se corrigió el desplazamiento de offsets causado por el BOM y se evitó introducir otro párrafo alrededor de enlaces HTML separados por líneas vacías.
 
 Esta corrección tiene inspección directa del analizador y revisión independiente, con lint, tipos, formato, enlaces de documentación y compilación correctos. No se añadieron ni ejecutaron suites de pruebas en esta iteración. Los resultados de 909 pruebas unitarias y 229 recorridos anteriores corresponden a la entrega previa, no a una regresión de este ajuste.
+
+## Validación de código, editor de fuentes y formato personalizado
+
+El 20 de octubre de 2026 se integraron los bloques de código literal, CodeMirror para HTML/código y los controles de nivel/alineación en secciones personalizadas. El contrato y sus límites se registran en [ADR 0019](decisions/0019-code-and-formatting.md); el uso, en [editor](editor.md).
+
+Resultados ejecutados sobre la integración:
+
+- `pnpm check`: lint, tipos, formato, enlaces de 35 archivos Markdown y 993 pruebas unitarias en 35 suites correctos.
+- `pnpm build`: compilación de producción correcta con los cambios finales de producto.
+- `pnpm install --frozen-lockfile`: instalación reproducible correcta, sin excepciones a la antigüedad mínima de paquetes.
+- Recorridos focales de Chromium: 41/41, con 15 casos nuevos y 26 regresiones de HTML/bloques visuales.
+- Grupo responsive completo: 52/52, de 320 a 1920 px, EN/ES, temas claro/oscuro y texto al 200 %.
+- Regresión completa de Chromium: 244/244 en 4,8 minutos, sobre la misma compilación de producción. Desde esa compilación solo se actualizó la expectativa responsive de nueve a diez opciones; no cambió el producto.
+
+Se verificaron código literal sin ejecución ni solicitudes de sus imágenes, resaltado local, foco y Tab, sangría y cierre HTML, fuente con BOM/CRLF, copia/descarga del mismo Markdown, importación con lenguaje, recuperación, duplicación independiente y ocultación. El historial cubre ambos modos de edición, el pegado y cambios exclusivos de saltos de línea. El formato conserva defaults anteriores y el nivel elegido explícitamente cuando se quita el título opcional.
+
+La revisión corrigió pérdidas de undo al alternar modos o pegar, la normalización de la copia de fragmentos, un nivel de encabezado sin título y problemas de nombres accesibles y áreas desplazables. Se mantuvieron las comprobaciones de teclado y axe; los grupos locales de código no crean landmarks repetidos. La regresión responsive necesitó actualizar de nueve a diez opciones del selector al incorporar Código, conservando las demás aserciones.
+
+Se revisaron visualmente escritorio y móvil, ambos temas y ambos idiomas: primer campo accesible en 320 × 640, navegación horizontal y desplazamiento del código dentro de su contenedor. Los escenarios axe ejecutados no detectaron infracciones. El contraste calculado de los tonos de sintaxis sobre ambas superficies supera 5,72:1 en claro y 7,32:1 en oscuro. La revisión automática y las capturas no sustituyen una evaluación completa con lector de pantalla ni pruebas en teléfonos físicos.
+
+Los manifests y loaders del build separan CodeMirror y las gramáticas del JavaScript inicial del editor; el resaltado se solicita bajo demanda. Esta lectura de bundles no es una medición de rendimiento de red ni una comparación con una versión anterior. No se verificó paridad visual completa con GitHub ni la configuración autenticada de actividad, que mantiene sus requisitos operativos existentes.
+
+## Validación de resaltado, Presentación y borrado
+
+El 20 de octubre de 2026 se corrigió la cobertura de resaltado, se cambió el ejemplo explícito a JSON, se extendió el formato visual a Presentación y se agregó «Borrar README» con confirmación. El esquema v1 permanece cerrado; v2 conserva opciones ausentes al recuperar. Ver [ADR 0020](decisions/0020-presentation-formatting.md) y [uso del editor](editor.md).
+
+- `pnpm check`: 1.121 pruebas en 40 suites, lint, tipos, formato y enlaces de 36 Markdown correctos.
+- `pnpm build`: compilación de producción correcta.
+- `pnpm install --frozen-lockfile`: correcta, sin excepciones a la antigüedad mínima de paquetes.
+- Recorridos dirigidos de Chromium: 53/53 correctos sobre la compilación final.
+- Regresión completa de Chromium: 264/264 correctos en 5,4 minutos sobre esa misma compilación, sin exclusiones ni reintentos.
+
+Las pruebas puras cubren todos los lenguajes del catálogo, alias, C#, JSONC, PHP con/sin etiqueta y el resaltado léxico de GraphQL. El color no valida ni ejecuta código. Markdown y PHP utilizan gramáticas oficiales de CodeMirror con carga diferida; los demás lenguajes reutilizan los paquetes fijados y modos locales.
+
+La revisión independiente comprobó almacenamiento protegido, revisiones pendientes, compatibilidad, escape y presupuesto HTML compartido. Se corrigió además la jerarquía semántica de un primer encabezado pequeño en la vista previa, sin modificar el nivel ni el Markdown exportado. El aviso de vaciado solo en memoria se muestra como nota y se anuncia mediante una única región estable.
+
+La primera regresión encontró que el botón global agregaba 24 px y dejaba parte del primer campo personalizado fuera de 320 × 568. Se compactó el espaciado móvil del encabezado, manteniendo los botones de 44 px y el diseño de escritorio. Los casos EN/ES y sus capturas se repitieron sobre la compilación corregida sin relajar la comprobación del primer campo.
+
+Se inspeccionaron capturas de C# en escritorio, Presentación centrada en móvil y botón de borrado en 320 × 568. Las pruebas usan contextos aislados y no vacían el borrador real del usuario. La revisión de accesibilidad automática no sustituye una evaluación completa con lectores de pantalla o dispositivos físicos.

@@ -1,12 +1,14 @@
 "use client";
 
 import { createElement, type ReactNode } from "react";
+import Image from "next/image";
 import type { Element, Root, RootContent } from "hast";
 import { useTranslations } from "next-intl";
 import type { CustomHtmlFragment } from "@/core/readme";
 import { normalizePublicImageUrl } from "@/core/readme/public-image";
 import { normalizeWebUrl } from "@/core/readme/web-url";
 import { PublicProfileImage } from "./public-profile-image";
+import { findCountryByIconUrl } from "@/core/location";
 
 const allowedTags = new Set([
   "h1",
@@ -130,6 +132,25 @@ export function ProfileHtmlPreview({ fragment }: { fragment: CustomHtmlFragment 
       const src =
         typeof properties.src === "string" ? normalizePublicImageUrl(properties.src) : null;
       if (!src || typeof properties.alt !== "string") return null;
+      const country = findCountryByIconUrl(src);
+      if (
+        country &&
+        properties.alt === "" &&
+        Number(properties.width) === 20 &&
+        Number(properties.height) === 15
+      )
+        return (
+          <Image
+            key={path}
+            src={country.iconPath}
+            alt=""
+            aria-hidden="true"
+            width={20}
+            height={15}
+            unoptimized
+            className="inline-block h-[15px] w-5 shrink-0 rounded-[2px] align-middle"
+          />
+        );
       return (
         <PublicProfileImage
           key={`${path}:${src}`}

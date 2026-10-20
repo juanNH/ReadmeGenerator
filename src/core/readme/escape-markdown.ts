@@ -32,13 +32,18 @@ export function escapeInlineText(value: string): string {
 
 /** Keep paragraph breaks while removing indentation that could create code blocks. */
 export function escapeParagraphText(value: string): string {
+  return normalizeParagraphText(value).split("\n").map(escapeText).join("\n");
+}
+
+/** Same plain paragraph normalization for derived safe HTML, before contextual escaping. */
+export function normalizeParagraphText(value: string): string {
   return normalizeLines(value)
     .trim()
     .split(/\n[\t ]*\n+/)
     .map((paragraph) =>
       paragraph
         .split("\n")
-        .map((line) => escapeInlineText(line))
+        .map((line) => normalizeInlineText(line))
         .join("\n"),
     )
     .filter(Boolean)

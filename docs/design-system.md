@@ -101,3 +101,9 @@ Referencias oficiales consultadas el 19 de octubre de 2026. Son puntos de partid
 - [Accesibilidad de Radix Primitives](https://www.radix-ui.com/primitives/docs/overview/accessibility): comportamiento, semántica y responsabilidades de accesibilidad de las primitivas.
 
 Ver también [arquitectura](architecture.md) y [decisión inicial](decisions/0001-architecture.md).
+
+## Edición de fuentes
+
+`CodeEditor` es una frontera cliente reutilizable para HTML y código literal. El shell ofrece texto simple mientras carga CodeMirror 6 y sus gramáticas necesarias. Los modos, sangría y ajuste de líneas tienen etiquetas EN/ES; el campo conserva su etiqueta, ayuda y error. Tab permite salir. La fuente no se formatea al recuperar ni colorear. Los tonos `--syntax-keyword`, `--syntax-string`, `--syntax-number`, `--syntax-comment` y `--syntax-variable` se definen en ambos temas y se comparten con la vista previa. El color es decorativo: el contenido sigue legible sin resaltado.
+
+La altura y el desbordamiento pertenecen al editor o fragmento, sin ensanchar la página. Los controles se distribuyen en varias filas cuando falta ancho y mantienen el objetivo táctil del kit. El bloque de código de vista previa es enfocable para desplazar su contenido mediante teclado. No confundir esta herramienta interna de edición con un IDE ni con ejecución de código.

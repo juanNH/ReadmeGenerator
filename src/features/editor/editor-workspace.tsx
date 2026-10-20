@@ -86,6 +86,7 @@ export function EditorWorkspace({
     storageStatus,
     recoveryBlocked,
     startNewDraft,
+    clearReadme,
     importBackup,
     importBackupStatus,
     importMemoryOnly,
@@ -95,6 +96,7 @@ export function EditorWorkspace({
   const [exportFeedback, setExportFeedback] = useState<ExportFeedback>("idle");
   const [selectedId, setSelectedId] = useState<EditableSectionId | null>(null);
   const [announcement, setAnnouncement] = useState("");
+  const [clearFeedback, setClearFeedback] = useState<"saved" | "memory_only" | null>(null);
   const [compactView, setCompactView] = useState<"edit" | "preview">("edit");
   const [importOpen, setImportOpen] = useState(false);
   const importTriggerRef = useRef<HTMLButtonElement>(null);
@@ -161,6 +163,7 @@ export function EditorWorkspace({
   const hasInvalidUsername = readmeErrors.some((error) => error.code === "invalid_username");
   const hasMissingImageAlt = readmeErrors.some((error) => error.code === "missing_image_alt");
   const hasHtmlErrors = readmeErrors.some((error) => error.code === "invalid_html");
+  const hasCodeErrors = readmeErrors.some((error) => error.code === "invalid_code");
   const hasLocalCards = result.success && Boolean(result.exportIssues?.length);
   const canExport = !isLoading && result.success && !hasLocalCards;
   const exportGuidance = isLoading
@@ -169,17 +172,19 @@ export function EditorWorkspace({
       ? t("export.empty")
       : hasInvalidUsername
         ? t("export.invalidUsername")
-        : hasHtmlErrors
-          ? t("export.invalidHtml")
-          : hasImageUrlErrors
-            ? t("export.invalidImages")
-            : hasMissingImageAlt
-              ? t("export.missingImageDescription")
-              : hasUrlErrors
-                ? t("export.invalidLinks")
-                : hasLocalCards
-                  ? t("export.localCards")
-                  : t("export.ready");
+        : hasCodeErrors
+          ? t("export.invalidCode")
+          : hasHtmlErrors
+            ? t("export.invalidHtml")
+            : hasImageUrlErrors
+              ? t("export.invalidImages")
+              : hasMissingImageAlt
+                ? t("export.missingImageDescription")
+                : hasUrlErrors
+                  ? t("export.invalidLinks")
+                  : hasLocalCards
+                    ? t("export.localCards")
+                    : t("export.ready");
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -252,6 +257,7 @@ export function EditorWorkspace({
 
   function editDocument(next: ProfileDocument) {
     setExportFeedback("idle");
+    setClearFeedback(null);
     updateDocument(next);
   }
 
@@ -364,6 +370,8 @@ export function EditorWorkspace({
             return Boolean(block.text.trim());
           case "html":
             return Boolean(block.source.trim());
+          case "code":
+            return Boolean(block.source.length || block.language.trim());
           case "link":
             return Boolean(block.label.trim() || block.url.trim());
           case "image":
@@ -430,6 +438,7 @@ export function EditorWorkspace({
 
   function recoverWithNewDraft() {
     if (window.confirm(t("storage.resetConfirmation"))) {
+      setClearFeedback(null);
       setExportFeedback("idle");
       setSelectedId(null);
       setCompactView("edit");
@@ -437,7 +446,24 @@ export function EditorWorkspace({
     }
   }
 
+  function clearCurrentReadme() {
+    if (isLoading || !window.confirm(t("reset.confirmation"))) return;
+    const cleared = clearReadme();
+    if (cleared.status === "not_ready") return;
+    pendingReadmeImportOpen = false;
+    setImportOpen(false);
+    setSelectedId(null);
+    setCompactView("edit");
+    setExportFeedback("idle");
+    pendingFocus.current = null;
+    pendingViewScroll.current = null;
+    pendingWorkspaceFocus.current = true;
+    setClearFeedback(cleared.status);
+    setAnnouncement(t(cleared.status === "saved" ? "reset.cleared" : "reset.memoryOnly"));
+  }
+
   function completeImport(next: ProfileDocument) {
+    setClearFeedback(null);
     setExportFeedback("idle");
     pendingReadmeImportOpen = false;
     setImportOpen(false);
@@ -473,11 +499,33 @@ export function EditorWorkspace({
         >
           {t("workspaceTitle")}
         </h2>
-        <p className="flex items-center gap-2 text-xs leading-5 text-muted-foreground">
-          <Save className="size-3.5 shrink-0" aria-hidden="true" />
-          {isLoading ? t("storage.loading") : t(`storage.${storageStatus}`)}
-        </p>
+        <div className="ml-auto flex max-w-full min-w-0 items-center gap-2 sm:gap-3">
+          <p className="flex min-w-0 items-center gap-2 text-xs leading-5 text-muted-foreground">
+            <Save className="size-3.5 shrink-0" aria-hidden="true" />
+            {isLoading ? t("storage.loading") : t(`storage.${storageStatus}`)}
+          </p>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="shrink-0 text-destructive sm:w-auto sm:px-3"
+            disabled={isLoading}
+            aria-label={t("reset.action")}
+            title={t("reset.action")}
+            onClick={clearCurrentReadme}
+          >
+            <Trash2 aria-hidden="true" />
+            <span className="hidden sm:inline">{t("reset.action")}</span>
+          </Button>
+        </div>
       </div>
+      {clearFeedback === "memory_only" && (
+        <p
+          role="note"
+          className="rounded-md border border-warning/30 bg-warning-soft p-3 text-sm text-warning"
+        >
+          {t("reset.memoryOnly")}
+        </p>
+      )}
       {recoveryBlocked && (
         <div
           role="status"
@@ -654,7 +702,7 @@ export function EditorWorkspace({
           )}
         >
           <Card>
-            <CardHeader className="gap-1 border-b border-border p-4 sm:gap-2 sm:p-6">
+            <CardHeader className="gap-1 border-b border-border px-4 py-2 sm:gap-2 sm:p-6">
               <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
                 <span className="hidden items-center gap-2 font-medium sm:flex">
                   <PenLine className="size-3.5" aria-hidden="true" />
@@ -693,7 +741,7 @@ export function EditorWorkspace({
                   : t("settings.chooseHelp")}
               </p>
               {activeCustom && (
-                <div className="flex flex-wrap gap-2 pt-2">
+                <div className="flex flex-wrap gap-2 sm:pt-2">
                   <Button
                     variant="outline"
                     size="sm"

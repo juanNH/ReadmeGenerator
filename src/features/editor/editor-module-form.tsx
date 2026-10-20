@@ -25,6 +25,7 @@ export function EditorModuleForm({ id, profile, errors, onChange }: EditorModule
       return (
         <PresentationForm
           value={profile.data.presentation}
+          errors={errors}
           onChange={(value) => update(id, value)}
         />
       );

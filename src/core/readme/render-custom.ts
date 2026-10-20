@@ -1,8 +1,18 @@
-import type { ElementContent, Root } from "hast";
+import type { Root } from "hast";
+import { CODE_MAX_SOURCE_LENGTH, normalizeCodeLanguage, renderCodeFence } from "../code";
 import type { CustomSection } from "../profile/custom-content";
-import { escapeInlineText, escapeParagraphText, normalizeInlineText } from "./escape-markdown";
+import {
+  escapeInlineText,
+  escapeParagraphText,
+  normalizeInlineText,
+  normalizeParagraphText,
+} from "./escape-markdown";
 import { normalizePublicImageUrl } from "./public-image";
-import { analyzeProfileHtml } from "./profile-html";
+import {
+  formattedTextSource,
+  renderProfileHtml,
+  type ProfileHtmlBudget,
+} from "./derived-profile-html";
 import { renderLink } from "./render-helpers";
 import type { CustomHtmlFragment, CustomImageSource, ReadmeIssue } from "./readme-result";
 import { escapeLinkDestination } from "./web-url";
@@ -13,6 +23,8 @@ export type CustomSectionRenderResult = {
   readonly htmlFragments?: readonly CustomHtmlFragment[];
 };
 
+export type CustomHtmlBudget = ProfileHtmlBudget;
+
 /** Alternate emitted list markers so CommonMark keeps independently authored lists separate. */
 export function renderCustomSectionWithListIndex(
   section: CustomSection,
@@ -20,18 +32,50 @@ export function renderCustomSectionWithListIndex(
   errors: ReadmeIssue[],
   initialListIndex: number,
   images?: CustomImageSource[],
+  htmlBudget: CustomHtmlBudget = { sourceLength: 0 },
 ): CustomSectionRenderResult {
   let nextListIndex = initialListIndex;
   if (!section.visible) return { markdown: "", nextListIndex };
   const title = escapeInlineText(section.title);
   const htmlBlocks = new Map<number, Root>();
+  function html(source: string, path: readonly (string | number)[], blockIndex: number): string {
+    const rendered = renderProfileHtml(source, path, errors, htmlBudget);
+    if (!rendered) return "";
+    htmlBlocks.set(blockIndex, rendered.tree);
+    return rendered.html;
+  }
   const blocks = section.blocks.map((block, blockIndex) => {
+    const path = ["customSections", sectionIndex, "blocks", blockIndex] as const;
     switch (block.type) {
-      case "paragraph":
+      case "paragraph": {
+        if (block.alignment && block.alignment !== "left") {
+          const text = normalizeParagraphText(block.text);
+          return text
+            ? html(formattedTextSource("p", text, block.alignment), [...path, "text"], blockIndex)
+            : "";
+        }
         return escapeParagraphText(block.text);
+      }
       case "heading": {
         const text = escapeInlineText(block.text);
-        return text ? `${title ? "###" : "##"} ${text}` : "";
+        if (!text) return "";
+        const level = block.level ?? (title ? 3 : 2);
+        return block.alignment && block.alignment !== "left"
+          ? html(
+              formattedTextSource(`h${level}`, normalizeInlineText(block.text), block.alignment),
+              [...path, "text"],
+              blockIndex,
+            )
+          : `${"#".repeat(level)} ${text}`;
+      }
+      case "code": {
+        const language = normalizeCodeLanguage(block.language);
+        if (language === null) errors.push({ code: "invalid_code", path: [...path, "language"] });
+        if (block.source.length > CODE_MAX_SOURCE_LENGTH)
+          errors.push({ code: "invalid_code", path: [...path, "source"] });
+        if (language === null || block.source.length > CODE_MAX_SOURCE_LENGTH || !block.source)
+          return "";
+        return renderCodeFence(block.source, language);
       }
       case "divider":
         return "---";
@@ -58,27 +102,7 @@ export function renderCustomSectionWithListIndex(
         return `![${escapeInlineText(alt)}](${escapeLinkDestination(src)})`;
       }
       case "html": {
-        const analyzed = analyzeProfileHtml(block.source);
-        if (analyzed.errors.length > 0) {
-          errors.push({
-            code: "invalid_html",
-            path: ["customSections", sectionIndex, "blocks", blockIndex, "source"],
-          });
-          return "";
-        }
-        if (!analyzed.html) return "";
-        htmlBlocks.set(blockIndex, {
-          type: "root",
-          children: [
-            {
-              type: "element",
-              tagName: "div",
-              properties: {},
-              children: analyzed.tree.children as ElementContent[],
-            },
-          ],
-        });
-        return `<div>${analyzed.html}</div>`;
+        return html(block.source, [...path, "source"], blockIndex);
       }
       case "list": {
         const items = block.items.map((item) => escapeParagraphText(item.text)).filter(Boolean);
@@ -103,7 +127,21 @@ export function renderCustomSectionWithListIndex(
         );
     }
   });
-  const prefix = title ? `## ${title}\n\n` : "";
+  if (!blocks.some(Boolean)) return { markdown: "", nextListIndex };
+  const heading = !title
+    ? ""
+    : section.titleAlignment && section.titleAlignment !== "left"
+      ? html(
+          formattedTextSource(
+            `h${section.titleLevel ?? 2}`,
+            normalizeInlineText(section.title),
+            section.titleAlignment,
+          ),
+          ["customSections", sectionIndex, "title"],
+          -1,
+        )
+      : `${"#".repeat(section.titleLevel ?? 2)} ${title}`;
+  const prefix = heading ? `${heading}\n\n` : "";
   const htmlFragments: CustomHtmlFragment[] = [];
   let content = "";
   blocks.forEach((text, blockIndex) => {
@@ -123,6 +161,16 @@ export function renderCustomSectionWithListIndex(
     content += text;
   });
   if (!content) return { markdown: "", nextListIndex };
+  const titleTree = htmlBlocks.get(-1);
+  if (titleTree) {
+    htmlFragments.unshift({
+      html: heading,
+      tree: titleTree,
+      start: 0,
+      end: heading.length,
+      headingLevel: 3,
+    });
+  }
   return {
     markdown: `${prefix}${content}`,
     nextListIndex,

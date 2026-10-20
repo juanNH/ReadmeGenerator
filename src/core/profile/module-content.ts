@@ -51,14 +51,28 @@ const technologySchema = z.strictObject({
   context: z.string(),
 });
 
-// Empty text is valid draft content. Rendering and export require separate checks.
-export const moduleContentSchemas = Object.freeze({
-  presentation: z.strictObject({
-    displayName: z.string(),
-    headline: z.string(),
-    bio: z.string(),
-    location: z.string(),
-  }),
+const presentationV1Schema = z.strictObject({
+  displayName: z.string(),
+  headline: z.string(),
+  bio: z.string(),
+  location: z.string(),
+});
+const presentationAlignmentSchema = z.enum(["left", "center", "right"]);
+const presentationLevelSchema = z.union([z.literal(1), z.literal(2), z.literal(3)]);
+
+export const presentationFormatSchema = z.strictObject({
+  displayNameLevel: presentationLevelSchema.optional(),
+  displayNameAlignment: presentationAlignmentSchema.optional(),
+  headlineLevel: presentationLevelSchema.optional(),
+  headlineAlignment: presentationAlignmentSchema.optional(),
+  bioAlignment: presentationAlignmentSchema.optional(),
+  locationAlignment: presentationAlignmentSchema.optional(),
+});
+export type PresentationFormat = z.infer<typeof presentationFormatSchema>;
+
+// Empty text is valid draft content. The exact v1 shape remains closed and independent.
+export const moduleContentV1Schemas = Object.freeze({
+  presentation: presentationV1Schema,
   knowledge: z.strictObject({
     items: entriesWithUniqueIds(
       z.strictObject({ id: entryIdSchema, title: z.string(), description: z.string() }),
@@ -122,6 +136,11 @@ export const moduleContentSchemas = Object.freeze({
   }),
   metrics: z.strictObject({ username: z.string(), cards: selectedCardsSchema }),
   contact: z.strictObject({ links: entriesWithUniqueIds(linkSchema) }),
+});
+
+export const moduleContentSchemas = Object.freeze({
+  ...moduleContentV1Schemas,
+  presentation: presentationV1Schema.extend({ format: presentationFormatSchema.optional() }),
 });
 
 export type ProfileModuleData = {

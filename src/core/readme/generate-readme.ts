@@ -1,7 +1,5 @@
 import type { ProfileDocument } from "../profile/profile-schema";
-import { parseCountryLocation } from "../location";
-import { countryFlagMarkup } from "./country-flags";
-import { escapeInlineText, escapeParagraphText } from "./escape-markdown";
+import { CODE_MAX_DOCUMENT_LENGTH } from "../code";
 import { readmeLabels } from "./readme-labels";
 import type {
   CustomHtmlFragment,
@@ -14,27 +12,8 @@ import { renderActivity } from "./render-activity";
 import { renderContact } from "./render-contact";
 import { renderCustomSectionWithListIndex } from "./render-custom";
 import { renderProjects } from "./render-projects";
+import { renderPresentation } from "./render-presentation";
 import { renderTechnologies } from "./render-technologies";
-
-function renderPresentation(document: ProfileDocument): string {
-  const { displayName, headline, bio, location } = document.data.presentation;
-  const nameText = escapeInlineText(displayName);
-  const headlineText = escapeInlineText(headline);
-  const bioText = escapeParagraphText(bio);
-  const countryLocation = parseCountryLocation(location);
-  const locationText = escapeInlineText(countryLocation?.text ?? location);
-  const locationContent = countryLocation
-    ? `${countryFlagMarkup(countryLocation.country)} ${locationText}`
-    : locationText;
-  return [
-    nameText && `# ${nameText}`,
-    headlineText && `## ${headlineText}`,
-    bioText,
-    locationText && `${readmeLabels[document.contentLocale].location}: ${locationContent}`,
-  ]
-    .filter(Boolean)
-    .join("\n\n");
-}
 
 /**
  * document must be structurally valid (from the factory, parser or domain operations).
@@ -53,18 +32,35 @@ export function generateReadme(
   const labels = readmeLabels[document.contentLocale];
   let customListIndex = 0;
   let cursor = 0;
+  const htmlBudget = { sourceLength: 0 };
   let htmlSourceLength = 0;
+  let codeSourceLength = 0;
   for (const [sectionIndex, section] of document.customSections.entries()) {
     if (!section.visible) continue;
     for (const [blockIndex, block] of section.blocks.entries()) {
-      if (block.type !== "html") continue;
-      htmlSourceLength += block.source.length;
-      if (htmlSourceLength > PROFILE_HTML_MAX_DOCUMENT_LENGTH) {
+      // Reject an excessive stored HTML aggregate before parsing any of its fragments.
+      if (block.type === "html") {
+        htmlSourceLength += block.source.length;
+        if (htmlSourceLength > PROFILE_HTML_MAX_DOCUMENT_LENGTH) {
+          return {
+            success: false,
+            errors: [
+              {
+                code: "invalid_html",
+                path: ["customSections", sectionIndex, "blocks", blockIndex, "source"],
+              },
+            ],
+          };
+        }
+      }
+      if (block.type !== "code") continue;
+      codeSourceLength += block.source.length;
+      if (codeSourceLength > CODE_MAX_DOCUMENT_LENGTH) {
         return {
           success: false,
           errors: [
             {
-              code: "invalid_html",
+              code: "invalid_code",
               path: ["customSections", sectionIndex, "blocks", blockIndex, "source"],
             },
           ],
@@ -96,6 +92,7 @@ export function generateReadme(
           errors,
           customListIndex,
           customImages,
+          htmlBudget,
         );
         customListIndex = rendered.nextListIndex;
         append(rendered.markdown, rendered.htmlFragments);
@@ -110,9 +107,11 @@ export function generateReadme(
 
     let content: string;
     switch (moduleId) {
-      case "presentation":
-        content = renderPresentation(document);
-        break;
+      case "presentation": {
+        const rendered = renderPresentation(document, errors, htmlBudget);
+        append(rendered.markdown, rendered.htmlFragments);
+        continue;
+      }
       case "knowledge":
       case "education":
       case "current":

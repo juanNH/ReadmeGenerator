@@ -87,7 +87,7 @@
     "retained_html": "El HTML original queda en un bloque explícito y se revisa con la política HTML del editor.",
     "grouped_html_context": "Se conserva junto el contenido HTML relacionado para mantener su estructura.",
     "references_resolved": "Las referencias de enlaces e imágenes se resuelven con las definiciones del original completo.",
-    "code_metadata_removed": "Se conserva el código, pero no se exportan metadatos como la etiqueta del lenguaje.",
+    "code_metadata_removed": "Se conserva el código, pero no se exportan los metadatos adicionales del bloque. Un fragmento anidado convertido a HTML también pierde la etiqueta del lenguaje.",
     "html_unsupported_elements": "Se filtran elementos HTML no admitidos. Revisá qué queda antes de importar.",
     "html_unsupported_attributes": "Se retiran los atributos HTML no admitidos, incluidos los estilos.",
     "html_comments_removed": "Los comentarios HTML no aparecen en el README resultante; quedan en el original.",

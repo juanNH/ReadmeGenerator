@@ -95,6 +95,7 @@
     "examplesHelp": "Estos ejemplos locales sirven como punto de partida. Solo se agregan cuando elegís Usar este ejemplo y después podés editarlos.",
     "useExample": "Usar este ejemplo",
     "useNamedExample": "Usar este ejemplo: {name}",
+    "exampleCode": "Código HTML: {name}",
     "replaceConfirmation": "¿Reemplazar el código de este bloque HTML con el ejemplo? Se quitará el código actual de este bloque. Los demás bloques se conservarán.",
     "exampleApplied": "Se agregó el ejemplo de HTML. Ya podés editar su código.",
     "exported": "HTML exportado",
@@ -127,5 +128,42 @@
         "source": "<details>\n  <summary>Un poco más sobre mí</summary>\n  <p>Aprendo creando y compartiendo.</p>\n</details>"
       }
     }
+  },
+  "addCode": "Agregar código",
+  "pickerCodeHelp": "Un fragmento de código, configuración o perfil informal con lenguaje opcional.",
+  "codeLabel": "Bloque de código {number}",
+  "code": {
+    "language": "Lenguaje (opcional)",
+    "languageHelp": "Todos los lenguajes sugeridos tienen resaltado local, incluidos json, csharp y python. Dejalo vacío para texto plano. Los colores no validan el código; GitHub puede usar otros colores.",
+    "plainLanguageHelp": "No hay resaltado local para {language}. Tu código se muestra como texto plano acá y conserva el lenguaje en el README. Elegí una sugerencia si querés ver colores locales.",
+    "languagePlaceholder": "Texto plano, json, csharp…",
+    "invalidLanguage": "Usá un nombre corto de lenguaje como python, ts o c#. No se admiten espacios, delimitadores de Markdown ni identificadores largos.",
+    "source": "Código",
+    "help": "Pegá solo el fragmento, sin los delimitadores de Markdown. Se conservan espacios y saltos de línea. El HTML escrito acá se muestra como código, nunca se interpreta ni ejecuta.",
+    "tooLong": "Este bloque de código supera los {limit, number} caracteres. Acortalo o dividilo en bloques más pequeños. Se conservó el código original.",
+    "documentLimit": "Los bloques de código incluidos superan los {limit, number} caracteres en total. Acortá parte del código u ocultá una sección antes de exportar. Se conservó el código original.",
+    "characterCount": "{count, number} de {limit, number} caracteres por bloque",
+    "exampleTitle": "Un pequeño ejemplo en JSON",
+    "exampleHelp": "Una forma informal de presentarte. Solo se agrega cuando elegís Usar este ejemplo y después podés cambiar cada palabra.",
+    "useExample": "Usar este ejemplo JSON",
+    "replaceConfirmation": "¿Reemplazar el código y el lenguaje de este bloque con el ejemplo JSON? Se quitará el código actual de este bloque. Los demás bloques se conservarán.",
+    "exampleApplied": "Se agregó el ejemplo JSON. Ya podés editar el código.",
+    "exampleSource": "{\n  \"name\": \"Alex\",\n  \"interests\": [\"crear\", \"compartir\"],\n  \"learning\": \"algo nuevo\"\n}"
+  },
+  "format": {
+    "titleOptions": "Apariencia del título (opcional)",
+    "textOptions": "Apariencia del texto (opcional)",
+    "help": "Elegí un tamaño de título o alineación. Tu texto se conserva literal. El texto centrado o a la derecha usa HTML compatible; GitHub puede mostrarlo de otra manera.",
+    "titleLevel": "Tamaño del título",
+    "textType": "Tipo de texto",
+    "paragraph": "Párrafo",
+    "heading1": "Título 1 · grande",
+    "heading2": "Título 2 · mediano",
+    "heading3": "Título 3 · pequeño",
+    "alignment": "Alineación",
+    "left": "Izquierda",
+    "center": "Centro",
+    "right": "Derecha",
+    "tooLong": "El texto con formato supera los límites de HTML compatible. Acortalo, elegí alineación a la izquierda u ocultá otra sección con formato o HTML antes de exportar. Tu texto se conservó."
   }
 }

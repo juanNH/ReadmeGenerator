@@ -7,6 +7,7 @@ export type ReadmeIssue = {
     | "invalid_url"
     | "missing_image_alt"
     | "invalid_html"
+    | "invalid_code"
     | "invalid_username"
     | "activity_not_configured";
   readonly path: readonly (string | number)[];

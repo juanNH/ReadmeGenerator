@@ -20,6 +20,11 @@
   --warning: #80500d;
   --warning-soft: #fff5dc;
   --ring: #08775a;
+  --syntax-keyword: #6b2fb8;
+  --syntax-string: #17663b;
+  --syntax-number: #88511a;
+  --syntax-comment: #53635b;
+  --syntax-variable: #075e83;
   --ds-shadow-soft: 0 1px 2px rgb(24 37 34 / 4%);
   --ds-shadow-panel: 0 4px 16px rgb(24 37 34 / 4%);
   --ds-radius-sm: 0.375rem;
@@ -47,6 +52,11 @@
   --warning: #f5d28c;
   --warning-soft: #392d17;
   --ring: #85e2b5;
+  --syntax-keyword: #d3a9ff;
+  --syntax-string: #9cddb4;
+  --syntax-number: #f2ca91;
+  --syntax-comment: #a9bab0;
+  --syntax-variable: #96d7ee;
   --ds-shadow-soft: 0 1px 2px rgb(0 0 0 / 12%);
   --ds-shadow-panel: 0 4px 16px rgb(0 0 0 / 12%);
 }

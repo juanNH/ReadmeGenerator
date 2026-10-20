@@ -81,7 +81,21 @@
     "countrySuggestions": "Sugerencias de países",
     "countrySelected": "Seleccionaste {name}. Su bandera aparecerá en tu README.",
     "countryNoResults": "No hay países que coincidan. Podés dejar este texto como tu ubicación.",
-    "locationPlaceholder": "Argentina"
+    "locationPlaceholder": "Argentina",
+    "format": {
+      "options": "Formato visual",
+      "help": "Elegí el tamaño y la alineación de tu presentación. Estas opciones también se aplican al README exportado; GitHub puede mostrarlo de otra manera.",
+      "alignment": "Alineación",
+      "level": "Tamaño del título",
+      "heading1": "Título grande (H1)",
+      "heading2": "Título mediano (H2)",
+      "heading3": "Título pequeño (H3)",
+      "left": "Izquierda",
+      "center": "Centro",
+      "right": "Derecha",
+      "reset": "Restablecer formato de presentación",
+      "invalid": "Este texto con formato supera los límites de salida HTML. Acortalo o usá alineación izquierda. Conservamos lo que escribiste."
+    }
   },
   "contact": {
     "description": "Agregá solo los enlaces que quieras compartir públicamente.",
@@ -119,6 +133,11 @@
     "importMemoryHelp": "Este perfil importado está disponible solo en esta pestaña. Abrí Importar README para descargar el perfil anterior y el README original. Descargá tu trabajo antes de recargar o cerrar esta página."
   },
   "preview": {
+    "codePlain": "Texto plano",
+    "codeRegion": "Bloque de código: {language}",
+    "copyCode": "Copiar código",
+    "codeCopied": "Código copiado",
+    "codeCopyError": "No se pudo copiar. Seleccioná el código y copialo manualmente.",
     "title": "Revisá y exportá",
     "description": "Se copia y descarga el mismo contenido que ves acá. GitHub puede mostrar los espacios y la tipografía de otra manera.",
     "fileLabel": "Vista previa",
@@ -137,7 +156,8 @@
     "empty": "Elegí una sección y agregá algo de texto o un enlace para habilitar la copia y descarga.",
     "unsupported": "Este borrador tiene una sección visible que el editor todavía no puede exportar. El contenido guardado se conserva, pero la exportación no está disponible para este borrador.",
     "invalidLinks": "Revisá los enlaces marcados antes de copiar o descargar. Usá Revisar campos en tus secciones para abrir la configuración que necesita atención. No se eliminó contenido.",
-    "invalidHtml": "Revisá los bloques HTML marcados antes de copiar o descargar. Usá Revisar campos para abrir su configuración y ver qué necesita atención.",
+    "invalidHtml": "Revisá el HTML o texto con formato marcado antes de copiar o descargar. Usá Revisar campos para abrir su configuración y ver qué necesita atención.",
+    "invalidCode": "Revisá los bloques de código marcados antes de copiar o descargar. Comprobá su extensión y lenguaje desde Revisar campos.",
     "invalidImages": "Revisá las direcciones de imagen señaladas. Usá una URL HTTPS pública y directa, y Revisar campos para abrir su configuración.",
     "missingImageDescription": "Agregá una descripción a las imágenes señaladas para que todos puedan entenderlas. Usá Revisar campos para abrir su configuración.",
     "invalidUsername": "Revisá el usuario de GitHub en Actividad y contribuciones, o excluí las tarjetas de GitHub para exportar tus textos.",
@@ -157,5 +177,11 @@
     "title": "Llevalo a tu perfil de GitHub",
     "instructions": "En un repositorio público con el mismo nombre que tu usuario de GitHub, colocá README.md en la raíz. Pegá el texto copiado o subí el archivo descargado. Revisalo antes de publicarlo.",
     "guide": "Ver la guía de README de perfil de GitHub"
+  },
+  "reset": {
+    "action": "Borrar README",
+    "confirmation": "¿Borrar todo el contenido del README actual, incluidas las secciones ocultas? Vas a empezar con un perfil vacío. Esta acción no se puede deshacer. El respaldo anterior de importación se conserva.",
+    "cleared": "Tu README está vacío. Elegí una sección para empezar de nuevo.",
+    "memoryOnly": "El README actual se vació en memoria. El borrador guardado está protegido o el navegador no pudo guardar el cambio; al recargar puede volver el borrador anterior."
   }
 }

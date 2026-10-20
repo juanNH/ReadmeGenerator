@@ -12,6 +12,7 @@ export type AddBlockKind =
   | "divider"
   | "quote"
   | "image"
+  | "code"
   | "html";
 
 const options = [
@@ -23,6 +24,7 @@ const options = [
   { kind: "divider", label: "addDivider", description: "pickerDividerHelp" },
   { kind: "quote", label: "addQuote", description: "pickerQuoteHelp" },
   { kind: "image", label: "addImage", description: "pickerImageHelp" },
+  { kind: "code", label: "addCode", description: "pickerCodeHelp" },
   { kind: "html", label: "addHtml", description: "pickerHtmlHelp" },
 ] as const;
 
@@ -162,6 +164,24 @@ function BlockSample({ kind }: { kind: AddBlockKind }) {
           focusable="false"
         >
           <path d="m21 8-9 8 9 8m22-16 9 8-9 8M36 5l-8 22" />
+        </svg>
+      )}
+      {kind === "code" && (
+        <svg
+          viewBox="0 0 140 32"
+          style={{ width: "100%", height: "2rem" }}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          focusable="false"
+        >
+          <path d="M7 3H3v8h4m32-8h4v8h-4" className="text-accent" />
+          <path
+            d="M12 7h21M3 18h19m5-2h5m-5 4h5m8-4h38M3 28h25m6-2h5m-5 4h5m8-4h52"
+            opacity="0.65"
+          />
         </svg>
       )}
     </span>

@@ -87,7 +87,7 @@
     "retained_html": "The original HTML is kept in an explicit HTML block and checked against the editor's HTML policy.",
     "grouped_html_context": "Related HTML content is kept together to preserve its structure.",
     "references_resolved": "Referenced links or images are resolved using definitions in the complete original.",
-    "code_metadata_removed": "Code is preserved, but metadata such as a language label is not exported.",
+    "code_metadata_removed": "Code is preserved, but additional fence metadata is not exported. A nested code fragment converted to HTML also loses its language label.",
     "html_unsupported_elements": "Unsupported HTML elements are filtered from the result. Review what remains before importing.",
     "html_unsupported_attributes": "Unsupported HTML attributes, including styling, are removed from the result.",
     "html_comments_removed": "HTML comments are removed from the resulting README; the original keeps them.",

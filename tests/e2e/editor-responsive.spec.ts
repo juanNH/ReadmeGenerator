@@ -233,7 +233,7 @@ async function openCustomConfiguration(page: Page, locale: Locale) {
   });
   await expect(addText).toBeVisible();
   const picker = addText.locator("..");
-  await expect(picker.getByRole("button")).toHaveCount(9);
+  await expect(picker.getByRole("button")).toHaveCount(10);
   expect(
     await picker
       .getByRole("button")

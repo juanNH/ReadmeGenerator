@@ -14,9 +14,10 @@ import {
 type LocationFieldProps = {
   value: string;
   onChange: (value: string) => void;
+  error?: string;
 };
 
-export function LocationField({ value, onChange }: LocationFieldProps) {
+export function LocationField({ value, onChange, error }: LocationFieldProps) {
   const t = useTranslations("Editor.presentation");
   const locale = useLocale();
   const baseId = useId();
@@ -54,7 +55,12 @@ export function LocationField({ value, onChange }: LocationFieldProps) {
         if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false);
       }}
     >
-      <Field htmlFor="profile-location" label={t("location")} description={t("locationHelp")}>
+      <Field
+        htmlFor="profile-location"
+        label={t("location")}
+        description={t("locationHelp")}
+        error={error}
+      >
         <Input
           ref={inputRef}
           role="combobox"

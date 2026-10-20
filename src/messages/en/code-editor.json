@@ -1,0 +1,14 @@
+{
+  "codeMode": "Code editor",
+  "plainMode": "Plain text",
+  "wrap": "Wrap lines",
+  "indent": "Indent selection",
+  "outdent": "Remove indentation",
+  "loading": "Loading syntax highlighting. You can keep editing.",
+  "loadError": "Syntax highlighting could not load. You can keep editing as plain text.",
+  "keyboardHelp": "Tab moves to the next control. Use the indentation buttons or Ctrl+] and Ctrl+[ to indent. On Mac, use ⌘ instead of Ctrl.",
+  "plainHelp": "Plain text uses a standard text box. Both modes edit the same source.",
+  "htmlLabel": "HTML source",
+  "codeLabel": "Code source",
+  "scrollRegion": "Code editor scroll area"
+}

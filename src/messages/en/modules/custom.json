@@ -95,6 +95,7 @@
     "examplesHelp": "These local examples are starting points. They are added only when you choose Use this example, and you can edit them afterwards.",
     "useExample": "Use this example",
     "useNamedExample": "Use this example: {name}",
+    "exampleCode": "HTML source: {name}",
     "replaceConfirmation": "Replace the code in this HTML block with the example? The current code in this block will be removed. Other blocks will be kept.",
     "exampleApplied": "HTML example added. You can edit its code now.",
     "exported": "HTML exported",
@@ -127,5 +128,42 @@
         "source": "<details>\n  <summary>A little more about me</summary>\n  <p>I learn by making and sharing.</p>\n</details>"
       }
     }
+  },
+  "addCode": "Add code",
+  "pickerCodeHelp": "A code snippet, configuration or informal profile with an optional language.",
+  "codeLabel": "Code block {number}",
+  "code": {
+    "language": "Language (optional)",
+    "languageHelp": "All suggested languages have local syntax highlighting, including json, csharp and python. Leave it blank for plain text. Colors do not validate the code; GitHub may use different colors.",
+    "plainLanguageHelp": "There is no local highlighter for {language}. Your code stays as plain text here and keeps its language in the README. Choose a suggestion if you want local colors.",
+    "languagePlaceholder": "Plain text, json, csharp…",
+    "invalidLanguage": "Use a short language name such as python, ts or c#. Spaces, Markdown fences and long identifiers are not supported.",
+    "source": "Code",
+    "help": "Paste only the snippet, without Markdown fences. Spaces and line breaks are kept. HTML here is shown as code, never rendered or run.",
+    "tooLong": "This code block exceeds {limit, number} characters. Shorten it or divide it into smaller blocks. Your source has been kept.",
+    "documentLimit": "The included code blocks exceed {limit, number} characters in total. Shorten some code or hide a section before exporting. Your source has been kept.",
+    "characterCount": "{count, number} of {limit, number} characters per block",
+    "exampleTitle": "A small JSON example",
+    "exampleHelp": "An informal way to introduce yourself. It is added only when you choose Use this example, and you can change every word.",
+    "useExample": "Use this JSON example",
+    "replaceConfirmation": "Replace the source and language in this code block with the JSON example? The current code in this block will be removed. Other blocks will be kept.",
+    "exampleApplied": "JSON example added. You can edit the code now.",
+    "exampleSource": "{\n  \"name\": \"Alex\",\n  \"interests\": [\"building\", \"sharing\"],\n  \"learning\": \"something new\"\n}"
+  },
+  "format": {
+    "titleOptions": "Title appearance (optional)",
+    "textOptions": "Text appearance (optional)",
+    "help": "Choose a heading size or alignment. Your text stays literal. Centered and right-aligned text use supported HTML; GitHub may display it differently.",
+    "titleLevel": "Title size",
+    "textType": "Text type",
+    "paragraph": "Paragraph",
+    "heading1": "Heading 1 · large",
+    "heading2": "Heading 2 · medium",
+    "heading3": "Heading 3 · small",
+    "alignment": "Alignment",
+    "left": "Left",
+    "center": "Center",
+    "right": "Right",
+    "tooLong": "The formatted text exceeds the supported HTML limits. Shorten this text, choose left alignment or hide another formatted or HTML section before exporting. Your text has been kept."
   }
 }

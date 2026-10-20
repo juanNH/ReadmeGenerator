@@ -1,4 +1,9 @@
-import { showCustomBlockPicker, showSectionOrganizer } from "./editor-test-helpers";
+import {
+  expectCodeSource,
+  fillCodeSource,
+  showCustomBlockPicker,
+  showSectionOrganizer,
+} from "./editor-test-helpers";
 import { expect, test, type Page } from "@playwright/test";
 import { createEmptyProfile } from "../../src/core/profile/profile-operations";
 import type { ProfileDocument } from "../../src/core/profile/profile-schema";
@@ -57,8 +62,13 @@ for (const locale of ["en", "es"] as const) {
     await option.press("Enter");
     const field = page.getByRole("textbox", { name: copy.code, exact: true });
     await expect(field).toBeFocused();
-    await expect(field).toHaveValue("");
-    await expect(field).toHaveAttribute("rows", "8");
+    await expectCodeSource(field, "");
+    await expect(
+      page.getByRole("button", {
+        name: locale === "en" ? "Code editor" : "Editor de código",
+        exact: true,
+      }),
+    ).toHaveAttribute("aria-pressed", "true");
     await expect(field).toHaveAttribute("spellcheck", "false");
     await expect(field).toHaveAttribute("autocorrect", "off");
     await expect(field).toHaveAccessibleDescription(copy.help);
@@ -69,7 +79,7 @@ for (const locale of ["en", "es"] as const) {
     await supported.press("Enter");
     await expect(supported.locator("..")).toContainText("HTTPS");
     await expect(supported.locator("..")).toContainText(/30[,.]000/);
-    await expect(field).toHaveValue("");
+    await expectCodeSource(field, "");
     await expect
       .poll(async () => (await storedProfile(page))?.customSections[0]?.blocks[0])
       .toMatchObject({ type: "html", source: "" });
@@ -94,13 +104,14 @@ test("HTML examples stay local and replace code only after an explicit choice an
   const table = page.getByRole("group", { name: "A small table", exact: true });
   const details = page.getByRole("group", { name: "Expandable details", exact: true });
   for (const example of [centered, table, details]) {
-    await expect(example.getByRole("region")).toBeVisible();
+    await expect(example.locator("pre")).toBeVisible();
+    await expect(example.locator("pre")).toHaveAttribute("role", "group");
     await expect(example.locator("img, iframe")).toHaveCount(0);
   }
-  await expect(field).toHaveValue("");
-  const centeredSource = await centered.getByRole("region").textContent();
-  const tableSource = await table.getByRole("region").textContent();
-  const detailsSource = await details.getByRole("region").textContent();
+  await expectCodeSource(field, "");
+  const centeredSource = await centered.locator("pre").textContent();
+  const tableSource = await table.locator("pre").textContent();
+  const detailsSource = await details.locator("pre").textContent();
   if (!centeredSource || !tableSource || !detailsSource) throw new Error("HTML example is empty");
   const useCentered = centered.getByRole("button", {
     name: "Use this example: Centered introduction",
@@ -108,7 +119,7 @@ test("HTML examples stay local and replace code only after an explicit choice an
   });
   await useCentered.focus();
   await useCentered.press("Enter");
-  await expect(field).toHaveValue(centeredSource);
+  await expectCodeSource(field, centeredSource);
   await expect(field).toBeFocused();
   const useTable = table.getByRole("button", {
     name: "Use this example: A small table",
@@ -116,17 +127,17 @@ test("HTML examples stay local and replace code only after an explicit choice an
   });
   page.once("dialog", (dialog) => dialog.dismiss());
   await useTable.click();
-  await expect(field).toHaveValue(centeredSource);
+  await expectCodeSource(field, centeredSource);
   await expect(useTable).toBeFocused();
   page.once("dialog", (dialog) => dialog.accept());
   await useTable.click();
-  await expect(field).toHaveValue(tableSource);
+  await expectCodeSource(field, tableSource);
   await expect(field).toBeFocused();
   page.once("dialog", (dialog) => dialog.accept());
   await details
     .getByRole("button", { name: "Use this example: Expandable details", exact: true })
     .click();
-  await expect(field).toHaveValue(detailsSource);
+  await expectCodeSource(field, detailsSource);
   await expect(field).toBeFocused();
   expect(imageRequests).toEqual([]);
 });
@@ -141,7 +152,7 @@ test("HTML original and filtered output stay distinct across duplication, hiding
   await page.getByRole("button", { name: "Add HTML", exact: true }).click();
   const source = '<p class="note">My original text</p>\n<!-- keep my original -->';
   const field = page.getByRole("textbox", { name: "HTML code", exact: true });
-  await field.fill(source);
+  await fillCodeSource(field, source);
   await expect(
     page.getByRole("list", { name: "Changes in supported HTML", exact: true }),
   ).toContainText("Unsupported attributes were removed");
@@ -149,20 +160,20 @@ test("HTML original and filtered output stay distinct across duplication, hiding
     .locator("summary")
     .filter({ hasText: /^HTML exported$/ })
     .click();
-  const exported = page.getByRole("region", { name: "HTML exported", exact: true });
+  const exported = page.getByRole("group", { name: "HTML exported", exact: true });
   await expect(exported).toContainText("<p>My original text</p>");
   await expect(exported).not.toContainText('class="note"');
   await expect(exported).not.toContainText("<!--");
-  await expect(field).toHaveValue(source);
+  await expectCodeSource(field, source);
   await expect
     .poll(async () => (await storedProfile(page))?.customSections[0]?.blocks[0])
     .toMatchObject({ type: "html", source });
   const original = (await storedProfile(page))!.customSections[0]!;
   await page.getByRole("button", { name: "Duplicate section", exact: true }).click();
-  await expect(field).toHaveValue(source);
+  await expectCodeSource(field, source);
   await page.getByRole("textbox", { name: "Section title", exact: true }).fill("HTML copy");
   const copiedSource = "<p>Independent HTML copy</p>";
-  await field.fill(copiedSource);
+  await fillCodeSource(field, copiedSource);
   await showSectionOrganizer(page);
   await page
     .getByRole("checkbox", { name: "HTML notes", exact: true, includeHidden: true })
@@ -183,10 +194,10 @@ test("HTML original and filtered output stay distinct across duplication, hiding
   ).not.toBeChecked();
   await showSectionOrganizer(page);
   await page.getByRole("button", { name: "HTML copy", exact: true }).click();
-  await expect(field).toHaveValue(copiedSource);
+  await expectCodeSource(field, copiedSource);
   await showSectionOrganizer(page);
   await page.getByRole("button", { name: "Add and edit HTML notes", exact: true }).click();
-  await expect(field).toHaveValue(source);
+  await expectCodeSource(field, source);
 });
 
 test("valid HTML blocks explain the combined limit and focus the affected code", async ({
@@ -222,7 +233,7 @@ test("valid HTML blocks explain the combined limit and focus the affected code",
   await showSectionOrganizer(page);
   await page.getByRole("button", { name: "Review fields in HTML limit", exact: true }).click();
   await expect(field).toBeFocused();
-  await field.fill("<p>A smaller block</p>");
+  await fillCodeSource(field, "<p>A smaller block</p>");
   await expect(field).not.toHaveAttribute("aria-invalid", "true");
   await expect(page.getByRole("button", { name: "Download README", exact: true })).toBeEnabled();
 });
