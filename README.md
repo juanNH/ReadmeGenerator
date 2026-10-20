@@ -2,7 +2,7 @@
 
 GitHub Profile Generator es un generador visual de README para perfiles de GitHub. Permite crear una presentación personal breve, elegir tecnologías con sus iconos y compartir proyectos, aportes o contacto, aunque haya poca actividad pública.
 
-El repositorio incluye un editor bilingüe de cinco secciones, navegación, configuración estable, vista previa, exportación, borrador local y kit visual. Las secciones incluidas se ordenan mediante arrastre, teclado o botones. Actividad y contribuciones reúne aportes manuales y tarjetas opcionales de GitHub: calendario, resumen y lenguajes. La consulta necesita configuración del servidor; el recorrido manual funciona sin credenciales. El contrato `ProfileDocument` versión 1 conserva sus nueve IDs sin migración. No hay asistencia con IA.
+El repositorio incluye un editor bilingüe con cinco secciones fijas y secciones personalizadas repetibles, navegación, configuración estable, vista previa, exportación, borrador local y kit visual. Las secciones incluidas se ordenan mediante arrastre, teclado o botones. Actividad y contribuciones reúne aportes manuales y tarjetas opcionales de GitHub: calendario, resumen y lenguajes. La consulta necesita configuración del servidor; el recorrido manual funciona sin credenciales. `ProfileDocument` versión 2 conserva las estructuras heredadas y usa un orden mixto de secciones. No hay asistencia con IA.
 
 ## Ejecutar el proyecto
 
@@ -24,7 +24,9 @@ Consultá la [guía operativa](docs/development.md) para conocer todos los coman
 
 ## La propuesta de producto
 
-El editor ofrece presentación, tecnologías, proyectos, actividad y contribuciones, y contacto. Todas son opcionales. La introducción permite contar quién sos, qué te interesa o qué estás aprendiendo sin repetirlo en otras secciones. Conocimientos, formación y actualidad están retirados del producto, también para borradores anteriores. Sus datos v1 permanecen guardados internamente, sin edición ni exportación y sin fusionarlos con la presentación.
+El editor ofrece presentación, tecnologías, proyectos, actividad y contribuciones, y contacto. Todas son opcionales. También podés agregar varias secciones propias con título opcional, párrafos, listas con viñetas o numeradas, enlaces web, subtítulos, separadores, frases destacadas e imágenes o banners. Un selector con ocho muestras pequeñas permite elegir el contenido; los bloques nuevos empiezan sin datos de ejemplo. Se pueden duplicar como copias independientes, ocultar sin perder contenido o eliminar. Las listas y sus ayudas de teclado pertenecen a estas secciones; los demás campos siguen siendo texto plano.
+
+La introducción permite contar quién sos, qué te interesa o qué estás aprendiendo sin repetirlo en otras secciones. Conocimientos, formación y actualidad están retirados del producto, también para borradores anteriores. Sus datos heredados de v1 permanecen guardados internamente, sin edición ni exportación y sin fusionarlos con la presentación.
 
 El recorrido funciona sin cuenta: elegir qué compartir, configurar una sección a la vez, revisar y copiar o descargar `README.md`. En pantallas amplias, las secciones están a la izquierda, la configuración en el centro y la vista previa a la derecha. En pantallas angostas, la navegación es plegable y se alterna Editar/Vista previa. Tecnologías ofrece búsqueda y autocompletado sobre un catálogo local de 358 herramientas, además de texto propio. Incluye frameworks, ORMs, bases de datos, mensajería, infraestructura e IA, como Drizzle, TypeORM, Hono, TanStack, Claude, Codex y LangGraph. Su selección no integra esos servicios ni asigna un nivel de habilidad.
 
@@ -32,11 +34,13 @@ Las tecnologías muestran icono y nombre en filas adaptables, con categorías su
 
 Ubicación permite autocompletar países por nombre en inglés o español y agregar su bandera, o escribir otro lugar libremente. Contacto comienza con «Agregar red social» y cada entrada permite elegir su servicio o web y completar la dirección; la etiqueta personalizada sigue siendo opcional.
 
-La vista previa, la copia y la descarga parten del mismo Markdown. Los textos personales se escapan y los iconos exportados se generan exclusivamente desde los catálogos permitidos. El editor usa SVG locales; el README referencia originales de Devicon, Simple Icons y Lobe Icons fijados a commits. No admite HTML libre ni imágenes personalizadas por URL. Ver [recursos de terceros](THIRD_PARTY_NOTICES.md) y [decisión de iconos](docs/decisions/0009-profile-icons.md).
+La vista previa, la copia y la descarga parten del mismo Markdown. Los textos personales se escapan y los iconos exportados se generan exclusivamente desde los catálogos permitidos. El editor usa SVG locales; el README referencia originales de Devicon, Simple Icons y Lobe Icons fijados a commits. No admite HTML libre. Ver [recursos de terceros](THIRD_PARTY_NOTICES.md) y [decisión de iconos](docs/decisions/0009-profile-icons.md).
+
+Las imágenes propias se agregan mediante su bloque, con una URL HTTPS pública ya alojada y una descripción alternativa necesaria para exportar. La aplicación no sube archivos: una imagen local o una ruta de repositorio por sí sola no queda publicada. La validación de la dirección es sintáctica, sin comprobar DNS, disponibilidad ni tipo de archivo. La vista previa carga la imagen directamente desde el navegador, sin proxy del servidor; si falla, muestra la descripción y un enlace sin invalidar una dirección admitida. Ver [bloques visuales e imágenes](docs/decisions/0014-custom-visual-blocks.md).
 
 Actividad y contribuciones permite escribir aportes propios sin usuario de GitHub. El bloque opcional de GitHub consulta información pública tras una acción explícita y permite elegir las tarjetas y sugerencias que se quieren mostrar. El formulario no consulta al escribir ni recuperar; las imágenes de tarjetas ya elegidas sí se actualizan al mostrarse. Cero actividad y falta de datos son estados distintos; no se asignan rankings ni niveles de conocimiento. Los snapshots consultados no se guardan en el borrador: solo el usuario, las tarjetas y los aportes elegidos.
 
-El borrador v1 se guarda en el navegador, sin sincronización entre dispositivos ni migración. Los antiguos flags de contribuciones y métricas se presentan como una única sección; ocultarla conserva ambos contenidos. La actividad de GitHub no se usa para medir conocimientos.
+El borrador actual se guarda bajo `github-profile-generator.profile.v2` en el navegador, sin sincronización entre dispositivos. Si falta esa clave, un borrador v1 válido se migra en memoria, sin escribir hasta editar y conservando intacto su original. Un v2 inválido no se sustituye con v1 automáticamente. Los flags heredados de contribuciones y métricas se presentan como una única sección; ocultarla conserva ambos contenidos. Ver [secciones personalizadas y migración](docs/decisions/0013-custom-sections.md). La actividad de GitHub no se usa para medir conocimientos.
 
 ## Actividad de GitHub opcional
 

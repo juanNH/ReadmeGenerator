@@ -103,11 +103,16 @@ describe("README sections and export readiness", () => {
     expect(output).not.toContain("Location:");
   });
 
-  it("follows moduleOrder for combined sections", () => {
+  it("follows sectionOrder for combined sections", () => {
     const profile = presentationProfile();
     profile.visibility.contact = true;
     profile.data.contact.links = contactProfile().data.contact.links;
-    profile.moduleOrder = ["contact", ...profile.moduleOrder.filter((id) => id !== "contact")];
+    profile.sectionOrder = [
+      { kind: "module", moduleId: "contact" },
+      ...profile.sectionOrder.filter(
+        (reference) => reference.kind !== "module" || reference.moduleId !== "contact",
+      ),
+    ];
     const output = markdown(generateReadme(profile));
     expect(output.indexOf("## Contact")).toBeLessThan(output.indexOf("# Alex Rivera"));
   });
@@ -182,8 +187,8 @@ describe("retired sections remain stored without participating in output", () =>
       expect(generateReadme(freezeDeep(profile))).toEqual(generateReadme(expected));
       expect(markdown(generateReadme(profile))).toBe("A brief personal introduction\n");
       expect(profile).toEqual(before);
-      expect(profile.schemaVersion).toBe(1);
-      expect(profile.moduleOrder).toHaveLength(9);
+      expect(profile.schemaVersion).toBe(2);
+      expect(profile.sectionOrder).toHaveLength(9);
     },
   );
 
@@ -191,7 +196,9 @@ describe("retired sections remain stored without participating in output", () =>
     "reports empty output when only retired %s is visible despite saved content",
     (moduleId) => {
       const profile = retiredSectionsProfile();
-      for (const id of profile.moduleOrder) profile.visibility[id] = id === moduleId;
+      for (const reference of profile.sectionOrder)
+        if (reference.kind === "module")
+          profile.visibility[reference.moduleId] = reference.moduleId === moduleId;
       const before = structuredClone(profile);
 
       expect(generateReadme(freezeDeep(profile))).toEqual({

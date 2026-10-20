@@ -1,22 +1,24 @@
 # Modelo del perfil
 
-El núcleo implementa `ProfileDocument` versión 1, un registro de nueve IDs y operaciones puras de creación, validación, visibilidad y orden. El editor y el generador ofrecen cinco secciones: presentación, tecnologías, proyectos, actividad y contribuciones, y contacto. Los IDs retirados `knowledge`, `education` y `current` conservan únicamente su estructura interna v1, sin edición ni salida. Métricas aporta tarjetas a la sección de contribuciones, sin navegación separada. Ver [uso del editor](editor.md).
+El núcleo implementa `ProfileDocument` versión 2, un registro de nueve IDs fijos y operaciones puras de creación, validación, visibilidad, orden y secciones personalizadas. El editor ofrece cinco secciones fijas —presentación, tecnologías, proyectos, actividad y contribuciones, y contacto— y varias instancias propias con bloques. Los IDs retirados `knowledge`, `education` y `current` conservan su estructura heredada de v1, sin edición ni salida. Métricas aporta tarjetas a contribuciones, sin navegación separada. Ver [uso del editor](editor.md).
 
 ## Ubicación y contrato
 
 - [module-ids.ts](../src/core/modules/module-ids.ts) y [module-registry.ts](../src/core/modules/module-registry.ts): identificadores, orden inicial y registro tipado de esquema, clave de etiqueta y fábrica de datos vacíos. La UI resuelve las etiquetas de secciones activas en el namespace `Modules` EN/ES; el registro no importa componentes.
 - [module-content.ts](../src/core/profile/module-content.ts) y [profile-schema.ts](../src/core/profile/profile-schema.ts): esquemas Zod y tipos inferidos del contenido y documento.
 - [profile-validation.ts](../src/core/profile/profile-validation.ts), [profile-result.ts](../src/core/profile/profile-result.ts) y [profile-operations.ts](../src/core/profile/profile-operations.ts): parser, errores y operaciones.
+- [custom-content.ts](../src/core/profile/custom-content.ts) y [custom-section-operations.ts](../src/core/profile/custom-section-operations.ts): esquemas de bloques y operaciones de instancias personalizadas.
+- [render-custom.ts](../src/core/readme/render-custom.ts), [public-image.ts](../src/core/readme/public-image.ts) y [readme-result.ts](../src/core/readme/readme-result.ts): salida de bloques, política sintáctica de imágenes públicas y metadatos derivados de vista previa.
 - [Catálogo de tecnologías](../src/core/technologies/index.ts) y [proveedores de contacto](../src/core/contact/index.ts): metadatos puros de presentación; no agregan propiedades al documento.
 - [Actividad](../src/core/activity/index.ts), [snapshot público](../src/core/activity/activity-types.ts) y [SVG](../src/core/activity/render-card.ts): contratos serializables externos al documento, normalización y renderizado determinista; no consultan GitHub.
 
-`schemaVersion` es el número `1`. `contentLocale` admite `en` o `es` y es independiente del idioma de navegación. `data` y `visibility` contienen los nueve módulos; `moduleOrder` los incluye exactamente una vez, también si están ocultos. Opcional significa que no es obligatorio mostrarlos ni completar su contenido, no que sus propiedades puedan omitirse.
+`schemaVersion` es el número `2`. `contentLocale` admite `en` o `es` y es independiente del idioma de navegación. `data` y `visibility` conservan los nueve módulos. `customSections` contiene las instancias propias y `sectionOrder` mezcla `{ kind: "module", moduleId }` y `{ kind: "custom", sectionId }`. Cada módulo fijo y cada instancia personalizada deben tener una referencia exactamente una vez, también ocultos o retirados. No existe `moduleOrder` en documentos v2. Opcional significa que no es obligatorio mostrarlos ni completar su contenido, no que sus propiedades puedan omitirse.
 
 La forma JSON usa `""` para texto vacío, `[]` para colecciones vacías y `null` para elecciones enumeradas sin completar. No usa `undefined` ni valores de reloj o azar. Ejemplo completo de `createEmptyProfile("en")`:
 
 ```json
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "contentLocale": "en",
   "data": {
     "presentation": { "displayName": "", "headline": "", "bio": "", "location": "" },
@@ -29,17 +31,18 @@ La forma JSON usa `""` para texto vacío, `[]` para colecciones vacías y `null`
     "metrics": { "username": "", "cards": [] },
     "contact": { "links": [] }
   },
-  "moduleOrder": [
-    "presentation",
-    "knowledge",
-    "technologies",
-    "education",
-    "current",
-    "projects",
-    "contributions",
-    "metrics",
-    "contact"
+  "sectionOrder": [
+    { "kind": "module", "moduleId": "presentation" },
+    { "kind": "module", "moduleId": "knowledge" },
+    { "kind": "module", "moduleId": "technologies" },
+    { "kind": "module", "moduleId": "education" },
+    { "kind": "module", "moduleId": "current" },
+    { "kind": "module", "moduleId": "projects" },
+    { "kind": "module", "moduleId": "contributions" },
+    { "kind": "module", "moduleId": "metrics" },
+    { "kind": "module", "moduleId": "contact" }
   ],
+  "customSections": [],
   "visibility": {
     "presentation": false,
     "knowledge": false,
@@ -54,7 +57,7 @@ La forma JSON usa `""` para texto vacío, `[]` para colecciones vacías y `null`
 }
 ```
 
-## Estructuras del documento v1
+## Contenido fijo conservado desde v1
 
 Todos los campos están presentes en cada entrada; el texto puede estar vacío. La tabla describe el formato persistido, no opciones del editor. Los esquemas enlazados son la referencia exacta. `knowledge`, `education` y `current` son estructuras retiradas que se preservan internamente.
 
@@ -70,7 +73,7 @@ Todos los campos están presentes en cada entrada; el texto puede estar vacío. 
 | `metrics`       | `username`, `cards`; selecciones `calendar`, `summary`, `languages`, sin repetición. Se compone dentro de contribuciones. |
 | `contact`       | `links`.                                                                                                                  |
 
-Los enlaces tienen `id`, `label`, `url`. Cada `id` necesita algún carácter distinto de espacios y debe ser único dentro de su colección. El núcleo no genera ni recorta identificadores; distintas colecciones pueden repetirlos.
+Los enlaces tienen `id`, `label`, `url`. Cada `id` necesita algún carácter distinto de espacios y debe ser único dentro de su colección; distintas colecciones pueden repetirlos. No se recortan IDs recuperados. Las operaciones que necesitan nuevas identidades reciben una función explícita, sin usar azar propio dentro del núcleo.
 
 Los IDs son strings opacos, no necesariamente UUID: conservarlos al editar o recuperar. Los formularios generan IDs nuevos fuera de `core` y no los usan para construir IDs DOM. `projects.technologies` sigue siendo un array de strings, sin IDs añadidos al formato persistido. Los grupos tecnológicos admiten nombre vacío y cada tecnología, nombre o contexto.
 
@@ -80,16 +83,54 @@ El catálogo de contacto deriva el proveedor desde `url` después de normalizarl
 
 Ubicación conserva `presentation.location` como string libre. Una selección explícita del catálogo de países guarda, por ejemplo, `"🇦🇷 Argentina"`. Solo bandera y nombre exacto EN/ES del mismo país permiten generar un SVG decorativo fijo de 20 × 15 junto al nombre escapado; no se incorporan URLs ni campos nuevos al documento. El formulario muestra el nombre con la bandera local y buscar reconoce ambos idiomas y códigos ISO. Escribir otra ubicación quita el prefijo de la elección anterior. Los demás valores, como `"Argentina"`, `"Buenos Aires, Argentina"` o `"🇦🇷 Remote"`, siguen siendo texto íntegro y no se reescriben ni traducen automáticamente. Ver [ADR 0011](decisions/0011-country-and-contact-inputs.md).
 
-La validación interna conserva las elecciones anulables v1: `education.kind` = `degree`, `course`, `certification`, `other` o `null`; `education.status` = `in-progress`, `completed`, `paused` o `null`; `current.kind` = `work`, `learning`, `interests`, `collaboration` o `null`. Los campos de fecha retirados siguen siendo strings, sin reinterpretarlos. No tienen formulario ni generación. Las cinco secciones activas usan el esquema existente y la clave `github-profile-generator.profile.v1`; no hay migración para recuperar borradores anteriores.
+La validación interna conserva las elecciones anulables v1: `education.kind` = `degree`, `course`, `certification`, `other` o `null`; `education.status` = `in-progress`, `completed`, `paused` o `null`; `current.kind` = `work`, `learning`, `interests`, `collaboration` o `null`. Los campos de fecha retirados siguen siendo strings, sin reinterpretarlos. No tienen formulario ni generación. Estas estructuras se conservan al migrar a v2.
+
+## Secciones personalizadas
+
+Cada instancia contiene `id`, `title`, `visible` y `blocks`. El título es texto opcional y no determina su identidad; títulos repetidos son válidos. La visibilidad pertenece a la instancia, fuera del objeto de flags fijos.
+
+| Bloque    | Forma                                                                           |
+| --------- | ------------------------------------------------------------------------------- |
+| Párrafo   | `{ id, type: "paragraph", text }`.                                              |
+| Lista     | `{ id, type: "list", style: "unordered" \| "ordered", items: [{ id, text }] }`. |
+| Enlace    | `{ id, type: "link", label, url }`.                                             |
+| Subtítulo | `{ id, type: "heading", text }`.                                                |
+| Separador | `{ id, type: "divider" }`.                                                      |
+| Cita      | `{ id, type: "quote", text }`.                                                  |
+| Imagen    | `{ id, type: "image", url, alt }`.                                              |
+
+La validación es estricta y exige IDs no vacíos y únicos en cada colección: secciones en el documento, bloques en una sección e ítems en una lista. Un `sectionId` desconocido o una instancia sin referencia produce `invalid_reference`; referencias repetidas producen `invalid_order`. La parte discriminada de una referencia permite distinguir una instancia de un módulo aunque sus strings coincidan.
+
+`heading`, `divider`, `quote` e `image` son variantes aditivas de v2. No cambian las estructuras heredadas, claves de almacenamiento ni campos de las variantes anteriores; el parser no les agrega valores por defecto. La URL y alternativa de una imagen son strings que pueden estar incompletos en un borrador estructuralmente válido. La exportación aplica controles separados. El selector ofrece ocho opciones porque `list` tiene dos estilos. Las muestras del selector no forman parte del documento.
+
+Agregar inserta una instancia vacía y visible después de una referencia explícita o al final. Duplicar copia todo el árbol, conserva textos, orden y visibilidad, genera IDs nuevos para sección, bloques e ítems y coloca la referencia junto al original. No hay objetos anidados compartidos con la copia. Ocultar cambia solo `visible`; eliminar quita esa instancia y su referencia, conservando el orden relativo de las demás.
+
+Las operaciones reciben `createId` desde la UI. Rechazan IDs vacíos o ya usados y limitan los intentos; un fallo devuelve `id_generation_failed` sin cambios parciales. El núcleo no consulta reloj, azar, navegador ni almacenamiento.
+
+## Compatibilidad y migración
+
+`profileDocumentV1Schema` describe el formato antiguo de forma estricta. `migrateProfileV1` conserva contenido, idioma, IDs y visibilidad; convierte cada entrada de `moduleOrder` en una referencia fija, agrega `customSections: []` y devuelve v2. No traduce, deduplica, fusiona ni inventa contenido. Un v1 con propiedades extra de v2 no se acepta como formato heredado.
+
+`parseProfileDocument` valida v2 o valida v1 y devuelve su migración. El adaptador local usa `github-profile-generator.profile.v2` y solo consulta `github-profile-generator.profile.v1` si no existe v2. Recuperar o migrar no escribe: la primera edición guarda v2 y deja la clave v1 intacta como original local. Si v2 está dañado, es incompatible o no se puede leer, no se sustituye por v1 automáticamente. Ver [ADR 0013](decisions/0013-custom-sections.md).
+
+Un lector anterior con una unión estricta de bloques puede rechazar las variantes visuales nuevas aunque `schemaVersion` siga siendo `2`; esa ampliación no implica compatibilidad hacia atrás del lector. El comportamiento de recuperación conserva el valor rechazado y no lo reescribe ni sustituye por v1. Los documentos previos sin esos bloques mantienen su forma y salida. Ver [ADR 0014](decisions/0014-custom-visual-blocks.md).
 
 ## API y resultados
 
 | API                                                                                                                   | Contrato                                                                                                                                                      |
 | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `createEmptyProfile(contentLocale: ContentLocale): ProfileDocument`                                                   | Crea datos y arrays independientes en cada llamada, orden inicial y todas las secciones ocultas. Recibe un idioma tipado explícito; no consulta el navegador. |
-| `parseProfileDocument(input: unknown): ProfileResult<ProfileDocument>`                                                | Valida un borrador completo. No convierte tipos, completa campos ni descarta propiedades desconocidas, tampoco anidadas.                                      |
+| `parseProfileDocument(input: unknown): ProfileResult<ProfileDocument>`                                                | Valida v2 o valida v1 y migra a v2. No convierte tipos de contenido ni descarta propiedades desconocidas.                                                     |
 | `setModuleVisibility(document: ProfileDocument, moduleId: unknown, visible: unknown): ProfileResult<ProfileDocument>` | Valida identificador y booleano. Conserva contenido y orden.                                                                                                  |
-| `reorderModules(document: ProfileDocument, moduleOrder: unknown): ProfileResult<ProfileDocument>`                     | Valida una permutación completa y copia el array recibido. Conserva contenido y visibilidad.                                                                  |
+| `reorderSections(document: ProfileDocument, sectionOrder: unknown): ProfileResult<ProfileDocument>`                   | Valida el orden mixto completo y sus referencias; conserva contenido y visibilidad.                                                                           |
+| `reorderModules(document: ProfileDocument, moduleOrder: unknown): ProfileResult<ProfileDocument>`                     | Compatibilidad: reordena solo las nueve referencias fijas, conservando las posiciones personalizadas.                                                         |
+| `addCustomSection(document, createId, after?)`                                                                        | Agrega una instancia y su referencia.                                                                                                                         |
+| `updateCustomSection(document, sectionId, value)`                                                                     | Valida y reemplaza una instancia sin permitir cambiar su identidad.                                                                                           |
+| `setCustomSectionVisibility(document, sectionId, visible)`                                                            | Cambia solo su inclusión.                                                                                                                                     |
+| `duplicateCustomSection(document, sectionId, createId)`                                                               | Copia completa con IDs nuevos y referencia junto al original.                                                                                                 |
+| `removeCustomSection(document, sectionId)`                                                                            | Elimina solo la instancia y su referencia.                                                                                                                    |
+
+Las operaciones de instancias también devuelven `ProfileResult<ProfileDocument>`. `createEmptyProfileV1` permanece como fábrica de compatibilidad; los nuevos borradores usan `createEmptyProfile` y v2.
 
 ```ts
 type ProfileResult<T> =
@@ -104,25 +145,29 @@ type ProfileIssue = {
 
 Los errores exponen códigos estables y rutas, sin mensajes de Zod ni el valor rechazado. La UI resuelve sus textos. No depender del orden o número exacto de errores.
 
-| Códigos                                        | Significado                                                                                                    |
-| ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `invalid_type`, `invalid_value`                | Tipo incorrecto/campo requerido ausente, o valor no admitido.                                                  |
-| `unknown_property`                             | Propiedad no declarada; la ruta termina en esa clave.                                                          |
-| `unsupported_version`                          | Propiedad propia `schemaVersion` presente con valor distinto del número `1`; si falta, es error de estructura. |
-| `unknown_module`, `invalid_order`              | Identificador desconocido en orden/visibilidad, o composición incompleta/repetida del orden.                   |
-| `invalid_id`, `duplicate_id`, `duplicate_card` | Identificador vacío, identificador repetido en su colección o tarjeta seleccionada más de una vez.             |
+| Códigos                                        | Significado                                                                                           |
+| ---------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `invalid_type`, `invalid_value`                | Tipo incorrecto/campo requerido ausente, o valor no admitido.                                         |
+| `unknown_property`                             | Propiedad no declarada; la ruta termina en esa clave.                                                 |
+| `unsupported_version`                          | Propiedad propia `schemaVersion` distinta de los números `1` y `2`; si falta, es error de estructura. |
+| `unknown_module`, `invalid_order`              | Identificador desconocido en orden/visibilidad, o composición incompleta/repetida del orden.          |
+| `invalid_id`, `duplicate_id`, `duplicate_card` | Identificador vacío, identificador repetido en su colección o tarjeta seleccionada más de una vez.    |
+| `unknown_section`, `invalid_reference`         | Instancia inexistente o referencias personalizadas que no corresponden al documento.                  |
+| `id_generation_failed`                         | No se pudieron generar identidades nuevas válidas; no se aplicó una operación parcial.                |
 
-Ejemplos de rutas: `["data", "projects", "items", 0, "id"]`, `["moduleOrder", 2]`, `["schemaVersion"]`. Los argumentos de visibilidad usan `["moduleId"]` y `["visible"]`.
+Ejemplos de rutas: `["data", "projects", "items", 0, "id"]`, `["sectionOrder", 2]`, `["customSections", 0, "blocks", 1, "id"]`, `["schemaVersion"]`. Los argumentos de visibilidad usan `["moduleId"]` o `["sectionId"]` y `["visible"]`.
 
-Las operaciones requieren un documento válido procedente de la fábrica o del parser; no lo revalidan completo. Una aserción de TypeScript sobre datos externos no cumple ese requisito. Devuelven documentos nuevos sin mutar el original, con ramas no modificadas compartidas: visibilidad conserva `data` y `moduleOrder`; orden conserva `data` y `visibility`. Tratar los documentos como inmutables; no hay congelación profunda. La fábrica produce estructuras independientes entre llamadas.
+Las operaciones requieren un documento válido procedente de la fábrica o del parser y validan sus argumentos; `reorderSections` comprueba el documento candidato con su orden mixto. Una aserción de TypeScript sobre datos externos no cumple ese requisito. No mutan el original; pueden compartir ramas no modificadas, por lo que se deben tratar como inmutables. La fábrica produce estructuras independientes y duplicar una instancia copia sus objetos anidados.
 
 ## Límites de validación
 
-El parser recibe un valor de JavaScript: no interpreta cadenas JSON ni captura errores de `JSON.parse`. Esa frontera debe controlar fallos de lectura o sintaxis. No hay migraciones implícitas.
+El parser recibe un valor de JavaScript: no interpreta cadenas JSON ni captura errores de `JSON.parse`. Esa frontera debe controlar fallos de lectura o sintaxis. La única migración implementada es v1 validado a v2; no corrige estructuras incompatibles.
 
 Un borrador vacío y totalmente oculto es válido. La validación del documento no comprueba protocolos de URL, formatos o relaciones de fechas ni seguridad del HTML. Un resultado correcto no autoriza renderizar o exportar sin controles específicos de salida.
 
-[`generateReadme(document, { activityCardBaseUrl? }): ReadmeResult`](../src/core/readme/generate-readme.ts) requiere un documento ya válido y no consulta red ni almacenamiento. Devuelve `{ success: true, markdown, exportIssues? }` o `{ success: false, errors }`. Los errores de generación activos son `empty_profile`, `invalid_url` e `invalid_username`; `unsupported_module` permanece en el tipo por compatibilidad, pero métricas ya no lo genera. Vista previa, copia y descarga comparten el mismo Markdown. Un resultado `success: true` con `exportIssues` permite revisar, pero no autoriza copiar o descargar.
+[`generateReadme(document, { activityCardBaseUrl? }): ReadmeResult`](../src/core/readme/generate-readme.ts) requiere un documento ya válido y no consulta red ni almacenamiento. Devuelve `{ success: true, markdown, exportIssues?, customImages? }` o `{ success: false, errors }`. Los errores de generación activos son `empty_profile`, `invalid_url`, `missing_image_alt` e `invalid_username`; `unsupported_module` permanece en el tipo por compatibilidad, pero métricas ya no lo genera. Vista previa, copia y descarga comparten el mismo Markdown. Un resultado `success: true` con `exportIssues` permite revisar, pero no autoriza copiar o descargar.
+
+`customImages` solo está presente cuando el resultado correcto contiene imágenes propias válidas. Es `readonly CustomImageSource[]`, con elementos `{ readonly src: string; readonly alt: string }`: URL canónica y texto alternativo plano normalizado que coinciden exactamente con el nodo del Markdown generado. Conserva orden de salida y repeticiones. No incluye iconos de catálogo, tarjetas ni imágenes de secciones ocultas; no se persiste ni se devuelve en errores. La vista previa usa estos pares para permitir exclusivamente las imágenes explícitas del mismo resultado.
 
 Las tarjetas visibles y seleccionadas necesitan un usuario normalizable de GitHub. Se admite `@` inicial y espacios exteriores al normalizar; se guarda el texto del borrador y el generador usa el login canónico en URLs. Un usuario inválido produce `invalid_username` en `["data", "metrics", "username"]`. Métricas visible sin tarjetas no exige usuario ni produce contenido.
 
@@ -132,17 +177,20 @@ Las tarjetas visibles y seleccionadas necesitan un usuario normalizable de GitHu
 
 ## Reglas de salida
 
-- Respetar `moduleOrder` y el orden de cada colección, sin ordenar por nombre o actividad. La UI mueve las cinco secciones activas visibles manteniendo las posiciones de IDs ocultos, retirados y métricas dentro de los nueve elementos.
+- Respetar `sectionOrder` y el orden de cada colección, sin ordenar por nombre o actividad. La UI reordena referencias incluidas, fijas o personalizadas, manteniendo las posiciones ocultas, retiradas y de métricas.
 - Actividad y contribuciones tiene inclusión efectiva `visibility.contributions || visibility.metrics`. El generador compone ambas fuentes en el slot `contributions` y omite el slot `metrics`. Los aportes manuales solo participan con su flag; las tarjetas, con el de métricas y una selección no vacía. La casilla global apaga ambos flags al ocultar; al mostrar activa contribuciones y métricas si conserva tarjetas. Esta coordinación de UI no modifica los esquemas ni las operaciones puras de visibilidad de un único ID.
 - Omitir entradas completamente vacías y encabezados sin contenido. Proyectos y contribuciones admiten contenido manual sin enlaces.
+- Las instancias personalizadas solo salen cuando `visible` es verdadero. Un título sin bloques útiles no produce un encabezado; un cuerpo útil sin título sale sin inventar nombre. Los párrafos conservan sus separaciones; las listas omiten ítems vacíos, numeran los exportables y sangran las continuaciones según su marcador. Las listas estructuradas solo pertenecen a las instancias personalizadas, no al texto de módulos fijos.
+- Un subtítulo propio no vacío genera `###` si la sección tiene título o `##` si no lo tiene; el texto se normaliza en una línea y se escapa. Un separador genera `---` y cuenta como contenido explícito. La cita escapa su texto y antepone `>` a todas sus líneas, incluidas las separaciones entre párrafos. Los bloques de texto vacíos se omiten.
+- Una imagen completamente vacía se omite. Si hay descripción pero no una URL admitida, devuelve `invalid_url` en `["customSections", índice, "blocks", índice, "url"]`; una URL sin alternativa normalizada devuelve `missing_image_alt` en la ruta terminada en `alt`. Puede devolver ambos errores cuando ambos campos requieren corrección. No devuelve un README parcial. Una instancia oculta no aporta errores ni `customImages`.
 - Un grupo tecnológico solo aporta su encabezado si tiene alguna tecnología exportable. Las tecnologías aceptan nombre, contexto o ambos. Un nombre o alias reconocido genera un icono decorativo y nombre visible desde el catálogo permitido; las entradas propias y los contextos producen texto escapado. No hay puntuaciones de dominio ni organización automática al generar.
 - Omitir los tres IDs retirados antes de revisar su contenido, sin alterar sus datos o visibilidad.
 - Escapar texto plano para Markdown y HTML. Traducir únicamente etiquetas generadas por `contentLocale`, sin traducir los textos del perfil.
 - Compartir HTTP/HTTPS absoluto para enlaces de contenido, sin credenciales, espacios, controles ni barras invertidas. `mailto:` con un solo buzón ASCII sin parámetros solo se admite en contacto.
 - Una URL opcional vacía es válida. Las filas de enlaces de contacto y proyectos se omiten si ambos campos están vacíos; una etiqueta sin URL válida produce un error. Una URL válida sin etiqueta muestra el nombre de un servicio reconocido de contacto o la dirección en los demás casos.
-- Una URL proporcionada e inválida en una sección activa y visible bloquea toda la salida. Por ejemplo, `["data", "contributions", "items", 0, "url"]` o `["data", "projects", "items", 0, "links", 1, "url"]`. Los enlaces de módulos ocultos o retirados no participan. No generar un archivo parcial silenciosamente.
+- Una URL proporcionada e inválida en una sección activa y visible bloquea toda la salida. Por ejemplo, `["data", "contributions", "items", 0, "url"]`, `["data", "projects", "items", 0, "links", 1, "url"]` o `["customSections", 1, "blocks", 2, "url"]`. Los índices de secciones propias corresponden a su almacenamiento, aunque el orden visual sea diferente. Sus enlaces usan la misma política web, sin `mailto:`. Los datos ocultos o retirados no participan. No generar un archivo parcial silenciosamente.
 
-Los iconos tecnológicos exportados son etiquetas `img` decorativas de 20 × 20, con `alt=""` y `src` construido exclusivamente desde los metadatos de [tecnologías](../src/core/technologies/index.ts), seguidas del nombre visible escapado. Sus 358 entradas referencian Devicon, Simple Icons y Lobe Icons fijados a commits. La vista previa conserva compatibilidad con los tokens anteriores de 32 × 32. No hay URLs de imagen personalizadas ni niveles de habilidad; algunos productos comparten una marca de familia documentada. Ver [ADR 0012](decisions/0012-technology-categories.md).
+Los iconos tecnológicos exportados son etiquetas `img` decorativas de 20 × 20, con `alt=""` y `src` construido exclusivamente desde los metadatos de [tecnologías](../src/core/technologies/index.ts), seguidas del nombre visible escapado. Sus 358 entradas referencian Devicon, Simple Icons y Lobe Icons fijados a commits. La vista previa conserva compatibilidad con los tokens anteriores de 32 × 32. No hay URLs de iconos personalizados ni niveles de habilidad; algunos productos comparten una marca de familia documentada. Ver [ADR 0012](decisions/0012-technology-categories.md).
 
 Contacto agrega iconos decorativos de 20 × 20 con `alt=""` desde sus 13 proveedores de [contacto](../src/core/contact/index.ts). La marca depende de una URL admitida y un hostname explícito; no se asigna a dominios parecidos, subdominios arbitrarios o puertos no estándar. La etiqueta escapada conserva el nombre accesible del enlace. Una dirección propia o un correo sin proveedor se exporta como texto enlazado, sin imagen externa elegida por la persona.
 
@@ -150,10 +198,14 @@ Una ubicación que coincide con una selección del [catálogo de países](../src
 
 Los campos personales nunca se interpolan como atributos HTML. La vista previa reconoce únicamente tokens exactos del marcado generado y verifica URL permitida y alternativa vacía para iconos decorativos de tecnología/contacto; comprueba también el nombre alternativo en los tokens tecnológicos anteriores. Solo usa los SVG locales equivalentes. Las filas tecnológicas se adaptan al ancho disponible; ese estilo de interfaz no se incrusta en el README. El resto del HTML sigue descartado con `skipHtml`, sin `rehypeRaw`. Las licencias y procedencia están en [recursos de terceros](../THIRD_PARTY_NOTICES.md).
 
-Las tarjetas son imágenes Markdown generadas desde `/cards/github/{username}/{card}.svg?locale={locale}` bajo el origen configurado. La vista previa reconoce exactamente esas rutas y sus parámetros y las resuelve localmente; no acepta un host de imagen arbitrario ni URLs personales. El SVG recibe `ActivitySnapshot`, tipo de tarjeta, idioma y estado stale explícitos. Usa fechas UTC del snapshot, escapa XML, limita texto y solo acepta colores hex; no ejecuta JavaScript ni carga recursos externos.
+Las imágenes propias se generan exclusivamente desde el bloque `image`, con alternativa escapada y destino Markdown delimitado por `<` y `>`. [`normalizePublicImageUrl`](../src/core/readme/public-image.ts) admite HTTPS con nombre de dominio de sintaxis pública, sin direcciones IP, hosts locales o sufijos privados conocidos, credenciales, fragmentos ni puerto no estándar. Se admiten query, puerto HTTPS predeterminado y rutas sin extensión. No se aceptan direcciones HTTP, relativas, `file:`, `blob:` o `data:`. Es una validación sintáctica: no resuelve DNS ni verifica contenido, disponibilidad o duración del enlace. El recurso debe estar alojado por separado; exportar el README no lo publica ni lo copia.
 
-`ActivitySnapshot` contiene usuario, fecha de consulta, período, calendario, resumen, lenguajes y sugerencias públicas. Es un contrato validado de datos remotos, separado de `ProfileDocument`: no se almacena en el borrador. `ActivityResult` distingue éxito con `stale` de errores de usuario, configuración, inexistencia, cuota o indisponibilidad. Las sugerencias solo se convierten en datos persistidos cuando la persona las elige; se guardan como entradas manuales v1 con un ID nuevo. No hay migración ni segunda fuente de verdad del perfil.
+La vista previa exige coincidencia exacta de `src` y `alt` con `customImages` y vuelve a verificar la política HTTPS. Su carga ocurre mediante un `img` directo en el navegador con `loading="lazy"`, `decoding="async"` y `referrerPolicy="no-referrer"`, sin proxy ni optimizador del servidor. Un fallo de carga produce una alternativa visual temporal con descripción y enlace; no modifica el borrador ni cambia la validez de exportación. Escribir sintaxis de imagen en un párrafo, cita, título o enlace sigue produciendo texto escapado.
 
-El alcance activo y la conservación interna están definidos en [ADR 0008](decisions/0008-focused-profile.md). Las fuentes y los iconos de tecnologías/contacto están en [ADR 0009](decisions/0009-profile-icons.md); la unión de contribuciones/métricas y los contratos remotos, en [ADR 0010](decisions/0010-github-activity.md). [ADR 0005](decisions/0005-manual-profile-composition.md) y [ADR 0007](decisions/0007-simple-profile.md) conservan el contexto histórico.
+Las tarjetas son imágenes Markdown generadas desde `/cards/github/{username}/{card}.svg?locale={locale}` bajo el origen configurado. La vista previa reconoce exactamente esas rutas y sus parámetros y las resuelve localmente; la excepción de tarjetas no admite un host arbitrario. El SVG recibe `ActivitySnapshot`, tipo de tarjeta, idioma y estado stale explícitos. Usa fechas UTC del snapshot, escapa XML, limita texto y solo acepta colores hex; no ejecuta JavaScript ni carga recursos externos.
+
+`ActivitySnapshot` contiene usuario, fecha de consulta, período, calendario, resumen, lenguajes y sugerencias públicas. Es un contrato validado de datos remotos, separado de `ProfileDocument`: no se almacena en el borrador. `ActivityResult` distingue éxito con `stale` de errores de usuario, configuración, inexistencia, cuota o indisponibilidad. Las sugerencias solo se convierten en datos persistidos cuando la persona las elige; se guardan en la estructura heredada de aportes manuales con un ID nuevo. No hay una segunda fuente de verdad del perfil.
+
+El retiro de módulos se define en [ADR 0008](decisions/0008-focused-profile.md). Las fuentes e iconos están en [ADR 0009](decisions/0009-profile-icons.md); la unión de contribuciones/métricas, en [ADR 0010](decisions/0010-github-activity.md); el contrato actual, las instancias y la migración, en [ADR 0013](decisions/0013-custom-sections.md), ampliado con las variantes visuales y su política de imágenes en [ADR 0014](decisions/0014-custom-visual-blocks.md). Los ADR anteriores conservan el contexto histórico.
 
 Ver [ADR 0003](decisions/0003-profile-document.md). Referencias funcionales: [Zod: Basics](https://zod.dev/basics) para `safeParse` y `z.infer`; [Zod: API](https://zod.dev/api) para objetos estrictos y esquemas anulables.

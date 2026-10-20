@@ -5,7 +5,12 @@ import {
   createEmptyExampleProfile,
   createKnowledgeExampleProfile,
 } from "./fixtures";
-import { createEmptyProfile, reorderModules, setModuleVisibility } from "./profile-operations";
+import {
+  createEmptyProfile,
+  createEmptyProfileV1,
+  reorderModules,
+  setModuleVisibility,
+} from "./profile-operations";
 import type { ProfileIssue, ProfileResult } from "./profile-result";
 import { parseProfileDocument } from "./profile-validation";
 
@@ -60,8 +65,11 @@ describe("profile drafts and reference examples", () => {
   it("starts empty without requiring any public activity or personal data", () => {
     const profile = createEmptyProfile("en");
     expect(createEmptyExampleProfile()).toEqual(profile);
-    expect(profile.schemaVersion).toBe(1);
-    expect(profile.moduleOrder).toEqual(moduleIds);
+    expect(profile.schemaVersion).toBe(2);
+    expect(profile.sectionOrder).toEqual(
+      moduleIds.map((moduleId) => ({ kind: "module", moduleId })),
+    );
+    expect(profile.customSections).toEqual([]);
     expect(Object.values(profile.visibility)).toEqual(moduleIds.map(() => false));
     expect(profile.data.presentation).toEqual({
       displayName: "",
@@ -149,7 +157,7 @@ describe("profile drafts and reference examples", () => {
     });
     first.data.metrics.cards.push("summary");
     first.data.contact.links.push({ id: "new-contact", label: "", url: "" });
-    first.moduleOrder.reverse();
+    first.sectionOrder.reverse();
     first.visibility.presentation = !first.visibility.presentation;
     expect(second).toEqual(originalSecond);
   });
@@ -184,7 +192,7 @@ describe("profile drafts and reference examples", () => {
 });
 
 describe("invalid imported documents", () => {
-  it.each([0, 2, "1", null])(
+  it.each([0, 3, "1", null])(
     "rejects unsupported schema version %j explicitly",
     (schemaVersion) => {
       expectIssue(parseProfileDocument({ ...createEmptyProfile("en"), schemaVersion }), {
@@ -306,7 +314,7 @@ describe("module visibility and order operations", () => {
       const hidden = unwrap(setModuleVisibility(original, moduleId, false));
       expect(hidden.visibility).toEqual({ ...before.visibility, [moduleId]: false });
       expect(hidden.data).toEqual(before.data);
-      expect(hidden.moduleOrder).toEqual(before.moduleOrder);
+      expect(hidden.sectionOrder).toEqual(before.sectionOrder);
       const restored = unwrap(setModuleVisibility(deepFreeze(hidden), moduleId, true));
       expect(restored).toEqual(before);
       expect(original).toEqual(before);
@@ -336,10 +344,15 @@ describe("module visibility and order operations", () => {
     const before = structuredClone(original);
     const order = [...moduleIds].reverse();
     const reordered = unwrap(reorderModules(original, order));
-    expect(reordered).toEqual({ ...before, moduleOrder: order });
+    expect(reordered).toEqual({
+      ...before,
+      sectionOrder: order.map((moduleId) => ({ kind: "module", moduleId })),
+    });
     expect(original).toEqual(before);
     order.reverse();
-    expect(reordered.moduleOrder).toEqual([...moduleIds].reverse());
+    expect(reordered.sectionOrder).toEqual(
+      [...moduleIds].reverse().map((moduleId) => ({ kind: "module", moduleId })),
+    );
     expect(unwrap(parseProfileDocument(reordered))).toEqual(reordered);
   });
 
@@ -369,7 +382,15 @@ describe("module visibility and order operations", () => {
     const original = deepFreeze(createContributorExampleProfile());
     const before = structuredClone(original);
     expectIssue(reorderModules(original, order), issue);
-    expectIssue(parseProfileDocument({ ...original, moduleOrder: order }), issue);
+    expectIssue(
+      parseProfileDocument({
+        ...createEmptyProfileV1(original.contentLocale),
+        data: original.data,
+        visibility: original.visibility,
+        moduleOrder: order,
+      }),
+      issue,
+    );
     expect(original).toEqual(before);
   });
 });

@@ -1,5 +1,7 @@
 {
   "title": "Your sections",
+  "addCustom": "Add custom section",
+  "customHelp": "Add text, lists, links and images. Create more sections or duplicate one whenever you like.",
   "description": "Choose a section to configure it. Drag included sections into the order you want to share them.",
   "count": "{total, plural, =0 {No sections included yet} one {# section included} other {# sections included}}",
   "editing": "Editing now",

@@ -110,7 +110,7 @@ describe("manual content export and optional sections", () => {
       { id: "help", title: "Community", description: "", url: "" },
     ];
     profile.data.contact.links = [{ id: "site", label: "Website", url: "https://example.com" }];
-    profile.moduleOrder.reverse();
+    profile.sectionOrder.reverse();
     const output = markdown(generateReadme(profile));
     const headings = [...output.matchAll(/^#{1,2} (.+)$/gm)].map((match) => match[1]);
     expect(headings).toEqual(["Contact", "Contributions", "Projects", "Technologies", "Alex"]);

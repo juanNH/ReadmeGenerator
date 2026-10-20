@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createEmptyProfile } from "@/core/profile/profile-operations";
 import { moduleIds } from "@/core/modules/module-ids";
+import type { ProfileDocument } from "@/core/profile/profile-schema";
 import {
   moveVisibleModule,
   editableModuleIds,
@@ -9,7 +10,19 @@ import {
   isEditableModuleId,
   moveVisibleModuleToIndex,
   visibleEditableModules,
+  editableSectionIds,
+  visibleEditableSections,
+  moveVisibleSectionToIndex,
+  getCustomSection,
+  setSectionVisibility,
+  sectionHasErrors,
 } from "./module-composition";
+
+function fixedOrder(document: ProfileDocument) {
+  return document.sectionOrder.flatMap((reference) =>
+    reference.kind === "module" ? [reference.moduleId] : [],
+  );
+}
 
 function example() {
   const profile = createEmptyProfile("en");
@@ -37,6 +50,47 @@ function example() {
 }
 
 describe("visible module composition", () => {
+  it("keeps repeated custom titles and opaque identities separate from fixed modules", () => {
+    const profile = example();
+    profile.customSections = [
+      { id: "presentation", title: "My section", visible: true, blocks: [] },
+      { id: "\ud800", title: "My section", visible: false, blocks: [] },
+    ];
+    profile.sectionOrder.splice(3, 0, { kind: "custom", sectionId: "presentation" });
+    profile.sectionOrder.push({ kind: "custom", sectionId: "\ud800" });
+    expect(editableSectionIds(profile)).toContain("custom:presentation");
+    expect(visibleEditableSections(profile)).toEqual([
+      "technologies",
+      "custom:presentation",
+      "projects",
+      "contributions",
+    ]);
+    expect(getCustomSection(profile, "custom:presentatio")).toBeUndefined();
+    const next = moveVisibleSectionToIndex(profile, "custom:presentation", 0);
+    if (!next.success) throw new Error("Mixed sections must be reorderable.");
+    expect(visibleEditableSections(next.data)).toEqual([
+      "custom:presentation",
+      "technologies",
+      "projects",
+      "contributions",
+    ]);
+    expect(next.data.sectionOrder.at(-1)).toEqual({ kind: "custom", sectionId: "\ud800" });
+    expect(next.data.data).toBe(profile.data);
+    const hidden = setSectionVisibility(next.data, "custom:presentation", false);
+    if (!hidden.success) throw new Error("Custom visibility must be editable.");
+    expect(hidden.data.customSections[0]?.visible).toBe(false);
+    expect(profile.customSections[0]?.visible).toBe(true);
+    expect(
+      sectionHasErrors(profile, "custom:presentatio", [
+        { code: "invalid_url", path: ["customSections", 0, "blocks", 0, "url"] },
+      ]),
+    ).toBe(false);
+    expect(
+      sectionHasErrors(profile, "custom:presentation", [
+        { code: "invalid_url", path: ["customSections", 0, "blocks", 0, "url"] },
+      ]),
+    ).toBe(true);
+  });
   it("includes a metrics-only saved document as one contributions section without normalizing it", () => {
     const profile = createEmptyProfile("en");
     profile.visibility.metrics = true;
@@ -62,7 +116,7 @@ describe("visible module composition", () => {
     if (!restored.success) return;
     expect(restored.data.visibility.contributions).toBe(true);
     expect(restored.data.visibility.metrics).toBe(true);
-    expect(restored.data.moduleOrder).toEqual(profile.moduleOrder);
+    expect(fixedOrder(restored.data)).toEqual(fixedOrder(profile));
     expect(restored.data.data).toBe(profile.data);
   });
 
@@ -74,7 +128,7 @@ describe("visible module composition", () => {
     expect(result.success).toBe(true);
     if (!result.success) return;
     expect(visibleEditableModules(result.data)).toEqual(["contact", "contributions"]);
-    expect(result.data.moduleOrder.indexOf("metrics")).toBe(profile.moduleOrder.indexOf("metrics"));
+    expect(fixedOrder(result.data).indexOf("metrics")).toBe(fixedOrder(profile).indexOf("metrics"));
     expect(profile.visibility.contributions).toBe(false);
   });
   it("offers exactly five sections without changing the stored nine slots", () => {
@@ -86,7 +140,7 @@ describe("visible module composition", () => {
       "contributions",
       "contact",
     ]);
-    expect(profile.moduleOrder).toEqual(moduleIds);
+    expect(fixedOrder(profile)).toEqual(moduleIds);
   });
 
   it("never offers retired sections even when saved as visible with entries", () => {
@@ -103,7 +157,7 @@ describe("visible module composition", () => {
   });
   it("selects visible manual modules in their authored order", () => {
     const profile = example();
-    profile.moduleOrder.reverse();
+    profile.sectionOrder.reverse();
     expect(visibleEditableModules(profile)).toEqual(["contributions", "projects", "technologies"]);
   });
 
@@ -120,13 +174,13 @@ describe("visible module composition", () => {
           ? ["projects", "technologies", "contributions"]
           : ["technologies", "contributions", "projects"],
       );
-      for (const [index, id] of profile.moduleOrder.entries()) {
+      for (const [index, id] of fixedOrder(profile).entries()) {
         if (!isEditableModuleId(id) || !profile.visibility[id])
-          expect(result.data.moduleOrder[index]).toBe(id);
+          expect(fixedOrder(result.data)[index]).toBe(id);
       }
       expect(result.data.data).toBe(profile.data);
       expect(result.data.visibility).toBe(profile.visibility);
-      expect([...result.data.moduleOrder].sort()).toEqual([...moduleIds].sort());
+      expect([...fixedOrder(result.data)].sort()).toEqual([...moduleIds].sort());
       expect(profile).toEqual(original);
     },
   );
@@ -143,7 +197,7 @@ describe("visible module composition", () => {
   it("keeps the order when a moved section is hidden and shown again", () => {
     const result = moveVisibleModule(example(), "projects", "up");
     if (!result.success) throw new Error("The sample must be reorderable.");
-    const originalOrder = [...result.data.moduleOrder];
+    const originalOrder = [...fixedOrder(result.data)];
     result.data.visibility.projects = false;
     expect(visibleEditableModules(result.data)).toEqual(["technologies", "contributions"]);
     result.data.visibility.projects = true;
@@ -152,7 +206,7 @@ describe("visible module composition", () => {
       "technologies",
       "contributions",
     ]);
-    expect(result.data.moduleOrder).toEqual(originalOrder);
+    expect(fixedOrder(result.data)).toEqual(originalOrder);
   });
 
   it.each([
@@ -167,15 +221,15 @@ describe("visible module composition", () => {
     expect(result.success).toBe(true);
     if (!result.success) return;
     expect(visibleEditableModules(result.data)).toEqual(order);
-    for (const [slot, moduleId] of profile.moduleOrder.entries()) {
+    for (const [slot, moduleId] of fixedOrder(profile).entries()) {
       if (!isEditableModuleId(moduleId) || !profile.visibility[moduleId])
-        expect(result.data.moduleOrder[slot]).toBe(moduleId);
+        expect(fixedOrder(result.data)[slot]).toBe(moduleId);
     }
     expect(result.data.data).toBe(profile.data);
     expect(result.data.visibility).toBe(profile.visibility);
-    expect(result.data.moduleOrder).not.toBe(profile.moduleOrder);
-    expect(result.data.moduleOrder).toHaveLength(9);
-    expect([...result.data.moduleOrder].sort()).toEqual([...moduleIds].sort());
+    expect(result.data.sectionOrder).not.toBe(profile.sectionOrder);
+    expect(fixedOrder(result.data)).toHaveLength(9);
+    expect([...fixedOrder(result.data)].sort()).toEqual([...moduleIds].sort());
     expect(profile).toEqual(original);
   });
 

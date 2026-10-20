@@ -6,7 +6,7 @@ import { createEmptyProfile } from "../../src/core/profile/profile-operations";
 import type { ProfileDocument } from "../../src/core/profile/profile-schema";
 import { generateReadme } from "../../src/core/readme";
 
-const draftKey = "github-profile-generator.profile.v1";
+const draftKey = "github-profile-generator.profile.v2";
 
 async function openEditor(page: Page, profile?: ProfileDocument, locale: "en" | "es" = "en") {
   if (profile) {
@@ -107,8 +107,8 @@ test("retired sections never return from a saved draft and invalid retired links
   expect(stored.data.education).toEqual(profile.data.education);
   expect(stored.data.current).toEqual(profile.data.current);
   expect(stored.visibility).toEqual(profile.visibility);
-  expect(stored.moduleOrder).toEqual(profile.moduleOrder);
-  expect(stored.schemaVersion).toBe(1);
+  expect(stored.sectionOrder).toEqual(profile.sectionOrder);
+  expect(stored.schemaVersion).toBe(2);
   await page.reload();
   await expect(navigation.getByRole("checkbox")).toHaveCount(5);
   await expect(preview).toContainText("Alex Updated");
@@ -408,15 +408,21 @@ test("keyboard ordering preserves hidden positions and metrics settings until hi
     page.getByRole("button", { name: "Move Activity & contributions down", exact: true }),
   ).toBeFocused();
   const stored = await savedProfile(page);
-  const expectedOrder = [...profile.moduleOrder];
+  const expectedOrder = [...profile.sectionOrder];
   [expectedOrder[2], expectedOrder[5], expectedOrder[6]] = [
-    "contributions",
-    "technologies",
-    "projects",
+    { kind: "module", moduleId: "contributions" },
+    { kind: "module", moduleId: "technologies" },
+    { kind: "module", moduleId: "projects" },
   ];
-  expect(stored.moduleOrder).toEqual(expectedOrder);
-  expect(stored.moduleOrder).toHaveLength(9);
-  expect(new Set(stored.moduleOrder).size).toBe(9);
+  expect(stored.sectionOrder).toEqual(expectedOrder);
+  expect(stored.sectionOrder).toHaveLength(9);
+  expect(
+    new Set(
+      stored.sectionOrder
+        .filter((reference) => reference.kind === "module")
+        .map((reference) => reference.moduleId),
+    ).size,
+  ).toBe(9);
   expect(stored.data).toEqual(profile.data);
   expect(stored.visibility.metrics).toBe(true);
   await page
@@ -427,7 +433,7 @@ test("keyboard ordering preserves hidden positions and metrics settings until hi
   const hidden = await savedProfile(page);
   expect(hidden.data.metrics).toEqual(profile.data.metrics);
   expect(hidden.visibility.metrics).toBe(false);
-  expect(hidden.moduleOrder).toEqual(expectedOrder);
+  expect(hidden.sectionOrder).toEqual(expectedOrder);
   await page.reload();
   await expect(
     page.getByRole("button", { name: "Activity & contributions", exact: true }),

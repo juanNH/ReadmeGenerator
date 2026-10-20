@@ -3,7 +3,7 @@ import { expect, test, type Locator, type Page } from "@playwright/test";
 import { createEmptyProfile } from "../../src/core/profile/profile-operations";
 import type { ProfileDocument } from "../../src/core/profile/profile-schema";
 
-const draftKey = "github-profile-generator.profile.v1";
+const draftKey = "github-profile-generator.profile.v2";
 
 function navigationProfile() {
   const profile = createEmptyProfile("en");
@@ -89,8 +89,8 @@ async function storedProfile(page: Page): Promise<ProfileDocument> {
   );
 }
 
-async function expectStoredOrder(page: Page, order: ProfileDocument["moduleOrder"]) {
-  await expect.poll(async () => (await storedProfile(page)).moduleOrder).toEqual(order);
+async function expectStoredOrder(page: Page, order: ProfileDocument["sectionOrder"]) {
+  await expect.poll(async () => (await storedProfile(page)).sectionOrder).toEqual(order);
 }
 
 async function moveMouseDrag(page: Page, source: Locator, target: Locator) {
@@ -218,14 +218,24 @@ test("pointer dragging reorders visible sections while preserving hidden slots, 
       exact: true,
     }),
   );
-  const order = [...profile.moduleOrder];
-  [order[2], order[5], order[6]] = ["projects", "contributions", "technologies"];
+  const order = [...profile.sectionOrder];
+  [order[2], order[5], order[6]] = [
+    { kind: "module", moduleId: "projects" },
+    { kind: "module", moduleId: "contributions" },
+    { kind: "module", moduleId: "technologies" },
+  ];
   await expectStoredOrder(page, order);
   const stored = await storedProfile(page);
   expect(stored.data).toEqual(profile.data);
   expect(stored.visibility).toEqual(profile.visibility);
-  expect(stored.moduleOrder).toHaveLength(9);
-  expect(new Set(stored.moduleOrder).size).toBe(9);
+  expect(stored.sectionOrder).toHaveLength(9);
+  expect(
+    new Set(
+      stored.sectionOrder
+        .filter((reference) => reference.kind === "module")
+        .map((reference) => reference.moduleId),
+    ).size,
+  ).toBe(9);
   await expect(page.locator("#editor-section-title")).toHaveText("Technologies & tools");
   const preview = page.getByRole("article", { name: "README preview", exact: true });
   await expect(preview.getByRole("heading").first()).toHaveText("Projects");
@@ -291,8 +301,12 @@ test("touch dragging uses the browser pointer pipeline and saves the new visible
       });
     }
     await session.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
-    const order = [...profile.moduleOrder];
-    [order[2], order[5], order[6]] = ["projects", "contributions", "technologies"];
+    const order = [...profile.sectionOrder];
+    [order[2], order[5], order[6]] = [
+      { kind: "module", moduleId: "projects" },
+      { kind: "module", moduleId: "contributions" },
+      { kind: "module", moduleId: "technologies" },
+    ];
     await expectStoredOrder(page, order);
     expect((await storedProfile(page)).data).toEqual(profile.data);
     await page.reload();
@@ -330,7 +344,7 @@ test("dropping outside all section targets keeps the original order and saved pr
   const preview = page.getByRole("article", { name: "README preview", exact: true });
   await expect(preview.getByRole("heading").first()).toHaveText("Technologies");
   await page.reload();
-  await expectStoredOrder(page, profile.moduleOrder);
+  await expectStoredOrder(page, profile.sectionOrder);
 });
 
 test("keyboard dragging moves a section with Space and arrows and preserves the saved order after reload", async ({
@@ -351,8 +365,11 @@ test("keyboard dragging moves a section with Space and arrows and preserves the 
   ).toBeVisible();
   await page.keyboard.press("ArrowDown");
   await page.keyboard.press("Space");
-  const order = [...profile.moduleOrder];
-  [order[2], order[5]] = ["projects", "technologies"];
+  const order = [...profile.sectionOrder];
+  [order[2], order[5]] = [
+    { kind: "module", moduleId: "projects" },
+    { kind: "module", moduleId: "technologies" },
+  ];
   await expectStoredOrder(page, order);
   await expect(handle).toBeFocused();
   await expect(page.locator("#editor-section-title")).toHaveText("Technologies & tools");
@@ -379,7 +396,7 @@ test("Escape cancels an in-progress keyboard drag without changing the saved pro
   const preview = page.getByRole("article", { name: "README preview", exact: true });
   await expect(preview.getByRole("heading").first()).toHaveText("Technologies");
   await page.reload();
-  await expectStoredOrder(page, profile.moduleOrder);
+  await expectStoredOrder(page, profile.sectionOrder);
 });
 
 test("editing and selecting text never starts a drag or changes the module order", async ({
@@ -399,7 +416,7 @@ test("editing and selecting text never starts a drag or changes the module order
   await expect(name).toBeFocused();
   await expect(name).toHaveValue("Selecting words stays inside this input");
   await expect(page.getByText("Saved on this browser", { exact: true })).toBeVisible();
-  expect((await storedProfile(page)).moduleOrder).toEqual(profile.moduleOrder);
+  expect((await storedProfile(page)).sectionOrder).toEqual(profile.sectionOrder);
   await expect(page.locator("#editor-section-title")).toHaveText("Projects");
 });
 for (const locale of ["en", "es"] as const) {

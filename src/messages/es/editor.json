@@ -44,6 +44,17 @@
     "hide": "Excluir tarjetas de GitHub y conservar su configuración",
     "hidden": "Las tarjetas de GitHub están excluidas. Se conservó su configuración guardada."
   },
+  "custom": {
+    "untitled": "Sección personalizada {number}",
+    "namedInstance": "{title} · personalizada {number}",
+    "duplicate": "Duplicar sección",
+    "delete": "Eliminar sección",
+    "deleteConfirmation": "¿Eliminar {section} y todo su contenido? Las otras secciones y copias se conservan.",
+    "added": "Se agregó una sección personalizada. Poné un título o empezá con texto o una lista.",
+    "duplicated": "Se duplicó {section}. Estás editando una copia independiente.",
+    "deleted": "Se eliminó {section}. Las otras secciones y copias se conservaron.",
+    "failed": "No pudimos actualizar esta sección. Tu contenido se conservó."
+  },
   "contentLanguage": "Idioma del README",
   "contentLanguageHelp": "Cambia los títulos generados, como Contacto. Tus textos se conservan tal como los escribiste, incluso si cambiás el idioma de la aplicación.",
   "languageOptions": {
@@ -112,12 +123,17 @@
     "emptyTitle": "Un poco sobre vos puede contar mucho",
     "emptyDescription": "Elegí una sección y agregá texto o un enlace. Tu README aparecerá acá.",
     "reviewTitle": "Tu borrador sigue acá",
-    "reviewDescription": "Revisá el mensaje de abajo para preparar tu README para exportar."
+    "reviewDescription": "Revisá el mensaje de abajo para preparar tu README para exportar.",
+    "imageLoadFailure": "No se pudo cargar esta imagen",
+    "imageLoadHelp": "Revisá que la URL abra la imagen directamente y funcione sin iniciar sesión. La dirección se conserva en tu borrador y README.",
+    "openImage": "Abrir dirección de la imagen"
   },
   "export": {
     "empty": "Elegí una sección y agregá algo de texto o un enlace para habilitar la copia y descarga.",
     "unsupported": "Este borrador tiene una sección visible que el editor todavía no puede exportar. El contenido guardado se conserva, pero la exportación no está disponible para este borrador.",
     "invalidLinks": "Revisá los enlaces marcados antes de copiar o descargar. Usá Revisar campos en tus secciones para abrir la configuración que necesita atención. No se eliminó contenido.",
+    "invalidImages": "Revisá las direcciones de imagen señaladas. Usá una URL HTTPS pública y directa, y Revisar campos para abrir su configuración.",
+    "missingImageDescription": "Agregá una descripción a las imágenes señaladas para que todos puedan entenderlas. Usá Revisar campos para abrir su configuración.",
     "invalidUsername": "Revisá el usuario de GitHub en Actividad y contribuciones, o excluí las tarjetas de GitHub para exportar tus textos.",
     "localCards": "Podés revisar las tarjetas localmente. Exportarlas necesita una dirección pública de esta aplicación. Excluí las tarjetas para exportar tus textos ahora.",
     "ready": "Todo listo. Copiá el Markdown o descargá tu archivo README.md.",

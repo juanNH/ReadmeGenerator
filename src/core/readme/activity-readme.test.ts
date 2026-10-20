@@ -14,7 +14,12 @@ describe("one optional activity and contributions section", () => {
     const profile = activityProfile();
     profile.visibility.contact = true;
     profile.data.contact.links = [{ id: "mail", label: "Email", url: "mailto:alex@example.com" }];
-    profile.moduleOrder = ["metrics", ...profile.moduleOrder.filter((id) => id !== "metrics")];
+    profile.sectionOrder = [
+      { kind: "module", moduleId: "metrics" },
+      ...profile.sectionOrder.filter(
+        (reference) => reference.kind !== "module" || reference.moduleId !== "metrics",
+      ),
+    ];
     const original = structuredClone(profile);
     const result = generateReadme(profile, { activityCardBaseUrl: "https://profiles.example.com" });
     expect(result.success).toBe(true);

@@ -21,8 +21,13 @@ function normalizeLines(value: string): string {
     );
 }
 
+/** Plain normalized text for consumers that must compare the same visible inline content. */
+export function normalizeInlineText(value: string): string {
+  return normalizeLines(value).replace(/\s+/g, " ").trim();
+}
+
 export function escapeInlineText(value: string): string {
-  return escapeText(normalizeLines(value).replace(/\s+/g, " ").trim());
+  return escapeText(normalizeInlineText(value));
 }
 
 /** Keep paragraph breaks while removing indentation that could create code blocks. */

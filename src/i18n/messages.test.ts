@@ -15,6 +15,8 @@ import englishTechnologies from "@/messages/en/modules/technologies.json";
 import spanishTechnologies from "@/messages/es/modules/technologies.json";
 import englishProjects from "@/messages/en/modules/projects.json";
 import spanishProjects from "@/messages/es/modules/projects.json";
+import englishCustom from "@/messages/en/modules/custom.json";
+import spanishCustom from "@/messages/es/modules/custom.json";
 
 function messageEntries(value: object, prefix = ""): Array<[string, string]> {
   return Object.entries(value).flatMap(([key, message]) => {
@@ -37,6 +39,7 @@ describe("translation contracts", () => {
     ["contributions", englishContributions, spanishContributions],
     ["technologies", englishTechnologies, spanishTechnologies],
     ["projects", englishProjects, spanishProjects],
+    ["custom sections", englishCustom, spanishCustom],
   ])("keeps complete English and Spanish messages for %s", (_name, en, es) => {
     const englishEntries = messageEntries(en);
     const spanishEntries = new Map(messageEntries(es));

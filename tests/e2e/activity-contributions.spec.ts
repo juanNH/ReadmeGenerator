@@ -7,7 +7,7 @@ import { metricCardIds } from "../../src/core/profile/module-content";
 import { createEmptyProfile } from "../../src/core/profile/profile-operations";
 import type { ProfileDocument } from "../../src/core/profile/profile-schema";
 
-const draftKey = "github-profile-generator.profile.v1";
+const draftKey = "github-profile-generator.profile.v2";
 const activityLabel = "Activity & contributions";
 const cards = ["Contribution calendar", "Activity summary", "Repository languages"];
 
@@ -225,7 +225,7 @@ test("GitHub is queried only on request and a successful empty profile differs f
     await expect(page.getByRole("checkbox", { name, exact: true })).toBeDisabled();
 });
 
-test("cards are independent, retained in v1 and restored without requesting GitHub on reload", async ({
+test("cards are independent, retained in v2 and restored without requesting GitHub on reload", async ({
   page,
 }) => {
   let requests = 0;
@@ -239,13 +239,13 @@ test("cards are independent, retained in v1 and restored without requesting GitH
   await page.getByRole("checkbox", { name: cards[2], exact: true }).check();
   await expect(page.getByRole("checkbox", { name: cards[1], exact: true })).not.toBeChecked();
   const stored = await storedProfile(page);
-  expect(stored.schemaVersion).toBe(1);
+  expect(stored.schemaVersion).toBe(2);
   expect(stored.data.metrics).toEqual({
     username: "example-dev",
     cards: ["calendar", "languages"],
   });
   expect(stored.visibility.metrics).toBe(true);
-  expect(stored.moduleOrder).toHaveLength(9);
+  expect(stored.sectionOrder).toHaveLength(9);
   expect(stored).not.toHaveProperty("activitySnapshot");
   expect(JSON.stringify(stored)).not.toContain("fetchedAt");
   await page.reload();
@@ -354,7 +354,7 @@ test("legacy metrics alone use one editable section and preserve data when the w
   expect(hidden.visibility.contributions).toBe(false);
   expect(hidden.visibility.metrics).toBe(false);
   expect(hidden.data.metrics).toEqual(profile.data.metrics);
-  expect(hidden.moduleOrder).toEqual(profile.moduleOrder);
+  expect(hidden.sectionOrder).toEqual(profile.sectionOrder);
   await expect(page.getByText("Not included in README", { exact: true })).toBeVisible();
   await choice.check();
   const restored = await storedProfile(page);
@@ -458,7 +458,7 @@ test("restoring one excluded card does not restore others and hidden sections ke
     page.getByRole("checkbox", { name: "Contribution calendar", exact: true }),
   ).not.toBeChecked();
   await expect(page.getByRole("checkbox", { name: "Activity summary", exact: true })).toBeChecked();
-  expect(restored.moduleOrder).toEqual(profile.moduleOrder);
+  expect(restored.sectionOrder).toEqual(profile.sectionOrder);
 });
 
 for (const locale of ["en", "es"] as const) {

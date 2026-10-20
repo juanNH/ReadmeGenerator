@@ -10,7 +10,7 @@ Todas las secciones son opcionales. El recorrido manual funciona sin cuenta ni c
 
 Un perfil breve puede considerarse terminado. No se muestra un porcentaje de completitud ni se exige empleo, proyectos, métricas o contacto. La interfaz ofrece inglés inicial y español, controles reconocibles y alternativas de teclado al arrastre.
 
-## Las cinco secciones
+## Las cinco secciones fijas
 
 | Sección                    | Contenido                                                                                             |
 | -------------------------- | ----------------------------------------------------------------------------------------------------- |
@@ -19,6 +19,12 @@ Un perfil breve puede considerarse terminado. No se muestra un porcentaje de com
 | Proyectos                  | Nombre, descripción, participación personal, tecnologías y enlaces opcionales; no exige GitHub.       |
 | Actividad y contribuciones | Aportes manuales con título/enlace opcionales; consulta pública y tarjetas de GitHub elegibles.       |
 | Contacto                   | Proveedores conocidos con icono según URL, portfolio o web propia y correo; etiqueta opcional.        |
+
+Además, «Agregar sección personalizada» permite crear varias secciones propias, con título opcional y bloques de texto, listas con puntos (•) o numeradas, enlaces web, subtítulos, separadores, frases destacadas e imágenes/banner. El selector presenta ocho opciones con pequeñas muestras locales de su distribución; no agrega datos de ejemplo al perfil. Los puntos y números de listas se agregan automáticamente. Se pueden ordenar entre las secciones fijas, duplicar como copias independientes y ocultar conservando su contenido. Eliminar una instancia borra únicamente esa sección; si tiene contenido, requiere confirmación. Los títulos vacíos o repetidos son válidos y no se usan como identidad.
+
+Las ayudas para escribir listas se limitan a las secciones personalizadas: comenzar la primera línea de un bloque de texto con `- ` lo convierte en lista; Enter permite agregar ítems y continuar como texto desde el último ítem vacío. Pegar varias líneas genera ítems y «Convertir a texto» conserva su contenido y marcadores. Los demás campos continúan siendo texto plano; no se agrega formato Markdown global.
+
+El bloque de imagen acepta una dirección HTTPS pública ya alojada y una descripción accesible. Puede mostrar un banner, una captura o un GIF disponible en esa dirección. No sube archivos ni publica una imagen local por seleccionar o escribir una ruta. La comprobación de URL es sintáctica y no garantiza que el host responda o entregue una imagen. La vista previa solicita el recurso directamente desde el navegador, sin proxy del servidor; si no carga, muestra la descripción y un enlace para revisarlo. Ese fallo temporal no impide exportar una dirección admitida. Los subtítulos, separadores y frases destacadas agregan jerarquía sin pedir datos de trayectoria. Ver [ADR 0014](decisions/0014-custom-visual-blocks.md).
 
 El catálogo local contiene 358 tecnologías con iconos de Devicon, Simple Icons y Lobe Icons. Incluye lenguajes, frameworks, ORMs, bases de datos, mensajería, infraestructura, herramientas de desarrollo y de IA. No consulta servicios externos para buscar ni exige cuentas de esas herramientas. La vista previa muestra icono y nombre en filas que se adaptan al ancho; la exportación referencia originales fijados a commits y el editor usa sus copias SVG locales. Los nombres propios siguen disponibles como texto. La selección no representa un nivel de conocimiento ni un ranking del mercado.
 
@@ -34,15 +40,15 @@ Actividad y contribuciones puede usarse solo para contar un aporte de documentac
 
 Las sugerencias públicas de PR e issues se agregan únicamente al seleccionarlas; después son aportes editables con una nota propia opcional. No hay mínimos de actividad, rachas, rankings ni mensajes que penalicen un resultado vacío. Cero actividad, usuario inexistente, servicio no configurado, cuota agotada e indisponibilidad se explican como situaciones distintas. Un fallo mantiene la edición manual disponible y puede mostrar el último resultado válido con su fecha.
 
-Conocimientos, formación y actualidad están retirados de la navegación, los formularios y la salida, también en borradores anteriores. Sus estructuras internas v1 permanecen guardadas sin borrarlas o fusionarlas. No reaparecen por tener contenido o visibilidad y sus enlaces no bloquean la exportación. La [compatibilidad del documento](profile-model.md) no amplía las cinco secciones del producto.
+Conocimientos, formación y actualidad están retirados de la navegación, los formularios y la salida, también en borradores anteriores. Sus estructuras heredadas de v1 permanecen guardadas sin borrarlas o fusionarlas. No reaparecen por tener contenido o visibilidad y sus enlaces no bloquean la exportación. Las secciones propias no reactivan módulos retirados ni importan sus datos automáticamente.
 
 ## Recorrido
 
 1. Abrir el editor en inglés o español, sin crear cuenta.
-2. Elegir qué compartir y configurar una sección por vez. Ninguna está preseleccionada.
+2. Elegir qué compartir y configurar una sección por vez. Ninguna sección fija está preseleccionada; agregar una propia la incluye y permite empezar con título o contenido.
 3. Incluir u ocultar con la casilla y ordenar las incluidas con el tirador, teclado o Subir/Bajar.
 4. Elegir el idioma de las etiquetas del README, sin traducir el texto personal ni cambiar el idioma de interfaz.
-5. Revisar la vista previa, corregir los enlaces señalados y copiar o descargar `README.md`.
+5. Revisar la vista previa, corregir las direcciones o descripciones de imagen señaladas y copiar o descargar `README.md`.
 
 Si se eligieron tarjetas, su exportación requiere que la aplicación tenga un origen HTTPS público configurado para alojarlas. En un entorno local se revisan las mismas imágenes mediante rutas locales y se muestra el requisito antes de copiar o descargar; desmarcarlas permite terminar un perfil manual. No se solicitan tokens ni tareas de despliegue dentro del recorrido de creación del perfil.
 
@@ -52,10 +58,12 @@ El borrador se guarda en el navegador. Si el almacenamiento falla, el aviso perm
 
 ## Alcance y límites
 
-La aplicación incluye Next.js App Router, TypeScript, un kit visual bilingüe y `ProfileDocument` versión 1. Vista previa, copia y descarga consumen el mismo Markdown generado. Los textos personales se escapan y solo el catálogo permitido genera iconos; no hay HTML libre.
+La aplicación incluye Next.js App Router, TypeScript, un kit visual bilingüe y `ProfileDocument` versión 2. El orden mixto `sectionOrder` conserva referencias a los nueve IDs fijos y a cada instancia de `customSections`. Los bloques visuales amplían v2 sin cambiar las claves de borrador ni las estructuras anteriores; un lector antiguo estricto puede rechazarlos y debe conservar su valor. Vista previa, copia y descarga consumen el mismo Markdown generado. Los textos personales se escapan; las imágenes propias requieren un bloque explícito validado y los iconos siguen procediendo de los catálogos permitidos. No hay HTML libre.
 
 La consulta opcional de GitHub requiere configuración del servidor con credenciales públicas verificables; un entorno sin ella conserva toda la creación manual. Las tarjetas SVG están alojadas por esta aplicación y se actualizan según caché; no se guarda una captura del gráfico en el borrador. No hay asistencia con IA: mostrar una herramienta de IA en el catálogo no incorpora una integración. Tampoco hay sincronización remota, importación/exportación de configuración ni personalización libre del diseño del README.
 
-La única sección de actividad integra los antiguos campos de contribuciones y métricas sin agregar una sexta opción ni migrar v1. Ocultarla apaga ambos flags y conserva datos; volver a mostrarla incluye aportes y las tarjetas que sigan seleccionadas. Los snapshots remotos son efímeros; solo se guardan usuario, selección de tarjetas y aportes elegidos. La consulta del formulario es explícita y no ocurre al abrir o escribir; las imágenes ya seleccionadas pueden actualizarse al mostrarse.
+La única sección fija de actividad integra los campos heredados de contribuciones y métricas sin ofrecer métricas por separado. Ocultarla apaga ambos flags y conserva datos; volver a mostrarla incluye aportes y las tarjetas que sigan seleccionadas. Los snapshots remotos son efímeros; solo se guardan usuario, selección de tarjetas y aportes elegidos. La consulta del formulario es explícita y no ocurre al abrir o escribir; las imágenes ya seleccionadas pueden actualizarse al mostrarse.
 
-La validación estructural de un documento admite contenido incompleto y no demuestra que sea exportable. El generador aplica sus controles sobre las cinco secciones activas. Los campos retirados se conservan únicamente por compatibilidad interna, según [ADR 0008](decisions/0008-focused-profile.md). Las fuentes de iconos y la presentación de contacto se registran en [ADR 0009](decisions/0009-profile-icons.md); la consulta pública y el alojamiento de tarjetas, en [ADR 0010](decisions/0010-github-activity.md).
+El guardado actual usa una clave v2. Si no existe, un borrador v1 válido se migra en memoria y su original permanece intacto; no se escribe v2 hasta una edición. Si hay un v2 inválido, no se sustituye automáticamente desde v1. La migración conserva idioma, contenido, IDs, orden y visibilidad de las estructuras anteriores. Ver [ADR 0013](decisions/0013-custom-sections.md).
+
+La validación estructural de un documento admite contenido incompleto y no demuestra que sea exportable. El generador revisa las secciones fijas activas y las personalizadas visibles. Un enlace o dirección de imagen inválidos, o una imagen con URL pero sin descripción, bloquean toda la exportación y señalan el campo. Una imagen completamente vacía se omite; ocultar la sección conserva sus datos sin exigir corregirlos. Los campos retirados se conservan únicamente por compatibilidad interna, según [ADR 0008](decisions/0008-focused-profile.md). Las fuentes de iconos y la presentación de contacto se registran en [ADR 0009](decisions/0009-profile-icons.md); la consulta pública y el alojamiento de tarjetas, en [ADR 0010](decisions/0010-github-activity.md); los bloques visuales, en [ADR 0014](decisions/0014-custom-visual-blocks.md).

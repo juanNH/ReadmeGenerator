@@ -14,24 +14,36 @@ import {
   RotateCcw,
   Save,
   Settings2,
+  Trash2,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { moduleRegistry } from "@/core/modules/module-registry";
-import { setModuleVisibility } from "@/core/profile/profile-operations";
+import {
+  addCustomSection,
+  duplicateCustomSection,
+  removeCustomSection,
+  setModuleVisibility,
+  updateCustomSection,
+} from "@/core/profile/profile-operations";
+import { CustomSectionForm } from "@/modules/custom/custom-section-form";
 import type { ContentLocale, ProfileDocument } from "@/core/profile/profile-schema";
 import { generateReadme } from "@/core/readme";
 import { cn } from "@/lib/cn";
 import { EditorModuleForm } from "./editor-module-form";
 import { EditorSectionNavigation } from "./editor-section-navigation";
 import {
-  moveVisibleModule,
-  isModuleIncluded,
-  setEditableModuleVisibility,
-  moveVisibleModuleToIndex,
-  visibleEditableModules,
-  type EditableModuleId,
+  moveVisibleSection,
+  isSectionIncluded,
+  setSectionVisibility,
+  moveVisibleSectionToIndex,
+  visibleEditableSections,
+  editableSectionIds,
+  getCustomSection,
+  isEditableModuleId,
+  sectionKey,
+  type EditableSectionId,
 } from "./module-composition";
 import { ReadmePreview } from "./readme-preview";
 import { useProfileDraft } from "./use-profile-draft";
@@ -57,30 +69,66 @@ export function EditorWorkspace({
     startNewDraft,
   } = useProfileDraft(initialContentLocale);
   const [exportFeedback, setExportFeedback] = useState<ExportFeedback>("idle");
-  const [selectedId, setSelectedId] = useState<EditableModuleId | null>(null);
+  const [selectedId, setSelectedId] = useState<EditableSectionId | null>(null);
   const [announcement, setAnnouncement] = useState("");
   const [compactView, setCompactView] = useState<"edit" | "preview">("edit");
   const [mobileNavigationOpen, setMobileNavigationOpen] = useState<boolean | null>(null);
   const workspaceHeadingRef = useRef<HTMLHeadingElement>(null);
   const configurationHeadingRef = useRef<HTMLHeadingElement>(null);
   const pendingWorkspaceFocus = useRef(false);
-  const navigationRefs = useRef(new Map<EditableModuleId, HTMLButtonElement>());
-  const panelRefs = useRef(new Map<EditableModuleId, HTMLDivElement>());
+  const navigationRefs = useRef(new Map<EditableSectionId, HTMLButtonElement>());
+  const panelRefs = useRef(new Map<EditableSectionId, HTMLDivElement>());
   const moveRefs = useRef(new Map<string, HTMLButtonElement>());
   const pendingFocus = useRef<{
-    id: EditableModuleId;
-    kind: "settings" | "error" | "up" | "down";
+    id: EditableSectionId;
+    kind: "settings" | "title" | "error" | "up" | "down";
   } | null>(null);
-  const visibleModules = visibleEditableModules(profile);
-  const activeId = selectedId ?? visibleModules[0] ?? null;
-  const activeLabel = activeId ? moduleLabels(moduleRegistry[activeId].labelKey) : null;
+  const visibleModules = visibleEditableSections(profile);
+  const allIds = editableSectionIds(profile);
+  const activeId =
+    selectedId && allIds.includes(selectedId) ? selectedId : (visibleModules[0] ?? null);
+  const labelCandidates = new Map(
+    allIds.map((id) => {
+      if (isEditableModuleId(id)) return [id, moduleLabels(moduleRegistry[id].labelKey)] as const;
+      const section = getCustomSection(profile, id);
+      const number = profile.customSections.findIndex((entry) => entry === section) + 1;
+      const title = section?.title.trim();
+      return [id, title || t("custom.untitled", { number })] as const;
+    }),
+  );
+  const sectionLabels = new Map([...labelCandidates].filter(([id]) => isEditableModuleId(id)));
+  const usedLabels = new Set(sectionLabels.values());
+  for (const [id, title] of labelCandidates) {
+    if (isEditableModuleId(id)) continue;
+    const section = getCustomSection(profile, id);
+    let number = profile.customSections.findIndex((entry) => entry === section) + 1;
+    const repeated = [...labelCandidates.values()].filter((label) => label === title).length > 1;
+    let label = repeated ? t("custom.namedInstance", { title, number }) : title;
+    while (usedLabels.has(label)) {
+      label = t("custom.namedInstance", { title, number: number++ });
+    }
+    usedLabels.add(label);
+    sectionLabels.set(id, label);
+  }
+  const activeLabel = activeId ? (sectionLabels.get(activeId) ?? null) : null;
+  const activeCustom = getCustomSection(profile, activeId);
   const navigationOpen = mobileNavigationOpen ?? activeId === null;
   const isLoading = hydration === "loading";
   const result = generateReadme(profile, { activityCardBaseUrl });
   const readmeErrors = result.success ? [] : result.errors;
   const isEmpty = readmeErrors.some((error) => error.code === "empty_profile");
   const hasUrlErrors = readmeErrors.some((error) => error.code === "invalid_url");
+  const hasImageUrlErrors = readmeErrors.some(
+    (error) =>
+      error.code === "invalid_url" &&
+      error.path[0] === "customSections" &&
+      typeof error.path[1] === "number" &&
+      error.path[2] === "blocks" &&
+      typeof error.path[3] === "number" &&
+      profile.customSections[error.path[1]]?.blocks[error.path[3]]?.type === "image",
+  );
   const hasInvalidUsername = readmeErrors.some((error) => error.code === "invalid_username");
+  const hasMissingImageAlt = readmeErrors.some((error) => error.code === "missing_image_alt");
   const hasLocalCards = result.success && Boolean(result.exportIssues?.length);
   const canExport = !isLoading && result.success && !hasLocalCards;
   const exportGuidance = isLoading
@@ -89,11 +137,15 @@ export function EditorWorkspace({
       ? t("export.empty")
       : hasInvalidUsername
         ? t("export.invalidUsername")
-        : hasUrlErrors
-          ? t("export.invalidLinks")
-          : hasLocalCards
-            ? t("export.localCards")
-            : t("export.ready");
+        : hasImageUrlErrors
+          ? t("export.invalidImages")
+          : hasMissingImageAlt
+            ? t("export.missingImageDescription")
+            : hasUrlErrors
+              ? t("export.invalidLinks")
+              : hasLocalCards
+                ? t("export.localCards")
+                : t("export.ready");
 
   useEffect(() => {
     if (pendingWorkspaceFocus.current) {
@@ -105,6 +157,8 @@ export function EditorWorkspace({
     if (!pending) return;
     pendingFocus.current = null;
     if (pending.kind === "settings") configurationHeadingRef.current?.focus();
+    else if (pending.kind === "title")
+      panelRefs.current.get(pending.id)?.querySelector<HTMLInputElement>("input")?.focus();
     else if (pending.kind === "error")
       panelRefs.current
         .get(pending.id)
@@ -126,9 +180,9 @@ export function EditorWorkspace({
     updateDocument(next);
   }
 
-  function selectModule(id: EditableModuleId) {
-    if (!isModuleIncluded(profile, id)) {
-      const next = setEditableModuleVisibility(profile, id, true);
+  function selectModule(id: EditableSectionId) {
+    if (!isSectionIncluded(profile, id)) {
+      const next = setSectionVisibility(profile, id, true);
       if (next.success) editDocument(next.data);
     }
     setSelectedId(id);
@@ -138,30 +192,28 @@ export function EditorWorkspace({
     else pendingFocus.current = { id, kind: "settings" };
   }
 
-  function toggleModule(id: EditableModuleId, visible: boolean) {
-    const next = setEditableModuleVisibility(profile, id, visible);
+  function toggleModule(id: EditableSectionId, visible: boolean) {
+    const next = setSectionVisibility(profile, id, visible);
     if (!next.success) return;
     setMobileNavigationOpen(true);
     setSelectedId(activeId ?? (visible ? id : null));
     if (!visible && activeId === id)
-      setAnnouncement(
-        t("settings.sectionHidden", { module: moduleLabels(moduleRegistry[id].labelKey) }),
-      );
+      setAnnouncement(t("settings.sectionHidden", { module: sectionLabels.get(id) ?? "" }));
     editDocument(next.data);
   }
 
-  function announceOrder(next: ProfileDocument, id: EditableModuleId) {
+  function announceOrder(next: ProfileDocument, id: EditableSectionId) {
     setAnnouncement(
       t("composition.moved", {
-        module: moduleLabels(moduleRegistry[id].labelKey),
-        position: visibleEditableModules(next).indexOf(id) + 1,
+        module: sectionLabels.get(id) ?? "",
+        position: visibleEditableSections(next).indexOf(id) + 1,
         total: visibleModules.length,
       }),
     );
   }
 
-  function moveModule(id: EditableModuleId, direction: "up" | "down") {
-    const next = moveVisibleModule(profile, id, direction);
+  function moveModule(id: EditableSectionId, direction: "up" | "down") {
+    const next = moveVisibleSection(profile, id, direction);
     if (!next.success || next.data === profile) return;
     setSelectedId(activeId);
     pendingFocus.current = { id, kind: direction };
@@ -169,20 +221,92 @@ export function EditorWorkspace({
     announceOrder(next.data, id);
   }
 
-  function reorderModule(id: EditableModuleId, destination: number) {
-    const next = moveVisibleModuleToIndex(profile, id, destination);
+  function reorderModule(id: EditableSectionId, destination: number) {
+    const next = moveVisibleSectionToIndex(profile, id, destination);
     if (!next.success || next.data === profile) return;
     setSelectedId(activeId);
     editDocument(next.data);
   }
 
-  function reviewErrors(id: EditableModuleId) {
+  function reviewErrors(id: EditableSectionId) {
     setSelectedId(id);
     setCompactView("edit");
     setMobileNavigationOpen(false);
     if (activeId === id && compactView === "edit")
       panelRefs.current.get(id)?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
     else pendingFocus.current = { id, kind: "error" };
+  }
+
+  function focusNewCustom(next: ProfileDocument, previousIds: ReadonlySet<string>) {
+    const section = next.customSections.find((entry) => !previousIds.has(entry.id));
+    if (!section) return;
+    const id = `custom:${section.id}`;
+    editDocument(next);
+    setSelectedId(id);
+    setCompactView("edit");
+    setMobileNavigationOpen(false);
+    pendingFocus.current = { id, kind: "title" };
+  }
+
+  function addSection() {
+    const after = profile.sectionOrder.find((reference) => sectionKey(reference) === activeId);
+    const next = addCustomSection(profile, () => crypto.randomUUID(), after);
+    if (!next.success) {
+      setAnnouncement(t("custom.failed"));
+      return;
+    }
+    focusNewCustom(next.data, new Set(profile.customSections.map((section) => section.id)));
+    setAnnouncement(t("custom.added"));
+  }
+
+  function duplicateSection() {
+    if (!activeCustom) return;
+    const next = duplicateCustomSection(profile, activeCustom.id, () => crypto.randomUUID());
+    if (!next.success) {
+      setAnnouncement(t("custom.failed"));
+      return;
+    }
+    focusNewCustom(next.data, new Set(profile.customSections.map((section) => section.id)));
+    setAnnouncement(t("custom.duplicated", { section: activeLabel ?? "" }));
+  }
+
+  function deleteSection() {
+    if (!activeCustom || !activeId) return;
+    const hasContent =
+      activeCustom.title.trim() ||
+      activeCustom.blocks.some((block) => {
+        switch (block.type) {
+          case "paragraph":
+          case "heading":
+          case "quote":
+            return Boolean(block.text.trim());
+          case "link":
+            return Boolean(block.label.trim() || block.url.trim());
+          case "image":
+            return Boolean(block.url.trim() || block.alt.trim());
+          case "divider":
+            return true;
+          case "list":
+            return block.items.some((item) => item.text.trim());
+        }
+      });
+    if (
+      hasContent &&
+      !window.confirm(t("custom.deleteConfirmation", { section: activeLabel ?? "" }))
+    )
+      return;
+    const next = removeCustomSection(profile, activeCustom.id);
+    if (!next.success) {
+      setAnnouncement(t("custom.failed"));
+      return;
+    }
+    const remaining = allIds.filter((id) => id !== activeId);
+    const following = remaining[Math.min(allIds.indexOf(activeId), remaining.length - 1)] ?? null;
+    setSelectedId(following);
+    if (following) pendingFocus.current = { id: following, kind: "settings" };
+    else pendingWorkspaceFocus.current = true;
+    editDocument(next.data);
+    setAnnouncement(t("custom.deleted", { section: activeLabel ?? "" }));
   }
 
   async function copyReadme() {
@@ -345,6 +469,8 @@ export function EditorWorkspace({
         >
           <EditorSectionNavigation
             profile={profile}
+            labels={sectionLabels}
+            onAddCustom={addSection}
             activeId={activeId}
             errors={readmeErrors}
             disabled={isLoading}
@@ -363,10 +489,7 @@ export function EditorWorkspace({
             }}
           />
         </aside>
-        <section
-          className={cn("min-w-0 space-y-4 xl:block", compactView === "preview" && "hidden")}
-          aria-labelledby="editor-section-title"
-        >
+        <div className={cn("min-w-0 space-y-4 xl:block", compactView === "preview" && "hidden")}>
           <div className="flex min-w-0 flex-wrap items-center justify-between gap-3 px-1">
             <label
               htmlFor="readme-language"
@@ -403,7 +526,7 @@ export function EditorWorkspace({
                 </span>
                 {activeId && (
                   <span>
-                    {isModuleIncluded(profile, activeId)
+                    {isSectionIncluded(profile, activeId)
                       ? t("settings.position", {
                           position: visibleModules.indexOf(activeId) + 1,
                           total: visibleModules.length,
@@ -416,17 +539,40 @@ export function EditorWorkspace({
                 id="editor-section-title"
                 ref={configurationHeadingRef}
                 tabIndex={-1}
-                className="text-xl font-semibold tracking-tight"
+                className="text-xl font-semibold tracking-tight wrap-anywhere"
               >
                 {activeLabel ?? t("settings.chooseTitle")}
               </h2>
               <p className="text-sm leading-6 text-muted-foreground">
                 {activeId
-                  ? activeId === "presentation" || activeId === "contact"
-                    ? t(`${activeId}.description`)
-                    : formText(`${activeId}.description`)
+                  ? activeCustom
+                    ? formText("custom.description")
+                    : activeId === "presentation" || activeId === "contact"
+                      ? t(`${activeId}.description`)
+                      : activeId === "technologies" ||
+                          activeId === "projects" ||
+                          activeId === "contributions"
+                        ? formText(`${activeId}.description`)
+                        : ""
                   : t("settings.chooseHelp")}
               </p>
+              {activeCustom && (
+                <div className="flex flex-wrap gap-2 pt-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={isLoading}
+                    onClick={duplicateSection}
+                  >
+                    <Copy aria-hidden="true" />
+                    {t("custom.duplicate")}
+                  </Button>
+                  <Button variant="ghost" size="sm" disabled={isLoading} onClick={deleteSection}>
+                    <Trash2 aria-hidden="true" />
+                    {t("custom.delete")}
+                  </Button>
+                </div>
+              )}
             </CardHeader>
             <CardContent className="pt-5 sm:pt-6">
               <fieldset disabled={isLoading} className="min-w-0">
@@ -446,12 +592,27 @@ export function EditorWorkspace({
                       else panelRefs.current.delete(activeId);
                     }}
                   >
-                    <EditorModuleForm
-                      id={activeId}
-                      profile={profile}
-                      errors={readmeErrors}
-                      onChange={editDocument}
-                    />
+                    {activeCustom ? (
+                      <CustomSectionForm
+                        value={activeCustom}
+                        errors={readmeErrors.filter(
+                          (error) =>
+                            error.path[0] === "customSections" &&
+                            error.path[1] === profile.customSections.indexOf(activeCustom),
+                        )}
+                        onChange={(value) => {
+                          const next = updateCustomSection(profile, activeCustom.id, value);
+                          if (next.success) editDocument(next.data);
+                        }}
+                      />
+                    ) : isEditableModuleId(activeId) ? (
+                      <EditorModuleForm
+                        id={activeId}
+                        profile={profile}
+                        errors={readmeErrors}
+                        onChange={editDocument}
+                      />
+                    ) : null}
                   </div>
                 )}
               </fieldset>
@@ -461,7 +622,7 @@ export function EditorWorkspace({
             <Globe2 className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
             {t("storage.privacy")}
           </p>
-        </section>
+        </div>
         <section
           className={cn(
             "min-w-0 space-y-4 xl:sticky xl:top-6 xl:block",
@@ -478,7 +639,7 @@ export function EditorWorkspace({
             </p>
           </div>
           {activeLabel && (
-            <p className="inline-flex items-center gap-2 rounded-md border border-accent/25 bg-accent-soft px-3 py-1.5 text-xs font-medium text-accent-soft-foreground">
+            <p className="inline-flex max-w-full items-center gap-2 rounded-md border border-accent/25 bg-accent-soft px-3 py-1.5 text-xs font-medium wrap-anywhere text-accent-soft-foreground">
               <PenLine aria-hidden="true" className="size-3.5" />
               {t("settings.nowEditing", { module: activeLabel })}
             </p>
@@ -489,6 +650,7 @@ export function EditorWorkspace({
             loading={isLoading}
             hasErrors={!isEmpty && readmeErrors.length > 0}
             activityCardBaseUrl={activityCardBaseUrl}
+            customImages={result.success ? result.customImages : undefined}
           />
           <div className="space-y-4">
             <p

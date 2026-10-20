@@ -4,7 +4,7 @@ import { readFile } from "node:fs/promises";
 import { createEmptyProfile } from "../../src/core/profile/profile-operations";
 import type { ProfileDocument } from "../../src/core/profile/profile-schema";
 
-const draftKey = "github-profile-generator.profile.v1";
+const draftKey = "github-profile-generator.profile.v2";
 
 async function openEditor(page: Page, locale: "en" | "es" = "en") {
   await page.goto(`/${locale}/editor`);
@@ -84,8 +84,8 @@ test("a fresh profile offers five optional sections and a short introduction wit
   expect(markdown).toContain("# Alex Example");
   expect(markdown).toContain(bio);
   const stored = await storedProfile(page);
-  expect(stored.schemaVersion).toBe(1);
-  expect(stored.moduleOrder).toHaveLength(9);
+  expect(stored.schemaVersion).toBe(2);
+  expect(stored.sectionOrder).toHaveLength(9);
   expect(stored.data.knowledge.items).toEqual([]);
   expect(stored.data.education.items).toEqual([]);
   expect(stored.data.current.items).toEqual([]);
@@ -224,9 +224,9 @@ test("a saved contact label stays editable when cleared without changing its lin
     ...profile.data,
     contact: { links: [{ ...link, label: "Write to me" }] },
   });
-  expect(stored.moduleOrder).toEqual(profile.moduleOrder);
+  expect(stored.sectionOrder).toEqual(profile.sectionOrder);
   expect(stored.visibility).toEqual(profile.visibility);
-  expect(stored.schemaVersion).toBe(1);
+  expect(stored.schemaVersion).toBe(2);
 });
 test("accessibility: the simple Spanish editor fits 360px with autocomplete, projects and preview", async ({
   page,

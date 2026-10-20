@@ -44,6 +44,17 @@
     "hide": "Exclude GitHub cards and keep their settings",
     "hidden": "GitHub cards are excluded. Their saved settings have been kept."
   },
+  "custom": {
+    "untitled": "Custom section {number}",
+    "namedInstance": "{title} · custom {number}",
+    "duplicate": "Duplicate section",
+    "delete": "Delete section",
+    "deleteConfirmation": "Delete {section} and all its content? Other sections and copies will be kept.",
+    "added": "Custom section added. Give it a title or start with text or a list.",
+    "duplicated": "{section} duplicated. You are editing an independent copy.",
+    "deleted": "{section} deleted. Other sections and copies have been kept.",
+    "failed": "We could not update this section. Your content has been kept."
+  },
   "contentLanguage": "README language",
   "contentLanguageHelp": "Changes generated headings, such as Contact. Your writing stays as you entered it, even when you switch the app language.",
   "languageOptions": {
@@ -112,12 +123,17 @@
     "emptyTitle": "A little about you goes a long way",
     "emptyDescription": "Choose a section and add some text or a link. Your README will appear here.",
     "reviewTitle": "Your draft is safe here",
-    "reviewDescription": "Review the message below to prepare your README for export."
+    "reviewDescription": "Review the message below to prepare your README for export.",
+    "imageLoadFailure": "This image could not be loaded",
+    "imageLoadHelp": "Check that the URL opens the image directly and works without signing in. The address is kept in your draft and README.",
+    "openImage": "Open image address"
   },
   "export": {
     "empty": "Choose a section and add at least some text or a link to enable copy and download.",
     "unsupported": "This draft includes a visible section this editor cannot export yet. The saved content has been kept, but export is unavailable for this draft.",
     "invalidLinks": "Check the highlighted links before copying or downloading. Use Review fields in your sections to open the affected settings. No content has been removed.",
+    "invalidImages": "Check the highlighted image addresses. Use a direct, public HTTPS URL and Review fields to open its settings.",
+    "missingImageDescription": "Add a description to the highlighted images so everyone can understand them. Use Review fields to open their settings.",
     "invalidUsername": "Check the GitHub username in Activity & contributions, or exclude the GitHub cards to export your writing.",
     "localCards": "You can review these cards locally. Exporting them needs this app's public address. Exclude the cards to export your writing now.",
     "ready": "Ready when you are. Copy the Markdown or download your README.md file.",

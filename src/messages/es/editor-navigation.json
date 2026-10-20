@@ -1,5 +1,7 @@
 {
   "title": "Tus secciones",
+  "addCustom": "Agregar sección personalizada",
+  "customHelp": "Agregá texto, listas, enlaces e imágenes. Podés crear más secciones o duplicarlas.",
   "description": "Elegí una sección para configurarla. Arrastrá las incluidas al orden en que querés mostrarlas.",
   "count": "{total, plural, =0 {Todavía no incluiste secciones} one {# sección incluida} other {# secciones incluidas}}",
   "editing": "Configurando ahora",

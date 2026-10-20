@@ -64,10 +64,10 @@ La planificación interna se conserva localmente en `.private/planning/`, exclui
 - `/`: redirección al idioma predeterminado, inglés.
 - `/en` y `/es`: entrada de la aplicación y presentación del estado inicial del proyecto.
 - `/en/design-system` y `/es/design-system`: catálogo del kit visual y sus estados de interacción.
-- `/en/editor` y `/es/editor`: cinco secciones opcionales —presentación, tecnologías, proyectos, actividad y contribuciones, contacto—, con navegación, configuración estable, orden por arrastre o botones, vista previa, exportación y borrador local. Conocimientos, formación y actualidad están retirados también para borradores anteriores. El editor se renderiza por solicitud para leer la configuración de tarjetas en ejecución; portada y kit siguen pregenerados.
+- `/en/editor` y `/es/editor`: cinco secciones fijas opcionales y secciones personalizadas repetibles, con navegación, configuración estable, orden por arrastre o botones, vista previa, exportación y borrador local. Conocimientos, formación y actualidad están retirados también para borradores anteriores. El editor se renderiza por solicitud para leer la configuración de tarjetas en ejecución; portada y kit siguen pregenerados.
 - Selector de idioma funcional, rutas localizadas y mensajes separados para inglés y español.
 - Componentes compartidos y configuración inicial de calidad y pruebas.
-- Contrato de perfil versión 1, registro puro de los nueve módulos y operaciones de creación, validación, visibilidad y orden en `src/core/`.
+- Contrato de perfil v2, referencias fijas/personalizadas en `sectionOrder`, bloques en `customSections`, migración validada de v1 y operaciones puras de creación, duplicación, visibilidad, eliminación y orden en `src/core/`.
 
 Las pruebas unitarias incluyen contratos y operaciones del perfil, generación de README, adaptador de almacenamiento, mensajes, SVG y cliente de GitHub con respuestas controladas. Las comprobaciones de navegador cubren la base visual, el kit y el recorrido del editor. La integración de actividad de GitHub está implementada y requiere configuración del servidor; no hay proveedores de IA.
 
@@ -79,21 +79,25 @@ El cambio de idioma conserva la ruta, los parámetros y el ancla. El campo `cont
 
 ## Borrador local y diagnóstico
 
-El editor guarda el documento completo en `localStorage`, bajo `github-profile-generator.profile.v1`. La lectura se valida antes de habilitar escritura; los cambios válidos se guardan tras 500 ms y se intenta guardar lo pendiente al ocultar o abandonar la página o desmontar el editor. Un cierre abrupto puede impedir ese último intento. Los datos no se envían a un servidor ni se sincronizan entre dispositivos.
+El editor guarda el documento completo en `localStorage`, bajo `github-profile-generator.profile.v2`. Si esa clave no existe, lee `github-profile-generator.profile.v1`, valida exactamente el formato heredado y lo migra en memoria. Recuperar o migrar no escribe; la primera edición guarda v2. La clave v1 permanece intacta como original local, incluso al iniciar otro borrador confirmado. Un v2 inválido o inaccesible no se sustituye con v1 automáticamente.
+
+Los cambios válidos se guardan tras 500 ms y se intenta guardar lo pendiente al ocultar o abandonar la página o desmontar el editor. Un cierre abrupto puede impedir ese último intento. Los datos del documento no se envían a un servidor ni se sincronizan entre dispositivos. Para diagnóstico, distinguir siempre las dos claves y conservar los valores originales antes de intervenir.
 
 Usar siempre el mismo origen: `http://127.0.0.1:3000`. Cambiar a `localhost`, otro host, puerto o protocolo abre un almacenamiento diferente. Los idiomas del editor comparten el borrador si se mantiene el origen.
 
 Ante JSON inválido, versión incompatible o lectura bloqueada, el editor conserva el valor existente y bloquea su reemplazo automático. La confirmación de iniciar un borrador nuevo permite sustituirlo; si se cancela no se escribe. Ante un fallo de escritura o cuota, el aviso permanece y se puede seguir editando en memoria y exportando un README válido; no afirmar que los últimos cambios están guardados.
 
-Los cinco módulos editables usan campos que ya existían en v1, sin cambiar la versión ni la clave de almacenamiento. La sección seleccionada y la vista móvil son efímeras; contenido, visibilidad y orden sí se guardan. Ocultar una sección activa conserva su formulario editable y avisa que no participa en el README. Arrastrar mueve una sección entre las incluidas; Subir/Bajar mueve una posición. Ambas acciones conservan las posiciones de módulos ocultos, retirados y métricas.
+Los cinco módulos fijos mantienen sus estructuras heredadas de v1. El formato actual agrega instancias propias y su orden mixto. La sección seleccionada y la vista móvil son efímeras; contenido, visibilidad y orden sí se guardan. Ocultar una sección activa conserva su formulario editable y avisa que no participa en el README. Arrastrar mueve una sección fija o propia entre las incluidas; Subir/Bajar mueve una posición. Ambas acciones conservan las referencias ocultas, retiradas y de métricas en sus posiciones durante el reordenamiento.
 
-Todos los documentos ofrecen las mismas cinco secciones. Conocimientos, formación y actualidad no tienen formulario ni salida, aunque sus flags de visibilidad antiguos sean verdaderos; sus enlaces tampoco bloquean la exportación. El formato v1 conserva esos campos y los nueve slots internamente para leer y guardar borradores sin destruir datos. No hay una condición que los vuelva a ofrecer ni una fusión automática con la intro. Presentación concentra el texto libre. Ver [ADR 0008](decisions/0008-focused-profile.md).
+Todos los documentos ofrecen las mismas cinco secciones fijas y la opción de agregar secciones personalizadas. Conocimientos, formación y actualidad no tienen formulario ni salida, aunque sus flags antiguos sean verdaderos; sus enlaces tampoco bloquean la exportación. V2 conserva esos campos y sus referencias para recuperar borradores sin destruir datos. No hay una condición que los vuelva a ofrecer ni una fusión automática con la intro. Ver [ADR 0008](decisions/0008-focused-profile.md).
+
+Las instancias propias admiten título opcional, párrafos, listas con viñetas/numeradas y enlaces web. Duplicar copia todo el árbol con IDs nuevos; ocultar conserva datos y eliminar quita solo esa instancia. Las ayudas de `- `, Enter, pegado y conversión de listas se limitan a `modules/custom`; los campos fijos siguen siendo texto plano. El generador produce un único Markdown escapado y valida sus enlaces visibles con rutas de `customSections`, sin habilitar HTML libre. Ver [ADR 0013](decisions/0013-custom-sections.md).
 
 Tecnologías usa un catálogo local de 358 herramientas con SVG y licencias de Devicon, Simple Icons y Lobe Icons, fijados a commits. Admite texto propio, categorías sugeridas editables y notas opcionales; la búsqueda no consulta servicios externos. Los iconos decorativos de 20 × 20 aparecen junto a nombres visibles en filas adaptables. La organización es explícita y no modifica borradores al recuperarlos o cambiar idioma. Contacto ofrece 13 servicios, web/portfolio y correo; una URL válida determina el icono, mientras la etiqueta es opcional y personalizable. Sus iconos exportados son decorativos de 20 × 20. `remarkProfileIcons` conserva el contexto inline del Markdown sin párrafos anidados y reconoce también los tokens tecnológicos anteriores de 32 × 32. El namespace `ContactProviders` se entrega explícitamente al proveedor cliente del editor. El marcado se genera únicamente desde los catálogos permitidos. Ver [ADR 0009](decisions/0009-profile-icons.md) y [ADR 0012](decisions/0012-technology-categories.md).
 
 ## Configurar actividad de GitHub
 
-El formulario **Actividad y contribuciones** conserva un recorrido manual sin cuenta y ofrece una parte plegable para consultar un usuario y elegir calendario, resumen o lenguajes. Los destacados sugeridos se copian solo por una selección explícita. El documento v1 conserva `data.metrics` y `data.contributions`; no guarda snapshots remotos. La navegación usa la inclusión efectiva de ambos flags y genera un único bloque en el slot de contribuciones, sin mover el slot interno de métricas.
+El formulario **Actividad y contribuciones** conserva un recorrido manual sin cuenta y ofrece una parte plegable para consultar un usuario y elegir calendario, resumen o lenguajes. Los destacados sugeridos se copian solo por una selección explícita. El documento actual conserva las estructuras heredadas `data.metrics` y `data.contributions`; no guarda snapshots remotos. La navegación usa la inclusión efectiva de ambos flags y genera un único bloque en la referencia de contribuciones, sin mover la referencia interna de métricas.
 
 Las variables están descritas en [.env.example](../.env.example). Por defecto quedan vacías y el recorrido manual funciona sin ellas:
 
@@ -322,3 +326,51 @@ Iteración del **2026-10-19**: `pnpm check` correcto con 506 pruebas en 22 suite
 Se verifican el nombre «Categorías automáticas», ayuda contextual para los tres destinos, las nueve categorías con ejemplos, apertura por teclado sin modificar el borrador, destino visible y descripción accesible por opción. Se comprueba que una elección explícita prevalece sobre la clasificación del catálogo, que los nombres propios se agregan al lugar anunciado y que el foco vuelve a la búsqueda. Alta, descripción y anuncio usan un único resolver; no se cambian v1, asignaciones guardadas ni recuperación. Las capturas focalizadas de la guía y de una sugerencia en español fueron revisadas, además del móvil oscuro con la guía abierta.
 
 La revisión independiente no encontró hallazgos accionables. No hubo dependencias nuevas ni cambios en el generador; el resultado sigue limitado a verificación local de Chromium y análisis automáticos, sin lectores de pantalla ni certificación completa de accesibilidad.
+
+## Validación de secciones personalizadas y documento v2
+
+Verificación local del **2026-10-19**, en Windows con Node.js 24.21.0 y pnpm 11.25.0. Las comprobaciones de navegador usan la compilación de producción en `http://127.0.0.1:3000`.
+
+La ejecución completa final registró **114 recorridos de Chromium correctos**, incluidos 17 casos nuevos de secciones propias. Los 31 casos de accesibilidad contienen 57 análisis axe sin infracciones detectadas de las reglas seleccionadas; no se ejecutó `test:a11y` por separado.
+
+| Comprobación | Resultado observado                                                                                     |
+| ------------ | ------------------------------------------------------------------------------------------------------- |
+| `pnpm check` | Correcto: lint, tipos, formato, enlaces de 29 documentos Markdown y 589 pruebas unitarias en 24 suites. |
+| `pnpm build` | Correcto; editor dinámico y portada/kit pregenerados en EN/ES.                                          |
+
+El núcleo comprueba esquemas v1/v2 estrictos, migración sin inferencias, referencias mixtas completas, IDs opacos, operaciones inmutables, duplicación profunda con identidades nuevas y fallos atómicos. El adaptador conserva el string v1 original, migra solo cuando falta v2 y no escribe al recuperar o cambiar idioma; un v2 inválido no activa un fallback silencioso.
+
+Los recorridos propios incluyen creación, texto, listas por botón y atajo `- `, Enter y pegado con selección, conversión a texto, orden de bloques, copias independientes, ocultación, confirmación de borrado, enlaces inválidos y revisión del campo exacto. También cubren recuperación y exportación, cuota agotada con continuidad en memoria entre idiomas, títulos repetidos o coincidentes con etiquetas provisionales y texto largo en móvil. El arrastre por teclado conserva selección y posiciones ocultas; Escape cancela sin persistir la proyección. Los eventos de composición del navegador comprueban que el formulario no convierta texto ni consuma Enter antes de terminar la composición.
+
+La prueba DOM de listas verifica que bloques consecutivos mantengan listas independientes y numeración desde 1, incluso con bloques vacíos, secciones sin título y listas de módulos fijos. El generador alterna marcadores Markdown equivalentes sin agregar HTML o contenido invisible. Vista previa y descarga comparten la misma salida segura.
+
+La revisión visual incluye configuración y vista previa de escritorio a 1600 px y móvil a 360 px, ambos idiomas y temas. Los ítems de lista se ajustan al contenido en el navegador revisado y los títulos largos no provocan desbordamiento horizontal. Se corrigieron jerarquía de encabezados, coincidencia del texto visible con nombres accesibles, regiones duplicadas y colisiones de etiquetas de navegación.
+
+Sin dependencias nuevas ni publicación de un README en GitHub. La revisión se limita a Chromium local; los datos de actividad siguen usando respuestas controladas. No se verificaron otros motores, lectores de pantalla, dispositivos físicos, el selector de candidatos de un IME del sistema ni CI remoto. Las comprobaciones automáticas no certifican accesibilidad completa. Ver [ADR 0013](decisions/0013-custom-sections.md).
+
+### Aclaración de listas con puntos
+
+Iteración local del **2026-10-19**: la interfaz en español usa «Lista con puntos» en lugar de «viñetas». Las opciones muestran los símbolos `•` y `1.`; las ayudas EN/ES explican con ejemplos que los marcadores se agregan automáticamente y se asocian a los campos mediante descripciones accesibles. El formato persistido y la salida permanecen iguales.
+
+Pasaron lint del formulario y su archivo de recorridos, `pnpm typecheck`, `pnpm build`, enlaces de 29 documentos, las 9 pruebas de traducciones y los **18 recorridos dirigidos** de secciones personalizadas y teclado. Incluyen el caso nuevo en español y los 8 análisis axe de edición/vista previa a 360 px en ambos idiomas y temas. Se revisó la captura móvil. La suite completa de 114 casos registrada arriba corresponde al cierre anterior; no se repitió en esta corrección local.
+
+## Validación de bloques visuales personalizados
+
+Validación local del **2026-10-19**, en Windows con Node.js 24.21.0 y pnpm 11.25.0. Los recorridos de Chromium usan la compilación de producción local y una imagen ficticia interceptada por la prueba, sin solicitar un alojamiento externo real.
+
+| Comprobación                    | Resultado observado                                                                                                                                                                    |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm check`                    | Correcto: lint, tipos, formato, enlaces de 30 documentos Markdown y 723 pruebas unitarias en 25 suites.                                                                                |
+| `pnpm build`                    | Correcto; editor dinámico y portada/kit pregenerados en EN/ES.                                                                                                                         |
+| Recorridos nuevos dirigidos     | 12 correctos: selección, edición, errores, recuperación, salida, copias, foco, teclado y móvil.                                                                                        |
+| `pnpm test:e2e`                 | 127 recorridos correctos en la ejecución completa final.                                                                                                                               |
+| Accesibilidad automática        | 35 casos incluyen 65 análisis axe sin infracciones detectadas de las reglas ejecutadas. No se ejecutó `test:a11y` por separado.                                                        |
+| Revisión visual e independiente | Escritorio de 1600 px y móvil de 360 px, edición y vista previa, ambos idiomas y temas, sin desbordamiento horizontal. Sin hallazgos materiales pendientes en la integración revisada. |
+
+El núcleo comprueba las cuatro variantes nuevas, borradores anteriores, duplicación independiente y validación sintáctica HTTPS sin red. La generación conserva texto escapado, listas independientes, niveles de subtítulo según el título de sección, separadores, citas de varios párrafos y errores por el campo original. Los metadatos `customImages` coinciden con el Markdown, conservan orden y repeticiones, se omiten sin imágenes y nunca se persisten en el perfil.
+
+Los recorridos comprueban las ocho muestras locales sin solicitudes de imagen ni contenido precargado, foco al agregar o mover, eliminación de una sección que contiene solo un separador y prefijos `- ` literales en subtítulos y frases destacadas. Una imagen necesita URL válida y descripción para exportarse; ocultarla conserva sus datos y evita su carga y validación. Vista previa, copia y descarga comparten el resultado del generador. El portapapeles se compara normalizando los saltos CRLF propios de Windows.
+
+Se verifican ausencia de referrer y de solicitudes al optimizador, destinos inválidos sin carga, texto hostil sin imágenes ni HTML inyectados y respuesta 404 con descripción y enlace. Editar otro bloque o la descripción conserva el estado de fallo sin repetir la solicitud; cambiar la URL permite cargar la nueva imagen. La revisión corrigió la identidad de los componentes de párrafo e imagen y los números decorativos del selector, que ahora usan trazos SVG para conservar la coincidencia del nombre accesible con el texto visible.
+
+Se mantienen las regresiones de almacenamiento, migración v1/v2, recuperación, cuota, idiomas, arrastre, tecnologías, ubicación, contactos y actividad. Sin dependencias nuevas. Las imágenes siguen alojadas en la URL indicada; la validación no comprueba DNS, disponibilidad ni tipo de archivo. No hubo publicación de README en GitHub, lectores de pantalla, dispositivos físicos, otros motores ni CI remoto. Las comprobaciones automáticas no certifican accesibilidad completa. Ver [ADR 0014](decisions/0014-custom-visual-blocks.md).

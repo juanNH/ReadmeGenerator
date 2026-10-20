@@ -6,6 +6,7 @@ import type contactProviders from "@/messages/en/contact-providers.json";
 import type contributions from "@/messages/en/modules/contributions.json";
 import type technologies from "@/messages/en/modules/technologies.json";
 import type projects from "@/messages/en/modules/projects.json";
+import type custom from "@/messages/en/modules/custom.json";
 import type { AppLocale } from "@/i18n/routing";
 
 declare module "next-intl" {
@@ -20,6 +21,7 @@ declare module "next-intl" {
         contributions: typeof contributions;
         technologies: typeof technologies;
         projects: typeof projects;
+        custom: typeof custom;
       };
     };
   }

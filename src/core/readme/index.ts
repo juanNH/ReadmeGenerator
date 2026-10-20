@@ -1,2 +1,2 @@
 export { generateReadme } from "./generate-readme";
-export type { ReadmeIssue, ReadmeResult } from "./readme-result";
+export type { CustomImageSource, ReadmeIssue, ReadmeResult } from "./readme-result";

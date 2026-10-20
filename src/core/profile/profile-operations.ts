@@ -1,11 +1,26 @@
 import { defaultModuleOrder, isModuleId } from "../modules/module-ids";
 import { moduleRegistry } from "../modules/module-registry";
-import { moduleOrderSchema, type ContentLocale, type ProfileDocument } from "./profile-schema";
+import {
+  moduleOrderSchema,
+  profileDocumentSchema,
+  type ContentLocale,
+  type ProfileDocument,
+  type ProfileDocumentV1,
+} from "./profile-schema";
 import type { ProfileResult } from "./profile-result";
-import { issuesFromValidationError } from "./profile-validation";
+import { issuesFromValidationError, migrateProfileV1 } from "./profile-validation";
+
+export {
+  addCustomSection,
+  duplicateCustomSection,
+  removeCustomSection,
+  setCustomSectionVisibility,
+  updateCustomSection,
+  type CreateId,
+} from "./custom-section-operations";
 
 /** The locale is supplied by the caller; this factory never reads UI or browser state. */
-export function createEmptyProfile(contentLocale: ContentLocale): ProfileDocument {
+export function createEmptyProfileV1(contentLocale: ContentLocale): ProfileDocumentV1 {
   return {
     schemaVersion: 1,
     contentLocale,
@@ -35,6 +50,11 @@ export function createEmptyProfile(contentLocale: ContentLocale): ProfileDocumen
   };
 }
 
+/** Current drafts use a single mixed order, with no random or clock-dependent identities. */
+export function createEmptyProfile(contentLocale: ContentLocale): ProfileDocument {
+  return migrateProfileV1(createEmptyProfileV1(contentLocale));
+}
+
 /** document must come from the factory or parser; only operation arguments are untrusted. */
 export function setModuleVisibility(
   document: ProfileDocument,
@@ -53,13 +73,42 @@ export function setModuleVisibility(
   };
 }
 
-/** Keeps hidden modules in the order and copies the supplied array to avoid aliasing. */
+/** Validates the entire mixed order, including references to every custom section. */
+export function reorderSections(
+  document: ProfileDocument,
+  sectionOrder: unknown,
+): ProfileResult<ProfileDocument> {
+  const result = profileDocumentSchema.safeParse({ ...document, sectionOrder });
+  if (!result.success) {
+    return { success: false, errors: issuesFromValidationError(result.error) };
+  }
+  const order = result.data.sectionOrder;
+  const unchanged = order.every((reference, index) => {
+    const previous = document.sectionOrder[index];
+    return reference.kind === "module"
+      ? previous?.kind === "module" && previous.moduleId === reference.moduleId
+      : previous?.kind === "custom" && previous.sectionId === reference.sectionId;
+  });
+  return {
+    success: true,
+    data: unchanged ? document : { ...document, sectionOrder: order },
+  };
+}
+
+/** Compatibility operation: reorder only fixed slots and keep custom positions intact. */
 export function reorderModules(
   document: ProfileDocument,
   moduleOrder: unknown,
 ): ProfileResult<ProfileDocument> {
   const result = moduleOrderSchema.safeParse(moduleOrder);
-  return result.success
-    ? { success: true, data: { ...document, moduleOrder: result.data } }
-    : { success: false, errors: issuesFromValidationError(result.error, ["moduleOrder"]) };
+  if (!result.success) {
+    return { success: false, errors: issuesFromValidationError(result.error, ["moduleOrder"]) };
+  }
+  let index = 0;
+  const order = document.sectionOrder.map((reference) =>
+    reference.kind === "module"
+      ? { kind: "module" as const, moduleId: result.data[index++]! }
+      : reference,
+  );
+  return reorderSections(document, order);
 }

@@ -1,6 +1,6 @@
 import type { z } from "zod";
-import { profileDocumentSchema } from "./profile-schema";
-import type { ProfileDocument } from "./profile-schema";
+import { profileDocumentSchema, profileDocumentV1Schema } from "./profile-schema";
+import type { ProfileDocument, ProfileDocumentV1 } from "./profile-schema";
 import {
   profileIssueCodes,
   type ProfileIssue,
@@ -29,23 +29,52 @@ export function issuesFromValidationError(
       return [{ code: issue.params.profileCode, path }];
     }
     if (issue.code === "invalid_type") return [{ code: "invalid_type", path }];
-    if (issue.code === "invalid_value" && path[0] === "moduleOrder") {
+    if (
+      issue.code === "invalid_value" &&
+      (path[0] === "moduleOrder" || path.at(-1) === "moduleId")
+    ) {
       return [{ code: "unknown_module", path }];
     }
     return [{ code: "invalid_value", path }];
   });
 }
 
-/** Validates a draft structure. A successful result is not permission to render or export it. */
+/** Valid v1 data is copied without inferred content, new identities or translated text. */
+export function migrateProfileV1(document: ProfileDocumentV1): ProfileDocument {
+  const legacy = profileDocumentV1Schema.parse(document);
+  return {
+    schemaVersion: 2,
+    contentLocale: legacy.contentLocale,
+    data: legacy.data,
+    visibility: legacy.visibility,
+    sectionOrder: legacy.moduleOrder.map((moduleId) => ({ kind: "module", moduleId })),
+    customSections: [],
+  };
+}
+
+/** Validates known versions and returns current v2 data; export validation remains separate. */
 export function parseProfileDocument(input: unknown): ProfileResult<ProfileDocument> {
   if (
     typeof input === "object" &&
     input !== null &&
     Object.hasOwn(input, "schemaVersion") &&
     "schemaVersion" in input &&
-    input.schemaVersion !== 1
+    input.schemaVersion !== 1 &&
+    input.schemaVersion !== 2
   ) {
     return { success: false, errors: [{ code: "unsupported_version", path: ["schemaVersion"] }] };
+  }
+
+  if (
+    typeof input === "object" &&
+    input !== null &&
+    "schemaVersion" in input &&
+    input.schemaVersion === 1
+  ) {
+    const legacy = profileDocumentV1Schema.safeParse(input);
+    return legacy.success
+      ? { success: true, data: migrateProfileV1(legacy.data) }
+      : { success: false, errors: issuesFromValidationError(legacy.error) };
   }
 
   const result = profileDocumentSchema.safeParse(input);

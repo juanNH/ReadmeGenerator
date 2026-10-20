@@ -4,7 +4,7 @@ import { readFile } from "node:fs/promises";
 import { createEmptyProfile } from "../../src/core/profile/profile-operations";
 
 type Locale = "en" | "es";
-const draftKey = "github-profile-generator.profile.v1";
+const draftKey = "github-profile-generator.profile.v2";
 const copy = {
   en: {
     section: "About you",

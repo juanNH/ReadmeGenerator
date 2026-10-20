@@ -4,7 +4,7 @@ import { createContributorExampleProfile } from "../../src/core/profile/fixtures
 import { createEmptyProfile } from "../../src/core/profile/profile-operations";
 import type { ContentLocale, ProfileDocument } from "../../src/core/profile/profile-schema";
 
-const draftKey = "github-profile-generator.profile.v1";
+const draftKey = "github-profile-generator.profile.v2";
 const copy = {
   en: {
     section: "Technologies & tools",
@@ -107,7 +107,7 @@ for (const locale of ["en", "es"] as const) {
       await addTool(page, name, locale, query);
     }
     const stored = await savedProfile(page, locale);
-    expect(stored.schemaVersion).toBe(1);
+    expect(stored.schemaVersion).toBe(2);
     expect(
       stored.data.technologies.groups.map((group) => ({
         name: group.name,
@@ -190,7 +190,7 @@ test("renaming or removing category titles keeps tools and selects that destinat
     { name: "Small stack", tools: ["Hono"] },
   ]);
   expect(stored.data).toEqual({ ...profile.data, technologies: stored.data.technologies });
-  expect(stored.moduleOrder).toEqual(profile.moduleOrder);
+  expect(stored.sectionOrder).toEqual(profile.sectionOrder);
   expect(stored.visibility).toEqual(profile.visibility);
   await expect(
     page
@@ -291,7 +291,7 @@ test("moving tools requires confirmation and category ordering skips empty unnam
     name: "",
     items: [{ id: "shared", name: "Hono", context: "" }],
   });
-  expect(stored.moduleOrder).toEqual(profile.moduleOrder);
+  expect(stored.sectionOrder).toEqual(profile.sectionOrder);
 });
 
 test("organizing an inherited draft is explicit, cancelable and preserves notes, opaque IDs and other data", async ({
@@ -351,8 +351,8 @@ test("organizing an inherited draft is explicit, cancelable and preserves notes,
   expect(new Set(frontend?.items.map((item) => item.id)).size).toBe(frontend?.items.length);
   expect(stored.data).toEqual({ ...profile.data, technologies: stored.data.technologies });
   expect(stored.visibility).toEqual(profile.visibility);
-  expect(stored.moduleOrder).toEqual(profile.moduleOrder);
-  expect(stored.schemaVersion).toBe(1);
+  expect(stored.sectionOrder).toEqual(profile.sectionOrder);
+  expect(stored.schemaVersion).toBe(2);
   expect(errors).toEqual([]);
 });
 

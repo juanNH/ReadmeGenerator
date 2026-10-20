@@ -37,7 +37,7 @@ async function openTools(page: Page, locale: "en" | "es") {
   ];
   await page.addInitScript(
     (document) =>
-      localStorage.setItem("github-profile-generator.profile.v1", JSON.stringify(document)),
+      localStorage.setItem("github-profile-generator.profile.v2", JSON.stringify(document)),
     profile,
   );
   await page.goto(`/${locale}/editor`);

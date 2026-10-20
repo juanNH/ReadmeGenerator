@@ -1,7 +1,9 @@
 import type { ProfileDocument } from "@/core/profile/profile-schema";
-import { parseProfileDocument } from "@/core/profile/profile-validation";
+import { migrateProfileV1, parseProfileDocument } from "@/core/profile/profile-validation";
+import { profileDocumentV1Schema } from "@/core/profile/profile-schema";
 
-export const PROFILE_DRAFT_STORAGE_KEY = "github-profile-generator.profile.v1";
+export const PROFILE_DRAFT_STORAGE_KEY = "github-profile-generator.profile.v2";
+export const LEGACY_PROFILE_DRAFT_STORAGE_KEY = "github-profile-generator.profile.v1";
 
 export type ProfileDraftReadResult =
   | { readonly status: "empty" }
@@ -14,6 +16,18 @@ export function readProfileDraft(storage: Pick<Storage, "getItem">): ProfileDraf
   let serialized: string | null;
   try {
     serialized = storage.getItem(PROFILE_DRAFT_STORAGE_KEY);
+    if (serialized === null) {
+      const legacy = storage.getItem(LEGACY_PROFILE_DRAFT_STORAGE_KEY);
+      if (legacy === null) return { status: "empty" };
+      try {
+        const result = profileDocumentV1Schema.safeParse(JSON.parse(legacy));
+        return result.success
+          ? { status: "restored", document: migrateProfileV1(result.data) }
+          : { status: "invalid" };
+      } catch {
+        return { status: "invalid" };
+      }
+    }
   } catch {
     return { status: "unavailable" };
   }
@@ -21,7 +35,15 @@ export function readProfileDraft(storage: Pick<Storage, "getItem">): ProfileDraf
   if (serialized === null) return { status: "empty" };
 
   try {
-    const result = parseProfileDocument(JSON.parse(serialized));
+    const input: unknown = JSON.parse(serialized);
+    if (
+      typeof input !== "object" ||
+      input === null ||
+      !("schemaVersion" in input) ||
+      input.schemaVersion !== 2
+    )
+      return { status: "invalid" };
+    const result = parseProfileDocument(input);
     return result.success ? { status: "restored", document: result.data } : { status: "invalid" };
   } catch {
     return { status: "invalid" };

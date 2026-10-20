@@ -5,68 +5,66 @@ import { Accessibility } from "@dnd-kit/dom";
 import { SortableKeyboardPlugin } from "@dnd-kit/dom/sortable";
 import { DragDropProvider } from "@dnd-kit/react";
 import { isSortable, useSortable } from "@dnd-kit/react/sortable";
-import { ArrowDown, ArrowUp, CircleAlert, GripVertical } from "lucide-react";
+import { ArrowDown, ArrowUp, CircleAlert, GripVertical, Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { moduleRegistry } from "@/core/modules/module-registry";
 import type { ProfileDocument } from "@/core/profile/profile-schema";
 import type { ReadmeIssue } from "@/core/readme";
 import { cn } from "@/lib/cn";
 import {
-  editableModuleIds,
-  isModuleIncluded,
-  visibleEditableModules,
-  type EditableModuleId,
+  editableSectionIds,
+  isSectionIncluded,
+  sectionHasErrors,
+  visibleEditableSections,
+  type EditableSectionId,
 } from "./module-composition";
 
 type EditorSectionNavigationProps = {
   profile: ProfileDocument;
-  activeId: EditableModuleId | null;
+  activeId: EditableSectionId | null;
   errors: readonly ReadmeIssue[];
   disabled: boolean;
-  onSelect: (id: EditableModuleId) => void;
-  onVisibility: (id: EditableModuleId, visible: boolean) => void;
-  onMove: (id: EditableModuleId, direction: "up" | "down") => void;
-  onReorder: (id: EditableModuleId, destinationIndex: number) => void;
-  buttonRef: (id: EditableModuleId, node: HTMLButtonElement | null) => void;
+  labels: ReadonlyMap<string, string>;
+  onAddCustom: () => void;
+  onSelect: (id: EditableSectionId) => void;
+  onVisibility: (id: EditableSectionId, visible: boolean) => void;
+  onMove: (id: EditableSectionId, direction: "up" | "down") => void;
+  onReorder: (id: EditableSectionId, destinationIndex: number) => void;
+  buttonRef: (id: EditableSectionId, node: HTMLButtonElement | null) => void;
   moveButtonRef: (
-    id: EditableModuleId,
+    id: EditableSectionId,
     direction: "up" | "down",
     node: HTMLButtonElement | null,
   ) => void;
-  onReview: (id: EditableModuleId) => void;
+  onReview: (id: EditableSectionId) => void;
 };
 
 export function EditorSectionNavigation(props: EditorSectionNavigationProps) {
   const { profile, activeId, disabled, onReorder } = props;
   const t = useTranslations("EditorNavigation");
-  const moduleLabels = useTranslations("Modules");
   const titleId = useId();
   const helpId = useId();
-  const visibleIds = visibleEditableModules(profile);
+  const visibleIds = visibleEditableSections(profile);
   const total = visibleIds.length;
-  const [projectedIds, setProjectedIds] = useState<EditableModuleId[] | null>(null);
-  const projectedIdsRef = useRef<EditableModuleId[] | null>(null);
+  const [projectedIds, setProjectedIds] = useState<EditableSectionId[] | null>(null);
+  const projectedIdsRef = useRef<EditableSectionId[] | null>(null);
   const orderedIds = [
     ...(projectedIds ?? visibleIds),
-    ...editableModuleIds.filter((id) => !isModuleIncluded(profile, id)),
+    ...editableSectionIds(profile).filter((id) => !isSectionIncluded(profile, id)),
   ];
-  const announcementContext = useRef({ t, moduleLabels, total });
+  const announcementContext = useRef({ t, labels: props.labels, total });
 
   useEffect(() => {
-    announcementContext.current = { t, moduleLabels, total };
-  }, [t, moduleLabels, total]);
+    announcementContext.current = { t, labels: props.labels, total };
+  }, [t, props.labels, total]);
 
   // Plugins keep their first options. Stable callbacks read the latest committed
   // labels and section count instead of capturing the empty hydration document.
   const accessibility = useMemo(() => {
     function moduleLabel(id: string | number | undefined) {
-      const moduleId = editableModuleIds.find((candidate) => candidate === id);
-      return moduleId
-        ? announcementContext.current.moduleLabels(moduleRegistry[moduleId].labelKey)
-        : null;
+      return typeof id === "string" ? (announcementContext.current.labels.get(id) ?? null) : null;
     }
 
     const options = {
@@ -173,12 +171,22 @@ export function EditorSectionNavigation(props: EditorSectionNavigationProps) {
                   id={id}
                   index={index}
                   total={total}
-                  included={isModuleIncluded(profile, id)}
+                  included={isSectionIncluded(profile, id)}
                   active={activeId === id}
                 />
               ))}
             </ul>
           </DragDropProvider>
+          <Button
+            variant="outline"
+            className="mt-4 w-full"
+            disabled={disabled}
+            onClick={props.onAddCustom}
+          >
+            <Plus aria-hidden="true" />
+            {t("addCustom")}
+          </Button>
+          <p className="mt-2 px-1 text-xs leading-5 text-muted-foreground">{t("customHelp")}</p>
           <p id={helpId} className="mt-4 px-1 text-xs leading-5 text-muted-foreground">
             {t("help")}
           </p>
@@ -189,7 +197,7 @@ export function EditorSectionNavigation(props: EditorSectionNavigationProps) {
 }
 
 type SectionNavigationItemProps = EditorSectionNavigationProps & {
-  id: EditableModuleId;
+  id: EditableSectionId;
   index: number;
   total: number;
   included: boolean;
@@ -210,11 +218,12 @@ function SectionNavigationItem({
   buttonRef,
   moveButtonRef,
   onReview,
+  profile,
+  labels,
 }: SectionNavigationItemProps) {
   const t = useTranslations("EditorNavigation");
   const composition = useTranslations("Editor.composition");
-  const moduleLabels = useTranslations("Modules");
-  const label = moduleLabels(moduleRegistry[id].labelKey);
+  const label = labels.get(id) ?? "";
   const { ref, handleRef, isDragSource } = useSortable({
     id,
     index,
@@ -224,11 +233,7 @@ function SectionNavigationItem({
     plugins: [SortableKeyboardPlugin],
     transition: null,
   });
-  const hasErrors = errors.some(
-    (error) =>
-      error.path[0] === "data" &&
-      (error.path[1] === id || (id === "contributions" && error.path[1] === "metrics")),
-  );
+  const hasErrors = sectionHasErrors(profile, id, errors);
 
   return (
     <li

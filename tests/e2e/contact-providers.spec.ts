@@ -6,7 +6,7 @@ import type { ProfileDocument } from "../../src/core/profile/profile-schema";
 
 type Locale = "en" | "es";
 
-const draftKey = "github-profile-generator.profile.v1";
+const draftKey = "github-profile-generator.profile.v2";
 const copy = {
   en: {
     contact: "Contact",
@@ -240,7 +240,7 @@ for (const locale of ["en", "es"] as const) {
     await expect(preview.locator('a[href="mailto:hello@alex.example"]')).toBeVisible();
     await expect.poll(async () => (await storedProfile(page)).data.contact.links.length).toBe(8);
     const stored = await storedProfile(page);
-    expect(stored.schemaVersion).toBe(1);
+    expect(stored.schemaVersion).toBe(2);
     expect(stored.data.contact.links.map((link) => Object.keys(link).sort())).toEqual(
       Array.from({ length: 8 }, () => ["id", "label", "url"]),
     );
@@ -373,7 +373,7 @@ test("restored contacts preserve custom labels, opaque IDs and unrelated data af
   const profile = createEmptyProfile("es");
   profile.visibility.contact = true;
   profile.data.presentation.bio = "Stored words outside the current section";
-  profile.moduleOrder.reverse();
+  profile.sectionOrder.reverse();
   profile.data.contact.links = [
     { id: "\ud800", label: "Mi espacio profesional", url: brandedContacts[0].url },
     { id: "entry / ? # : []", label: "Ideas personales", url: "https://alex.example/" },

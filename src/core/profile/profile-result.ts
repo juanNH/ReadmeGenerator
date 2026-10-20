@@ -8,6 +8,9 @@ export const profileIssueCodes = Object.freeze([
   "invalid_id",
   "duplicate_id",
   "duplicate_card",
+  "unknown_section",
+  "invalid_reference",
+  "id_generation_failed",
 ] as const);
 
 export type ProfileIssueCode = (typeof profileIssueCodes)[number];

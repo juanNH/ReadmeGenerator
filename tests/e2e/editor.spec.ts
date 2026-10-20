@@ -4,7 +4,7 @@ import { readFile } from "node:fs/promises";
 import { createEmptyProfile } from "../../src/core/profile/profile-operations";
 import { generateReadme } from "../../src/core/readme";
 
-const draftKey = "github-profile-generator.profile.v1";
+const draftKey = "github-profile-generator.profile.v2";
 
 async function openEditor(page: Page, locale: "en" | "es" = "en") {
   await page.goto(`/${locale}/editor`);
@@ -244,7 +244,7 @@ test("hiding and restoring a section preserves its draft, order and opaque IDs a
   ];
   profile.visibility.presentation = true;
   profile.visibility.contact = true;
-  profile.moduleOrder.reverse();
+  profile.sectionOrder.reverse();
   await page.goto("/en");
   await page.evaluate(({ key, value }) => localStorage.setItem(key, value), {
     key: draftKey,
@@ -281,7 +281,7 @@ test("hiding and restoring a section preserves its draft, order and opaque IDs a
     (key) => JSON.parse(localStorage.getItem(key) ?? "null"),
     draftKey,
   );
-  expect(stored.moduleOrder).toEqual(profile.moduleOrder);
+  expect(stored.sectionOrder).toEqual(profile.sectionOrder);
   expect(stored.data.knowledge).toEqual(profile.data.knowledge);
   expect(stored.data.contact.links[0].id).toBe("\ud800");
   expect(await downloadReadme(page)).toContain("Updated portfolio");
@@ -417,7 +417,7 @@ test("preview, clipboard and README download use the generator, and clipboard fa
 
 for (const [name, saved] of [
   ["corrupt JSON", "{unfinished"],
-  ["future version", JSON.stringify({ ...createEmptyProfile("en"), schemaVersion: 2 })],
+  ["future version", JSON.stringify({ ...createEmptyProfile("en"), schemaVersion: 99 })],
 ] as const) {
   test(`a ${name} draft remains untouched until a new saved draft is confirmed`, async ({
     page,
