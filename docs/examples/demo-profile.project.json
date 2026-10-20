@@ -1,0 +1,194 @@
+{
+  "schemaVersion": 2,
+  "contentLocale": "en",
+  "data": {
+    "presentation": {
+      "displayName": "Alex Rivera",
+      "headline": "Small ideas. Useful tools. Shared learning.",
+      "bio": "I enjoy building accessible web experiences and turning what I learn into open projects. I care about thoughtful design, clear documentation and tools that make everyday work simpler.",
+      "location": ""
+    },
+    "knowledge": {
+      "items": []
+    },
+    "technologies": {
+      "groups": [
+        {
+          "id": "demo-web",
+          "name": "Web & interfaces",
+          "items": [
+            {
+              "id": "demo-web-0",
+              "name": "TypeScript",
+              "context": ""
+            },
+            {
+              "id": "demo-web-1",
+              "name": "React",
+              "context": ""
+            },
+            {
+              "id": "demo-web-2",
+              "name": "Next.js",
+              "context": ""
+            },
+            {
+              "id": "demo-web-3",
+              "name": "Tailwind CSS",
+              "context": ""
+            }
+          ]
+        },
+        {
+          "id": "demo-tools",
+          "name": "Data & tools",
+          "items": [
+            {
+              "id": "demo-tool-0",
+              "name": "Node.js",
+              "context": ""
+            },
+            {
+              "id": "demo-tool-1",
+              "name": "PostgreSQL",
+              "context": ""
+            },
+            {
+              "id": "demo-tool-2",
+              "name": "Git",
+              "context": ""
+            }
+          ]
+        }
+      ]
+    },
+    "education": {
+      "items": []
+    },
+    "current": {
+      "items": []
+    },
+    "projects": {
+      "items": [
+        {
+          "id": "demo-project",
+          "name": "Idea Garden",
+          "description": "A digital notebook for collecting lessons and sharing web development resources.",
+          "role": "Design and development",
+          "technologies": ["Next.js", "TypeScript"],
+          "links": [
+            {
+              "id": "demo-project-link",
+              "label": "View the example project",
+              "url": "https://example.com/ideas"
+            }
+          ]
+        }
+      ]
+    },
+    "contributions": {
+      "items": []
+    },
+    "metrics": {
+      "username": "",
+      "cards": []
+    },
+    "contact": {
+      "links": [
+        {
+          "id": "demo-portfolio",
+          "label": "My portfolio",
+          "url": "https://example.com"
+        }
+      ]
+    }
+  },
+  "visibility": {
+    "presentation": true,
+    "knowledge": false,
+    "technologies": true,
+    "education": false,
+    "current": false,
+    "projects": true,
+    "contributions": false,
+    "metrics": false,
+    "contact": true
+  },
+  "sectionOrder": [
+    {
+      "kind": "module",
+      "moduleId": "presentation"
+    },
+    {
+      "kind": "module",
+      "moduleId": "knowledge"
+    },
+    {
+      "kind": "module",
+      "moduleId": "technologies"
+    },
+    {
+      "kind": "module",
+      "moduleId": "education"
+    },
+    {
+      "kind": "module",
+      "moduleId": "current"
+    },
+    {
+      "kind": "module",
+      "moduleId": "projects"
+    },
+    {
+      "kind": "module",
+      "moduleId": "contributions"
+    },
+    {
+      "kind": "module",
+      "moduleId": "metrics"
+    },
+    {
+      "kind": "module",
+      "moduleId": "contact"
+    },
+    {
+      "kind": "custom",
+      "sectionId": "demo-learning"
+    }
+  ],
+  "customSections": [
+    {
+      "id": "demo-learning",
+      "title": "What I am exploring",
+      "visible": true,
+      "blocks": [
+        {
+          "id": "demo-paragraph",
+          "type": "paragraph",
+          "text": "I learn by building, experimenting and sharing the process."
+        },
+        {
+          "id": "demo-list",
+          "type": "list",
+          "style": "unordered",
+          "items": [
+            {
+              "id": "demo-list-1",
+              "text": "Accessible interfaces and keyboard navigation."
+            },
+            {
+              "id": "demo-list-2",
+              "text": "Small tools that automate everyday tasks."
+            }
+          ]
+        },
+        {
+          "id": "demo-code",
+          "type": "code",
+          "source": "const learn = (idea: string) => {\n  return { idea, nextStep: \"build and share\" };\n};",
+          "language": "typescript"
+        }
+      ]
+    }
+  ]
+}

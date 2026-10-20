@@ -1,84 +1,144 @@
 # GitHub Profile Generator
 
-GitHub Profile Generator es un generador visual de README para perfiles de GitHub. Permite crear una presentación personal breve, elegir tecnologías con sus iconos y compartir proyectos, aportes o contacto, aunque haya poca actividad pública.
+**Create your GitHub profile README with a visual editor.**
 
-El repositorio incluye un editor bilingüe con cinco secciones fijas y secciones personalizadas repetibles, navegación, configuración estable, vista previa, exportación, borrador local y kit visual. Las secciones incluidas se ordenan mediante arrastre, teclado o botones. Actividad y contribuciones reúne aportes manuales y diez tipos de tarjetas opcionales: cinco propias y las familias de estadísticas, lenguajes, repositorio, Gist y WakaTime adaptadas de GitHub Stats Extended. Las consultas GitHub necesitan configuración del servidor; WakaTime usa estadísticas públicas de una cuenta independiente y el recorrido manual funciona sin credenciales. `ProfileDocument` versión 2 conserva las estructuras heredadas y usa un orden mixto de secciones. No hay asistencia con IA.
+Introduce yourself, share your tools and show what you build. Choose your sections, preview the result as you edit and bring your `README.md` to GitHub. Save the complete project as JSON to keep editing another day, even on another device.
 
-Presentación permite elegir niveles de título y alineación sin escribir etiquetas. El editor de fuentes resalta todos los lenguajes sugeridos y ofrece un ejemplo JSON opcional. El botón «Borrar README» vacía el perfil actual con confirmación y conserva los respaldos existentes. Consultá [el editor](docs/editor.md) para conocer las opciones y sus límites.
+**No sign-in required to build your profile · English and Español interface · Original code licensed under MIT**
 
-Desde **Proyecto** podés descargar el perfil completo en JSON y abrirlo para continuar en otro navegador. La apertura incluye revisión y confirmación con respaldo independiente del perfil actual; conserva también el contenido oculto y el trabajo incompleto.
+[How it works](#how-it-works) · [Save and continue later](#save-and-continue-later) · [Run locally](#run-locally) · [Documentation](#documentation) · [Contribute](CONTRIBUTING.md)
 
-## Ejecutar el proyecto
+![English editor showing the introduction for a fictional profile named Alex Rivera on the left and a live README preview with technologies on the right.](docs/assets/editor-overview.jpg)
 
-Requisitos: Node.js `24.21.0` y pnpm `11.25.0`. La versión de Node está en `.nvmrc` y la de pnpm en `package.json`.
+_A real editor screenshot with a fictional profile. Open the [example project](docs/examples/demo-profile.project.json) from Project to explore it._
+
+## What you can create
+
+A short profile can tell a story. Every section is optional: start with a few words, some tools or a link, whether or not you have projects or public activity to share.
+
+| What you want to share                | What the editor offers                                                                                                             |
+| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| **Who you are**                       | An introduction, interests, a short headline and an optional location, with heading sizes and alignment controls.                  |
+| **What you build with**               | A searchable technology catalog with icons, editable categories and custom names.                                                  |
+| **What you do**                       | Projects and contributions to code, documentation, reviews or communities, with context and links.                                 |
+| **Your own content**                  | Repeatable sections with text, lists, links, headings, quotes, dividers, public images, filtered HTML and syntax-highlighted code. |
+| **Where to find you**                 | Social profiles, a portfolio, websites and email.                                                                                  |
+| **Public activity, if you choose it** | Ten optional card types with themes and colors; they require the configuration described [below](#optional-activity-and-cards).    |
+
+Reorder sections by dragging, using the keyboard or pressing the arrow buttons. Hide a section while keeping its content. On desktop, editing and preview appear side by side; on smaller screens, switch between them. Light and dark themes are available.
+
+<details>
+<summary>Watch an animated editor tour</summary>
+
+![English editor tour showing the introduction, technology selection and options to save and open a JSON project for a fictional profile.](docs/assets/editor-tour.gif)
+
+The animation shows real editor states using the same fictional profile. The screenshot above offers a still view without opening the animation.
+
+</details>
+
+## How it works
+
+1. **Choose what to share.** Open the editor and add the sections that work for you. Fill them in at your own pace.
+2. **Edit and preview.** Write, choose technologies and arrange your content. Preview, copy and download all use the same generated Markdown.
+3. **Bring it to GitHub.** Use **Copy README** or **Download README**, then place the file at the root of a public repository named exactly like your GitHub username. Follow [GitHub's official profile README guide](https://docs.github.com/en/account-and-profile/how-tos/profile-customization/managing-your-profile-readme) to publish it.
+
+The app prepares the file; you decide when to publish it. GitHub applies its own styles and filters, so the published result may look different from the preview.
+
+## Save and continue later
+
+**Keep editing without starting over.** Your draft is saved in your browser, and you can download a complete copy to continue later or on another device.
+
+| File                          | What it is for                                                                              |
+| ----------------------------- | ------------------------------------------------------------------------------------------- |
+| `README.md`                   | Publishing your introduction on GitHub.                                                     |
+| `github-profile.project.json` | Reopening your profile in this generator to keep editing its fields, sections and settings. |
+
+1. Open **Project → Download project** to save your work.
+2. When you return, choose **Project → Open project file** and select that `.json` file.
+3. Review the summary and confirm replacement of the open profile. The app first tries to save a recovery copy of your previous profile.
+
+The project keeps your text, order, categories, formatting and hidden content. You can also save unfinished work, even when the README still needs corrections. Opening a project replaces the whole profile after confirmation; it does not merge two projects. Local files up to **4 MiB** are processed on your device.
+
+![English editor Project panel with Download project and Open project file options, explaining that the fictional profile's project file is processed locally.](docs/assets/project-files.jpg)
+
+Want to try it first? Save the [example project](docs/examples/demo-profile.project.json) and open it from that panel. It uses fictional data and links to `example.com`.
+
+> Browser drafts do not sync across devices and can be lost if you clear browser data. Keep the JSON file to continue editing. The [editor guide](docs/editor.md#guardar-y-abrir-proyectos) explains local backups and recovery in Spanish.
+
+## Start with an existing README
+
+Use **Import README** to paste Markdown or open a `.md` file. The editor analyzes it and proposes custom sections that you can review and exclude before confirming.
+
+The conversion reports formatting changes and content that needs attention; it does not automatically reconstruct the original fields of a JSON project. Before replacing the profile, the app tries to save both the previous profile and the original Markdown. Images and cards remain inactive during review.
+
+Read the [import and recovery guide](docs/editor.md#importar-un-readme-existente) for its limits and the options available if storage fails.
+
+## Run locally
+
+You need **Node.js 24.21.0** and **pnpm 11.25.0**. Versions are pinned in `.nvmrc` and `package.json`.
 
 ```sh
-pnpm install
+git clone https://github.com/juanNH/ReadmeGenerator.git
+cd ReadmeGenerator
+pnpm install --frozen-lockfile
 pnpm dev
 ```
 
-- Aplicación en inglés: [http://127.0.0.1:3000/en](http://127.0.0.1:3000/en).
-- Aplicación en español: [http://127.0.0.1:3000/es](http://127.0.0.1:3000/es).
-- Editor: [inglés](http://127.0.0.1:3000/en/editor) y [español](http://127.0.0.1:3000/es/editor).
-- Kit interno, solo con `pnpm dev`: [inglés](http://127.0.0.1:3000/en/design-system) y [español](http://127.0.0.1:3000/es/design-system). No se expone en producción.
-- Comprobaciones locales: `pnpm check`.
-- Interfaz interna de pruebas: `pnpm test:e2e:ui` (Playwright).
-- Compilación para producción: `pnpm build` y luego `pnpm start`.
+Open the editor in [English](http://127.0.0.1:3000/en/editor) or [Español](http://127.0.0.1:3000/es/editor). Building a profile manually requires no environment variables or GitHub account. The app defaults to English and lets you switch languages; your own writing stays in the language you entered.
 
-Consultá la [guía operativa](docs/development.md) para conocer todos los comandos y el estado de la validación.
+To serve a production build:
 
-## La propuesta de producto
+```sh
+pnpm build
+pnpm start
+```
 
-Para continuar un README existente, «Importar README» permite pegar Markdown o abrir un `.md` UTF-8 local, revisar las secciones detectadas y confirmar cuáles conservar. Se convierten a secciones personalizadas editables; las estructuras complejas usan HTML permitido con avisos. Antes de reemplazar se guarda el perfil anterior completo y el Markdown original, descargables por separado, con restauración confirmada. No se cargan imágenes durante la revisión. Ver [recorrido y límites de importación](docs/editor.md#importar-un-readme-existente).
+The [development guide](docs/development.md) covers commands, environment setup and the scope of verification.
 
-El editor ofrece presentación, tecnologías, proyectos, actividad y contribuciones, y contacto. Todas son opcionales. También podés agregar varias secciones propias con título opcional, párrafos, listas con viñetas o numeradas, enlaces web, subtítulos, separadores, frases destacadas, imágenes o banners, HTML explícito y código literal. Un selector con diez muestras pequeñas permite elegir el contenido; los bloques nuevos empiezan sin datos de ejemplo. Se pueden duplicar como copias independientes, ocultar sin perder contenido o eliminar. Las listas y sus ayudas de teclado pertenecen a estas secciones; los campos de texto ordinarios siguen siendo texto plano.
+## Optional activity and cards
 
-El bloque Código permite compartir una configuración TOML, un ejemplo de otro lenguaje o texto sin lenguaje declarado. Conserva la fuente como contenido literal y usa delimitadores seguros, aunque se pegue Markdown o HTML dentro. HTML y código disponen de un editor con resaltado local, números de línea, sangría, ajuste de líneas y alternativa de texto simple; se carga cuando se necesita. Títulos y subtítulos propios permiten elegir nivel; párrafos y encabezados pueden alinearse a izquierda, centro o derecha. Son opciones acotadas compatibles con la salida del README, sin interpretar etiquetas escritas en los campos de texto ni agregar estilos libres. GitHub decide los colores y el aspecto final. Ver [contrato de código y formato](docs/decisions/0019-code-and-formatting.md).
+Describe your contributions manually without querying an account. If the server operator configures the integration, **Search data** fetches public GitHub data so you can choose which cards to show. All cards start disabled. Searching requires an explicit action, and available data is reused temporarily to avoid repeated requests.
 
-La introducción permite contar quién sos, qué te interesa o qué estás aprendiendo sin repetirlo en otras secciones. Conocimientos, formación y actualidad están retirados del producto, también para borradores anteriores. Sus datos heredados de v1 permanecen guardados internamente, sin edición ni exportación y sin fusionarlos con la presentación.
+Cards include a calendar, summary, languages, overview and monthly activity, plus five families adapted from GitHub Stats Extended: statistics, languages, repositories, Gists and WakaTime. Charts are rendered by this app with configurable themes and appearance. WakaTime uses a separate username with public statistics.
 
-El recorrido funciona sin cuenta: elegir qué compartir, configurar una sección a la vez, revisar y copiar o descargar `README.md`. Las secciones están siempre visibles en una fila superior con desplazamiento horizontal; sus casillas permiten incluir u ocultar y sus tiradores ordenarlas de izquierda a derecha. Dos flechas permiten ordenar la sección activa sin arrastrar. En pantallas amplias, configuración y vista previa aparecen juntas. En pantallas angostas se alterna Editar/Vista previa. «Agregar bloque» despliega las muestras sin alejar el contenido existente. Tecnologías ofrece búsqueda y autocompletado sobre un catálogo local de 358 herramientas, además de texto propio. Incluye frameworks, ORMs, bases de datos, mensajería, infraestructura e IA, como Drizzle, TypeORM, Hono, TanStack, Claude, Codex y LangGraph. Su selección no integra esos servicios ni asigna un nivel de habilidad.
+| Server configuration | When it is needed                                                                                                                     |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `GITHUB_TOKEN`       | To query GitHub: a dedicated classic PAT with only `public_repo`, validated by the server and kept out of the browser.                |
+| `APP_URL`            | To export cards: the public HTTPS origin of the instance hosting their SVGs. A localhost server cannot make them available on GitHub. |
 
-Las tecnologías muestran icono y nombre en filas adaptables, con categorías sugeridas que se pueden renombrar, crear, ordenar o dejar sin título. También se pueden mover y ordenar las herramientas. Los borradores anteriores conservan su organización hasta que la persona decide cambiarla. Contacto ofrece 13 servicios conocidos, como LinkedIn, LeetCode, HackerRank y YouTube, y permite agregar varias webs, portfolios o correos propios y repetir servicios. Cada enlace conserva su nombre y URL; la etiqueta es opcional y el icono corresponde al dominio de la URL. No hace falta empleo, proyecto ni actividad pública para crear un perfil útil.
+Without a configured public origin, you can review cards locally; README copy and download remain disabled while cards are selected. Deselect them to export your manually entered content. Saving the JSON project remains available.
 
-Ubicación permite autocompletar países por nombre en inglés o español y agregar su bandera, o escribir otro lugar libremente. Contacto comienza con «Agregar red social» y cada entrada permite elegir su servicio o web y completar la dirección; la etiqueta personalizada sigue siendo opcional.
+Configuration and limits are documented in [.env.example](.env.example), [GitHub and hosting](docs/development.md#configurar-actividad-de-github) and [supported cards](docs/github-stats-extended.md). Public activity does not determine a person's ability, and the optional rank does not measure it either.
 
-La vista previa, la copia y la descarga parten del mismo Markdown. Los textos personales ordinarios se escapan y los iconos exportados se generan exclusivamente desde los catálogos permitidos. El editor usa SVG locales; el README referencia originales de Devicon, Simple Icons y Lobe Icons fijados a commits. Escribir etiquetas dentro de un campo de texto no activa HTML. Ver [recursos de terceros](THIRD_PARTY_NOTICES.md) y [decisión de iconos](docs/decisions/0009-profile-icons.md).
+## Your data
 
-Las imágenes propias se agregan mediante su bloque, con una URL HTTPS pública ya alojada y una descripción alternativa necesaria para exportar. La aplicación no sube archivos: una imagen local o una ruta de repositorio por sí sola no queda publicada. La validación de la dirección es sintáctica, sin comprobar DNS, disponibilidad ni tipo de archivo. La vista previa carga la imagen directamente desde el navegador, sin proxy del servidor; si falla, muestra la descripción y un enlace sin invalidar una dirección admitida. Ver [bloques visuales e imágenes](docs/decisions/0014-custom-visual-blocks.md).
+Your profile is edited and saved in the browser. Project files and imported Markdown are analyzed locally; drafts are not synced remotely. If storage fails, the editor explains that your work remains only in memory and offers the relevant recovery actions.
 
-El bloque HTML permite composiciones breves con encabezados centrados, imágenes enlazadas, tablas o desplegables. Conserva el código original y muestra avisos sobre lo filtrado y el HTML que se exportará. Admite etiquetas y atributos concretos, sin CSS ni JavaScript; los enlaces deben ser HTTP/HTTPS absolutos y las imágenes, HTTPS públicas con atributo `alt` explícito. No interpreta Markdown dentro del código ni importa un README completo. La vista previa aproxima el resultado: GitHub aplica filtros y estilos propios. Ver [uso de HTML](docs/editor.md#html-explícito) y [decisión de HTML explícito](docs/decisions/0015-explicit-profile-html.md).
+Public images load from their original servers. Optional searches contact GitHub or WakaTime through the app's server. Icons use local catalogs in the editor and pinned source references in exported READMEs. The generator does not upload your images or publish to your GitHub account. It includes no AI assistance.
 
-Actividad y contribuciones permite escribir aportes propios sin usuario de GitHub. Las consultas del formulario son explícitas y todas las tarjetas empiezan desactivadas. Panorama combina los datos disponibles y actividad mensual agrupa el calendario por mes, señalando períodos parciales. La suite Extended agrega 18 contadores seleccionables, ranking opcional explicado, cinco diseños de lenguajes, tarjetas repetibles de repositorios y Gists públicos y estadísticas públicas WakaTime de los últimos siete días. Ofrece 79 temas nombrados, colores y degradados validados, títulos, bordes y formato numérico junto a los presets propios. Los SVG se generan localmente conservando la licencia MIT y los avisos del código adaptado; no requieren el servicio alojado de Extended. Ver [funciones compatibles y límites](docs/github-stats-extended.md), [ADR 0024](docs/decisions/0024-extended-public-suite-and-mit.md) y [atribución](THIRD_PARTY_NOTICES.md#github-stats-extended-tarjetas-de-estadísticas-y-lenguajes).
+## Development and contributions
 
-El formulario no consulta al escribir ni recuperar; las imágenes de tarjetas ya elegidas sí se actualizan al mostrarse. Cero actividad, dato parcial y falta de datos son estados distintos. El ranking opcional aplica la fórmula de Extended, sin medir habilidad ni un percentil de población observado, y se oculta si faltan sus entradas completas. Los snapshots no se guardan en el borrador: se conservan usuarios y destinos públicos, tarjetas, opciones y aportes elegidos. Los aportes manuales permiten agregar contexto con título, descripción y enlace, sin publicar el borrador en una tarjeta dinámica.
+The project uses **Next.js App Router, React, TypeScript, Tailwind CSS and next-intl**. The profile model and Markdown generator live in a core independent of the interface, network and storage.
 
-El borrador actual se guarda bajo `github-profile-generator.profile.v2` en el navegador, sin sincronización entre dispositivos. Si falta esa clave, un borrador v1 válido se migra en memoria, sin escribir hasta editar y conservando intacto su original. Un v2 inválido no se sustituye con v1 automáticamente. Los flags heredados de contribuciones y métricas se presentan como una única sección; ocultarla conserva ambos contenidos. Ver [secciones personalizadas y migración](docs/decisions/0013-custom-sections.md). La actividad de GitHub no se usa para medir conocimientos.
+Run `pnpm check` and `pnpm build` to review a change; browser checks use Playwright. See [CONTRIBUTING.md](CONTRIBUTING.md) for setup and checks appropriate to each change. The internal `/design-system` catalog is available only in development.
 
-## Actividad de GitHub opcional
+Found a bug or have a suggestion? Open an [issue](https://github.com/juanNH/ReadmeGenerator/issues) with the expected behavior and, for a bug, the steps to reproduce it. Keep credentials and private data out of reports.
 
-El editor manual no requiere variables de entorno. Para habilitar consultas, la persona que opera el servidor configura `GITHUB_TOKEN` con un PAT classic dedicado y únicamente **`public_repo`**, fuera de Git y del navegador. La política verifica `x-oauth-scopes` presente, vacío o exactamente `public_repo`; rechaza scopes adicionales, como `repo` y `read:user`, y credenciales no verificables, incluidos tokens fine-grained. El cliente solo ejecuta lecturas; el token público debe guardarse como secreto aunque permita otras operaciones. No hay un formulario para solicitar claves a quienes crean perfiles.
+## Documentation
 
-Para exportar tarjetas también se necesita `APP_URL`: el origen HTTPS público de este despliegue, que aloja sus SVG. Se lee en ejecución; cambiarlo requiere reiniciar el servicio, sin recompilar. Sin ese origen se pueden revisar tarjetas mediante rutas locales, pero copia y descarga permanecen deshabilitadas mientras haya tarjetas seleccionadas. Desmarcarlas permite exportar el contenido manual. No alcanza con un servidor en localhost para que GitHub pueda cargar imágenes.
+Detailed guides are currently in Spanish.
 
-Las tarjetas se actualizan desde la aplicación según caché; no dependen de un servicio externo de gráficos. Las consultas usan endpoints fijos de GitHub o estadísticas públicas de WakaTime, filtran datos públicos y distinguen límites, errores, muestras parciales y último resultado válido. La integración está preparada; habilitar un servidor con credenciales y verificarlo contra GitHub son pasos operativos explícitos. Ver [.env.example](.env.example), [arquitectura](docs/architecture.md) y [ADR 0010](docs/decisions/0010-github-activity.md).
+| To…                                               | Read                                                                          |
+| ------------------------------------------------- | ----------------------------------------------------------------------------- |
+| Use the editor, save projects and import Markdown | [Editor guide](docs/editor.md)                                                |
+| Understand the product and its limits             | [Product](docs/product.md)                                                    |
+| Install, configure and verify the app             | [Development](docs/development.md)                                            |
+| Configure queries and publish cards               | [GitHub and hosting](docs/development.md#configurar-actividad-de-github)      |
+| Understand the architecture and data format       | [Architecture](docs/architecture.md) · [Profile model](docs/profile-model.md) |
+| Explore the other guides and decisions            | [Documentation index](docs/README.md)                                         |
 
-La base incluye inglés como idioma predeterminado y español, con un selector de idioma funcional. La ruta `/` redirige a `/en`. La dirección visual busca claridad, jerarquía, controles reconocibles y opciones avanzadas que se muestran cuando hacen falta, tomando como referencia la sobriedad de Linear y Vercel sin copiar sus interfaces.
+## License
 
-## Licencia y contribuciones
+Original code is licensed under [MIT](LICENSE), with `Copyright (c) 2026 Juan Nicolas Herrera`. Third-party materials retain their own licenses and attribution; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and the [open-source guide](docs/open-source.md).
 
-El código propio se publica bajo [MIT](LICENSE), con `Copyright (c) 2026 Juan Nicolas Herrera`. Permite reutilizar, modificar y distribuir, también comercialmente, conservando el aviso de copyright y permiso. Los materiales de terceros conservan sus licencias y atribuciones. Consultá la [guía open source](docs/open-source.md), [recursos de terceros](THIRD_PARTY_NOTICES.md) y [cómo contribuir](CONTRIBUTING.md) antes de preparar una distribución o aportar código. Los derechos del contenido de un README generado pertenecen a sus respectivos titulares.
-
-## Documentación
-
-- [Índice de documentación](docs/README.md).
-- [Definición del producto y recorrido del usuario](docs/product.md).
-- [Desarrollo, comandos y validación](docs/development.md).
-- [Arquitectura y límites del código](docs/architecture.md).
-- [Contrato del perfil y API del núcleo](docs/profile-model.md).
-- [Uso y límites del editor](docs/editor.md).
-- [Funciones compatibles de GitHub Stats Extended](docs/github-stats-extended.md).
-- [Licencia, atribuciones y distribución open source](docs/open-source.md).
-- [Kit de diseño y criterios de accesibilidad](docs/design-system.md).
-- [Guía de trabajo con IA y subagentes](docs/ai-development.md).
-- [Cómo contribuir](CONTRIBUTING.md).
+The generator's license does not change the rights to the content each person adds to their README.
