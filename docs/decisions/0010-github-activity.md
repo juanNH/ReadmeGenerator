@@ -40,6 +40,8 @@ Las tarjetas son SVG pasivos propios, con texto escapado, colores validados, tí
 
 `APP_URL` identifica el origen HTTPS público de la aplicación, nunca inferido del Host. La ruta del editor usa `await connection()` para leerlo en ejecución: cambiarlo requiere reiniciar el servicio, no recompilar; las otras páginas mantienen su generación estática. `generateReadme(document, { activityCardBaseUrl? })` genera el único Markdown del producto. Sin origen público válido usa rutas locales para revisar y devuelve éxito con `exportIssues: activity_not_configured`; los consumidores deben bloquear copia/descarga. Desmarcar tarjetas permite exportar el contenido manual. No hay un flujo de configuración de tokens dentro del producto.
 
+La resolución del origen se amplía en [ADR 0036](0036-production-card-origin.md): únicamente Vercel Production puede usar su dominio estable cuando `APP_URL` está vacío. Se conserva la prioridad de configuración explícita y el contrato puro del generador.
+
 ## Alternativas consideradas
 
 | Alternativa                                   | Motivo de descarte en esta entrega                                            |
