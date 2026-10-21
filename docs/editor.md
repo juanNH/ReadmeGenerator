@@ -4,15 +4,17 @@ El editor permite crear un perfil breve con cinco secciones fijas opcionales: pr
 
 ## Guardar y abrir proyectos
 
-La opción **Proyecto** del encabezado permite descargar el perfil actual como `github-profile.project.json` y abrir un archivo de proyecto en otro navegador. Conserva módulos, orden, IDs, categorías, formato, fuentes HTML/código y contenido oculto. También puede guardar trabajo incompleto cuyo README todavía necesita correcciones. El JSON es una copia para continuar editando; el archivo destinado a GitHub sigue siendo `README.md`.
+Los botones **Exportar proyecto (.json)** y **Importar proyecto (.json)** están a la vista en la cabecera del editor. En móvil muestran **Exportar JSON** y **Importar JSON** para mantener espacio para el formulario. Exportar descarga el perfil actual como `github-profile.project.json` para continuar editándolo en otro navegador. El archivo conserva módulos, orden, IDs, categorías, formato, fuentes HTML/código y contenido oculto, incluso si el README todavía necesita correcciones. El JSON es una copia para continuar editando; el archivo destinado a GitHub sigue siendo `README.md`.
 
-1. Abrí **Proyecto** y elegí **Descargar proyecto** para conservar el estado actual.
-2. Usá **Abrir archivo de proyecto** para seleccionar un `.json` local UTF-8 de hasta 4 MiB.
+La importación solo admite archivos JSON con la estructura de proyecto de este generador (v1 o v2). No importa JSON arbitrario ni exportaciones del perfil o de la API de GitHub. **Importar proyecto (.json)** muestra un diálogo local para elegir el archivo y revisar su contenido antes de reemplazar el perfil.
+
+1. Elegí **Exportar proyecto (.json)** para conservar el estado actual directamente.
+2. Usá **Importar proyecto (.json)** y elegí un `.json` local UTF-8 de hasta 4 MiB que tenga la estructura compatible.
 3. Revisá el idioma del README y las secciones incluidas/ocultas. El resumen mantiene inactivo el contenido externo del archivo.
 4. Continuá a confirmación, marcá la casilla y confirmá el reemplazo completo. Antes se intenta guardar un respaldo del perfil activo.
-5. Para volver atrás, abrí en Proyecto el detalle del perfil anterior y elegí restaurarlo con su confirmación. También podés descargar esa copia.
+5. Para volver atrás, abrí **Importar proyecto (.json)** y usá el detalle del perfil anterior para restaurarlo con su confirmación o descargar esa copia.
 
-Seleccionar un archivo, analizarlo o cancelar no reemplaza el borrador. Cerrar el panel o cambiar el idioma de interfaz descarta la propuesta pendiente; el perfil conserva su idioma de contenido y la interfaz su idioma actual. La apertura admite v2 y v1 estricto migrado en memoria, sin modificar el archivo original ni escribir la clave v1.
+Seleccionar un archivo, analizarlo o cancelar no reemplaza el borrador. Cerrar el diálogo o cambiar el idioma de interfaz descarta la propuesta pendiente; el perfil conserva su idioma de contenido y la interfaz su idioma actual. La apertura admite v2 y v1 estricto migrado en memoria, sin modificar el archivo original ni escribir la clave v1.
 
 El respaldo de proyectos es independiente del perfil anterior y Markdown original del importador de README. Conserva un único perfil previo, no un historial. Si el navegador no puede guardar o encuentra datos protegidos, mantiene el perfil activo y pide una decisión explícita para continuar solo en memoria. El guardado automático permanece pausado; descargá el proyecto antes de cerrar o recargar. Un respaldo puede haberse guardado aunque la escritura del nuevo borrador haya fallado.
 

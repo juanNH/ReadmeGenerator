@@ -1,15 +1,13 @@
 {
-  "title": "Tu proyecto",
-  "description": "Guardá una copia completa y seguí editándola en otro navegador cuando quieras.",
-  "privacy": "Los archivos del proyecto se procesan en este dispositivo. Revisar un archivo conserva tu borrador actual hasta que confirmes el reemplazo.",
-  "close": "Cerrar proyecto",
-  "saveTitle": "Guardá tu trabajo",
-  "saveHelp": "El archivo del proyecto conserva tus textos, orden, categorías, formato y contenido oculto. Podés guardar trabajo incompleto, aunque el README todavía no se pueda exportar. Publicá tu README.md en GitHub; conservá este archivo para seguir editando.",
+  "title": "Importar un proyecto JSON",
+  "description": "Elegí un archivo de proyecto para revisarlo antes de reemplazar tu perfil actual.",
+  "privacy": "La importación solo admite JSON con la estructura compatible de proyecto de este generador. Los archivos se leen en este dispositivo; tu perfil actual no cambia hasta que confirmes el reemplazo.",
+  "close": "Cerrar importación de proyecto",
   "downloadCurrent": "Descargar proyecto",
   "downloaded": "Proyecto descargado.",
-  "openHelp": "Elegí un proyecto guardado con este generador. Vas a revisar su contenido antes de decidir si reemplaza tu perfil actual.",
-  "openFile": "Abrir archivo de proyecto",
-  "fileHelp": "Elegí un archivo .json en UTF-8 de hasta {limit} MiB. Se lee localmente y nunca se sube a un servidor.",
+  "openHelp": "Elegí un proyecto JSON guardado con este generador. El JSON arbitrario y las exportaciones del perfil o la API de GitHub no son compatibles.",
+  "openFile": "Elegir archivo JSON de proyecto",
+  "fileHelp": "Elegí un proyecto JSON en UTF-8 de hasta {limit} MiB. Debe tener la estructura compatible de este generador; se lee localmente y nunca se sube a un servidor.",
   "readingFile": "Leyendo tu proyecto…",
   "reviewReady": "Proyecto abierto para revisar. Tu perfil actual no cambió.",
   "reviewHelp": "Revisá el idioma del contenido, las secciones y su visibilidad. Abrir reemplaza todo el perfil, incluido el contenido oculto; no combina proyectos.",
@@ -27,7 +25,7 @@
   "confirmRestore": "Confirmar restauración",
   "cancelRestore": "Cancelar restauración",
   "steps": {
-    "source": "Abrí un proyecto guardado",
+    "source": "Elegí un proyecto JSON",
     "review": "1. Revisá tu proyecto",
     "confirm": "2. Confirmá el reemplazo",
     "restore": "Revisá el perfil que vas a restaurar"
@@ -46,7 +44,7 @@
   "memory": {
     "title": "No se pudo guardar tu trabajo de forma segura",
     "help": "No se pudo guardar el respaldo o el perfil, o el almacenamiento está protegido. Podés seguir editando en esta pestaña con el guardado automático pausado. Al recargar o cerrar puede volver el perfil guardado anteriormente. Es posible que ya haya una copia de recuperación disponible.",
-    "saveFirst": "Usá «Descargar proyecto» arriba para conservar tu trabajo actual antes de continuar. Después podés descargar el proyecto abierto desde el editor.",
+    "saveFirst": "Descargá una copia de tu perfil actual antes de continuar. Después podés exportar el proyecto abierto desde el editor.",
     "continue": "Continuar solo en memoria",
     "cancel": "Volver sin reemplazar"
   },

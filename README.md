@@ -10,7 +10,7 @@ Introduce yourself, share your tools and show what you build. Choose your sectio
 
 ![English editor showing the introduction for a fictional profile named Alex Rivera on the left and a live README preview with technologies on the right.](docs/assets/editor-overview.jpg)
 
-_A real editor screenshot with a fictional profile. Open the [example project](docs/examples/demo-profile.project.json) from Project to explore it._
+_A real editor screenshot with a fictional profile. Open the [example project](docs/examples/demo-profile.project.json) with **Import project (.json)** to explore it._
 
 ## What you can create
 
@@ -32,7 +32,7 @@ Reorder sections by dragging, using the keyboard or pressing the arrow buttons. 
 
 ![English editor tour showing the introduction, technology selection and options to save and open a JSON project for a fictional profile.](docs/assets/editor-tour.gif)
 
-The animation shows real editor states using the same fictional profile. The screenshot above offers a still view without opening the animation.
+The animation shows real editor states using the same fictional profile. It predates the current project import dialog; **Export project (.json)** and **Import project (.json)** now appear in the editor header. The screenshot above offers a still view without opening the animation.
 
 </details>
 
@@ -53,15 +53,15 @@ The app prepares the file; you decide when to publish it. GitHub applies its own
 | `README.md`                   | Publishing your introduction on GitHub.                                                     |
 | `github-profile.project.json` | Reopening your profile in this generator to keep editing its fields, sections and settings. |
 
-1. Open **Project → Download project** to save your work.
-2. When you return, choose **Project → Open project file** and select that `.json` file.
+1. Choose **Export project (.json)** below the editor heading to download your work.
+2. When you return, choose **Import project (.json)** beside it, then select that `.json` file in the dialog.
 3. Review the summary and confirm replacement of the open profile. The app first tries to save a recovery copy of your previous profile.
+
+On mobile, the same buttons read **Export JSON** and **Import JSON**. Import accepts only JSON files with this generator’s project structure; generic JSON and GitHub profile or API exports are not compatible.
 
 The project keeps your text, order, categories, formatting and hidden content. You can also save unfinished work, even when the README still needs corrections. Opening a project replaces the whole profile after confirmation; it does not merge two projects. Local files up to **4 MiB** are processed on your device.
 
-![English editor Project panel with Download project and Open project file options, explaining that the fictional profile's project file is processed locally.](docs/assets/project-files.jpg)
-
-Want to try it first? Save the [example project](docs/examples/demo-profile.project.json) and open it from that panel. It uses fictional data and links to `example.com`.
+Want to try it first? Download the [example project](docs/examples/demo-profile.project.json) and import it with **Import project (.json)**. It uses fictional data and links to `example.com`.
 
 > Browser drafts do not sync across devices and can be lost if you clear browser data. Keep the JSON file to continue editing. The [editor guide](docs/editor.md#guardar-y-abrir-proyectos) explains local backups and recovery in Spanish.
 

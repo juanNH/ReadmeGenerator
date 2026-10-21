@@ -198,8 +198,13 @@
     "guide": "Ver la guía de README de perfil de GitHub"
   },
   "project": {
-    "action": "Proyecto",
-    "loading": "Cargando las opciones del proyecto…",
+    "files": "Archivos de proyecto",
+    "save": "Exportar proyecto (.json)",
+    "open": "Importar proyecto (.json)",
+    "saveCompact": "Exportar JSON",
+    "openCompact": "Importar JSON",
+    "help": "La importación solo admite archivos JSON con la estructura de proyecto de este generador; los JSON con otra estructura no son compatibles.",
+    "loading": "Abriendo la importación del proyecto…",
     "completed": "Proyecto abierto. Podés seguir editando."
   },
   "reset": {
