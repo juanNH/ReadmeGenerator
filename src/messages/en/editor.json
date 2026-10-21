@@ -42,8 +42,8 @@
     "reviewNamed": "Review fields in {module}"
   },
   "metrics": {
-    "title": "Publishing cards",
-    "help": "Search and preview work locally. Publishing these cards on GitHub requires this app's public address to be configured.",
+    "title": "Cards are available for preview only",
+    "help": "This editor can draw cards from your browser's data, but GitHub needs a public address to load them. This instance does not have one configured. Save your JSON project to keep everything, or exclude the cards to download your text and manual contributions.",
     "hide": "Exclude GitHub cards and keep their settings",
     "hidden": "GitHub cards are excluded. Their saved settings have been kept."
   },
@@ -180,7 +180,7 @@
     "missingImageDescription": "Add a description to the highlighted images so everyone can understand them. Use Review fields to open their settings.",
     "invalidUsername": "Check the GitHub username in Activity & contributions, or exclude the GitHub cards to export your writing.",
     "invalidActivityOptions": "Check the public repository, Gist or WakaTime settings in Activity & contributions, or exclude those cards.",
-    "localCards": "You can review these cards locally. Exporting them needs this app's public address. Exclude the cards to export your writing now.",
+    "localCards": "README copy and download need a public address for the included cards. Save your JSON project, or exclude the cards to export your text and manual contributions.",
     "ready": "Ready when you are. Copy the Markdown or download your README.md file.",
     "copy": "Copy README",
     "copying": "Copying…",

@@ -56,7 +56,16 @@ function lastGoodOrFailure(
 }
 
 export function getPublicActivityBaseUrl(): string | undefined {
-  return normalizeActivityBaseUrl(process.env.APP_URL) ?? undefined;
+  const configuredOrigin = process.env.APP_URL?.trim();
+  // An explicit but invalid origin needs correction; do not silently replace it.
+  if (configuredOrigin) return normalizeActivityBaseUrl(configuredOrigin) ?? undefined;
+  if (process.env.VERCEL_ENV !== "production") return undefined;
+
+  // Vercel's stable production domain has no scheme. Never use a deployment or
+  // branch URL: previews may be temporary or protected and cannot host a README.
+  const productionDomain = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
+  if (!productionDomain || !/^[a-z0-9.-]+$/i.test(productionDomain)) return undefined;
+  return normalizeActivityBaseUrl(`https://${productionDomain}`) ?? undefined;
 }
 
 export async function getGitHubActivity(rawUsername: string): Promise<ActivityResult> {

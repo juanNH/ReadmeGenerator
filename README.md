@@ -108,6 +108,8 @@ Cards include a calendar, summary, languages, overview and monthly activity, plu
 
 Without a configured public origin, you can review cards locally; README copy and download remain disabled while cards are selected. Deselect them to export your manually entered content. Saving the JSON project remains available.
 
+On Vercel Production, an empty `APP_URL` uses the project's stable production domain from Vercel's system environment variables. Preview and local instances still need an explicit `APP_URL` to export cards. The card URLs must be publicly accessible without authentication. See the [deployment guide](docs/vercel-deployment.md#3-variables-por-entorno).
+
 Configuration and limits are documented in [.env.example](.env.example), [GitHub and hosting](docs/development.md#configurar-actividad-de-github) and [supported cards](docs/github-stats-extended.md). Public activity does not determine a person's ability, and the optional rank does not measure it either.
 
 ## Your data

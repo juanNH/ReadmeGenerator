@@ -49,22 +49,24 @@ En **Project → Settings → Environment Variables**:
 | Variable                       | Production (`main`)                                                           | Preview de `dev`                                                                               |
 | ------------------------------ | ----------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
 | `GITHUB_TOKEN`                 | PAT classic dedicado con solo `public_repo`, como el que funciona localmente. | PAT dedicado a pruebas si necesitás búsquedas reales; vacío permite edición manual y muestras. |
-| `APP_URL`                      | Origen HTTPS estable de producción.                                           | Vacío para muestras; para probar exportación, origen HTTPS público de preproducción.           |
+| `APP_URL`                      | Origen HTTPS estable explícito; vacío usa el dominio de Production de Vercel. | Vacío para muestras; para probar exportación, origen HTTPS público de preproducción.           |
 | `ENABLE_EXPERIMENTAL_COREPACK` | `1`.                                                                          | `1`.                                                                                           |
 
 Las variables de Preview sin filtro se aplican a todas sus ramas. Limitá explícitamente `GITHUB_TOKEN` y el origen de prueba a `dev` si querés que estén disponibles únicamente en esa rama. Si reutilizás el PAT entre entornos, comparten la cuota de la misma cuenta. Ver [entornos](https://vercel.com/docs/deployments/environments) y [variables por rama](https://vercel.com/docs/environment-variables).
 
 `GITHUB_TOKEN` es exclusivo del servidor: no usar `NEXT_PUBLIC_`, URLs ni README. `public_repo` también permite escritura en GitHub, pero este cliente ejecuta únicamente lecturas y filtra datos públicos; rechaza scopes adicionales y credenciales no verificables.
 
-`APP_URL` debe ser un origen como `https://tu-proyecto.vercel.app`, sin ruta, query ni fragmento. No se deduce de `Host` o `VERCEL_URL`. Usá el dominio estable de producción para los README definitivos; los previews temporales no son enlaces duraderos.
+`APP_URL` debe ser un origen como `https://tu-proyecto.vercel.app`, sin ruta, query ni fragmento. Tiene prioridad en todos los entornos. Si se suministra un valor no vacío pero inválido, requiere corrección: no se reemplaza silenciosamente. No se deduce de `Host`, `VERCEL_URL` ni `VERCEL_BRANCH_URL`.
 
-Si aún no conocés el dominio, hacé el primer despliegue sin `APP_URL`; después agregá el dominio asignado y ejecutá **Redeploy**. Mientras falta, las tarjetas son una vista previa local y bloquean exportación.
+Cuando `APP_URL` está vacío y `VERCEL_ENV` es exactamente `production`, se usa `https://` más `VERCEL_PROJECT_PRODUCTION_URL`, validando el dominio y la política de origen público existente. Vercel define ese valor como el dominio de producción más corto, personalizado o `vercel.app`, disponible durante compilación y ejecución sin esquema. Habilitá **Environment Variables → Enable access to System Environment Variables**. La lectura del editor es por solicitud; después de cambiar configuración en Vercel, ejecutá **Redeploy**. Ver [variables de sistema oficiales](https://vercel.com/docs/environment-variables/system-environment-variables) y [ADR 0036](decisions/0036-production-card-origin.md).
+
+El fallback no se activa en Preview, desarrollo, servidores propios ni por tener `NODE_ENV=production`: requieren un `APP_URL` explícito para exportar tarjetas. Sin origen válido, los datos disponibles en el navegador permiten dibujar la vista previa, pero no proporcionan una URL que GitHub pueda cargar. Copia y descarga del README siguen bloqueadas con tarjetas incluidas; el proyecto JSON y los aportes manuales sin tarjetas se pueden exportar.
 
 En `dev` podés usar el alias de rama asignado por Vercel como origen de prueba si es público. Si apuntás su `APP_URL` a producción, estarás probando las imágenes de `main`, aunque el editor sea de preproducción. No presentar ese resultado como prueba de las rutas nuevas de `dev`.
 
 ## 4. Acceso anónimo
 
-El dominio de `APP_URL` y `/cards/...` deben responder sin sesión, cookies, contraseña o redirecciones de autenticación. Revisá **Deployment Protection**. Podés proteger previews si no necesitás comprobar sus imágenes desde GitHub; una URL protegida no sirve para esa prueba.
+El origen efectivo, explícito o resuelto desde Production, y `/cards/...` deben responder sin sesión, cookies, contraseña o redirecciones de autenticación. Revisá **Deployment Protection**. Podés proteger previews si no necesitás comprobar sus imágenes desde GitHub; una URL protegida no sirve para esa prueba. La validación sintáctica del origen no verifica disponibilidad ni acceso anónimo.
 
 Las tarjetas están fuera de `/en` y `/es`; el idioma va en `?locale=en` o `?locale=es`. No agregar rewrites hacia el editor. Las respuestas incluyen `image/svg+xml`, CSP pasiva, `nosniff`, caché pública y `X-Activity-State`.
 

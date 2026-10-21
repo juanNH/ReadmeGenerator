@@ -42,8 +42,8 @@
     "reviewNamed": "Revisar campos en {module}"
   },
   "metrics": {
-    "title": "Publicación de tarjetas",
-    "help": "La búsqueda y la vista previa funcionan localmente. Para publicar estas tarjetas en GitHub hace falta configurar la dirección pública de esta aplicación.",
+    "title": "Tarjetas disponibles solo para vista previa",
+    "help": "Este editor puede dibujar tarjetas con los datos de tu navegador, pero GitHub necesita una dirección pública para cargarlas. Esta instancia no tiene una configurada. Guardá tu proyecto JSON para conservar todo, o excluí las tarjetas para descargar tus textos y aportes manuales.",
     "hide": "Excluir tarjetas de GitHub y conservar su configuración",
     "hidden": "Las tarjetas de GitHub están excluidas. Se conservó su configuración guardada."
   },
@@ -180,7 +180,7 @@
     "missingImageDescription": "Agregá una descripción a las imágenes señaladas para que todos puedan entenderlas. Usá Revisar campos para abrir su configuración.",
     "invalidUsername": "Revisá el usuario de GitHub en Actividad y contribuciones, o excluí las tarjetas de GitHub para exportar tus textos.",
     "invalidActivityOptions": "Revisá los datos públicos de repositorios, Gists o WakaTime en Actividad y contribuciones, o excluí esas tarjetas.",
-    "localCards": "Podés revisar las tarjetas localmente. Exportarlas necesita una dirección pública de esta aplicación. Excluí las tarjetas para exportar tus textos ahora.",
+    "localCards": "Copiar y descargar el README requiere una dirección pública para las tarjetas incluidas. Guardá tu proyecto JSON, o excluí las tarjetas para exportar tus textos y aportes manuales.",
     "ready": "Todo listo. Copiá el Markdown o descargá tu archivo README.md.",
     "copy": "Copiar README",
     "copying": "Copiando…",

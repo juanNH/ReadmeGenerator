@@ -62,6 +62,21 @@ describe("one optional activity and contributions section", () => {
     expect(profile.data.metrics.cards).toHaveLength(3);
   });
 
+  it("exports manual contributions without a host or username when no cards are selected", () => {
+    const profile = activityProfile();
+    profile.visibility.contributions = true;
+    profile.data.metrics = { username: "not/a/username", cards: [] };
+    profile.data.contributions.items = [
+      { id: "guide", title: "A useful guide", description: "", url: "" },
+    ];
+    const result = generateReadme(profile, { activityCardBaseUrl: "http://localhost:3000" });
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.exportIssues).toBeUndefined();
+    expect(result.markdown).toContain("A useful guide");
+    expect(result.activityCards).toBeUndefined();
+  });
+
   it("combines cards and highlights, preserving private hidden manual entries", () => {
     const profile = activityProfile();
     profile.data.contributions.items = [

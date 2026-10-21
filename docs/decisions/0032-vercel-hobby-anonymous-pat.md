@@ -23,4 +23,6 @@ GitHub App requiere verificar consultas e implementar otro proveedor de credenci
 
 El primer despliegue permite medir uso dentro de las condiciones y cuotas Hobby. La caché y los límites RAM siguen siendo por proceso; no garantizan consumo global ni usuarios por hora. El dominio estable, las credenciales y el acceso público deben configurarse antes de considerar verificadas las imágenes dentro de GitHub/Camo. Una compilación local no certifica instalación Linux ni infraestructura de Vercel.
 
+La resolución de `APP_URL` se amplía en [ADR 0036](0036-production-card-origin.md): Production puede usar el dominio estable de Vercel cuando la variable explícita está vacía. La validación sintáctica no sustituye comprobar acceso anónimo a las tarjetas.
+
 Ver [guía de despliegue](../vercel-deployment.md) y [API y alojamiento](../github-api-and-hosting.md).
