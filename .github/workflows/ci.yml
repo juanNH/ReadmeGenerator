@@ -13,8 +13,87 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  branch-policy:
+    name: Branch policy
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Check out trusted base revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.event.pull_request.base.sha || github.sha }}
+          persist-credentials: false
+      - name: Install Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version-file: .nvmrc
+      - name: Detect the trusted branch policy implementation
+        id: branch-policy
+        run: |
+          if [[ -f scripts/check-github-branch-policy.mjs ]]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Evaluate branch policy from trusted base
+        if: steps.branch-policy.outputs.available == 'true'
+        run: node scripts/check-github-branch-policy.mjs
+      - name: Bootstrap validation while policy is absent from the base
+        if: steps.branch-policy.outputs.available != 'true'
+        env:
+          BRANCH_POLICY_SOURCE_BRANCH: ${{ github.head_ref }}
+          BRANCH_POLICY_PULL_REQUEST_AUTHOR: ${{ github.event.pull_request.user.login }}
+          BRANCH_POLICY_TARGET_BRANCH: ${{ github.base_ref }}
+          BRANCH_POLICY_EVENT_NAME: ${{ github.event_name }}
+          BRANCH_POLICY_HEAD_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name }}
+          BRANCH_POLICY_BASE_REPOSITORY: ${{ github.repository }}
+        run: |
+          node --input-type=module --eval '
+            const sourceBranch = process.env.BRANCH_POLICY_SOURCE_BRANCH;
+            const targetBranch = process.env.BRANCH_POLICY_TARGET_BRANCH;
+            const sameRepository =
+              process.env.BRANCH_POLICY_HEAD_REPOSITORY === process.env.BRANCH_POLICY_BASE_REPOSITORY;
+
+            if (
+              process.env.BRANCH_POLICY_EVENT_NAME === "pull_request" &&
+              sourceBranch === "dev" &&
+              targetBranch === "main" &&
+              sameRepository
+            ) {
+              console.log("Branch policy bootstrap: same-repository dev-to-main promotion is allowed.");
+            } else if (process.env.BRANCH_POLICY_PULL_REQUEST_AUTHOR === "dependabot[bot]") {
+              if (targetBranch === "dev" || targetBranch === "main") {
+                console.log(`Branch policy bootstrap: Dependabot pull request targeting ${targetBranch} is allowed.`);
+              } else {
+                console.error("Branch policy bootstrap failed: Dependabot pull requests must target the dev or main integration branch.");
+                process.exitCode = 1;
+              }
+            } else {
+              let validateBranchName;
+              try {
+                ({ validateBranchName } = await import("./scripts/check-branch-name.mjs"));
+              } catch {
+                console.error("Branch policy bootstrap failed: the trusted base does not contain the shared branch-name validator.");
+                process.exitCode = 1;
+              }
+
+              if (validateBranchName) {
+                const error = sourceBranch ? validateBranchName(sourceBranch) : "GitHub did not provide a source branch.";
+                if (error) {
+                  console.error(`Branch policy bootstrap failed: ${error}`);
+                  process.exitCode = 1;
+                } else {
+                  console.log(`Branch policy bootstrap passed: ${sourceBranch}.`);
+                }
+              }
+            }
+          '
+
   foundation:
     name: Check, build and browser accessibility
+    needs: branch-policy
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
@@ -38,6 +117,8 @@ jobs:
         run: pnpm licenses:generate
       - name: Check code, translations and documentation
         run: pnpm check
+      - name: Test branch policy context handling
+        run: node --test scripts/check-github-branch-policy.test.mjs scripts/check-github-branch-policy.integration.test.mjs
       - name: Build production app
         run: pnpm build
       - name: Install test browser
