@@ -1,7 +1,23 @@
 {
   "Metadata": {
     "title": "GitHub Profile Generator",
-    "description": "Make your GitHub profile feel like you. A short intro, your favorite tools and whatever else you want to share."
+    "description": "Make your GitHub profile feel like you. A short intro, your favorite tools and whatever else you want to share.",
+    "socialTitle": "A GitHub profile, shaped around you"
+  },
+  "SocialSharing": {
+    "alt": "GitHub Profile Generator social preview: a visual README editor shaped around your story.",
+    "eyebrow": "A PROFILE README, SHAPED BY YOU",
+    "title": "Your GitHub profile.",
+    "titleAccent": "On your terms.",
+    "description": "A visual editor for a README that leaves room for your story.",
+    "sectionsTitle": "A few building blocks",
+    "sectionAbout": "About you",
+    "sectionTools": "Tools",
+    "sectionProjects": "Projects",
+    "sectionActivity": "Activity",
+    "sectionContact": "Contact",
+    "note": "No account needed",
+    "footer": "Choose what you share. Leave the rest out."
   },
   "Navigation": {
     "home": "GitHub Profile Generator home",
