@@ -9,6 +9,7 @@
     "modules": "Módulos",
     "howItWorks": "Cómo funciona",
     "editor": "Crear tu perfil",
+    "about": "Acerca del proyecto",
     "skip": "Saltar al contenido"
   },
   "Controls": {
@@ -90,9 +91,63 @@
     },
     "closingTitle": "Un pequeño espacio. Una mejor presentación.",
     "closingDescription": "Contenido claro, detalles cuidados y un diseño que te da lugar.",
-    "closingAction": "Crear tu perfil",
-    "footer": "Pensado para personas, en cada etapa.",
-    "footerNote": "Proyecto independiente. Sin afiliación con GitHub."
+    "closingAction": "Crear tu perfil"
+  },
+  "About": {
+    "metaTitle": "Acerca del proyecto",
+    "metaDescription": "Por qué existe GitHub Profile Generator y de qué maneras se puede ayudar a que crezca.",
+    "eyebrow": "Una herramienta nacida de una necesidad",
+    "title": "Tu perfil, contado a tu manera.",
+    "lede": "GitHub Profile Generator empezó con un deseo sencillo: crear un perfil que pudiera reflejar lo que quería compartir, a mi manera.",
+    "originTitle": "Por qué empecé a construirlo",
+    "originStory": "Quería actualizar mi perfil de GitHub, pero no encontraba una herramienta con la flexibilidad necesaria para expresar lo que tenía en mente. Empecé este proyecto para crear un espacio donde pudieran convivir una presentación breve, las herramientas favoritas, algunos trabajos, contribuciones y enlaces de contacto, según lo que cada persona quiera mostrar.",
+    "productBelief": "Un perfil no tiene que demostrar nada. La actividad pública es solo una parte de la historia de alguien, y está bien tener poca o ninguna para mostrar. Por eso las secciones del editor son opcionales: cada persona elige lo que le representa.",
+    "helpEyebrow": "El código abierto se construye entre varias personas",
+    "helpTitle": "Hay muchas formas de participar.",
+    "helpIntro": "No hace falta empezar escribiendo código. Un reporte claro, una explicación más sencilla o recomendar la herramienta a la persona indicada también ayudan a que el proyecto avance.",
+    "paths": {
+      "feedback": {
+        "title": "Ayudá a mejorar la experiencia",
+        "description": "¿Encontraste un paso confuso o algo que no funciona como esperabas? Contá qué pasó y qué estabas intentando hacer. También podés proponer ideas.",
+        "action": "Compartir una sugerencia"
+      },
+      "build": {
+        "title": "Construyamos algo en conjunto",
+        "description": "Podés colaborar con código, mejorar la documentación o ayudar a que el editor sea más fácil de usar. La guía explica cómo preparar el entorno y revisar los cambios.",
+        "action": "Leer la guía para contribuir"
+      },
+      "share": {
+        "title": "Ayudá a que otras personas lo encuentren",
+        "description": "Si este editor puede servirle a alguien que quiera armar su perfil, compartíselo. También podés dejar una estrella en el repositorio para que más personas lo descubran.",
+        "action": "Conocer el repositorio",
+        "stats": {
+          "star": "Estrellas",
+          "stars": "{count} en GitHub",
+          "fork": "Forks",
+          "forks": "{count} en GitHub"
+        }
+      }
+    },
+    "closingTitle": "¿Querés probarlo?",
+    "closingDescription": "Empezá por las partes del perfil que tengas ganas de compartir. El resto puede esperar.",
+    "closingAction": "Abrir el editor"
+  },
+  "Footer": {
+    "brand": "GitHub Profile Generator",
+    "description": "Un espacio flexible para crear tu perfil de GitHub con tus propias palabras.",
+    "explore": "Explorar",
+    "exploreNavigation": "Explorar el sitio",
+    "editor": "Editor de perfiles",
+    "about": "Acerca del proyecto",
+    "project": "Proyecto",
+    "projectNavigation": "Recursos del proyecto",
+    "repository": "Repositorio de GitHub",
+    "issues": "Problemas y sugerencias",
+    "contributing": "Guía para contribuir",
+    "license": "Licencia MIT",
+    "copyright": "© {year} GitHub Profile Generator",
+    "openSource": "Código abierto bajo la",
+    "independent": "Proyecto independiente, sin afiliación con GitHub."
   },
   "NotFound": {
     "title": "Esta página no está acá.",
