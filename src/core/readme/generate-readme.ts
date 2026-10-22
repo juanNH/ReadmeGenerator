@@ -120,9 +120,11 @@ export function generateReadme(
       case "technologies":
         content = renderTechnologies(document.data.technologies, labels);
         break;
-      case "projects":
-        content = renderProjects(document.data.projects, labels, errors);
-        break;
+      case "projects": {
+        const rendered = renderProjects(document.data.projects, labels, errors, htmlBudget);
+        append(rendered.markdown, rendered.htmlFragments);
+        continue;
+      }
       case "contributions":
         content = renderActivity(
           document,

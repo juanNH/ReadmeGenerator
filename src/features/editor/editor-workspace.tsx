@@ -95,6 +95,16 @@ function revealConfiguration(heading: HTMLHeadingElement | null, moveFocus = fal
   else if (!moveFocus) heading?.scrollIntoView({ block: "start" });
 }
 
+function focusInvalidControl(panel: HTMLElement | undefined) {
+  const control = panel?.querySelector<HTMLElement>('[aria-invalid="true"]');
+  let details = control?.closest("details");
+  while (details) {
+    details.open = true;
+    details = details.parentElement?.closest("details") ?? null;
+  }
+  control?.focus();
+}
+
 export function EditorWorkspace({
   initialContentLocale,
   activityCardBaseUrl,
@@ -202,11 +212,12 @@ export function EditorWorkspace({
   const hasImageUrlErrors = readmeErrors.some(
     (error) =>
       error.code === "invalid_url" &&
-      error.path[0] === "customSections" &&
-      typeof error.path[1] === "number" &&
-      error.path[2] === "blocks" &&
-      typeof error.path[3] === "number" &&
-      profile.customSections[error.path[1]]?.blocks[error.path[3]]?.type === "image",
+      ((error.path[0] === "customSections" &&
+        typeof error.path[1] === "number" &&
+        error.path[2] === "blocks" &&
+        typeof error.path[3] === "number" &&
+        profile.customSections[error.path[1]]?.blocks[error.path[3]]?.type === "image") ||
+        (error.path[0] === "data" && error.path[1] === "projects" && error.path[4] === "cover")),
   );
   const hasInvalidUsername = readmeErrors.some((error) => error.code === "invalid_username");
   const hasInvalidActivityOptions = readmeErrors.some(
@@ -291,11 +302,7 @@ export function EditorWorkspace({
     else if (pending.kind === "navigation") revealConfiguration(configurationHeadingRef.current);
     else if (pending.kind === "title")
       panelRefs.current.get(pending.id)?.querySelector<HTMLInputElement>("input")?.focus();
-    else if (pending.kind === "error")
-      panelRefs.current
-        .get(pending.id)
-        ?.querySelector<HTMLElement>('[aria-invalid="true"]')
-        ?.focus();
+    else if (pending.kind === "error") focusInvalidControl(panelRefs.current.get(pending.id));
     else {
       const control = moveRefs.current.get(`${pending.id}-${pending.kind}`);
       const alternative = moveRefs.current.get(
@@ -374,8 +381,7 @@ export function EditorWorkspace({
   function reviewErrors(id: EditableSectionId) {
     setSelectedId(id);
     setCompactView("edit");
-    if (activeId === id && compactView === "edit")
-      panelRefs.current.get(id)?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
+    if (activeId === id && compactView === "edit") focusInvalidControl(panelRefs.current.get(id));
     else pendingFocus.current = { id, kind: "error" };
   }
 

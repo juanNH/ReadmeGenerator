@@ -214,6 +214,14 @@ export const moduleContentV1Schemas = Object.freeze({
 export const moduleContentSchemas = Object.freeze({
   ...moduleContentV1Schemas,
   presentation: presentationV1Schema.extend({ format: presentationFormatSchema.optional() }),
+  projects: z.strictObject({
+    items: entriesWithUniqueIds(
+      moduleContentV1Schemas.projects.shape.items.element.extend({
+        titleUrl: z.string().optional(),
+        cover: z.strictObject({ url: z.string(), alt: z.string() }).optional(),
+      }),
+    ),
+  }),
   metrics: z.strictObject({
     username: z.string(),
     cards: uniqueCards(z.enum(metricCardIds)),

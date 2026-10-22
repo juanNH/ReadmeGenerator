@@ -49,6 +49,33 @@ function render(markdown: string, fragments: readonly CustomHtmlFragment[] = [])
 }
 
 describe("controlled HTML preview ranges", () => {
+  it("authorizes generated project covers only through their exact HTML fragment", () => {
+    const profile = createEmptyProfile("en");
+    profile.visibility.projects = true;
+    profile.data.projects.items = [
+      {
+        id: "app",
+        name: "🌱 My app",
+        description: "<img src=javascript:alert(1)>",
+        role: "",
+        technologies: [],
+        links: [{ id: "demo", label: "Demo", url: "https://example.com/demo" }],
+        cover: { url: "https://images.example.com/app.png", alt: "Project search interface" },
+      },
+    ];
+    const result = generateReadme(profile);
+    if (!result.success) throw new Error(JSON.stringify(result.errors));
+    const output = render(result.markdown, result.customHtml);
+    expect(output).toContain('data-slot="0"');
+    expect(output).toContain('href="https://example.com/demo"');
+    expect(output).toContain("&lt;img src=javascript:alert(1)&gt;");
+    expect(output).not.toContain("<img");
+    expect(render(result.markdown)).not.toContain("Controlled HTML");
+    const fragment = result.customHtml![0]!;
+    expect(render(result.markdown, [{ ...fragment, start: fragment.start + 1 }])).not.toContain(
+      "Controlled HTML",
+    );
+  });
   it("keeps Markdown-looking text inert in the exported HTML without requiring our preview plugin", () => {
     const result = generated(
       "<div>\n\n![x](http://localhost/x)\n\n[link](javascript:alert(1))\n\n# Heading\n\n</div><pre><code>first\n\nsecond</code></pre>",
