@@ -6,7 +6,7 @@ body:
     attributes:
       value: |
         Describe what happened and how to reproduce it. Use fictional examples and do not include credentials or private information.
-        Do not use this form for a suspected security vulnerability. Follow the [security policy](https://github.com/juanNH/ReadmeGenerator/security/policy) to report it privately.
+        Do not use this form for a suspected security vulnerability. Follow the [security policy](https://github.com/juanNH/ReadmeGenerator/blob/dev/SECURITY.md) to report it privately.
   - type: textarea
     id: problem
     attributes:
