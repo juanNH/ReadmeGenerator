@@ -124,6 +124,10 @@ jobs:
     name: Browser accessibility (shard ${{ matrix.shard }}/2)
     needs: branch-policy
     runs-on: ubuntu-latest
+    container:
+      # Keep this version aligned with @playwright/test in package.json.
+      image: mcr.microsoft.com/playwright:v1.64.1-noble@sha256:7852dc5a7d72f5fe458a597d690f6c42fbc8e9e26ddfa95f8e6ef552558d9bbf
+      options: --user 1001 --shm-size=1gb
     timeout-minutes: 35
     strategy:
       fail-fast: false
@@ -148,8 +152,6 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Build production app
         run: pnpm build
-      - name: Install test browser
-        run: pnpm exec playwright install --with-deps chromium
       - name: Check browser interactions and accessibility
         run: pnpm exec playwright test --shard=${{ matrix.shard }}/2
       - name: Check exported public card routes with controlled providers
