@@ -6,7 +6,7 @@ GitHub Profile Generator es un editor visual de README para perfiles de GitHub, 
 
 Usá Node.js `24.21.0` y pnpm `11.25.0`. Los pasos de instalación, los comandos y el alcance de cada comprobación están en la [guía de desarrollo](docs/development.md).
 
-Creá una rama para el cambio y mantené cada propuesta enfocada en un objetivo. Las ampliaciones de alcance o decisiones que cambien el producto deben discutirse antes de desarrollarlas.
+Creá una rama para el cambio y mantené cada propuesta enfocada en un objetivo. La [guía de ramas](docs/branching.md) explica los prefijos, cómo crear una rama y el flujo de pull requests. Las ampliaciones de alcance o decisiones que cambien el producto deben discutirse antes de desarrollarlas.
 
 ## Criterios para los cambios
 

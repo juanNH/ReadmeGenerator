@@ -2,6 +2,7 @@ import { showSectionOrganizer } from "./editor-test-helpers";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 import { readFile } from "node:fs/promises";
+import { mobileTest } from "./mobile-test";
 import { createContributorExampleProfile } from "../../src/core/profile/fixtures";
 import { createEmptyProfile } from "../../src/core/profile/profile-operations";
 import type { ProfileDocument } from "../../src/core/profile/profile-schema";
@@ -334,72 +335,57 @@ test("contribution web links and contact email links follow their own validation
   await expect(page.getByRole("button", { name: "Download README", exact: true })).toBeEnabled();
 });
 
-test("projects keep nested technology strings and links while treating untrusted descriptions as text", async ({
-  page,
-}) => {
+test("project edits preserve legacy details and keep descriptions as text", async ({ page }) => {
+  const profile = createEmptyProfile("en");
+  profile.visibility.projects = true;
+  profile.data.projects.items = [
+    {
+      id: "notebook",
+      name: "A learning notebook",
+      description: "A fictional project.",
+      role: "Wrote and reviewed the exercises",
+      technologies: ["TypeScript", "SQL"],
+      links: [{ id: "reference", label: "Reference", url: "https://example.com/reference" }],
+      titleUrl: "https://example.com/notebook",
+    },
+  ];
   const requestedMedia: string[] = [];
   page.on("request", (request) => {
     if (request.url().startsWith("https://example.com/attack")) requestedMedia.push(request.url());
   });
-  await openEditor(page);
-  await enableSection(page, "Projects");
-  await page.getByRole("button", { name: "Add project", exact: true }).click();
-  await expect(page.getByRole("textbox", { name: "Project name", exact: true })).toBeFocused();
-  await page
-    .getByRole("textbox", { name: "Project name", exact: true })
-    .fill("A learning notebook");
-  await page
-    .getByRole("textbox", { name: "Project description", exact: true })
-    .fill('<img src="https://example.com/attack.png">\n[Unexpected](javascript:alert(1))');
-  await page
-    .getByRole("textbox", { name: "Your role", exact: true })
-    .fill("Wrote and reviewed the exercises");
-  await page.getByRole("button", { name: "Add technology to project 1", exact: true }).click();
-  await expect(
-    page.getByRole("textbox", { name: "Project technology 1", exact: true }),
-  ).toBeFocused();
-  await page.getByRole("textbox", { name: "Project technology 1", exact: true }).fill("TypeScript");
-  await page.getByRole("button", { name: "Add technology to project 1", exact: true }).click();
-  await expect(
-    page.getByRole("textbox", { name: "Project technology 2", exact: true }),
-  ).toBeFocused();
-  await page.getByRole("textbox", { name: "Project technology 2", exact: true }).fill("SQL");
-  await page
-    .getByRole("button", { name: "Remove technology 1 from project 1", exact: true })
-    .click();
-  await expect(
-    page.getByRole("textbox", { name: "Project technology 1", exact: true }),
-  ).toHaveValue("SQL");
-  await expect(
-    page.getByRole("textbox", { name: "Project technology 1", exact: true }),
-  ).toBeFocused();
-  await page.getByRole("button", { name: "Add link to project 1", exact: true }).click();
-  const labels = page.getByRole("textbox", { name: "Project link label", exact: true });
-  await expect(labels).toBeFocused();
-  await labels.fill("Demo");
-  const urls = page.getByRole("textbox", { name: "Project link URL", exact: true });
-  await expect(urls).toHaveAttribute("aria-invalid", "true");
-  await urls.fill("https://example.com/demo");
-  await page.getByRole("button", { name: "Add link to project 1", exact: true }).click();
-  await labels.last().fill("Guide");
-  await urls.last().fill("https://example.com/guide");
-  await page.getByRole("button", { name: "Remove link 1 from project 1", exact: true }).click();
-  await expect(labels).toHaveValue("Guide");
-  await expect(labels).toBeFocused();
+  await openEditor(page, profile);
+  await openSection(page, "Projects");
+  const name = page.getByRole("textbox", { name: "Project name", exact: true });
+  await name.fill("A learning notebook");
+  const description = page.getByRole("textbox", { name: "Project description", exact: true });
+  await description.fill(
+    'Wrote and reviewed the exercises.\n<img src="https://example.com/attack.png">\n[Unexpected](javascript:alert(1))',
+  );
+  const titleUrl = page.getByRole("textbox", { name: "Project URL for title", exact: true });
+  await titleUrl.fill("javascript:alert(1)");
+  await expect(titleUrl).toHaveAttribute("aria-invalid", "true");
+  await titleUrl.fill("https://example.com/notebook");
   const preview = page.getByRole("article", { name: "README preview", exact: true });
   await expect(preview.locator("img, iframe, script")).toHaveCount(0);
-  await expect(preview.getByRole("link")).toHaveCount(1);
+  await expect(
+    preview.getByRole("link", { name: "A learning notebook", exact: true }),
+  ).toHaveAttribute("href", "https://example.com/notebook");
   await expect(preview).toContainText("[Unexpected](javascript:alert(1))");
+  await expect(preview).toContainText('<img src="https://example.com/attack.png">');
   expect(requestedMedia).toEqual([]);
   const stored = await savedProfile(page);
-  expect(stored.data.projects.items[0]?.technologies).toEqual(["SQL"]);
+  expect(stored.data.projects.items[0]).toMatchObject({
+    role: "Wrote and reviewed the exercises",
+    technologies: ["TypeScript", "SQL"],
+    links: [{ id: "reference", label: "Reference", url: "https://example.com/reference" }],
+  });
   await page.reload();
-  await expect(
-    page.getByRole("textbox", { name: "Project technology 1", exact: true }),
-  ).toHaveValue("SQL");
-  await expect(page.getByRole("textbox", { name: "Project link label", exact: true })).toHaveValue(
-    "Guide",
+  await expect(page.getByRole("textbox", { name: "Project name", exact: true })).toHaveValue(
+    "A learning notebook",
   );
+  await expect(
+    page.getByRole("textbox", { name: "Project URL for title", exact: true }),
+  ).toHaveValue("https://example.com/notebook");
   await page.getByRole("button", { name: "Remove project 1", exact: true }).click();
   await expect(page.getByRole("button", { name: "Add project", exact: true })).toBeFocused();
 });
@@ -528,59 +514,60 @@ test("an inactive section announces link errors and review selects its form at t
 });
 
 for (const locale of ["en", "es"] as const) {
-  test(`accessibility: ${locale} content modules fit 360px with a selected form, errors and both themes`, async ({
-    page,
-  }) => {
-    await page.setViewportSize({ width: 360, height: 800 });
-    const profile = createContributorExampleProfile();
-    profile.visibility.metrics = false;
-    const firstLink = profile.data.projects.items[0]?.links[0];
-    const firstGroup = profile.data.technologies.groups[0];
-    if (!firstLink || !firstGroup)
-      throw new Error("The contributor fixture must include a project link and technology group.");
-    firstLink.url = "incomplete";
-    firstGroup.name =
-      "A deliberately long technology group name to exercise wrapping on mobile screens";
-    await openEditor(page, profile, locale);
-    await showPreview(page, locale);
-    await showSections(page);
-    const projects = locale === "en" ? "Projects" : "Proyectos";
-    await page
-      .getByRole("button", {
-        name: locale === "en" ? `Review fields in ${projects}` : `Revisar campos en ${projects}`,
+  mobileTest(
+    `accessibility: ${locale} content modules fit 360px with a selected form, errors and both themes`,
+    async ({ page }) => {
+      await page.setViewportSize({ width: 360, height: 800 });
+      const profile = createContributorExampleProfile();
+      profile.visibility.metrics = false;
+      const firstProject = profile.data.projects.items[0];
+      const firstGroup = profile.data.technologies.groups[0];
+      if (!firstProject || !firstGroup)
+        throw new Error("The contributor fixture must include a project and technology group.");
+      firstProject.titleUrl = "incomplete";
+      firstGroup.name =
+        "A deliberately long technology group name to exercise wrapping on mobile screens";
+      await openEditor(page, profile, locale);
+      await showPreview(page, locale);
+      await showSections(page);
+      const projects = locale === "en" ? "Projects" : "Proyectos";
+      await page
+        .getByRole("button", {
+          name: locale === "en" ? `Review fields in ${projects}` : `Revisar campos en ${projects}`,
+          exact: true,
+        })
+        .click();
+      await expect(
+        page.getByRole("textbox", {
+          name: locale === "en" ? "Project URL for title" : "URL del proyecto para el título",
+          exact: true,
+        }),
+      ).toBeFocused();
+      const theme = page.getByRole("button", {
+        name: locale === "en" ? "Toggle dark mode" : "Activar o desactivar el modo oscuro",
         exact: true,
-      })
-      .click();
-    await expect(
-      page.getByRole("textbox", {
-        name: locale === "en" ? "Project link URL" : "URL del enlace del proyecto",
-        exact: true,
-      }),
-    ).toBeFocused();
-    const theme = page.getByRole("button", {
-      name: locale === "en" ? "Toggle dark mode" : "Activar o desactivar el modo oscuro",
-      exact: true,
-    });
-    for (const dark of [false, true]) {
-      const isDark = Boolean(
-        (await page.locator("html").getAttribute("class"))?.split(" ").includes("dark"),
-      );
-      if (isDark !== dark) await theme.click();
-      expect(
-        await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth),
-      ).toBe(false);
-      const results = await new AxeBuilder({ page })
-        .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
-        .analyze();
-      expect(results.violations).toEqual([]);
-    }
-    await page.keyboard.press("Control+Home");
-    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
-    await page.screenshot({
-      path: `work/previews/content-modules-${locale}-mobile.png`,
-      fullPage: true,
-    });
-    if (locale === "es")
-      await page.screenshot({ path: "work/previews/content-mobile.png", fullPage: true });
-  });
+      });
+      for (const dark of [false, true]) {
+        const isDark = Boolean(
+          (await page.locator("html").getAttribute("class"))?.split(" ").includes("dark"),
+        );
+        if (isDark !== dark) await theme.click();
+        expect(
+          await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth),
+        ).toBe(false);
+        const results = await new AxeBuilder({ page })
+          .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
+          .analyze();
+        expect(results.violations).toEqual([]);
+      }
+      await page.keyboard.press("Control+Home");
+      await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+      await page.screenshot({
+        path: `work/previews/content-modules-${locale}-mobile.png`,
+        fullPage: true,
+      });
+      if (locale === "es")
+        await page.screenshot({ path: "work/previews/content-mobile.png", fullPage: true });
+    },
+  );
 }

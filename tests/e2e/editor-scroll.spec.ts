@@ -1,6 +1,7 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
 import { createEmptyProfile } from "../../src/core/profile/profile-operations";
 import type { ContentLocale } from "../../src/core/profile/profile-schema";
+import { mobileTest } from "./mobile-test";
 
 const draftKey = "github-profile-generator.profile.v2";
 const copy = {
@@ -146,31 +147,32 @@ for (const locale of ["en", "es"] as const) {
     );
   });
 
-  test(`editor scroll: phone keeps natural page scrolling and reachable first field ${locale}`, async ({
-    page,
-  }) => {
-    await page.setViewportSize({ width: 320, height: 568 });
-    await openEditor(page, locale);
-    const title = page.getByRole("textbox", { name: copy[locale].title, exact: true });
-    // Initial geometry is measured before focus or an interaction can scroll the field.
-    const initialBounds = await title.boundingBox();
-    expect(initialBounds?.y).toBeGreaterThanOrEqual(0);
-    expect((initialBounds?.y ?? 0) + (initialBounds?.height ?? 0)).toBeLessThanOrEqual(568);
-    await page.screenshot({ path: `work/previews/editor-scroll-phone-initial-${locale}.png` });
-    await expectNaturalFlow(page);
-    const lastText = page.getByRole("textbox", { name: copy[locale].text, exact: true }).last();
-    await lastText.focus();
-    await lastText.fill("A final note reached on a phone.");
-    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(100);
-    await page.getByRole("button", { name: copy[locale].preview, exact: true }).click();
-    const article = page.getByRole("article", { name: copy[locale].document, exact: true });
-    await expect(article).toContainText("A final note reached on a phone.");
-    await expect(page.locator('[data-editor-scroll-panel="preview"]')).toHaveCSS(
-      "overflow-y",
-      "visible",
-    );
-    await expectNaturalFlow(page);
-  });
+  mobileTest(
+    `editor scroll: phone keeps natural page scrolling and reachable first field ${locale}`,
+    async ({ page }) => {
+      await page.setViewportSize({ width: 320, height: 568 });
+      await openEditor(page, locale);
+      const title = page.getByRole("textbox", { name: copy[locale].title, exact: true });
+      // Medir la posición inicial antes de enfocar o interactuar con el campo.
+      const initialBounds = await title.boundingBox();
+      expect(initialBounds?.y).toBeGreaterThanOrEqual(0);
+      expect((initialBounds?.y ?? 0) + (initialBounds?.height ?? 0)).toBeLessThanOrEqual(568);
+      await page.screenshot({ path: `work/previews/editor-scroll-phone-initial-${locale}.png` });
+      await expectNaturalFlow(page);
+      const lastText = page.getByRole("textbox", { name: copy[locale].text, exact: true }).last();
+      await lastText.focus();
+      await lastText.fill("A final note reached on a phone.");
+      await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(100);
+      await page.getByRole("button", { name: copy[locale].preview, exact: true }).click();
+      const article = page.getByRole("article", { name: copy[locale].document, exact: true });
+      await expect(article).toContainText("A final note reached on a phone.");
+      await expect(page.locator('[data-editor-scroll-panel="preview"]')).toHaveCSS(
+        "overflow-y",
+        "visible",
+      );
+      await expectNaturalFlow(page);
+    },
+  );
 }
 
 test("editor scroll: enlarged text returns to natural flow", async ({ page }) => {
