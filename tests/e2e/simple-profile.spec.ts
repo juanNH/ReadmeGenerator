@@ -170,9 +170,9 @@ test("technologies autocomplete with local icons, accept custom names and avoid 
   await page.screenshot({ path: "work/previews/simple-technologies-desktop.png", fullPage: true });
   const markdown = await downloadReadme(page);
   expect(markdown).toMatch(
-    /<img width="20" height="20" src="https:\/\/raw\.githubusercontent\.com\/devicons\/devicon\/[a-f0-9]{40}\/icons\/react\/react-original\.svg" alt="" \/>/,
+    /<img width="20" height="20" src="https:\/\/raw\.githubusercontent\.com\/devicons\/devicon\/[a-f0-9]{40}\/icons\/react\/react-original\.svg" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">/,
   );
-  expect(markdown).toContain("&nbsp;React");
+  expect(markdown).toContain("> React</kbd>");
   expect(markdown).toContain("My small toolkit");
   await page.reload();
   await expect(page.getByRole("button", { name: "Remove React", exact: true })).toBeVisible();

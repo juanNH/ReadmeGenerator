@@ -2,6 +2,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Locator, type Page } from "@playwright/test";
 import { readFile } from "node:fs/promises";
 import { createEmptyProfile } from "../../src/core/profile/profile-operations";
+import { mobileTest } from "./mobile-test";
 import type { CustomBlock } from "../../src/core/profile/custom-content";
 import type { ProfileDocument } from "../../src/core/profile/profile-schema";
 import { generateReadme } from "../../src/core/readme";
@@ -502,122 +503,123 @@ test("imported fences become editable code with a language and retain literal HT
 
 for (const locale of ["en", "es"] as const) {
   for (const theme of ["light", "dark"] as const) {
-    test(`accessibility: code and formatting fit 320px in ${locale} ${theme} and keep scroll local`, async ({
-      page,
-    }) => {
-      await page.setViewportSize({ width: 320, height: 640 });
-      await page.emulateMedia({ colorScheme: theme });
-      const t = messages[locale];
-      const profile = customProfile(
-        [
-          {
-            id: "long-code",
-            type: "code",
-            source:
-              'name = "' +
-              "a long profile line ".repeat(35) +
-              '"\n\n[profile]\nlikes = ["building", "sharing"]',
-            language: "toml",
-          },
-          {
-            id: "second-code",
-            type: "code",
-            source: '[extras]\nlikes = ["reading", "learning"]',
-            language: "toml",
-          },
-          { id: "html", type: "html", source: '<p align="center">A small HTML note</p>' },
-        ],
-        locale,
-      );
-      profile.customSections[0]!.titleAlignment = "center";
-      await openEditor(page, profile, locale);
-      // Reach and screenshots are measured before Playwright scrolls a control into view.
-      const title = page.getByRole("textbox", { name: t.title, exact: true });
-      const initialTitle = await title.boundingBox();
-      expect(initialTitle).not.toBeNull();
-      expect(initialTitle!.y + initialTitle!.height).toBeLessThanOrEqual(640);
-      await page.screenshot({
-        path: `work/previews/code-${locale}-${theme}-initial-320.png`,
-        fullPage: false,
-      });
-      const field = codeField(page, locale).first();
-      await enhanced(field);
-      const scrollArea = page
-        .getByRole("group", { name: t.codeLabel.replace("{number}", "1"), exact: true })
-        .getByRole("group", {
-          name:
-            locale === "en" ? "Code editor scroll area" : "Área desplazable del editor de código",
+    mobileTest(
+      `accessibility: code and formatting fit 320px in ${locale} ${theme} and keep scroll local`,
+      async ({ page }) => {
+        await page.setViewportSize({ width: 320, height: 640 });
+        await page.emulateMedia({ colorScheme: theme });
+        const t = messages[locale];
+        const profile = customProfile(
+          [
+            {
+              id: "long-code",
+              type: "code",
+              source:
+                'name = "' +
+                "a long profile line ".repeat(35) +
+                '"\n\n[profile]\nlikes = ["building", "sharing"]',
+              language: "toml",
+            },
+            {
+              id: "second-code",
+              type: "code",
+              source: '[extras]\nlikes = ["reading", "learning"]',
+              language: "toml",
+            },
+            { id: "html", type: "html", source: '<p align="center">A small HTML note</p>' },
+          ],
+          locale,
+        );
+        profile.customSections[0]!.titleAlignment = "center";
+        await openEditor(page, profile, locale);
+        // Medir el acceso y capturar la pantalla antes de que Playwright desplace el control.
+        const title = page.getByRole("textbox", { name: t.title, exact: true });
+        const initialTitle = await title.boundingBox();
+        expect(initialTitle).not.toBeNull();
+        expect(initialTitle!.y + initialTitle!.height).toBeLessThanOrEqual(640);
+        await page.screenshot({
+          path: `work/previews/code-${locale}-${theme}-initial-320.png`,
+          fullPage: false,
+        });
+        const field = codeField(page, locale).first();
+        await enhanced(field);
+        const scrollArea = page
+          .getByRole("group", { name: t.codeLabel.replace("{number}", "1"), exact: true })
+          .getByRole("group", {
+            name:
+              locale === "en" ? "Code editor scroll area" : "Área desplazable del editor de código",
+            exact: true,
+          });
+        await scrollArea.focus();
+        await expect(scrollArea).toBeFocused();
+        await scrollArea.press("ArrowDown");
+        await scrollArea.press("Tab");
+        await expect(field).toBeFocused();
+        await field.scrollIntoViewIfNeeded();
+        const reached = await field.boundingBox();
+        expect(reached!.y).toBeGreaterThanOrEqual(0);
+        expect(reached!.y + Math.min(reached!.height, 200)).toBeLessThanOrEqual(640);
+        expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+          true,
+        );
+        const block = page.getByRole("group", {
+          name: t.codeLabel.replace("{number}", "1"),
           exact: true,
         });
-      await scrollArea.focus();
-      await expect(scrollArea).toBeFocused();
-      await scrollArea.press("ArrowDown");
-      await scrollArea.press("Tab");
-      await expect(field).toBeFocused();
-      await field.scrollIntoViewIfNeeded();
-      const reached = await field.boundingBox();
-      expect(reached!.y).toBeGreaterThanOrEqual(0);
-      expect(reached!.y + Math.min(reached!.height, 200)).toBeLessThanOrEqual(640);
-      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
-        true,
-      );
-      const block = page.getByRole("group", {
-        name: t.codeLabel.replace("{number}", "1"),
-        exact: true,
-      });
-      await block
-        .getByRole("button", {
-          name: locale === "en" ? "Wrap lines" : "Ajustar líneas",
-          exact: true,
-        })
-        .click();
-      await expect(block.locator(".cm-scroller")).toHaveCSS("overflow-x", "auto");
-      expect(
         await block
-          .locator(".cm-scroller")
-          .evaluate((element) => element.scrollWidth > element.clientWidth),
-      ).toBe(true);
-      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
-        true,
-      );
-      await block
-        .getByRole("button", {
-          name: locale === "en" ? "Wrap lines" : "Ajustar líneas",
+          .getByRole("button", {
+            name: locale === "en" ? "Wrap lines" : "Ajustar líneas",
+            exact: true,
+          })
+          .click();
+        await expect(block.locator(".cm-scroller")).toHaveCSS("overflow-x", "auto");
+        expect(
+          await block
+            .locator(".cm-scroller")
+            .evaluate((element) => element.scrollWidth > element.clientWidth),
+        ).toBe(true);
+        expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+          true,
+        );
+        await block
+          .getByRole("button", {
+            name: locale === "en" ? "Wrap lines" : "Ajustar líneas",
+            exact: true,
+          })
+          .click();
+        expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+        await field.scrollIntoViewIfNeeded();
+        await page.screenshot({
+          path: `work/previews/code-${locale}-${theme}-edit-viewport-320.png`,
+          fullPage: false,
+        });
+        await page.screenshot({
+          path: `work/previews/code-${locale}-${theme}-edit-320.png`,
+          fullPage: true,
+        });
+        await page
+          .getByRole("button", { name: locale === "en" ? "Preview" : "Vista previa", exact: true })
+          .click();
+        const preview = page.getByRole("article", {
+          name: locale === "en" ? "README preview" : "Vista previa del README",
           exact: true,
-        })
-        .click();
-      expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
-      await field.scrollIntoViewIfNeeded();
-      await page.screenshot({
-        path: `work/previews/code-${locale}-${theme}-edit-viewport-320.png`,
-        fullPage: false,
-      });
-      await page.screenshot({
-        path: `work/previews/code-${locale}-${theme}-edit-320.png`,
-        fullPage: true,
-      });
-      await page
-        .getByRole("button", { name: locale === "en" ? "Preview" : "Vista previa", exact: true })
-        .click();
-      const preview = page.getByRole("article", {
-        name: locale === "en" ? "README preview" : "Vista previa del README",
-        exact: true,
-      });
-      await expect(preview.locator("pre code")).toHaveCount(2);
-      await expect(preview.locator("pre code").first()).toContainText("[profile]");
-      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
-        true,
-      );
-      expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
-      await preview.locator("pre code").first().scrollIntoViewIfNeeded();
-      await page.screenshot({
-        path: `work/previews/code-${locale}-${theme}-preview-viewport-320.png`,
-        fullPage: false,
-      });
-      await page.screenshot({
-        path: `work/previews/code-${locale}-${theme}-preview-320.png`,
-        fullPage: true,
-      });
-    });
+        });
+        await expect(preview.locator("pre code")).toHaveCount(2);
+        await expect(preview.locator("pre code").first()).toContainText("[profile]");
+        expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+          true,
+        );
+        expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+        await preview.locator("pre code").first().scrollIntoViewIfNeeded();
+        await page.screenshot({
+          path: `work/previews/code-${locale}-${theme}-preview-viewport-320.png`,
+          fullPage: false,
+        });
+        await page.screenshot({
+          path: `work/previews/code-${locale}-${theme}-preview-320.png`,
+          fullPage: true,
+        });
+      },
+    );
   }
 }

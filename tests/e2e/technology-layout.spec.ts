@@ -2,6 +2,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 import { readFile } from "node:fs/promises";
 import { createEmptyProfile } from "../../src/core/profile/profile-operations";
+import { mobileTest } from "./mobile-test";
 import { findTechnology } from "../../src/core/technologies";
 
 const toolNames = [
@@ -81,13 +82,11 @@ test("named technology icons share a compact row and export readable labels with
   const path = await (await downloadPromise).path();
   if (!path) throw new Error("The exported README must be available.");
   const markdown = await readFile(path, "utf8");
-  expect(markdown.match(/<img width="20" height="20"[^>]+alt=""/g)).toHaveLength(toolNames.length);
+  expect(
+    markdown.match(/<kbd><img width="20" height="20"[^>]+alt=""[^>]*> [^<]+<\/kbd>/g),
+  ).toHaveLength(toolNames.length);
   expect(markdown).not.toContain('width="32"');
-  for (const name of ["React", "Docker", "PostgreSQL", "LangGraph", "Claude", "Codex"]) {
-    expect(markdown).toContain(`&nbsp;${name}`);
-  }
-  expect(markdown).toContain("&nbsp;Node\\.js");
-  expect(markdown).toContain(" · ");
+  for (const name of toolNames) expect(markdown).toContain(`> ${name}</kbd>`);
   await page.screenshot({
     path: "work/previews/expanded-technologies-desktop.png",
     fullPage: true,
@@ -95,55 +94,47 @@ test("named technology icons share a compact row and export readable labels with
 });
 
 for (const locale of ["en", "es"] as const) {
-  test(`accessibility: ${locale} named technology icons wrap into compact rows at 360px in both themes`, async ({
-    page,
-  }) => {
-    await page.setViewportSize({ width: 360, height: 900 });
-    const preview = await openTools(page, locale);
-    for (const theme of ["light", "dark"] as const) {
-      await page.evaluate((value) => {
-        localStorage.setItem("theme", value);
-      }, theme);
-      await page.reload();
-      const previewButton = page.getByRole("button", {
-        name: locale === "en" ? "Preview" : "Vista previa",
-        exact: true,
-      });
-      if (await previewButton.isVisible()) await previewButton.click();
-      const first = await preview.locator("img").first().boundingBox();
-      const second = await preview.locator("img").nth(1).boundingBox();
-      const last = await preview.locator("img").last().boundingBox();
-      if (!first || !second || !last) throw new Error("Technology icons must be visible.");
-      expect(Math.abs(first.y - second.y)).toBeLessThan(1);
-      expect(last.y).toBeGreaterThan(first.y);
-      for (const dimensions of [first, second, last]) {
-        expect(dimensions.width).toBe(20);
-        expect(dimensions.height).toBe(20);
+  mobileTest(
+    `accessibility: ${locale} named technology icons wrap into compact rows at 360px in both themes`,
+    async ({ page }) => {
+      await page.setViewportSize({ width: 360, height: 900 });
+      const preview = await openTools(page, locale);
+      for (const theme of ["light", "dark"] as const) {
+        await page.evaluate((value) => {
+          localStorage.setItem("theme", value);
+        }, theme);
+        await page.reload();
+        const previewButton = page.getByRole("button", {
+          name: locale === "en" ? "Preview" : "Vista previa",
+          exact: true,
+        });
+        if (await previewButton.isVisible()) await previewButton.click();
+        const first = await preview.locator("img").first().boundingBox();
+        const second = await preview.locator("img").nth(1).boundingBox();
+        const last = await preview.locator("img").last().boundingBox();
+        if (!first || !second || !last) throw new Error("Technology icons must be visible.");
+        expect(Math.abs(first.y - second.y)).toBeLessThan(1);
+        expect(last.y).toBeGreaterThan(first.y);
+        for (const dimensions of [first, second, last]) {
+          expect(dimensions.width).toBe(20);
+          expect(dimensions.height).toBe(20);
+        }
+        for (const name of toolNames) await expect(preview).toContainText(name);
+        for (const name of toolNames)
+          await expect(preview.getByText(name, { exact: true })).toBeVisible();
+        expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+          true,
+        );
+        const scan = await new AxeBuilder({ page })
+          .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
+          .analyze();
+        expect(scan.violations).toEqual([]);
       }
-      for (const name of toolNames) await expect(preview).toContainText(name);
-      // An inline group keeps the compact icon and its readable name together.
-      const namedRows = await preview.locator("img").evaluateAll((icons) =>
-        icons.map((icon) => {
-          const name = icon.nextElementSibling;
-          if (name?.tagName !== "SPAN" || !name.textContent) return false;
-          const label = name.getBoundingClientRect();
-          const image = icon.getBoundingClientRect();
-          return Math.abs(label.y - image.y) < 6 && label.height < image.height * 1.5;
-        }),
-      );
-      expect(namedRows).toEqual(toolNames.map(() => true));
-      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
-        true,
-      );
-      const scan = await new AxeBuilder({ page })
-        .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
-        .analyze();
-      expect(scan.violations).toEqual([]);
-    }
-    if (locale === "es")
-      await page.screenshot({
-        path: "work/previews/expanded-technologies-mobile.png",
-        fullPage: true,
-      });
-  });
+      if (locale === "es")
+        await page.screenshot({
+          path: "work/previews/expanded-technologies-mobile.png",
+          fullPage: true,
+        });
+    },
+  );
 }

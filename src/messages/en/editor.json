@@ -4,7 +4,7 @@
   "pageEyebrow": "Your profile, your story",
   "pageTitle": "Your GitHub profile",
   "pageDescription": "Choose a section, shape your story and drag to set the order. Every section is optional.",
-  "pageCompactDescription": "Choose what to share. Every section is optional.",
+  "pageCompactDescription": "Every section is optional.",
   "workspaceTitle": "Make it yours",
   "workspaceDescription": "Choose what you want to share. A few words are enough to start.",
   "sectionsTitle": "1. Choose your sections",
@@ -213,7 +213,7 @@
     "open": "Import project (.json)",
     "saveCompact": "Export JSON",
     "openCompact": "Import JSON",
-    "help": "Import accepts only JSON files that match this generator’s project structure; other JSON formats aren’t compatible.",
+    "help": "Import this app’s project JSON only.",
     "loading": "Opening project import…",
     "completed": "Project opened. You can continue editing."
   },

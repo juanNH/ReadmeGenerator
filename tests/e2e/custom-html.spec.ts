@@ -138,10 +138,9 @@ test("HTML layouts, linked images, tables and details share one safe preview, cl
   expect(readme).toContain('<h1 align="center">A little playground</h1>');
   expect(readme).toContain("<table>");
   expect(readme).toContain("&#10;");
-  expect(result.customHtml).toHaveLength(1);
-  expect(readme.slice(result.customHtml![0]!.start, result.customHtml![0]!.end)).toBe(
-    result.customHtml![0]!.html,
-  );
+  const htmlFragment = result.customHtml?.find(({ html }) => html.includes("A little playground"));
+  expect(htmlFragment).toBeDefined();
+  expect(readme.slice(htmlFragment!.start, htmlFragment!.end)).toBe(htmlFragment!.html);
   await page.getByRole("button", { name: "Copy README", exact: true }).click();
   expect((await page.evaluate(() => navigator.clipboard.readText())).replace(/\r\n/g, "\n")).toBe(
     readme,

@@ -6,6 +6,7 @@ import {
   createEmptyProfileV1,
 } from "../../src/core/profile/profile-operations";
 import type { ProfileDocument } from "../../src/core/profile/profile-schema";
+import { mobileTest } from "./mobile-test";
 import { createImportBackup } from "../../src/features/editor/import-backup";
 import en from "../../src/messages/en/editor.json" with { type: "json" };
 import es from "../../src/messages/es/editor.json" with { type: "json" };
@@ -346,49 +347,53 @@ test("clear README: a confirmed memory-only import remains memory-only and keeps
 });
 
 for (const locale of ["en", "es"] as const) {
-  test(`accessibility: clear README stays reachable without pushing the first field below a 320px phone viewport ${locale}`, async ({
-    page,
-  }) => {
-    await page.setViewportSize({ width: 320, height: 568 });
-    await page.emulateMedia({ colorScheme: locale === "en" ? "light" : "dark" });
-    const profile = createEmptyProfile(locale);
-    profile.visibility.presentation = true;
-    profile.data.presentation.displayName = "Alex Example";
-    await openEditor(page, locale, { [draftKey]: JSON.stringify(profile) });
-    const trigger = page.getByRole("button", { name: messages[locale].reset.action, exact: true });
-    const firstField = page.getByRole("textbox", {
-      name: messages[locale].presentation.displayName,
-      exact: true,
-    });
-    // These measurements and the screenshot precede click, typing, or scrollIntoView.
-    await expect(firstField).toHaveValue("Alex Example");
-    const measurement = await firstField.boundingBox();
-    const buttonBounds = await trigger.boundingBox();
-    expect(measurement).not.toBeNull();
-    expect(measurement!.y).toBeGreaterThanOrEqual(0);
-    expect(measurement!.y + measurement!.height).toBeLessThanOrEqual(568);
-    expect(buttonBounds).not.toBeNull();
-    expect(buttonBounds!.width).toBeGreaterThanOrEqual(44);
-    expect(buttonBounds!.height).toBeGreaterThanOrEqual(44);
-    expect(buttonBounds!.y).toBeGreaterThanOrEqual(0);
-    expect(buttonBounds!.y + buttonBounds!.height).toBeLessThanOrEqual(568);
-    expect(buttonBounds!.x).toBeGreaterThanOrEqual(0);
-    expect(buttonBounds!.x + buttonBounds!.width).toBeLessThanOrEqual(320);
-    expect(
-      await page.evaluate(
-        () =>
-          Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) <= innerWidth,
-      ),
-    ).toBe(true);
-    await page.screenshot({ path: `work/previews/reset-initial-${locale}-320.png` });
-    expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
-    await trigger.focus();
-    page.once("dialog", async (dialog) => {
-      expect(dialog.message()).toBe(messages[locale].reset.confirmation);
-      await dialog.dismiss();
-    });
-    await trigger.press("Enter");
-    await expect(trigger).toBeFocused();
-    await expect(firstField).toHaveValue("Alex Example");
-  });
+  mobileTest(
+    `accessibility: clear README stays reachable without pushing the first field below a 320px phone viewport ${locale}`,
+    async ({ page }) => {
+      await page.setViewportSize({ width: 320, height: 568 });
+      await page.emulateMedia({ colorScheme: locale === "en" ? "light" : "dark" });
+      const profile = createEmptyProfile(locale);
+      profile.visibility.presentation = true;
+      profile.data.presentation.displayName = "Alex Example";
+      await openEditor(page, locale, { [draftKey]: JSON.stringify(profile) });
+      const trigger = page.getByRole("button", {
+        name: messages[locale].reset.action,
+        exact: true,
+      });
+      const firstField = page.getByRole("textbox", {
+        name: messages[locale].presentation.displayName,
+        exact: true,
+      });
+      // Estas medidas y la captura se toman antes de hacer clic, escribir o usar scrollIntoView.
+      await expect(firstField).toHaveValue("Alex Example");
+      const measurement = await firstField.boundingBox();
+      const buttonBounds = await trigger.boundingBox();
+      expect(measurement).not.toBeNull();
+      expect(measurement!.y).toBeGreaterThanOrEqual(0);
+      expect(measurement!.y + measurement!.height).toBeLessThanOrEqual(568);
+      expect(buttonBounds).not.toBeNull();
+      expect(buttonBounds!.width).toBeGreaterThanOrEqual(44);
+      expect(buttonBounds!.height).toBeGreaterThanOrEqual(44);
+      expect(buttonBounds!.y).toBeGreaterThanOrEqual(0);
+      expect(buttonBounds!.y + buttonBounds!.height).toBeLessThanOrEqual(568);
+      expect(buttonBounds!.x).toBeGreaterThanOrEqual(0);
+      expect(buttonBounds!.x + buttonBounds!.width).toBeLessThanOrEqual(320);
+      expect(
+        await page.evaluate(
+          () =>
+            Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) <= innerWidth,
+        ),
+      ).toBe(true);
+      await page.screenshot({ path: `work/previews/reset-initial-${locale}-320.png` });
+      expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+      await trigger.focus();
+      page.once("dialog", async (dialog) => {
+        expect(dialog.message()).toBe(messages[locale].reset.confirmation);
+        await dialog.dismiss();
+      });
+      await trigger.press("Enter");
+      await expect(trigger).toBeFocused();
+      await expect(firstField).toHaveValue("Alex Example");
+    },
+  );
 }
