@@ -9,9 +9,9 @@ import {
   GitPullRequest,
   Layers3,
   Sprout,
-  Terminal,
 } from "lucide-react";
 import { getTranslations } from "next-intl/server";
+import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -207,15 +207,7 @@ export async function HomePage() {
           </Button>
         </section>
       </main>
-      <footer className="border-t border-border">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-5 py-6 text-xs text-muted-foreground sm:px-8 lg:px-10">
-          <span className="flex items-center gap-2">
-            <Terminal className="size-3.5" aria-hidden="true" />
-            {t("footer")}
-          </span>
-          <span>{t("footerNote")}</span>
-        </div>
-      </footer>
+      <SiteFooter />
     </>
   );
 }
