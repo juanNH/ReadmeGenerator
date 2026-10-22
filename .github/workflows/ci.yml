@@ -95,7 +95,7 @@ jobs:
     name: Check, build and browser accessibility
     needs: branch-policy
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 35
     env:
       NEXT_TELEMETRY_DISABLED: "1"
     steps:
