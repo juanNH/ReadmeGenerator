@@ -3,6 +3,7 @@ import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
+import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { EditorWorkspace } from "@/features/editor/editor-workspace";
 import { routing } from "@/i18n/routing";
@@ -67,6 +68,7 @@ export default async function EditorPage({ params }: EditorPageProps) {
           />
         </NextIntlClientProvider>
       </main>
+      <SiteFooter />
     </>
   );
 }
