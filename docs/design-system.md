@@ -1,62 +1,62 @@
-# Sistema de diseño
+# Design System
 
-## Estado y propósito
+## Status and purpose
 
-El kit de GitHub Profile Generator es una herramienta interna de desarrollo: define los tokens y componentes reutilizables del generador. La muestra está disponible en `/en/design-system` y `/es/design-system` solo al ejecutar `pnpm dev`. En una compilación de producción ambas rutas devuelven 404 y no se muestran enlaces en la navegación ni en la portada. La muestra lleva una directiva para no indexarla; no incluye autenticación y no debe alojarse un servidor de desarrollo como servicio público.
+The GitHub Profile Generator UI kit is an internal development tool that defines the generator's reusable tokens and components. The showcase is available at `/en/design-system` and `/es/design-system` only when running `pnpm dev`. In a production build, both routes return 404 and no links to them appear in navigation or on the home page. The showcase includes a directive that keeps it out of search indexes; it has no authentication and a development server must not be hosted as a public service.
 
-Incluye interacciones locales de demostración; no crea perfiles, no consulta GitHub y no publica contenido. Playwright se usa desde el repositorio para revisar recorridos, tamaños de pantalla y accesibilidad automática; no es una sección del producto. El kit y las pruebas se mantienen separados del recorrido de las personas que crean un README.
+It includes local demonstration interactions; it does not create profiles, query GitHub, or publish content. Playwright is used from the repository to review flows, viewport sizes, and automated accessibility checks; it is not part of the product. The kit and its tests remain separate from the experience of people creating a README.
 
-La dirección busca una herramienta de creación sobria y cercana: superficies claras, texto carbón, acento verde, bordes precisos y una alternativa oscura equivalente. Los bloques breves reciben el mismo cuidado que los perfiles con muchas secciones. La actividad pública no representa un nivel de habilidad.
+The visual direction aims for a calm, approachable creation tool: light surfaces, charcoal text, a green accent, crisp borders, and an equivalent dark theme. Short profiles receive the same care as profiles with many sections. Public activity is not a measure of skill.
 
-## Fundamentos y tokens
+## Foundations and tokens
 
-La fuente de verdad es `src/styles/tokens.css`, importada desde `src/app/globals.css`. `:root` contiene el tema claro y `.dark` el oscuro. `@theme inline` expone utilidades de Tailwind y `@custom-variant dark` conecta sus variantes con la clase de `next-themes`.
+The source of truth is `src/styles/tokens.css`, imported by `src/app/globals.css`. `:root` contains the light theme and `.dark` the dark theme. `@theme inline` exposes Tailwind utilities, and `@custom-variant dark` connects its variants to the class managed by `next-themes`.
 
-| Token                                         | Uso                                                               |
+| Token                                         | Purpose                                                           |
 | --------------------------------------------- | ----------------------------------------------------------------- |
-| `background`                                  | Fondo de página y áreas de contexto.                              |
-| `surface`                                     | Tarjetas y controles.                                             |
-| `surface-raised`                              | Superficies secundarias y marcadores de carga.                    |
-| `foreground`                                  | Texto principal.                                                  |
-| `muted-foreground`                            | Descripciones y contexto. No expresa una opción deshabilitada.    |
-| `border`                                      | Separación visual de superficies.                                 |
-| `border-strong`                               | Límites de campos y controles que necesitan reconocimiento claro. |
-| `accent`, `accent-hover`, `accent-foreground` | Acciones principales y selecciones activas.                       |
-| `accent-soft`, `accent-soft-foreground`       | Contexto y confirmaciones de menor énfasis.                       |
-| `destructive`, `destructive-soft`             | Errores y acciones de eliminación.                                |
-| `warning`, `warning-soft`                     | Situaciones que requieren revisión.                               |
-| `ring`                                        | Foco de teclado.                                                  |
+| `background`                                  | Page background and contextual areas.                             |
+| `surface`                                     | Cards and controls.                                               |
+| `surface-raised`                              | Secondary surfaces and loading indicators.                        |
+| `foreground`                                  | Primary text.                                                     |
+| `muted-foreground`                            | Descriptions and context. It does not indicate a disabled option. |
+| `border`                                      | Visual separation between surfaces.                               |
+| `border-strong`                               | Field and control boundaries that need clear recognition.         |
+| `accent`, `accent-hover`, `accent-foreground` | Primary actions and active selections.                            |
+| `accent-soft`, `accent-soft-foreground`       | Context and lower-emphasis confirmations.                         |
+| `destructive`, `destructive-soft`             | Errors and removal actions.                                       |
+| `warning`, `warning-soft`                     | Situations that need review.                                      |
+| `ring`                                        | Keyboard focus.                                                   |
 
-Usar clases semánticas, por ejemplo `bg-surface`, `text-muted-foreground` y `border-border`. Evitar colores literales en componentes de producto. El nombre del token conserva su significado al cambiar de tema. La paleta apunta a WCAG AA; cada nueva combinación de fondo, transparencia, texto y estado necesita revisión en su contexto real.
+Use semantic classes such as `bg-surface`, `text-muted-foreground`, and `border-border`. Avoid literal colors in product components. A token keeps its meaning when the theme changes. The palette aims for WCAG AA; review every new combination of background, transparency, text, and state in its actual context.
 
-El espaciado parte de una grilla de 4 px. La escala más usada es 4, 8, 12, 16, 20, 24, 32, 48, 64 y 80 px. Los grupos internos usan 8–16 px; los bloques, 20–32 px; las secciones, 64–80 px. Los controles interactivos tienen un área de al menos 44 px. En checkbox y switch el dibujo es menor, pero el botón reserva toda esa superficie.
+Spacing follows a 4 px grid. The most common scale is 4, 8, 12, 16, 20, 24, 32, 48, 64, and 80 px. Internal groups use 8–16 px; blocks, 20–32 px; sections, 64–80 px. Interactive controls have a target area of at least 44 px. The visible checkbox and switch marks are smaller, but their buttons reserve the full target area.
 
-Los radios son 6 px para etiquetas, 10 px para controles, 16 px para tarjetas y 24 px para composiciones amplias. Los valores internos `--ds-radius-*` se exponen como `rounded-sm`, `rounded-md`, `rounded-lg` y `rounded-xl`. `shadow-soft` aporta una separación mínima y `shadow-panel` queda disponible para paneles. El borde y el espaciado sostienen la jerarquía principal.
+Corner radii are 6 px for tags, 10 px for controls, 16 px for cards, and 24 px for larger compositions. The internal `--ds-radius-*` values are exposed as `rounded-sm`, `rounded-md`, `rounded-lg`, and `rounded-xl`. `shadow-soft` adds minimal separation, and `shadow-panel` is available for panels. Borders and spacing provide the main visual hierarchy.
 
-Geist Sans se usa para contenido y controles; Geist Mono, para números y pequeños detalles técnicos. Las variables `--font-geist-sans` y `--font-geist-mono` se definen mediante las fuentes locales del layout. Escala habitual: 12 px para contexto, 14 px para controles y cuerpo compacto, 16 px para lectura, 20–24 px para títulos de sección y 36–60 px para presentación. Los campos usan 16 px en pantallas pequeñas para evitar el zoom de entrada de algunos navegadores.
+Geist Sans is used for content and controls; Geist Mono, for numbers and small technical details. The `--font-geist-sans` and `--font-geist-mono` variables are defined through the layout's local fonts. Common sizes are 12 px for context, 14 px for controls and compact body text, 16 px for reading, 20–24 px for section headings, and 36–60 px for display text. Fields use 16 px on small screens to prevent input zoom in some browsers.
 
-El texto hereda `overflow-wrap: anywhere` para ajustar URLs o cadenas sin espacios cuando no entren; las palabras se conservan completas siempre que haya lugar. `Button` limita su ancho al contenedor y permite etiquetas en varias líneas. Agrupar acciones con ajuste de filas, sin encoger iconos ni superponer estados. El editor usa consultas de contenedor en `em` para adaptar sus columnas también al ampliar la letra; los selectores de contenido responden al ancho de su propio panel. Las regiones de código conservan su política explícita de desplazamiento o salto de línea.
+Text inherits `overflow-wrap: anywhere` so URLs or unspaced strings can wrap when they do not fit; words remain whole whenever there is room. `Button` is constrained to its container and allows labels to wrap onto multiple lines. Group actions in wrapping rows without shrinking icons or overlapping states. The editor uses container queries in `em` to adapt its columns when text is enlarged as well; content selectors respond to the width of their own panel. Code regions keep their explicit scrolling or line-wrapping behavior.
 
-## Componentes y contratos
+## Components and contracts
 
-Las primitivas viven en `src/components/ui/`, se exportan por nombre y combinan clases con `cn` de `src/lib/cn.ts`. No contienen reglas del perfil ni traducciones fijas.
+Primitives live in `src/components/ui/`, are exported by name, and combine classes with `cn` from `src/lib/cn.ts`. They do not contain profile rules or hard-coded translations.
 
-| Componente                       | API y criterio de uso                                                                                                                                                                                                      |
-| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Button`                         | `variant="primary\|secondary\|outline\|ghost\|destructive"`, `size="sm\|default\|lg\|icon"`. CVA tipa las variantes. `type="button"` por defecto; indicar `submit` de forma explícita.                                     |
-| `Badge`                          | `variant="neutral\|accent\|success\|warning\|outline"`. Describe tecnologías, contexto o estado; no es un botón.                                                                                                           |
-| `Button` / `Badge` con `asChild` | Radix Slot aplica el estilo a un único elemento hijo. Los atributos de enlace pertenecen a ese hijo. Mantener la semántica y el área de toque adecuadas al contenido.                                                      |
-| `Input`                          | Props nativas de `input`; tipo texto por defecto. Requiere etiqueta visible y puede recibir `aria-invalid`.                                                                                                                |
-| `Textarea`                       | Props nativas de `textarea`; cuatro filas iniciales y redimensionamiento vertical.                                                                                                                                         |
-| `Field`                          | Recibe `htmlFor`, `label`, `description?`, `error?`, `required?` y un único control. Asocia automáticamente el id, la ayuda, el error y el estado inválido mediante `cloneElement`. Conserva un `aria-describedby` previo. |
-| `Label`                          | Etiqueta nativa exportada desde `field.tsx`. Usar `htmlFor` con controles compuestos.                                                                                                                                      |
-| `Card`                           | Contenedor visual con `CardHeader`, `CardTitle`, `CardDescription`, `CardContent` y `CardFooter`. `CardTitle` emite un `h3`; revisar la jerarquía del contexto al componer.                                                |
-| `Checkbox`                       | Props de Radix Checkbox, incluido `checked`, `defaultChecked`, `onCheckedChange`, `disabled` y estado `indeterminate`. La etiqueta se compone por fuera.                                                                   |
-| `Switch`                         | Props de Radix Switch. Usar para un ajuste que se aplica inmediatamente; etiqueta y descripción externas.                                                                                                                  |
-| `Separator`                      | `orientation="horizontal\|vertical"`; decorativo por defecto. `decorative={false}` expone la semántica de separador.                                                                                                       |
-| `Skeleton`                       | Marcador decorativo con `aria-hidden`. El contenedor debe describir la carga real cuando exista. La muestra se identifica como demostración estática.                                                                      |
+| Component                         | API and usage criteria                                                                                                                                                                                                   |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `Button`                          | `variant="primary\|secondary\|outline\|ghost\|destructive"`, `size="sm\|default\|lg\|icon"`. CVA types the variants. Defaults to `type="button"`; specify `submit` explicitly.                                           |
+| `Badge`                           | `variant="neutral\|accent\|success\|warning\|outline"`. Describes technologies, context, or state; it is not a button.                                                                                                   |
+| `Button` / `Badge` with `asChild` | Radix Slot applies the style to a single child element. Link attributes belong on that child. Preserve semantics and a touch target appropriate to the content.                                                          |
+| `Input`                           | Native `input` props; text by default. Requires a visible label and can receive `aria-invalid`.                                                                                                                          |
+| `Textarea`                        | Native `textarea` props; starts with four rows and can be resized vertically.                                                                                                                                            |
+| `Field`                           | Accepts `htmlFor`, `label`, `description?`, `error?`, `required?`, and one control. Automatically connects the id, help text, error, and invalid state through `cloneElement`. Preserves an existing `aria-describedby`. |
+| `Label`                           | Native label exported from `field.tsx`. Use `htmlFor` with compound controls.                                                                                                                                            |
+| `Card`                            | Visual container with `CardHeader`, `CardTitle`, `CardDescription`, `CardContent`, and `CardFooter`. `CardTitle` renders an `h3`; check heading hierarchy in context when composing.                                     |
+| `Checkbox`                        | Radix Checkbox props, including `checked`, `defaultChecked`, `onCheckedChange`, `disabled`, and the `indeterminate` state. Compose the label outside it.                                                                 |
+| `Switch`                          | Radix Switch props. Use for a setting that takes effect immediately; place its label and description outside it.                                                                                                         |
+| `Separator`                       | `orientation="horizontal\|vertical"`; decorative by default. `decorative={false}` exposes separator semantics.                                                                                                           |
+| `Skeleton`                        | Decorative placeholder with `aria-hidden`. Its container must describe the actual loading state when one exists. The showcase identifies it as a static demonstration.                                                   |
 
-Ejemplo de campo asociado:
+Example of an associated field:
 
 ```tsx
 <Field
@@ -70,40 +70,40 @@ Ejemplo de campo asociado:
 </Field>
 ```
 
-`Field` marca los campos obligatorios con un asterisco decorativo y el atributo nativo `required`; la pantalla debe explicar el asterisco con texto traducido. Un error combina descripción e icono. En errores dinámicos, el recorrido debe decidir cuándo anunciar cambios y dónde mover el foco, sin anunciar mensajes antes de que la persona pueda actuar.
+`Field` marks required fields with a decorative asterisk and the native `required` attribute; the page must explain the asterisk in translated text. An error combines a description and an icon. For dynamic errors, the flow must decide when to announce changes and where to move focus, without announcing messages before a person can act.
 
-Los botones deshabilitados conservan un motivo visible cerca y conectado con `aria-describedby`. `asChild` no convierte automáticamente un enlace en deshabilitado: usar un botón nativo para una acción no disponible. Los botones con solo icono necesitan `aria-label`. Los iconos que acompañan texto son decorativos.
+Disabled buttons keep a visible reason nearby and connected through `aria-describedby`. `asChild` does not automatically disable a link: use a native button for an unavailable action. Icon-only buttons need `aria-label`. Icons that accompany text are decorative.
 
-## Composición, estados e idiomas
+## Composition, states, and languages
 
-La muestra incluye acciones con respuesta local, campos con ayuda y error intencional, etiquetas, tarjetas, controles Radix y una composición de perfil. Los checkboxes permiten mostrar tecnologías y actividad; un switch cambia el espaciado. Los datos de actividad se identifican como ilustrativos. Ocultar todos los bloques opcionales mantiene una presentación completa.
+The showcase includes actions with local responses, fields with help and an intentional error, tags, cards, Radix controls, and a profile composition. Checkboxes show or hide technologies and activity; a switch changes spacing. Activity data is identified as illustrative. Hiding all optional blocks still leaves a complete presentation.
 
-Los estados previstos son reposo, hover, foco visible, selección, error y deshabilitado. Los errores y selecciones se expresan con texto, semántica o marcas además del color. Ningún bloque exige una cantidad mínima de proyectos o contribuciones. El foco de controles y anclas permanece visible y los efectos respetan `prefers-reduced-motion`.
+The supported states are idle, hover, visible focus, selected, error, and disabled. Errors and selections are expressed through text, semantics, or markers in addition to color. No block requires a minimum number of projects or contributions. Control and anchor focus stays visible, and effects respect `prefers-reduced-motion`.
 
-Los textos pertenecen a `src/messages/en/design-system.json` y `src/messages/es/design-system.json`, en el namespace `DesignSystem`. La página resuelve mensajes en el servidor. Solo esta ruta entrega ese namespace a un `NextIntlClientProvider` para las demostraciones. El encabezado compartido conserva el provider de navegación y controles del layout. Los enlaces internos utilizan `Link` de `src/i18n/navigation`.
+Text belongs in `src/messages/en/design-system.json` and `src/messages/es/design-system.json`, in the `DesignSystem` namespace. The page resolves messages on the server. Only this route passes that namespace to a `NextIntlClientProvider` for the demonstrations. The shared header retains the navigation and controls provider from the layout. Internal links use `Link` from `src/i18n/navigation`.
 
-El contenido estático de la página permanece en Server Components. Los ejemplos interactivos y controles Radix forman fronteras cliente. Se usan iconos locales y fuentes locales; no se descargan capturas ni bibliotecas visuales completas para la muestra. Incorporar animaciones, estados de carga o nuevas abstracciones cuando resuelvan una necesidad de producto concreta.
+Static page content remains in Server Components. Interactive examples and Radix controls form client boundaries. Local icons and fonts are used; the showcase does not download screenshots or full visual libraries. Add animations, loading states, or abstractions only when they solve a concrete product need.
 
-## Revisión recomendada
+## Recommended review
 
-Playwright ya está instalado como herramienta del repositorio. `pnpm test:e2e:ui` abre su interfaz de pruebas para revisar recorridos, resultados y trazas fuera de la navegación del producto. El modo de terminal sigue disponible mediante `pnpm test:e2e`. Para un taller independiente de componentes, [Storybook](https://storybook.js.org/docs) permite desarrollar sus estados de forma aislada; no está instalado en esta entrega.
+Playwright is already installed as a repository tool. `pnpm test:e2e:ui` opens its test UI to inspect flows, results, and traces outside product navigation. The terminal mode remains available through `pnpm test:e2e`. For a standalone component workshop, [Storybook](https://storybook.js.org/docs) can develop states in isolation; it is not installed in this release.
 
-Revisar ambas rutas y ambos temas, teclado completo, foco visible, zoom al 200 %, ancho de 320 px, etiquetas extensas y preferencia de movimiento reducido. Verificar asociaciones de campos, anuncios de cambios, estados deshabilitados y la diferencia entre checkbox y switch. Comprobar que las opciones alteren solo la composición de demostración y que el cambio de idioma conserve la ruta. Las pruebas automáticas de accesibilidad complementan la revisión manual; no certifican accesibilidad completa.
+Review both routes and themes, full keyboard navigation, visible focus, 200% zoom, 320 px width, long labels, and the reduced-motion preference. Verify field associations, change announcements, disabled states, and the difference between a checkbox and a switch. Confirm that the options change only the demonstration composition and that changing language preserves the route. Automated accessibility tests complement manual review; they do not certify full accessibility.
 
-La verificación integrada debe incluir lint, tipos, formato, compilación y navegación. Este documento describe los contratos y criterios; no afirma resultados de pruebas.
+Integrated verification should include linting, types, formatting, compilation, and navigation. This document describes contracts and review criteria; it does not claim test results.
 
-## Referencias de dirección
+## Directional references
 
-Referencias oficiales consultadas el 19 de octubre de 2026. Son puntos de partida para decisiones propias, sin copiar activos ni composiciones de producto.
+Official references reviewed on October 19, 2026. They are starting points for our own decisions; product assets and compositions are not copied.
 
-- [Linear](https://linear.app/): referencia editorial para jerarquía sobria y presentación de una herramienta de trabajo.
-- [Geist de Vercel](https://vercel.com/geist/introduction): referencia de sistema visual para herramientas de desarrollo.
-- [Accesibilidad de Radix Primitives](https://www.radix-ui.com/primitives/docs/overview/accessibility): comportamiento, semántica y responsabilidades de accesibilidad de las primitivas.
+- [Linear](https://linear.app/): editorial reference for a calm hierarchy and a work-tool presentation.
+- [Vercel Geist](https://vercel.com/geist/introduction): visual-system reference for developer tools.
+- [Radix Primitives accessibility](https://www.radix-ui.com/primitives/docs/overview/accessibility): behavior, semantics, and accessibility responsibilities of the primitives.
 
-Ver también [arquitectura](architecture.md) y [decisión inicial](decisions/0001-architecture.md).
+See also [architecture](architecture.md) and the [initial decision](decisions/0001-architecture.md).
 
-## Edición de fuentes
+## Source editing
 
-`CodeEditor` es una frontera cliente reutilizable para HTML y código literal. El shell ofrece texto simple mientras carga CodeMirror 6 y sus gramáticas necesarias. Los modos, sangría y ajuste de líneas tienen etiquetas EN/ES; el campo conserva su etiqueta, ayuda y error. Tab permite salir. La fuente no se formatea al recuperar ni colorear. Los tonos `--syntax-keyword`, `--syntax-string`, `--syntax-number`, `--syntax-comment` y `--syntax-variable` se definen en ambos temas y se comparten con la vista previa. El color es decorativo: el contenido sigue legible sin resaltado.
+`CodeEditor` is a reusable client boundary for HTML and literal code. Its shell provides plain text while CodeMirror 6 and the required language grammars load. Modes, indentation, and line wrapping have EN/ES labels; the field retains its label, help, and error. Tab can leave the editor. Source is not formatted when recovered or highlighted. The `--syntax-keyword`, `--syntax-string`, `--syntax-number`, `--syntax-comment`, and `--syntax-variable` tones are defined in both themes and shared with the preview. Color is decorative: content remains readable without syntax highlighting.
 
-La altura y el desbordamiento pertenecen al editor o fragmento, sin ensanchar la página. Los controles se distribuyen en varias filas cuando falta ancho y mantienen el objetivo táctil del kit. El bloque de código de vista previa es enfocable para desplazar su contenido mediante teclado. No confundir esta herramienta interna de edición con un IDE ni con ejecución de código.
+Height and overflow belong to the editor or code block and must not widen the page. Controls wrap onto multiple rows when space is limited and retain the kit's touch target. The code block in the preview is focusable so its content can be scrolled with a keyboard. Do not mistake this internal editing tool for an IDE or code execution.
