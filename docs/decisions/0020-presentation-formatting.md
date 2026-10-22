@@ -39,3 +39,5 @@ La UI agrupa tamaño y alineación en un bloque opcional de formato, con etiquet
 ## Consecuencias
 
 La presentación puede personalizarse sin escribir etiquetas ni agregar otra sección. La configuración no reescribe borradores recuperados ni modifica el país elegido. La alineación y jerarquía exportadas siguen sujetas al renderizador de GitHub; no se promete paridad de estilos con la vista previa. No se agregan fuentes, colores, CSS, banners ni servicios externos.
+
+[ADR 0034](0034-friendly-presentation.md) amplía las elecciones opcionales con tipografía compatible e integración explícita de ubicación, y define ejemplos de escritura para el título completo. También cambia el valor visual por defecto: nombre y titular se centran, salvo alineación explícita. Elegir alineación izquierda conserva la salida Markdown sencilla cuando no se usa una tipografía o una ubicación integrada que requiera HTML.

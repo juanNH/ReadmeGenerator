@@ -18,7 +18,7 @@ A short profile can tell a story. Every section is optional: start with a few wo
 
 | What you want to share                | What the editor offers                                                                                                             |
 | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| **Who you are**                       | An introduction, interests, a short headline and an optional location, with heading sizes and alignment controls.                  |
+| **Who you are**                       | A centered intro with writing examples, an optional country line, and italic or monospace title styles.                            |
 | **What you build with**               | A searchable technology catalog with icons, editable categories and custom names.                                                  |
 | **What you do**                       | Projects and contributions to code, documentation, reviews or communities, with context and links.                                 |
 | **Your own content**                  | Repeatable sections with text, lists, links, headings, quotes, dividers, public images, filtered HTML and syntax-highlighted code. |

@@ -113,7 +113,10 @@ describe("manual content export and optional sections", () => {
     profile.sectionOrder.reverse();
     const output = markdown(generateReadme(profile));
     const headings = [...output.matchAll(/^#{1,2} (.+)$/gm)].map((match) => match[1]);
-    expect(headings).toEqual(["Contact", "Contributions", "Projects", "Technologies", "Alex"]);
+    expect(headings).toEqual(["Contact", "Contributions", "Projects", "Technologies"]);
+    expect(output.indexOf("## Technologies")).toBeLessThan(
+      output.indexOf('<h1 align="center">Alex</h1>'),
+    );
     expect(output.indexOf("Testing")).toBeLessThan(output.indexOf("Accessibility"));
     const frozen = freezeDeep(profile);
     const original = JSON.stringify(frozen);
@@ -338,7 +341,7 @@ describe("shared web URL policy", () => {
     expect(markdown(generateReadme(profile))).toBe("Still exportable\n");
   });
 
-  it("reports original row and nested link indices without returning a partial README", () => {
+  it("reports original indices for the first useful project link and contributions without a partial README", () => {
     const profile = createEmptyProfile("en");
     profile.visibility.projects = true;
     profile.visibility.contributions = true;
@@ -361,7 +364,6 @@ describe("shared web URL policy", () => {
       success: false,
       errors: [
         { code: "invalid_url", path: ["data", "projects", "items", 1, "links", 1, "url"] },
-        { code: "invalid_url", path: ["data", "projects", "items", 1, "links", 2, "url"] },
         { code: "invalid_url", path: ["data", "contributions", "items", 0, "url"] },
       ],
     });

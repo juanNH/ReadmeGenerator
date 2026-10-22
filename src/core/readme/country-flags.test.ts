@@ -30,7 +30,7 @@ describe("controlled country flags in README", () => {
       const before = structuredClone(profile);
       expect(generateReadme(profile)).toEqual({
         success: true,
-        markdown: `${locale === "en" ? "Location" : "Ubicación"}: ${countryFlagMarkup(argentina)} Argentina\n`,
+        markdown: `${locale === "en" ? "📍 Currently based in" : "📍 Actualmente en"} ${countryFlagMarkup(argentina)} Argentina\n`,
       });
       expect(profile).toEqual(before);
     },
@@ -44,7 +44,7 @@ describe("controlled country flags in README", () => {
       profile.data.presentation.location = location;
       expect(generateReadme(profile)).toEqual({
         success: true,
-        markdown: `Location: ${location}\n`,
+        markdown: `📍 Currently based in ${location}\n`,
       });
     },
   );

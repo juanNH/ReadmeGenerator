@@ -24,15 +24,6 @@ async function openSection(page: Page, name: string) {
   await choice.click();
   await expect(choice).toHaveAttribute("aria-current", "step");
   await expect(page.locator("#editor-section-title")).toHaveText(name);
-  if (name === "About you" || name === "Presentación") {
-    const details = page.locator("details").filter({
-      has: page.getByText(name === "About you" ? "Extra details" : "Detalles opcionales", {
-        exact: true,
-      }),
-    });
-    if (!(await details.evaluate((node) => (node as HTMLDetailsElement).open)))
-      await details.locator("summary").click();
-  }
   if (name === "Contact" || name === "Contacto") {
     for (const summary of await page.locator("details:not([open]) > summary").all())
       await summary.click();
@@ -157,7 +148,7 @@ async function assertMemoryLocaleRoundTrip(
   }
   await expect(page.getByRole("button", { name: "Copy README", exact: true })).toBeEnabled();
   const markdown = await downloadReadme(page);
-  expect(markdown).toContain(`## ${memoryHeadline}\n`);
+  expect(markdown).toContain(`<h2 align="center">${memoryHeadline}</h2>`);
   expect(markdown).toContain(`## Contact\n\n- [Portfolio](<${memoryContactUrl}>)`);
   return markdown;
 }
@@ -357,11 +348,11 @@ test("UI locale changes preserve the latest unsaved text and keep README languag
   const preview = page.getByRole("article", { name: "Vista previa del README", exact: true });
   await expect(preview).toHaveAttribute("lang", "en");
   await expect(preview.getByRole("heading", { name: "Contact", exact: true })).toBeVisible();
-  await expect(preview).toContainText("Location: Example City");
+  await expect(preview).toContainText("📍 Currently based in Example City");
   await contentLanguage.selectOption("es");
   await expect(preview).toHaveAttribute("lang", "es");
   await expect(preview.getByRole("heading", { name: "Contacto", exact: true })).toBeVisible();
-  await expect(preview).toContainText("Ubicación: Example City");
+  await expect(preview).toContainText("📍 Actualmente en Example City");
   await page.getByRole("combobox", { name: "Idioma", exact: true }).selectOption("en");
   await expect(page).toHaveURL(/\/en\/editor$/);
   await openSection(page, "About you");
