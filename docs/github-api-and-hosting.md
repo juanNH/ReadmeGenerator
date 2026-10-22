@@ -1,105 +1,105 @@
-# API de GitHub, credenciales y alojamiento
+# GitHub API, credentials, and hosting
 
-Esta guía explica el consumo de la integración pública y qué considerar antes de alojarla en Vercel. Las condiciones externas se revisaron en sus fuentes oficiales el 20 de octubre de 2026; deben comprobarse otra vez antes de publicar o cambiar de plan.
+This guide explains how the public integration uses data and what to consider before hosting it on Vercel. External conditions were checked against official sources on October 20, 2026; check them again before publishing or changing plans.
 
-## Cuándo se consulta
+## When the app makes requests
 
-Tener una persona conectada al editor no implica consultar GitHub continuamente. Importan las acciones que realiza, los datos que faltan y las cachés disponibles.
+Having someone in the editor does not mean GitHub is queried continuously. The actions they take, the data they are missing, and the available caches all matter.
 
-| Acción                                                    | Consumo de datos remotos                                                                                                    |
-| --------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| Escribir un usuario o configurar tarjetas antes de Buscar | El documento cambia localmente; no activa consultas.                                                                        |
-| Ver las miniaturas de muestra                             | Son ejemplos locales, sin estadísticas personales ni consultas a GitHub o WakaTime.                                         |
-| Pulsar Buscar datos debajo del usuario                    | Carga básico, los 18 contadores y lenguajes del alcance actual, mediante dos JSON; agrega recursos seleccionados faltantes. |
-| Elegir o quitar contadores después de consultar           | Los 18 contadores ya consultados se renderizan localmente, sin HTTP SVG o JSON adicional.                                   |
-| Cambiar el año, los filtros o un destino de recurso       | Puede requerir información distinta; agrupa cambios durante 300 ms y consulta cobertura faltante.                           |
-| Ver un README publicado con tarjetas                      | Sus URLs SVG pueden volver a solicitar datos cuando no hay una respuesta o datos reutilizables en caché.                    |
+| Action                                                      | Remote data usage                                                                                                                      |
+| ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| Enter a username or configure cards before selecting Search | The document changes locally; no requests are triggered.                                                                               |
+| View sample thumbnails                                      | These are local examples, with no personal statistics and no requests to GitHub or WakaTime.                                           |
+| Select Search data below the username                       | Loads basic data, all 18 counters, and languages for the current scope through two JSON requests; adds any missing selected resources. |
+| Select or remove counters after a search                    | The 18 counters already queried are rendered locally, with no additional HTTP SVG or JSON requests.                                    |
+| Change the year, filters, or a resource target              | Different data may be needed; changes are grouped for 300 ms and missing coverage is queried.                                          |
+| View a published README with cards                          | Its SVG URLs may request data again when no reusable response or cached data is available.                                             |
 
-En un README publicado, cada imagen puede producir una petición HTTP a esta aplicación; eso no equivale necesariamente a una petición a GitHub. En el editor las tarjetas se renderizan desde snapshots públicos validados y temporales: cinco propias comparten una fuente y Extended agrupa estadísticas/lenguajes compatibles. Una fuente compleja puede necesitar varias llamadas externas, por paginación o métricas diferentes. WakaTime consulta su propio servicio público y no consume la cuota del PAT de GitHub.
+In a published README, each image may cause an HTTP request to this application; that is not necessarily a request to GitHub. In the editor, cards are rendered from validated, temporary public-data snapshots: the five built-in cards share one source, and Extended groups compatible statistics and languages. A complex source may require several external calls for pagination or different metrics. WakaTime queries its own public service and does not use the GitHub PAT quota.
 
-Precargar los 18 contadores aumenta potencialmente la duración y el consumo de la búsqueda inicial frente a precargar solo seis. Dos solicitudes JSON del navegador no significan dos llamadas o dos puntos de GitHub. Se conserva el presupuesto y la parcialidad de cada servicio; no se promete un histórico sin límites. Ver [ADR 0030](decisions/0030-all-profile-counters-prefetch.md).
+Preloading all 18 counters may increase the initial search duration and usage compared with preloading only six. Two browser JSON requests do not mean two GitHub calls or two GitHub points. The app respects each service's budget and partial-data behavior; it does not promise an unlimited history. See [ADR 0030](decisions/0030-all-profile-counters-prefetch.md).
 
-La caché del navegador conserva cobertura y antigüedad por usuario, filtros y período en IndexedDB independiente del perfil. Al recargar o volver al editor, recupera datos disponibles sin HTTP ni permisos para consultar automáticamente. La cobertura fresca se usa directamente; datos faltantes o vencidos esperan Buscar en la sesión recuperada. Un usuario sin datos necesita una primera búsqueda. Los SVG de vista previa usan Blob URLs internas revocables; sus enlaces y el Markdown mantienen las URLs públicas. Desmontar conserva el store; reemplazar o borrar el perfil lo purga e invalida el trabajo anterior. Si el almacenamiento falla, se usa RAM y se informa. Las imágenes propias del perfil mantienen su política independiente. Ver [ADR 0031](decisions/0031-browser-persistent-activity-cache.md).
+The browser cache keeps coverage and age by user, filters, and period in IndexedDB, separate from the profile. After a reload or when returning to the editor, it restores available data without HTTP requests or permission to query automatically. Fresh coverage is reused directly; missing or expired data waits for an explicit Search action in the restored session. A user with no data needs an initial search. Preview SVGs use internal, revocable Blob URLs; their links and the Markdown keep the public URLs. Unmounting preserves the store; replacing or clearing the profile purges it and invalidates earlier work. If storage fails, the app uses RAM and reports that. Profile images follow a separate policy. See [ADR 0031](decisions/0031-browser-persistent-activity-cache.md).
 
-El botón evita consultas accidentales mientras se configura el perfil. Los endpoints de tarjetas siguen siendo públicos para que GitHub pueda cargar las imágenes del README; alguien también puede pedirlos directamente. Este control de interfaz reduce trabajo, pero no constituye un límite global de consumo.
+The button prevents accidental queries while someone configures a profile. Card endpoints remain public so GitHub can load README images; anyone can also request them directly. This UI control reduces work, but it is not a global usage limit.
 
-## Qué significa usar tu key
+## What using your key means
 
-`GITHUB_TOKEN` contiene el PAT del propietario del despliegue, exclusivamente en el servidor. Los visitantes indican un usuario público; no necesitan iniciar sesión ni ingresar su propio token. Todas las consultas autenticadas de esa instancia usan la cuota de la cuenta propietaria del PAT.
+`GITHUB_TOKEN` contains the deployment owner's PAT and is used only on the server. Visitors provide a public username; they do not need to sign in or enter their own token. All authenticated queries from that instance use the account quota associated with the owner's PAT.
 
-La implementación acepta un PAT classic dedicado con permisos verificables vacíos o únicamente `public_repo`, consulta solo información pública y rechaza permisos ampliados o credenciales que no puede verificar. Esta es una restricción de la aplicación; no significa que GitHub recomiende tokens classic para todas las integraciones. Ver [configuración local](development.md) y [decisión de actividad pública](decisions/0010-github-activity.md).
+The implementation accepts a dedicated classic PAT whose permissions can be verified as empty or limited to `public_repo`; it queries public information only and rejects broader permissions or credentials it cannot verify. This is an application restriction; it does not mean GitHub recommends classic tokens for every integration. See [local setup](development.md) and the [public activity decision](decisions/0010-github-activity.md).
 
-El token nunca debe aparecer en código cliente, una variable `NEXT_PUBLIC_`, el README, una URL, el JSON del proyecto ni un commit. En un despliegue futuro se configurará como secreto del entorno del servidor. Tiene capacidades de autenticación y debe protegerse como una contraseña; conviene usar expiración y revocarlo si se expone. [GitHub: administración y seguridad de los PAT](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens).
+The token must never appear in client-side code, a `NEXT_PUBLIC_` variable, the README, a URL, the project JSON, or a commit. Configure `GITHUB_TOKEN` as a server-only environment secret before enabling authenticated GitHub queries. It grants authentication capabilities and must be protected like a password; use an expiration date and revoke it if exposed. [GitHub: managing and securing personal access tokens](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens).
 
-El nombre de variable `GITHUB_TOKEN` de este proyecto no lo convierte en el token automático de GitHub Actions: son mecanismos distintos.
+The project's `GITHUB_TOKEN` variable name does not make it the automatic GitHub Actions token; they are separate mechanisms.
 
-## Cuotas de GitHub
+## GitHub quotas
 
-| API, con un PAT de una cuenta normal | Límite primario habitual   | Unidad                                   |
-| ------------------------------------ | -------------------------- | ---------------------------------------- |
-| REST                                 | 5.000 por hora por usuario | Peticiones HTTP a la API REST.           |
-| GraphQL                              | 5.000 por hora por usuario | Puntos; el costo depende de la consulta. |
+| API, with a PAT from a standard account | Typical primary limit   | Unit                               |
+| --------------------------------------- | ----------------------- | ---------------------------------- |
+| REST                                    | 5,000 per hour per user | HTTP requests to the REST API.     |
+| GraphQL                                 | 5,000 per hour per user | Points; cost depends on the query. |
 
-REST y GraphQL tienen presupuestos primarios separados. Crear más PAT de la misma cuenta no crea cuotas personales independientes. Algunas rutas REST, como búsquedas, tienen límites más restrictivos. También existen límites secundarios de concurrencia, ráfagas y recursos consumidos; pueden alcanzarse antes del límite por hora. Hay que respetar `Retry-After` y el momento de reinicio comunicado por GitHub. [GitHub: límites REST](https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api).
+REST and GraphQL have separate primary budgets. Creating more PATs for the same account does not create separate personal quotas. Some REST endpoints, such as search, have stricter limits. Secondary limits also apply to concurrency, bursts, and consumed resources; they may be reached before the hourly limit. Respect `Retry-After` and the reset time reported by GitHub. [GitHub: REST rate limits](https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api).
 
-Una llamada GraphQL no equivale siempre a un punto. Sus conexiones y cantidad de datos influyen en el costo; las consultas costosas pueden agotar límites o devolver resultados parciales. Los encabezados `x-ratelimit-*` permiten observar el presupuesto correspondiente. Las cuotas y fórmulas pueden cambiar. [GitHub: límites y costo de GraphQL](https://docs.github.com/en/graphql/overview/rate-limits-and-query-limits-for-the-graphql-api).
+A GraphQL call does not always cost one point. Connections and the amount of data affect query cost; expensive queries can exhaust limits or return partial results. The `x-ratelimit-*` headers show the relevant budget. Quotas and formulas may change. [GitHub: GraphQL rate and query limits](https://docs.github.com/en/graphql/overview/rate-limits-and-query-limits-for-the-graphql-api).
 
-**Ejemplo hipotético:** si 1.000 usuarios distintos provocaran, cada uno, tres peticiones REST nuevas dentro de una hora, serían 3.000 peticiones REST. Es una cuenta ilustrativa, no una medición de esta aplicación ni una estimación de puntos GraphQL. El costo real depende de tarjetas, filtros, paginación, caché y otras aplicaciones que usen la misma cuenta.
+**Hypothetical example:** if 1,000 different users each caused three new REST requests within one hour, that would be 3,000 REST requests. This is an illustrative calculation, not a measurement of this application or an estimate of GraphQL points. Actual cost depends on cards, filters, pagination, cache behavior, and other applications using the same account.
 
-## Qué reutiliza la aplicación
+## What the application reuses
 
-| Nivel               | Dónde vive                                | Qué comparte                                                                                                            |
-| ------------------- | ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| Datos del navegador | RAM e IndexedDB temporal de ese navegador | Personalización y recarga con datos disponibles; no sirve datos a otros visitantes ni se sincroniza entre dispositivos. |
-| Datos del servidor  | RAM de cada proceso                       | Consultas compatibles atendidas por ese mismo proceso; no comparte con otras instancias.                                |
-| CDN                 | Red de Vercel al desplegar                | Respuestas públicas cacheables de una misma URL, especialmente SVG; Extended y recursos JSON actuales usan `no-store`.  |
+| Layer        | Where it lives                               | What it shares                                                                                                             |
+| ------------ | -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Browser data | RAM and temporary IndexedDB for that browser | Customization and reloads with available data; it does not serve other visitors or sync across devices.                    |
+| Server data  | RAM in each process                          | Compatible queries handled by that same process; it is not shared with other instances.                                    |
+| CDN          | Vercel's network after deployment            | Cacheable public responses for the same URL, especially SVGs; current Extended and resource JSON responses use `no-store`. |
 
-En local no se utiliza una CDN de Vercel. Tener caché en el navegador no agrega cuota al token ni evita las primeras consultas de otros usuarios. La misma tarjeta pública puede aprovechar una CDN; perfiles distintos o filtros nuevos usan claves diferentes y pueden necesitar trabajo nuevo.
+Local development does not use Vercel's CDN. Browser caching does not add to the token quota or avoid the first queries from other users. The same public card may benefit from a CDN; different profiles or filters use different keys and may need new work.
 
-IndexedDB conserva datos estructurados con operaciones asíncronas por origen. Se consideran frescos durante 30 minutos desde su consulta y los anteriores pueden mostrarse hasta 24 horas; la limpieza se realiza al acceder o guardar. Una transacción completada confirma el guardado. La caché puede desaparecer si se borran datos del sitio o el navegador los elimina; ante bloqueo, cuota o error, el editor sigue en RAM. No se solicita permiso especial de almacenamiento persistente. Fuentes: [IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API) y [cuotas y eliminación del navegador](https://developer.mozilla.org/en-US/docs/Web/API/Storage_API/Storage_quotas_and_eviction_criteria).
+IndexedDB keeps structured data with asynchronous operations, scoped to its origin. Entries are considered fresh for 30 minutes after a query, and older entries may be displayed for up to 24 hours; cleanup runs when data is accessed or saved. A completed transaction confirms the save. The cache may disappear if site data is cleared or the browser evicts it; when blocked, out of quota, or unavailable, the editor continues in RAM. The app does not request special persistent-storage permission. Sources: [IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API) and [browser storage quotas and eviction](https://developer.mozilla.org/en-US/docs/Web/API/Storage_API/Storage_quotas_and_eviction_criteria).
 
-- **Datos Extended:** cobertura por métrica o muestra de lenguajes, con frescura de 30 minutos. Cambiar colores, orden o diseño reutiliza los datos compatibles; un dato faltante puede necesitar red. Cada campo conserva su antigüedad.
-- **Solicitudes coincidentes en vuelo:** comparten el trabajo dentro del mismo proceso. Las solicitudes compatibles comprueban otra vez qué falta antes de consultar.
-- **Respuesta SVG:** las tarjetas listas envían `max-age=300` para navegador y `s-maxage=1800` para cachés compartidas. Se permite reutilización anterior ante errores mediante `stale-if-error=86400`. Las respuestas anteriores tienen plazos menores. JSON Extended y recursos responden `no-store`; la API básica conserva encabezados públicos y su formulario consulta con `cache: "no-store"`.
-- **Fallos transitorios:** el servidor puede devolver cobertura anterior completa hasta 24 horas, identificada como anterior. Un dato ausente no se convierte en cero; una identidad inexistente o credencial inválida no habilita este fallback.
+- **Extended data:** coverage by metric or language sample, fresh for 30 minutes. Changing colors, order, or layout reuses compatible data; a missing value may need a network request. Each field keeps its own age.
+- **Matching in-flight requests:** share work within the same process. Compatible requests check again for missing data before querying.
+- **SVG responses:** ready cards send `max-age=300` for browsers and `s-maxage=1800` for shared caches. Earlier responses may be reused on errors through `stale-if-error=86400`. Earlier responses have shorter deadlines. Extended JSON and resource responses use `no-store`; the basic API keeps public headers and its form queries with `cache: "no-store"`.
+- **Transient failures:** the server may return complete earlier coverage for up to 24 hours, marked as stale. A missing value is not changed to zero; a nonexistent identity or invalid credential does not enable this fallback.
 
-Extended limita a 512 sus entradas combinadas de datos y fallos. Es un límite de memoria por servicio y proceso, no una capacidad de 512 usuarios para todo el sitio. También hay cachés propias para actividad básica y recursos. Ver [ADR 0025](decisions/0025-activity-data-cache-and-preview-batching.md).
+Extended limits its combined data and failure entries to 512. This is a memory limit per service and process, not capacity for 512 users across the whole site. There are separate caches for basic activity and resources. See [ADR 0025](decisions/0025-activity-data-cache-and-preview-batching.md).
 
-Extended y recursos comparten, por proceso, hasta cuatro consultas activas, 60 inicios por minuto y una cola de 32 con espera máxima de 45 segundos. Extended además limita cada solicitud a 60 segundos totales, incluyendo esperas, y hasta 15 segundos de red dentro del tiempo restante. Estos números limitan operaciones locales, no representan llamadas GitHub disponibles. La actividad básica conserva su propio límite de cuatro consultas y 60 inicios por minuto.
+Extended and resources share up to four active queries per process, 60 starts per minute, and a queue of 32 with a maximum wait of 45 seconds. Extended also limits each request to 60 seconds total, including waits, and up to 15 seconds of network time within the remaining duration. These numbers limit local operations; they do not represent available GitHub calls. Basic activity keeps its own limit of four queries and 60 starts per minute.
 
-Una CDN puede servir el mismo SVG sin ejecutar otra vez el servidor. Vercel admite estas directivas, pero la retención es de mejor esfuerzo y puede variar por región o expulsión; el estado debe comprobarse en un despliegue mediante `x-vercel-cache`. [Vercel: caché CDN](https://vercel.com/docs/caching/cdn-cache), [encabezados de caché](https://vercel.com/docs/caching/cache-control-headers).
+A CDN can serve the same SVG without running the server again. Vercel supports these directives, but retention is best effort and may vary by region or eviction; verify behavior in a deployment using `x-vercel-cache`. [Vercel: CDN cache](https://vercel.com/docs/caching/cdn-cache), [cache-control headers](https://vercel.com/docs/caching/cache-control-headers).
 
-El SVG de indisponibilidad también puede responder HTTP 200 y no activa por sí mismo `stale-if-error` en la CDN. El servicio mantiene su propia política de datos anteriores y los estados de la tarjeta deben revisarse además del código HTTP.
+The unavailable-state SVG may also return HTTP 200 and does not by itself activate CDN `stale-if-error`. The service has its own policy for earlier data, so card states must be checked in addition to HTTP status.
 
-## Empezar con Vercel Hobby
+## Getting started with Vercel Hobby
 
-La [guía paso a paso](vercel-deployment.md) describe `vercel.json`, los entornos `main`/`Dev`, las variables y la comprobación anónima de tarjetas. La entrega usa el PAT classic actual, sin login ni GitHub App.
+The [step-by-step guide](vercel-deployment.md) describes `vercel.json`, the `main` and `dev` branches and their Vercel environments, variables, and anonymous card checks. The current implementation uses a classic PAT, with no login or GitHub App.
 
-Hobby puede ser un punto de partida para este proyecto personal mientras su uso sea no comercial. Publicar el repositorio bajo MIT no determina, por sí solo, si el uso de un despliegue cumple esas condiciones. Hobby tiene cuotas; al excederlas, en general el recurso deja de estar disponible hasta que transcurra el período indicado por Vercel, habitualmente hasta 30 días. [Vercel: condiciones de Hobby](https://vercel.com/docs/plans/hobby).
+Hobby may be a starting point for this personal project while its use remains non-commercial. Publishing the repository under MIT does not, by itself, determine whether a deployment complies with those conditions. Hobby has quotas; when exceeded, the affected resource generally becomes unavailable until the period specified by Vercel has elapsed, usually up to 30 days. [Vercel: Hobby terms](https://vercel.com/docs/plans/hobby).
 
-Los cupos mensuales publicados para Hobby al revisar esta guía son:
+The published monthly Hobby quotas when this guide was reviewed are:
 
-| Recurso                           | Uso incluido |
-| --------------------------------- | ------------ |
-| CPU activa de funciones con Fluid | 4 horas.     |
-| Memoria aprovisionada con Fluid   | 360 GB-hora. |
-| Invocaciones de funciones         | 1.000.000.   |
-| Solicitudes CDN                   | 1.000.000.   |
-| Fast Data Transfer                | 100 GB.      |
-| Fast Origin Transfer              | 10 GB.       |
+| Resource                       | Included usage |
+| ------------------------------ | -------------- |
+| Active function CPU with Fluid | 4 hours.       |
+| Provisioned memory with Fluid  | 360 GB-hours.  |
+| Function invocations           | 1,000,000.     |
+| CDN requests                   | 1,000,000.     |
+| Fast Data Transfer             | 100 GB.        |
+| Fast Origin Transfer           | 10 GB.         |
 
-Fuentes: [uso de funciones con Fluid](https://vercel.com/docs/functions/usage-and-pricing) y [cupos de Hobby](https://vercel.com/docs/plans/hobby). Esperar una API externa no consume CPU activa durante esa espera, pero la memoria sigue contando mientras la instancia atiende solicitudes. Una invocación cuenta aunque falle.
+Sources: [Fluid function usage](https://vercel.com/docs/functions/usage-and-pricing) and [Hobby quotas](https://vercel.com/docs/plans/hobby). Waiting for an external API does not consume active CPU during that wait, but memory continues to count while the instance handles requests. An invocation counts even if it fails.
 
-Con Fluid, el máximo de duración publicado para Hobby es 300 segundos y la memoria es de 2 GB con una vCPU. Antes del despliegue hay que comprobar la configuración efectiva de las rutas y su duración; las operaciones encadenadas pueden tardar más que una sola consulta Extended. [Vercel: límites de funciones](https://vercel.com/docs/functions/limitations).
+With Fluid, the published Hobby maximum duration is 300 seconds and memory is 2 GB with one vCPU. Before deployment, verify the effective route configuration and duration; chained operations may take longer than one Extended query. [Vercel: function limits](https://vercel.com/docs/functions/limitations).
 
-Vercel puede reutilizar instancias y ejecutar varias solicitudes en un mismo proceso; también crea otras instancias y reduce su cantidad según el tráfico. De ese comportamiento y de los `Map` usados por este proyecto se desprende que **la caché y los límites actuales no son compartidos entre todos los procesos ni persistentes**. Una instancia nueva puede repetir una consulta que otra ya resolvió. [Vercel: ciclo de vida de funciones](https://vercel.com/docs/functions), [Fluid y estado global](https://vercel.com/docs/fluid-compute).
+Vercel may reuse instances and run multiple requests in one process; it also creates other instances and scales their number with traffic. This behavior and the `Map` objects used by this project mean **the current cache and limits are not shared across all processes or persisted**. A new instance may repeat a query already handled by another one. [Vercel: function lifecycle](https://vercel.com/docs/functions), [Fluid and global state](https://vercel.com/docs/fluid-compute).
 
-## Si llegan miles de personas
+## If thousands of people show up
 
-Miles de visitantes leyendo contenido local o un SVG ya servido por CDN representan una carga distinta de miles de personas consultando perfiles distintos al mismo tiempo. No hay una cantidad de usuarios concurrentes garantizada por esta implementación ni una prueba de carga que demuestre esa capacidad en Hobby.
+Thousands of visitors reading local content or an SVG already served by a CDN create a different load from thousands of people querying different profiles at the same time. This implementation does not guarantee a number of concurrent users, and no load test demonstrates that capacity on Hobby.
 
-La recomendación es iniciar gratis con tráfico controlado y medir aciertos de caché, consultas externas por familia, latencias, límites GitHub y uso Vercel. Antes de promover un uso masivo, evaluar caché compartida de datos, límites y deduplicación globales, protección de endpoints, observabilidad y un presupuesto operativo. Estas decisiones pueden requerir infraestructura o servicios adicionales y todavía no están configuradas.
+The recommendation is to start free with controlled traffic and measure cache hits, external queries by family, latency, GitHub limits, and Vercel usage. Before promoting large-scale use, evaluate shared data caching, global limits and deduplication, endpoint protection, observability, and an operating budget. These decisions may require additional infrastructure or services, which are not configured yet.
 
-GitHub App se evaluará en esa etapa según el modelo de autorización. Un token de instalación puede tener cuota por instalación y escalado acotado; un token de usuario sigue sujeto a su presupuesto personal. Una App no elimina los límites de GitHub ni los de Vercel. [GitHub: cuotas de instalaciones y usuarios](https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api), [cuotas GraphQL de Apps](https://docs.github.com/en/graphql/overview/rate-limits-and-query-limits-for-the-graphql-api).
+GitHub App can be evaluated at that stage based on the authorization model. An installation token may have an installation-specific quota and bounded scaling; a user token remains subject to its personal budget. An App does not remove GitHub or Vercel limits. [GitHub: installation and user quotas](https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api), [GraphQL App quotas](https://docs.github.com/en/graphql/overview/rate-limits-and-query-limits-for-the-graphql-api).
 
-La selección con muestras y consulta explícita ayuda a empezar con menos consumo. La preparación para producción se decidirá con esas mediciones y sin asumir que un host gratuito ofrece capacidad ilimitada.
+Choosing cards from samples and searching explicitly helps start with lower usage. Production readiness should be decided from those measurements, without assuming a free host offers unlimited capacity.
