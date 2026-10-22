@@ -92,7 +92,7 @@ jobs:
           '
 
   foundation:
-    name: Check, build and browser accessibility
+    name: Static checks and unit tests
     needs: branch-policy
     runs-on: ubuntu-latest
     timeout-minutes: 35
@@ -119,11 +119,57 @@ jobs:
         run: pnpm check
       - name: Test branch policy context handling
         run: node --test scripts/check-github-branch-policy.test.mjs scripts/check-github-branch-policy.integration.test.mjs
+
+  browser:
+    name: Browser accessibility (shard ${{ matrix.shard }}/2)
+    needs: branch-policy
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2]
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Install pnpm
+        uses: pnpm/action-setup@f520eceda224fe1a4aed5a2a27a194379a409996 # v6
+      - name: Install Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
       - name: Build production app
         run: pnpm build
       - name: Install test browser
         run: pnpm exec playwright install --with-deps chromium
       - name: Check browser interactions and accessibility
-        run: pnpm test:e2e
+        run: pnpm exec playwright test --shard=${{ matrix.shard }}/2
       - name: Check exported public card routes with controlled providers
+        if: matrix.shard == 1
         run: pnpm test:e2e:cards
+
+  quality:
+    name: Check, build and browser accessibility
+    needs: [foundation, browser]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Require every quality suite to pass
+        env:
+          FOUNDATION_RESULT: ${{ needs.foundation.result }}
+          BROWSER_RESULT: ${{ needs.browser.result }}
+        run: |
+          if [[ "$FOUNDATION_RESULT" != "success" || "$BROWSER_RESULT" != "success" ]]; then
+            echo "::error::Foundation and both browser shards must pass."
+            exit 1
+          fi
+          echo "Foundation and both browser shards passed."
