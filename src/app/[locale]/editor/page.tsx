@@ -15,7 +15,11 @@ export async function generateMetadata({ params }: EditorPageProps): Promise<Met
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   const t = await getTranslations({ locale, namespace: "Editor" });
-  return { title: t("metaTitle"), description: t("metaDescription") };
+  return {
+    title: t("metaTitle"),
+    description: t("metaDescription"),
+    robots: { index: false, follow: false },
+  };
 }
 
 export default async function EditorPage({ params }: EditorPageProps) {
