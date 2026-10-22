@@ -24,6 +24,13 @@ type Locale = keyof typeof messages;
 type Failure = "none" | "quota-backup" | "quota-profile" | "getter";
 type FixtureWindow = Window & { projectReadStored?: (key: string) => string | null };
 
+function openProjectButton(page: Page, locale: Locale = "en") {
+  const projectMessages = editorMessages[locale].project;
+  return page
+    .getByRole("button", { name: projectMessages.open, exact: true })
+    .or(page.getByRole("button", { name: projectMessages.openCompact, exact: true }));
+}
+
 function currentProfile(contentLocale: Locale = "en"): ProfileDocument {
   const profile = createEmptyProfile(contentLocale);
   profile.visibility.presentation = true;
@@ -161,9 +168,7 @@ async function openEditor(
   );
   await page.route("https://project-assets.example/**", (route) => route.abort());
   await page.goto(`/${locale}/editor`);
-  await expect(
-    page.getByRole("button", { name: editorMessages[locale].project.open, exact: true }),
-  ).toBeEnabled();
+  await expect(openProjectButton(page, locale)).toBeEnabled();
 }
 
 function panel(page: Page, locale: Locale = "en") {
@@ -171,9 +176,7 @@ function panel(page: Page, locale: Locale = "en") {
 }
 
 async function openProject(page: Page, locale: Locale = "en") {
-  await page
-    .getByRole("button", { name: editorMessages[locale].project.open, exact: true })
-    .click();
+  await openProjectButton(page, locale).click();
   await expect(
     panel(page, locale).getByRole("heading", { name: messages[locale].title, exact: true }),
   ).toBeFocused();
@@ -637,13 +640,13 @@ test("project files: latest pending edits are backed up and pagehide cannot revi
   const entries = preservedRecords();
   const candidate = candidateProfile();
   await openEditor(page, "en", entries, "none", true);
-  await openProject(page);
-  await chooseFile(page, candidate);
-  await acknowledgeReplacement(page);
   await page
     .getByRole("textbox", { name: editorEn.presentation.displayName, exact: true })
     .fill("Latest unsaved current name");
   expect(await stored(page)).toBe(entries[draftKey]);
+  await openProject(page);
+  await chooseFile(page, candidate);
+  await acknowledgeReplacement(page);
   await panel(page).getByRole("button", { name: en.confirmReplace, exact: true }).click();
   await expect(panel(page)).toHaveCount(0);
   const backup = JSON.parse((await stored(page, projectBackupKey))!);
@@ -825,109 +828,114 @@ for (const locale of ["en", "es"] as const) {
 
   for (const theme of ["light", "dark"] as const) {
     test(`accessibility: project actions keep the initial field reachable and review usable on a 320px phone ${locale} ${theme}`, async ({
-      page,
+      browser,
     }) => {
-      await page.setViewportSize({ width: 320, height: 568 });
-      await page.emulateMedia({ colorScheme: theme });
-      await openEditor(page, locale, preservedRecords(currentProfile(locale)));
-      const firstField = page.getByRole("textbox", {
-        name: editorMessages[locale].presentation.displayName,
-        exact: true,
+      const context = await browser.newContext({
+        baseURL: process.env.PLAYWRIGHT_BASE_URL ?? "http://127.0.0.1:3000",
+        viewport: { width: 320, height: 568 },
+        isMobile: true,
+        hasTouch: true,
+        colorScheme: theme,
+        reducedMotion: "reduce",
       });
-      await expect(firstField).toHaveValue("Current fictional profile");
-      // Measure before click, typing or scrollIntoView; visibility alone cannot establish reach.
-      for (const name of [
-        editorMessages[locale].project.saveCompact,
-        editorMessages[locale].project.openCompact,
-      ]) {
-        const action = page.getByRole("button", { name, exact: true });
-        await expect(action.locator("span:visible")).toHaveText(name);
-        const actionBounds = await action.boundingBox();
-        expect(actionBounds).not.toBeNull();
-        expect(actionBounds!.y).toBeGreaterThanOrEqual(0);
-        expect(actionBounds!.y + actionBounds!.height).toBeLessThanOrEqual(568);
-        expect(actionBounds!.width).toBeGreaterThanOrEqual(44);
-        expect(actionBounds!.height).toBeGreaterThanOrEqual(44);
-      }
-      const bounds = await firstField.boundingBox();
-      expect(bounds).not.toBeNull();
-      expect(bounds!.y).toBeGreaterThanOrEqual(0);
-      expect(bounds!.y + bounds!.height).toBeLessThanOrEqual(568);
-      await page.screenshot({ path: `work/previews/project-initial-${locale}-${theme}-320.png` });
-      await openProject(page, locale);
-      const check = async () => {
-        expect(
-          await page.evaluate(
-            () =>
-              Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) <=
-              innerWidth,
-          ),
-        ).toBe(true);
-        expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
-      };
-      const expectStepUncovered = async (name: string) => {
-        const heading = panel(page, locale).getByRole("heading", { name, exact: true });
-        const box = await heading.boundingBox();
-        expect(box).not.toBeNull();
-        expect(box!.y).toBeGreaterThanOrEqual(0);
-        expect(box!.y + box!.height).toBeLessThanOrEqual(568);
-        const controls = await page
-          .getByRole("region", { name: editorMessages[locale].settings.controls, exact: true })
-          .boundingBox();
-        expect(controls).not.toBeNull();
-        expect(
-          box!.y >= controls!.y + controls!.height || box!.y + box!.height <= controls!.y,
-        ).toBe(true);
-        expect(
-          await heading.evaluate((node) => {
-            const rectangle = node.getBoundingClientRect();
-            const hit = document.elementFromPoint(
-              rectangle.x + rectangle.width / 2,
-              rectangle.y + rectangle.height / 2,
-            );
-            return hit !== null && node.contains(hit);
+      const page = await context.newPage();
+      try {
+        await openEditor(page, locale, preservedRecords(currentProfile(locale)));
+        const firstField = page.getByRole("textbox", {
+          name: editorMessages[locale].presentation.displayName,
+          exact: true,
+        });
+        await expect(firstField).toHaveValue("Current fictional profile");
+        // Medir antes de hacer clic, escribir o usar scrollIntoView; la visibilidad no prueba el acceso.
+        for (const name of [
+          editorMessages[locale].project.saveCompact,
+          editorMessages[locale].project.openCompact,
+        ]) {
+          const action = page.getByRole("button", { name, exact: true });
+          await expect(action.locator("span:visible")).toHaveText(name);
+          const actionBounds = await action.boundingBox();
+          expect(actionBounds).not.toBeNull();
+          expect(actionBounds!.y).toBeGreaterThanOrEqual(0);
+          expect(actionBounds!.y + actionBounds!.height).toBeLessThanOrEqual(568);
+          expect(actionBounds!.width).toBeGreaterThanOrEqual(44);
+          expect(actionBounds!.height).toBeGreaterThanOrEqual(44);
+        }
+        const bounds = await firstField.boundingBox();
+        expect(bounds).not.toBeNull();
+        expect(bounds!.y).toBeGreaterThanOrEqual(0);
+        expect(bounds!.y + bounds!.height).toBeLessThanOrEqual(568);
+        await page.screenshot({ path: `work/previews/project-initial-${locale}-${theme}-320.png` });
+        await openProject(page, locale);
+        const check = async () => {
+          expect(
+            await page.evaluate(
+              () =>
+                Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) <=
+                innerWidth,
+            ),
+          ).toBe(true);
+          expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+        };
+        const expectStepVisible = async (name: string) => {
+          const heading = panel(page, locale).getByRole("heading", { name, exact: true });
+          const box = await heading.boundingBox();
+          expect(box).not.toBeNull();
+          expect(box!.y).toBeGreaterThanOrEqual(0);
+          expect(box!.y + box!.height).toBeLessThanOrEqual(568);
+          expect(await panel(page, locale).evaluate((dialog) => dialog.matches(":modal"))).toBe(
+            true,
+          );
+          expect(
+            await heading.evaluate((node) => {
+              const rectangle = node.getBoundingClientRect();
+              const hit = document.elementFromPoint(
+                rectangle.x + rectangle.width / 2,
+                rectangle.y + rectangle.height / 2,
+              );
+              return hit !== null && node.contains(hit);
+            }),
+          ).toBe(true);
+        };
+        await check();
+        await chooseFile(page, candidateProfile(), locale);
+        // El foco puede mostrar el paso nuevo; antes no se hace clic ni se desplaza para capturar.
+        await expectStepVisible(messages[locale].steps.review);
+        await check();
+        await page.screenshot({
+          path: `work/previews/project-review-${locale}-${theme}-320.png`,
+        });
+        await panel(page, locale)
+          .getByRole("button", { name: messages[locale].continue, exact: true })
+          .click();
+        await expectStepVisible(messages[locale].steps.confirm);
+        await check();
+        await page.screenshot({ path: `work/previews/project-confirm-${locale}-${theme}-320.png` });
+        await panel(page, locale)
+          .getByRole("heading", { name: messages[locale].steps.confirm, exact: true })
+          .press("Tab");
+        await expect(
+          panel(page, locale).getByRole("checkbox", {
+            name: messages[locale].confirmLabel,
+            exact: true,
           }),
-        ).toBe(true);
-      };
-      await check();
-      await chooseFile(page, candidateProfile(), locale);
-      // Focus may intentionally reveal the new step; no click or screenshot scroll comes first.
-      await expectStepUncovered(messages[locale].steps.review);
-      await check();
-      await page.screenshot({
-        path: `work/previews/project-review-${locale}-${theme}-320.png`,
-      });
-      await panel(page, locale)
-        .getByRole("button", { name: messages[locale].continue, exact: true })
-        .click();
-      await expectStepUncovered(messages[locale].steps.confirm);
-      await check();
-      await page.screenshot({ path: `work/previews/project-confirm-${locale}-${theme}-320.png` });
-      await panel(page, locale)
-        .getByRole("heading", { name: messages[locale].steps.confirm, exact: true })
-        .press("Tab");
-      await expect(
-        panel(page, locale).getByRole("checkbox", {
-          name: messages[locale].confirmLabel,
-          exact: true,
-        }),
-      ).toBeFocused();
-      await panel(page, locale)
-        .getByRole("checkbox", { name: messages[locale].confirmLabel, exact: true })
-        .press("Space");
-      await expect(
-        panel(page, locale).getByRole("button", {
-          name: messages[locale].confirmReplace,
-          exact: true,
-        }),
-      ).toBeEnabled();
-      await panel(page, locale)
-        .getByRole("button", { name: messages[locale].cancel, exact: true })
-        .click();
-      await expect(
-        page.getByRole("button", { name: editorMessages[locale].project.open, exact: true }),
-      ).toBeFocused();
-      expect(await writes(page)).toEqual([]);
+        ).toBeFocused();
+        await panel(page, locale)
+          .getByRole("checkbox", { name: messages[locale].confirmLabel, exact: true })
+          .press("Space");
+        await expect(
+          panel(page, locale).getByRole("button", {
+            name: messages[locale].confirmReplace,
+            exact: true,
+          }),
+        ).toBeEnabled();
+        await panel(page, locale)
+          .getByRole("button", { name: messages[locale].cancel, exact: true })
+          .click();
+        await expect(openProjectButton(page, locale)).toBeFocused();
+        expect(await writes(page)).toEqual([]);
+      } finally {
+        await context.close();
+      }
     });
   }
 }
@@ -944,10 +952,13 @@ test("accessibility: project controls remain usable after long editing with 200 
     .getByRole("textbox", { name: editorEn.presentation.bio, exact: true })
     .fill("A long fictional editing session.\n".repeat(80));
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-  await openProject(page);
   await expect(
-    panel(page).getByRole("button", { name: en.downloadCurrent, exact: true }),
-  ).toBeVisible();
+    page
+      .getByRole("group", { name: editorEn.project.files, exact: true })
+      .getByRole("button", { name: editorEn.project.saveCompact, exact: true }),
+  ).toBeEnabled();
+  await openProject(page);
+  await expect(panel(page).getByRole("button", { name: en.close, exact: true })).toBeVisible();
   await chooseFile(page, candidateProfile());
   expect(
     await page.evaluate(
@@ -956,7 +967,5 @@ test("accessibility: project controls remain usable after long editing with 200 
   ).toBe(true);
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
   await panel(page).getByRole("button", { name: en.cancel, exact: true }).click();
-  await expect(
-    page.getByRole("button", { name: editorEn.project.open, exact: true }),
-  ).toBeFocused();
+  await expect(openProjectButton(page)).toBeFocused();
 });

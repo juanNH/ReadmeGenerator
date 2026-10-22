@@ -166,8 +166,8 @@ test("opening an identical project clears browser snapshots and waits for Search
   const stubs = activityDataStubs(page);
   await stubs.ready;
   await open(page);
-  await page.getByRole("button", { name: "Project", exact: true }).click();
-  const project = page.getByRole("region", { name: "Your project", exact: true });
+  await page.getByRole("button", { name: "Import project (.json)", exact: true }).click();
+  const project = page.getByRole("dialog", { name: "Import a project JSON", exact: true });
   await project.locator('input[type="file"]').setInputFiles({
     name: "same-cards.project.json",
     mimeType: "application/json",

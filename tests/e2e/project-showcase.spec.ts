@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { createEmptyProfile } from "../../src/core/profile/profile-operations";
 import type { ContentLocale } from "../../src/core/profile/profile-schema";
+import { mobileTest } from "./mobile-test";
 
 const imageUrl = "https://images.example.com/app.png";
 const labels = {
@@ -101,38 +102,39 @@ for (const locale of ["en", "es"] as const) {
     await expect(image).toBeVisible();
   });
 
-  test(`${locale}: project editing and mini preview fit a phone-height viewport`, async ({
-    page,
-  }) => {
-    await page.setViewportSize({ width: 390, height: 667 });
-    await open(page, locale);
-    const copy = labels[locale];
-    const firstField = page.getByRole("textbox", { name: copy.name, exact: true });
-    // Initial reachability is measured before any interaction can scroll this field.
-    await page.screenshot({
-      path: `work/previews/project-showcase-${locale}-mobile-initial.png`,
-      fullPage: false,
-    });
-    const bounds = await firstField.boundingBox();
-    expect(bounds).not.toBeNull();
-    expect(bounds!.y).toBeGreaterThanOrEqual(0);
-    expect(bounds!.y + bounds!.height).toBeLessThanOrEqual(667);
-    await page.getByRole("button", { name: copy.show, exact: true }).click();
-    const image = page
-      .getByRole("article", { name: copy.preview, exact: true })
-      .getByRole("img", { name: "README editor with two panels", exact: true });
-    await expect(image).toBeVisible();
-    await expect
-      .poll(() => image.evaluate((node) => (node as HTMLImageElement).naturalWidth))
-      .toBe(960);
-    const imageBounds = await image.boundingBox();
-    expect(imageBounds!.width).toBeLessThanOrEqual(390);
-    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
-      390,
-    );
-    await page.screenshot({
-      path: `work/previews/project-showcase-${locale}-mobile-preview.png`,
-      fullPage: true,
-    });
-  });
+  mobileTest(
+    `${locale}: project editing and mini preview fit a phone-height viewport`,
+    async ({ page }) => {
+      await page.setViewportSize({ width: 390, height: 667 });
+      await open(page, locale);
+      const copy = labels[locale];
+      const firstField = page.getByRole("textbox", { name: copy.name, exact: true });
+      // Medir el acceso inicial antes de que una interacción desplace este campo.
+      await page.screenshot({
+        path: `work/previews/project-showcase-${locale}-mobile-initial.png`,
+        fullPage: false,
+      });
+      const bounds = await firstField.boundingBox();
+      expect(bounds).not.toBeNull();
+      expect(bounds!.y).toBeGreaterThanOrEqual(0);
+      expect(bounds!.y + bounds!.height).toBeLessThanOrEqual(667);
+      await page.getByRole("button", { name: copy.show, exact: true }).click();
+      const image = page
+        .getByRole("article", { name: copy.preview, exact: true })
+        .getByRole("img", { name: "README editor with two panels", exact: true });
+      await expect(image).toBeVisible();
+      await expect
+        .poll(() => image.evaluate((node) => (node as HTMLImageElement).naturalWidth))
+        .toBe(960);
+      const imageBounds = await image.boundingBox();
+      expect(imageBounds!.width).toBeLessThanOrEqual(390);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+        390,
+      );
+      await page.screenshot({
+        path: `work/previews/project-showcase-${locale}-mobile-preview.png`,
+        fullPage: true,
+      });
+    },
+  );
 }

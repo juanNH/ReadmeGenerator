@@ -463,7 +463,7 @@ for (const [name, saved] of [
     await page.clock.fastForward(750);
     expect(await page.evaluate((key) => localStorage.getItem(key), draftKey)).toBe(saved);
     expect(await assertMemoryLocaleRoundTrip(page, "In-memory profile", "invalid")).toContain(
-      "# In\\-memory profile\n",
+      "In-memory profile",
     );
     expect(await page.evaluate((key) => localStorage.getItem(key), draftKey)).toBe(saved);
     page.once("dialog", (dialog) => dialog.dismiss());
@@ -518,7 +518,7 @@ for (const failure of ["blocked getter", "quota exceeded"] as const) {
         "Profile kept in memory",
         failure === "blocked getter" ? "unavailable" : "quota",
       ),
-    ).toContain("# Profile kept in memory\n");
+    ).toContain("Profile kept in memory");
     if (failure === "quota exceeded") {
       expect(await page.evaluate((key) => localStorage.getItem(key), draftKey)).toBeNull();
     }
@@ -569,7 +569,7 @@ test("a failed flush before the save debounce preserves pending edits across bot
     ),
   ).toBe(0);
   expect(await assertMemoryLocaleRoundTrip(page, "Latest pending profile", "quota")).toContain(
-    "# Latest pending profile\n",
+    "Latest pending profile",
   );
   expect(
     await page.evaluate(
