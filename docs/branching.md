@@ -14,7 +14,7 @@ Use `<type>/<short-description>` in lowercase English, with words separated by s
 | `chore/`   | Development tools and maintenance    | `chore/git-hooks`                |
 | `ci/`      | Continuous-integration configuration | `ci/repository-guardrails`       |
 
-Keep names short and descriptive. An issue number is optional, for example `fix/123-project-import-focus`. Avoid spaces, accents, uppercase letters, repeated hyphens, extra slashes and personal or secret information. These prefixes are a project convention, not a Git or GitHub requirement. The project uses `docs/` for documentation changes; Git does not distinguish it from `doc/`, and neither spelling is a standard. Commit-message types such as `docs`, `feat` and `fix` are a separate convention. Existing and bot-managed branches do not need to be renamed to match this convention.
+Keep names short and descriptive. An issue number is optional, for example `fix/123-project-import-focus`. Avoid spaces, accents, uppercase letters, repeated hyphens, extra slashes, dots, underscores, leading or trailing hyphens, trailing punctuation, and personal or secret information. Each name needs one supported prefix and one non-empty description made of lowercase letters and digits separated by single hyphens. These prefixes are a project convention, not a Git or GitHub requirement. The project uses `docs/` for documentation changes; Git does not distinguish it from `doc/`, and neither spelling is a standard. Commit-message types such as `docs`, `feat` and `fix` are a separate convention. Existing branches and open pull requests are not renamed retroactively. `dependabot[bot]` may use its generated branch names; other bot-managed branches follow this convention unless a maintainer explicitly approves an exception.
 
 ## Start a branch
 
@@ -31,7 +31,7 @@ git switch -c feature/about-and-contributing
 
 Replace the example with a name that describes your change. `git check-ref-format` checks Git's reference syntax; the branch-name convention above is an additional project rule.
 
-If your clone does not have a local `dev` branch yet, `git switch dev` creates it from the matching `origin/dev` remote-tracking branch. Do not start from `main` when the change is intended for the next project release; `dev` is the integration base.
+If your clone does not have a local `dev` branch yet, create it from the intended remote explicitly: use `git switch --track origin/dev` when `origin` is the project repository. With a fork, create or update local `dev` from `upstream/dev` as described below; do not accidentally track the fork's branch. If multiple remotes contain a `dev` branch, the explicit remote avoids an ambiguous choice. Do not start from `main` when the change is intended for the next project release; `dev` is the integration base.
 
 In a graphical client such as GitHub Desktop, first fetch the remote, switch to `dev`, pull its latest commits, then create a new branch from `dev`. Confirm the current branch before editing or pushing. Client labels vary, but the branch should have the same base and name as in the commands above.
 
@@ -76,9 +76,11 @@ For a fork, use `upstream` instead of `origin` when updating `dev`. Resolve conf
 
 Push your branch and open a pull request targeting `dev`. If you work from a fork, push to your fork and select the project's `dev` branch as the base. Explain the user-visible result, link a related issue when one exists, and list the checks you ran. Follow [CONTRIBUTING.md](../CONTRIBUTING.md) for setup and validation guidance.
 
+Dependabot version-update pull requests are planned to target `dev` by setting `target-branch: dev` in `.github/dependabot.yml`. GitHub reads this file from the repository's default branch, currently `main`; until that setting reaches `main`, both version-update and security-update pull requests target `main`. After it does, version updates target `dev`, but GitHub continues to target security updates to the default branch even when `target-branch` is configured ([Dependabot options reference](https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference)). Review security-update pull requests as production hotfixes against `main`; after merging one, bring the fix back to `dev` in a separate pull request.
+
 Keep a pull request focused so it can be reviewed independently. Do not include credentials, private profile data or unrelated local changes. Address review feedback with follow-up commits on the same branch, and wait for the repository's required checks and review before merging.
 
-Git does not enforce this naming convention by itself. Local hooks can help catch mistakes, but they can be skipped or unavailable; repository checks and branch protection are the shared controls. Existing pull requests and bot-managed branches should be handled explicitly by maintainers rather than renamed to fit a new convention.
+Git does not enforce this naming convention by itself. Local hooks can help catch mistakes, but they can be skipped or unavailable. Repository checks and branch protection provide shared controls when they are configured; check the repository's current rules rather than assuming they are enabled. Existing pull requests should be handled explicitly by maintainers rather than renamed solely to fit a new convention.
 
 ## Integration branches
 
