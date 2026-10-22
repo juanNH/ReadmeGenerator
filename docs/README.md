@@ -13,6 +13,7 @@ La documentación de GitHub Profile Generator describe el producto, el estado di
 | [Editor](editor.md)                                                                         | Bloques visuales, HTML, código, formato, importación y respaldo del borrador.         |
 | [Suite pública Extended](github-stats-extended.md)                                          | Familias, contadores, opciones, ranking voluntario y matriz de límites compatibles.   |
 | [Open source](open-source.md)                                                               | MIT, atribuciones, contribuciones, inventario y preparación de distribuciones.        |
+| [Ramas y pull requests](branching.md)                                                       | Nombres de ramas, trabajo desde clones o forks y flujo de integración.                |
 | [Kit de diseño](design-system.md)                                                           | Herramienta interna, tokens, componentes y criterios de accesibilidad.                |
 | [Trabajo con IA](ai-development.md)                                                         | Contexto, delegación y revisión de cambios asistidos.                                 |
 | [Decisión inicial](decisions/0001-architecture.md)                                          | Contexto y consecuencias de las decisiones de arquitectura de la base.                |

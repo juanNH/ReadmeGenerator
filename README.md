@@ -122,7 +122,7 @@ Public images load from their original servers. Optional searches contact GitHub
 
 The project uses **Next.js App Router, React, TypeScript, Tailwind CSS and next-intl**. The profile model and Markdown generator live in a core independent of the interface, network and storage.
 
-Run `pnpm check` and `pnpm build` to review a change; browser checks use Playwright. See [CONTRIBUTING.md](CONTRIBUTING.md) for setup and checks appropriate to each change. The internal `/design-system` catalog is available only in development.
+Run `pnpm check` and `pnpm build` to review a change; browser checks use Playwright. See [CONTRIBUTING.md](CONTRIBUTING.md) for setup and checks appropriate to each change, and the [branching guide](docs/branching.md) for branch names and pull-request targets. The internal `/design-system` catalog is available only in development.
 
 Found a bug or have a suggestion? Open an [issue](https://github.com/juanNH/ReadmeGenerator/issues) with the expected behavior and, for a bug, the steps to reproduce it. Keep credentials and private data out of reports.
 
