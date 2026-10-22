@@ -103,8 +103,8 @@ describe("explicit sanitized HTML and exact exported ranges", () => {
     const result = generateReadme(freezeDeep(profile));
     expect(result.success).toBe(true);
     if (!result.success) return;
-    expect(result.customHtml).toHaveLength(3);
-    expect(result.customHtml!.map((entry) => entry.headingLevel)).toEqual([3, 4, 4]);
+    expect(result.customHtml).toHaveLength(4);
+    expect(result.customHtml!.map((entry) => entry.headingLevel)).toEqual([3, 3, 4, 4]);
     expect(result.customHtml![0]!.start).toBe(0);
     let previousEnd = -1;
     for (const fragment of result.customHtml!) {
@@ -113,9 +113,11 @@ describe("explicit sanitized HTML and exact exported ranges", () => {
       expect(canonicalHtml(fragment.tree)).toBe(fragment.html);
       previousEnd = fragment.end;
     }
-    expect(result.customHtml![1]!.html).toBe(result.customHtml![2]!.html);
-    expect(result.customHtml![1]!.start).not.toBe(result.customHtml![2]!.start);
-    expect(result.markdown).toContain("# Alex 🌟\n\n## A 🌱 \\[title\\]\n\n");
+    expect(result.customHtml![2]!.html).toBe(result.customHtml![3]!.html);
+    expect(result.customHtml![2]!.start).not.toBe(result.customHtml![3]!.start);
+    expect(result.markdown).toContain(
+      '<div><h1 align="center">Alex 🌟</h1></div>\n\n## A 🌱 \\[title\\]\n\n',
+    );
     expect(generateReadme(profile)).toEqual(result);
     expect(profile).toEqual(original);
   });
@@ -1136,7 +1138,7 @@ describe("one Markdown source in mixed section order", () => {
     const before = JSON.stringify(profile);
     const result = generateReadme(freezeDeep(profile));
     expect(markdown(result)).toBe(
-      "## Second custom\n\nSecond custom body\n\n# Alex\n\n## First custom\n\nFirst custom body\n\n## Contact\n\n- [Website](<https://example.com/>)\n",
+      '## Second custom\n\nSecond custom body\n\n<div><h1 align="center">Alex</h1></div>\n\n## First custom\n\nFirst custom body\n\n## Contact\n\n- [Website](<https://example.com/>)\n',
     );
     expect(generateReadme(profile)).toEqual(result);
     expect(JSON.stringify(profile)).toBe(before);

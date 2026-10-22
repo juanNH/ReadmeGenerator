@@ -1,6 +1,7 @@
 export const readmeLabels = {
   en: {
-    location: "Location",
+    from: "from",
+    locationLine: "📍 Currently based in",
     technologies: "Technologies",
     projects: "Projects",
     contributions: "Contributions",
@@ -21,7 +22,8 @@ export const readmeLabels = {
     moreInformation: "More information",
   },
   es: {
-    location: "Ubicación",
+    from: "desde",
+    locationLine: "📍 Actualmente en",
     technologies: "Tecnologías",
     projects: "Proyectos",
     contributions: "Contribuciones",

@@ -129,12 +129,17 @@ const presentationV1Schema = z.strictObject({
 });
 const presentationAlignmentSchema = z.enum(["left", "center", "right"]);
 const presentationLevelSchema = z.union([z.literal(1), z.literal(2), z.literal(3)]);
+const presentationTypographySchema = z.enum(["italic", "monospace"]);
+export type PresentationTypography = z.infer<typeof presentationTypographySchema>;
 
 export const presentationFormatSchema = z.strictObject({
+  locationPlacement: z.enum(["displayName", "headline"]).optional(),
   displayNameLevel: presentationLevelSchema.optional(),
   displayNameAlignment: presentationAlignmentSchema.optional(),
+  displayNameTypography: presentationTypographySchema.optional(),
   headlineLevel: presentationLevelSchema.optional(),
   headlineAlignment: presentationAlignmentSchema.optional(),
+  headlineTypography: presentationTypographySchema.optional(),
   bioAlignment: presentationAlignmentSchema.optional(),
   locationAlignment: presentationAlignmentSchema.optional(),
 });
