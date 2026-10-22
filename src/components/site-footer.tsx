@@ -47,6 +47,11 @@ export async function SiteFooter() {
                   {t("about")}
                 </Link>
               </li>
+              <li>
+                <Link href="/privacy" className={footerLinkClassName}>
+                  {t("privacy")}
+                </Link>
+              </li>
             </ul>
           </nav>
 
@@ -73,6 +78,14 @@ export async function SiteFooter() {
               <li>
                 <a href={`${defaultBranchUrl}/LICENSE`} className={footerLinkClassName}>
                   {t("license")}
+                </a>
+              </li>
+              <li>
+                <a
+                  href={`${defaultBranchUrl}/THIRD_PARTY_NOTICES.md`}
+                  className={footerLinkClassName}
+                >
+                  {t("notices")}
                 </a>
               </li>
             </ul>
