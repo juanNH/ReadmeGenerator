@@ -43,7 +43,7 @@ function isVisibleGroup(group: TechnologyGroup) {
   return Boolean(group.name.trim()) || group.items.length > 0;
 }
 
-export function TechnologiesForm({ value, onChange }: TechnologiesFormProps) {
+export function TechnologiesForm({ value, errors, onChange }: TechnologiesFormProps) {
   const t = useTranslations("EditorModules.technologies");
   const locale = useLocale();
   const baseId = useId();
@@ -142,12 +142,14 @@ export function TechnologiesForm({ value, onChange }: TechnologiesFormProps) {
     if (target.group) {
       const targetId = target.group.id;
       onChange({
+        ...value,
         groups: value.groups.map((group) =>
           group.id === targetId ? { ...group, items: [...group.items, item] } : group,
         ),
       });
     } else {
       onChange({
+        ...value,
         groups: [...value.groups, { id: crypto.randomUUID(), name: target.name, items: [item] }],
       });
     }
@@ -171,7 +173,8 @@ export function TechnologiesForm({ value, onChange }: TechnologiesFormProps) {
       (group) => group.name.trim().toLowerCase() === name.toLowerCase(),
     );
     const groupId = existing?.id ?? crypto.randomUUID();
-    if (!existing) onChange({ groups: [...value.groups, { id: groupId, name, items: [] }] });
+    if (!existing)
+      onChange({ ...value, groups: [...value.groups, { id: groupId, name, items: [] }] });
     setDestination({ kind: "group", groupId });
     setNewCategoryName("");
     setAnnouncement(t("categoryCreated", { name }));
@@ -193,6 +196,32 @@ export function TechnologiesForm({ value, onChange }: TechnologiesFormProps) {
 
   return (
     <div className="space-y-5">
+      <Field
+        htmlFor={`${baseId}-layout`}
+        label={t("layout")}
+        description={t("layoutHelp")}
+        error={
+          errors.some(
+            (error) =>
+              error.code === "invalid_html" &&
+              error.path[0] === "data" &&
+              error.path[1] === "technologies",
+          )
+            ? t("compactLimit")
+            : undefined
+        }
+      >
+        <select
+          className={selectClassName}
+          value={value.layout ?? "grouped"}
+          onChange={(event) =>
+            onChange({ ...value, layout: event.target.value === "compact" ? "compact" : "grouped" })
+          }
+        >
+          <option value="compact">{t("layoutCompact")}</option>
+          <option value="grouped">{t("layoutGrouped")}</option>
+        </select>
+      </Field>
       <Field
         htmlFor={`${baseId}-destination`}
         label={t("destination")}
@@ -423,10 +452,14 @@ export function TechnologiesForm({ value, onChange }: TechnologiesFormProps) {
                 setOpen(false);
               }
             }
-            onChange({ groups: value.groups.map((item) => (item.id === group.id ? next : item)) });
+            onChange({
+              ...value,
+              groups: value.groups.map((item) => (item.id === group.id ? next : item)),
+            });
           }}
           onRemove={(itemId, name) => {
             onChange({
+              ...value,
               groups: value.groups.map((entry) =>
                 entry.id === group.id
                   ? { ...entry, items: entry.items.filter((item) => item.id !== itemId) }

@@ -50,6 +50,7 @@ La documentación de GitHub Profile Generator describe el producto, el estado di
 | [Vercel anónimo con PAT](decisions/0032-vercel-hobby-anonymous-pat.md)                      | Decisión de despliegue inicial, duración de funciones y límites de validación.        |
 | [Presentación de proyectos](decisions/0033-project-showcase.md)                             | Título enlazado, portada opcional v2 y composición con HTML derivado validado.        |
 | [Presentación y ubicación](decisions/0034-friendly-presentation.md)                         | Ubicación visible, saludo editable y estilos compatibles.                             |
+| [Tecnologías compactas](decisions/0035-compact-technologies.md)                             | Etiquetas con catálogo local, categorías en línea y compatibilidad de borradores.     |
 | [Origen estable de tarjetas](decisions/0036-production-card-origin.md)                      | APP_URL prioritario y fallback al dominio estable solo en Vercel Production.          |
 | [Descripción breve de proyectos](decisions/0037-project-description-and-links.md)           | Aporte en la descripción, portada y una única URL para el título.                     |
 | [Recursos de terceros](../THIRD_PARTY_NOTICES.md)                                           | Procedencia y licencias de iconos, banderas, editor de código y tarjetas Extended.    |

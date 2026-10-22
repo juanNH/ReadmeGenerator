@@ -52,7 +52,9 @@ export function createEmptyProfileV1(contentLocale: ContentLocale): ProfileDocum
 
 /** Current drafts use a single mixed order, with no random or clock-dependent identities. */
 export function createEmptyProfile(contentLocale: ContentLocale): ProfileDocument {
-  return migrateProfileV1(createEmptyProfileV1(contentLocale));
+  const document = migrateProfileV1(createEmptyProfileV1(contentLocale));
+  document.data.technologies.layout = "compact";
+  return document;
 }
 
 /** document must come from the factory or parser; only operation arguments are untrusted. */

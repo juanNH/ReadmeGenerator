@@ -1,5 +1,10 @@
 {
   "description": "Tus herramientas favoritas, de un vistazo.",
+  "layout": "Diseño en el README",
+  "layoutHelp": "Las etiquetas compactas ponen categorías y herramientas en la misma fila y se ajustan al ancho. Los iconos conservan sus colores; el fondo se adapta al tema de GitHub. Se mantienen tus notas y categorías guardadas.",
+  "layoutCompact": "Etiquetas compactas",
+  "layoutGrouped": "Títulos por categoría",
+  "compactLimit": "Esta sección compacta excede los límites de exportación HTML. Acortá la categoría o las notas, dividí una categoría grande o elegí Títulos por categoría para conservar todo como Markdown.",
   "searchLabel": "Agregar tecnologías",
   "searchPlaceholder": "Buscá React, Python, Docker…",
   "searchHelp": "Buscá y elegí una herramienta, o agregá un nombre propio. Usá las flechas y Enter para elegir.",

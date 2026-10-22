@@ -371,6 +371,7 @@ describe("shared web URL policy", () => {
 
   it("keeps Markdown and HTML text inert across active content modules and web destinations", () => {
     const profile = createEmptyProfile("en");
+    delete profile.data.technologies.layout;
     const plain = "<script>[text](javascript:alert(1))</script>";
     const escaped = "&lt;script&gt;\\[text\\]\\(javascript&#58;alert\\(1\\)\\)&lt;/script&gt;";
     profile.visibility.technologies = true;

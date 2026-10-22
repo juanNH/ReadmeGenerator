@@ -227,6 +227,9 @@ export const moduleContentSchemas = Object.freeze({
       }),
     ),
   }),
+  technologies: moduleContentV1Schemas.technologies.extend({
+    layout: z.enum(["compact", "grouped"]).optional(),
+  }),
   metrics: z.strictObject({
     username: z.string(),
     cards: uniqueCards(z.enum(metricCardIds)),
