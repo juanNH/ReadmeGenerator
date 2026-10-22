@@ -1,31 +1,31 @@
-# ADR 0037: Descripción, portada y enlace único de proyectos
+# ADR 0037: Project Description, Cover, and Single Link
 
-- Estado: aceptada.
-- Fecha: 2026-10-21.
+- Status: Accepted.
+- Date: 2026-10-21.
 
-## Contexto
+## Context
 
-Los campos separados de participación y tecnologías repetían información que cabe en una descripción corta y alargaban cada tarjeta en el editor. Los proyectos deben seguir siendo fáciles de compartir incluso sin repositorio público. Mostrar varios enlaces secundarios agrega controles y contenido que la persona no quiere incluir en la tarjeta.
+Separate contribution and technology fields repeated information that fits in a short description and made each card in the editor longer. Projects should remain easy to share even without a public repository. Showing several secondary links adds controls and content that the person does not want in the card.
 
-## Decisión
+## Decision
 
-El formulario presenta nombre, descripción, una URL opcional para el título e imagen opcional. La ayuda de descripción invita a explicar qué hace el proyecto, cuál fue el aporte o rol y qué tecnologías se usaron. Se retiran los controles independientes de rol y tecnologías para nuevas ediciones, pero se conservan ambos campos en el modelo v2 para no perder información en archivos JSON existentes. El generador incorpora esos valores heredados al texto de descripción.
+The form presents a name, description, an optional URL for the title, and an optional image. Description help invites the person to explain what the project does, what their contribution or role was, and which technologies were used. Remove the separate role and technology controls from new edits, but retain both fields in the v2 model so existing JSON files do not lose information. The generator incorporates those legacy values into the description text.
 
-El modelo v2 agrega `titleUrl?: string` para guardar el único destino que se aplica al título; v1 permanece cerrado. Los perfiles v2 antiguos mantienen su colección `links` sin cambios. Si todavía no tienen `titleUrl`, la app toma el primer enlace útil como destino al generar y lo materializa en `titleUrl` cuando se modifica ese proyecto. Los enlaces secundarios heredados se conservan en JSON, pero no se incluyen en el README. Las redes sociales se agregan en Contacto.
+The v2 model adds `titleUrl?: string` to store the single destination used for the title; v1 remains closed. Older v2 profiles retain their `links` collection unchanged. If they do not yet have `titleUrl`, the app uses the first useful link as the destination when generating and materializes it in `titleUrl` when that project is edited. Legacy secondary links remain in JSON but are not included in the README. Social links are added under Contact.
 
-La salida de cada proyecto sigue el orden: título, descripción e imagen de vista previa. El título se enlaza a la única URL configurada. La imagen usa el contrato HTTPS público y accesible de ADR 0033, debajo de la descripción.
+Each project is output in this order: title, description, and preview image. The title links to the one configured URL. The image uses the public HTTPS contract from ADR 0033 and appears below the description.
 
-La ayuda de imagen recomienda una URL HTTPS pública directa, formato horizontal 16:9 de aproximadamente 960 × 540 px para una visualización de hasta 480 px, menos de 1 MB para imágenes estáticas y GIFs breves y sutiles por debajo de unos 2–3 MB. Estos son consejos para el usuario, no límites que el editor pueda verificar. El editor no sube, redimensiona, comprime ni inspecciona archivos remotos.
+Image help recommends a direct public HTTPS URL, a horizontal 16:9 image of about 960 × 540 px for display at up to 480 px, less than 1 MB for static images, and brief, subtle GIFs below approximately 2–3 MB. These are tips for the user, not limits the editor can verify. The editor does not upload, resize, compress, or inspect remote files.
 
-El formulario ofrece un único campo de URL para el destino del título. No presenta filas de enlaces secundarios; las redes sociales se agregan en Contacto. Los detalles de ayuda y los controles conservan etiquetas, errores y navegación por teclado.
+The form provides one URL field for the title destination. It does not show rows of secondary links; social links are added under Contact. Help details and controls retain labels, errors, and keyboard navigation.
 
-## Alternativas consideradas
+## Alternatives Considered
 
-- Eliminar `links` al guardar en el nuevo formato: descartado porque borraría datos de perfiles JSON v2 existentes y haría incompatible la recuperación.
-- Subir o comprimir archivos de imagen desde el editor: descartado porque requiere almacenamiento, más dependencias y una política de privacidad adicional.
+- Delete `links` when saving the new format: rejected because it would erase data in existing v2 JSON profiles and make recovery incompatible.
+- Upload or compress image files in the editor: rejected because it requires storage, more dependencies, and an additional privacy policy.
 
-## Consecuencias
+## Consequences
 
-Los perfiles anteriores conservan sus arrays `links` al importarse y descargarse en JSON; el README usa solo el destino principal y omite las demás URLs. Al editar el proyecto, su destino se guarda en `titleUrl`. Los nuevos proyectos tienen una URL única para el título. Las imágenes externas siguen dependiendo de su servidor y la apariencia final la decide GitHub.
+Older profiles retain their `links` arrays when imported and downloaded as JSON; the README uses only the primary destination and omits the other URLs. When a project is edited, its destination is saved in `titleUrl`. New projects have a single URL for the title. External images remain dependent on their server, and GitHub determines their final appearance.
 
-Ver [modelo del perfil](../profile-model.md), [editor](../editor.md) y [ADR 0033](0033-project-showcase.md).
+See [Profile Model](../profile-model.md), [Editor](../editor.md), and [ADR 0033](0033-project-showcase.md).

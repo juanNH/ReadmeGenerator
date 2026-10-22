@@ -1,32 +1,32 @@
-# ADR 0029: Buscar la cuenta antes de elegir tarjetas
+# ADR 0029: Search for the Account Before Choosing Cards
 
-- Estado: aceptada; [ADR 0030](0030-all-profile-counters-prefetch.md) amplía la precarga a los 18 contadores del alcance actual.
-- Fecha: 2026-10-20.
-- Producto: GitHub Profile Generator.
-- Amplía [ADR 0027](0027-browser-activity-data-cache.md) y sustituye su requisito de volver a Buscar para cada cobertura nueva.
+- Status: Accepted. [ADR 0030](0030-all-profile-counters-prefetch.md) extends prefetching to all 18 counters in the current scope.
+- Date: 2026-10-20.
+- Product: GitHub Profile Generator.
+- Extends [ADR 0027](0027-browser-activity-data-cache.md) and replaces its requirement to search again for each new coverage scope.
 
-## Contexto
+## Context
 
-La búsqueda al final del formulario exigía tarjetas elegidas y hacía volver a ese botón para cargar contadores nuevos. Se pidió ingresar el usuario, buscar y luego elegir componentes usando la información ya cargada.
+Searching at the end of the form required choosing cards first and returning to that button to load new counters. The requested flow was to enter a user, search, and then choose components using the information already loaded.
 
-## Decisión
+## Decision
 
-Ubicar «Buscar datos» inmediatamente debajo del usuario. La acción funciona sin tarjetas: carga en paralelo el snapshot básico y las estadísticas y lenguajes Extended por defecto, mediante dos solicitudes JSON agrupadas. No precarga históricos, filtros específicos ni destinos desconocidos. También admite recursos seleccionados con destinos válidos aunque no haya usuario de GitHub.
+Place “Search data” immediately below the username. The action works without selected cards: it loads the basic snapshot and default Extended statistics and languages in parallel through two grouped JSON requests. It does not prefetch historical data, specific filters, or unknown destinations. It also supports selected resources with valid destinations even when there is no GitHub user.
 
-Buscar activa explícitamente esa cuenta durante la sesión del editor. Elegir tarjetas o cambiar sus opciones después reutiliza los datos disponibles y consulta únicamente cobertura faltante o vencida, agrupando cambios durante 300 ms. Los recursos válidos aplicados y seleccionados pueden cargarse después de esa primera búsqueda. Los errores permanecen visibles y no provocan reintentos automáticos continuos.
+Searching explicitly activates that account for the editor session. Choosing cards or changing their options afterward reuses available data and requests only missing or expired coverage, batching changes over 300 ms. Valid applied and selected resources can load after that first search. Errors remain visible and do not trigger continuous automatic retries.
 
-Montar, recuperar, abrir y escribir un usuario no buscado no consulta. Cambiar a otra identidad requiere Buscar; una respuesta anterior no puede mostrarse como datos de la nueva cuenta. Reemplazar, importar, restaurar o borrar el perfil vacía la caché y la activación. Se conservan la validación, los límites de concurrencia y memoria y el tratamiento de parcialidad de ADR 0027. Los snapshots siguen fuera del documento y del almacenamiento persistente.
+Mounting, recovering, opening, or typing a user that has not been searched does not make requests. Switching to another identity requires Search; a previous response cannot be shown as data for the new account. Replacing, importing, restoring, or deleting the profile clears the cache and activation. ADR 0027's validation, concurrency and memory limits, and partial-data handling remain in place. Snapshots remain outside the document and persistent storage.
 
-La búsqueda muestra progreso y errores aun sin tarjetas elegidas. La vista previa continúa renderizando localmente los SVG permitidos. La búsqueda opcional de aportes destacados conserva su acción independiente.
+Search shows progress and errors even when no cards are selected. The preview continues to render allowed SVGs locally. The optional search for highlighted contributions retains its separate action.
 
-El aviso de origen público se muestra junto a las acciones de exportación, con texto que distingue búsqueda local y publicación. La falta de origen público sigue bloqueando exportar tarjetas; excluirlas conserva su configuración y permite exportar el resto.
+Show the public-origin notice beside export actions, with text that distinguishes local search from publishing. The lack of a public origin continues to block card export; excluding cards preserves their configuration and allows the rest to be exported.
 
-## Alternativas consideradas
+## Alternatives Considered
 
-- Mantener selección primero: obliga a configurar antes de obtener información y fue rechazado durante la revisión del recorrido.
-- Precargar todos los históricos y recursos: aumenta costo y espera para opciones que quizá no se elijan.
-- Consultar al escribir el nombre: no conserva la acción explícita solicitada y puede consultar identidades incompletas.
+- Keep selection-first: requires configuring cards before retrieving information and was rejected during flow review.
+- Prefetch all historical data and resources: adds cost and wait time for options that may not be selected.
+- Search while typing the username: does not preserve the requested explicit action and can query incomplete identities.
 
-## Verificación
+## Verification
 
-Comprobar Buscar sin tarjetas, orden del botón, cero red antes de la acción, reutilización al seleccionar, faltantes agrupados, errores sin bucle, cambio de usuario, recursos aplicados y reset. Mantener el bloqueo de exportación y los recorridos de teclado/móvil. Resultados ejecutados en [desarrollo](../development.md).
+Check Search without cards, button placement, zero network traffic before the action, reuse after selection, batched missing data, errors without loops, account switching, applied resources, and reset. Preserve the export block and keyboard/mobile flows. Executed results are recorded in [Development](../development.md).

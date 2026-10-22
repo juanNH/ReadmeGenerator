@@ -1,38 +1,38 @@
-# ADR 0004: Editor local y Markdown compartido
+# ADR 0004: Local editor and shared Markdown
 
-- Estado: aceptada.
-- Fecha: 2026-10-19.
-- Ámbito: presentación, contacto, generación, vista previa y borrador local.
+- Status: accepted.
+- Date: 2026-10-19.
+- Scope: presentation, contact, generation, preview, and local draft.
 
-## Contexto
+## Context
 
-El editor necesita convertir entradas de la persona en una salida reproducible, con vista previa y exportación coherentes, sin requerir cuenta ni servicios externos. El contrato del perfil contiene nueve módulos; el editor y generador actuales admiten presentación y contacto.
+The editor needs to turn a person's input into reproducible output, with a consistent preview and export, without requiring an account or external services. The profile contract contains nine modules; the current editor and generator support presentation and contact.
 
-## Decisión
+## Decision
 
-Recibir texto plano y generar Markdown escapado en `src/core/readme/`. El generador recibe un documento estructuralmente válido y comprueba por separado los límites de salida. Devuelve Markdown o errores con código y ruta: `empty_profile`, `invalid_url` y `unsupported_module`. No producir una exportación parcial silenciosa ante módulos visibles sin soporte.
+Accept plain text and generate escaped Markdown in `src/core/readme/`. The generator receives a structurally valid document and checks output limits separately. It returns Markdown or errors with a code and path: `empty_profile`, `invalid_url`, and `unsupported_module`. Do not silently produce a partial export when visible modules are unsupported.
 
-Admitir HTTP/HTTPS absolutos sin credenciales, espacios, controles ni barras invertidas, y `mailto:` con un solo buzón ASCII sin parámetros. Los datos ocultos permanecen en el documento y no intervienen en la salida.
+Allow absolute HTTP/HTTPS URLs without credentials, spaces, control characters, or backslashes, and `mailto:` with a single ASCII mailbox and no parameters. Hidden data remains in the document and does not affect output.
 
-Usar el mismo Markdown para vista previa, portapapeles y descarga. Renderizar la vista previa con ReactMarkdown 10.1, sin HTML libre ni plugins GFM, con elementos permitidos explícitos. El diseño del editor no es un formato exportable. `contentLocale` gobierna las etiquetas del README y permanece separado del idioma de interfaz y del texto escrito.
+Use the same Markdown for preview, clipboard, and download. Render the preview with ReactMarkdown 10.1, without free-form HTML or GFM plugins, and with explicitly allowed elements. The editor layout is not an export format. `contentLocale` controls README labels and remains separate from the interface language and the text the person wrote.
 
-Mantener el borrador en `localStorage` a través de un adaptador de la feature del editor. Recuperarlo y validarlo antes de habilitar escrituras. Guardar tras 500 ms y efectuar un intento de vaciado al abandonar, ocultar o desmontar la página. Proteger valores inválidos o inaccesibles: el reemplazo requiere confirmar un borrador nuevo. Ante un fallo de escritura, conservar edición en memoria, aviso persistente y exportación válida disponible.
+Keep the draft in `localStorage` through an adapter in the editor feature. Recover and validate it before enabling writes. Save after 500 ms and attempt a flush when leaving, hiding, or unmounting the page. Protect invalid or inaccessible values: replacement requires confirming a new draft. If a write fails, keep editing in memory, show a persistent warning, and leave valid export available.
 
-Conservar temporalmente ese estado en el módulo cliente cuando no se puede guardar: la navegación entre idiomas remonta el editor y debe recuperar el documento completo sin depender del almacenamiento fallido. Leerlo después de hidratar y escribirlo solo desde efectos cliente. Un guardado correcto elimina ese respaldo efímero; no sobrevive a recargar ni cerrar la pestaña.
+Temporarily keep that state in the client module when saving is unavailable: changing languages remounts the editor, which must recover the full document without relying on failed storage. Read it after hydration and write it only from client effects. A successful save removes this ephemeral backup; it does not survive reload or closing the tab.
 
-## Alternativas
+## Alternatives
 
-| Alternativa                                          | Consecuencia                                                                                                  |
-| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| Editar HTML o Markdown libre                         | Amplía la interpretación de entrada y dificulta mantener una vista previa y controles de salida consistentes. |
-| Renderizar una vista previa desde los formularios    | Duplica reglas y permite diferencias con el archivo exportado.                                                |
-| Guardar en un servidor                               | Requiere identidad, operación y política de datos adicionales para este recorrido sin cuenta.                 |
-| Reemplazar una lectura fallida por valores iniciales | Puede destruir información incompatible o temporalmente inaccesible.                                          |
+| Alternative                               | Consequence                                                                                      |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| Edit free-form HTML or Markdown           | Expands input interpretation and makes it harder to keep preview and output controls consistent. |
+| Render a preview directly from forms      | Duplicates rules and can differ from the exported file.                                          |
+| Save to a server                          | Requires identity, operations, and additional data policy for this account-free flow.            |
+| Replace a failed read with initial values | Can destroy incompatible or temporarily inaccessible information.                                |
 
-## Consecuencias y revisión
+## Consequences and review
 
-El recorrido funciona sin red ni credenciales para generar el README. El borrador depende del origen y navegador: no tiene sincronización, respaldo remoto ni garantía de persistencia ante un cierre abrupto. Un fallo de almacenamiento no impide editar ni exportar, pero puede perder cambios al salir.
+The flow works without network access or credentials to generate the README. The draft depends on the origin and browser: there is no synchronization, remote backup, or guarantee of persistence after an abrupt close. A storage failure does not prevent editing or export, but changes may be lost on exit.
 
-El modelo conserva los otros siete módulos sin prometer formularios o generadores. La exportación requiere resolver cualquier módulo visible sin soporte; no se eliminan sus datos. No hay personalización libre del formato ni portabilidad de configuración mediante archivos.
+The model retains the other seven modules without promising forms or generators. Export requires resolving any visible unsupported module; its data is not deleted. There is no free-form format customization or configuration portability through files.
 
-Revisar ante formatos adicionales de salida, nuevas políticas de enlaces o requisitos concretos de persistencia y compatibilidad. Las decisiones anteriores describen el estado de sus entregas y conservan su valor histórico. Ver [editor](../editor.md), [modelo](../profile-model.md) y [arquitectura](../architecture.md).
+Review this decision when additional output formats, new link policies, or concrete persistence and compatibility requirements arise. Earlier decisions describe the state of their deliveries and retain their historical value. See [editor](../editor.md), [profile model](../profile-model.md), and [architecture](../architecture.md).

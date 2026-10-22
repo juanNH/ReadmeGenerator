@@ -1,47 +1,47 @@
-# ADR 0005: Composición de ocho módulos manuales
+# ADR 0005: Manual composition of eight modules
 
-- Estado: aceptada.
-- Fecha: 2026-10-19.
-- Ámbito: edición manual, composición y generación de README.
-- Amplía [ADR 0004](0004-local-readme-editor.md); conserva sus decisiones de texto plano, Markdown compartido y recuperación local.
+- Status: accepted.
+- Date: 2026-10-19.
+- Scope: manual editing, composition, and README generation.
+- Extends [ADR 0004](0004-local-readme-editor.md); retains its decisions about plain text, shared Markdown, and local recovery.
 
-## Contexto
+## Context
 
-El contrato v1 ya contiene nueve módulos. El editor necesita presentar conocimientos, estudios, tecnologías, actualidad, proyectos y contribuciones junto a presentación y contacto, sin exigir actividad pública o trayectoria laboral. Mostrar todos los formularios abiertos dificulta recorrer perfiles extensos; ocultar una sección tampoco debe ser la única forma de reducir el espacio de edición.
+The v1 contract already contains nine modules. The editor needs to present skills, education, technologies, current focus, projects, and contributions alongside presentation and contact, without requiring public activity or work history. Showing all forms open makes long profiles harder to navigate; hiding a section must not be the only way to reduce editing space.
 
-Las colecciones tienen IDs opacos y pueden contener datos parciales. Los borradores publicados deben conservar su formato, idioma, contenido oculto y orden. Métricas tiene configuración en el contrato, pero no dispone de edición ni generación.
+Collections have opaque IDs and may contain partial data. Saved drafts must retain their format, language, hidden content, and order. Metrics has configuration in the contract but no editing or generation support.
 
-## Decisión
+## Decision
 
-Admitir ocho módulos manuales con formularios específicos en `src/modules/` y renderers puros pequeños en `src/core/readme/`. Mantener `ProfileDocument` versión 1 y la clave de almacenamiento existente, sin migración: los campos requeridos ya están representados. El registro del núcleo conserva esquemas y metadatos, sin componentes, iconos ni reglas de interacción.
+Support eight manual modules with specific forms in `src/modules/` and small pure renderers in `src/core/readme/`. Keep `ProfileDocument` at version 1 and retain the existing storage key, without migration: all required fields are already represented. The core registry retains schemas and metadata, without components, icons, or interaction rules.
 
-Separar tres acciones: plegar conserva visibilidad y contenido; ocultar cambia visibilidad conservando contenido; quitar una entrada elimina sus datos con una acción que explica el efecto. La tarjeta abierta es estado efímero y solo se abre una a la vez. Los errores de enlaces se muestran en campo y tarjeta; una acción de revisión abre y enfoca el campo correspondiente.
+Separate three actions: collapsing preserves visibility and content; hiding changes visibility while preserving content; removing an entry deletes its data through an action that explains the effect. The open card is ephemeral state, and only one card is open at a time. Link errors appear in the field and card; a review action opens and focuses the corresponding field.
 
-Ordenar mediante botones Subir/Bajar que intercambian dos módulos manuales visibles vecinos dentro del array completo. Los IDs ocultos y métricas conservan sus posiciones; enviar siempre los nueve IDs a `reorderModules`. Usar ese orden para formularios y README, con foco y anuncio de posición. No introducir un orden paralelo de UI ni arrastre.
+Reorder with Move up/Move down buttons that swap two neighboring visible manual modules within the full array. Hidden IDs and metrics retain their positions; always pass all nine IDs to `reorderModules`. Use this order for forms and the README, with focus and a position announcement. Do not introduce a parallel UI order or drag-and-drop.
 
-Mantener tecnologías como texto libre agrupable, sin catálogo, logos o puntuaciones. Las tecnologías de proyectos siguen siendo strings; las entradas con ID conservan su identidad opaca. Usar IDs DOM independientes y crear nuevos IDs de entradas fuera del núcleo. Mantener fechas como texto libre y enums anulables, sin inferencias de antigüedad, finalización o habilidad.
+Keep technologies as free text that can be grouped, without a catalog, logos, or scores. Project technologies remain strings; entries with IDs retain their opaque identity. Use independent DOM IDs and create new entry IDs outside the core. Keep dates as free text and enums nullable, without inferring seniority, completion, or skill.
 
-Omitir entradas vacías sin inventar títulos. Los grupos tecnológicos necesitan alguna entrada exportable; los enums solos de formación o actualidad no crean contenido. Los demás datos parciales se muestran sin exigir nombre, institución, empleo o repositorio. `contentLocale` traduce etiquetas generadas y enums, conservando texto propio y fechas.
+Omit empty entries without inventing titles. Technology groups need at least one exportable entry; education or current-focus enums alone do not create content. Other partial data is shown without requiring a name, institution, job, or repository. `contentLocale` translates generated labels and enums while preserving authored text and dates.
 
-Compartir la política HTTP/HTTPS de enlaces web entre módulos. Solo contacto admite `mailto:` bajo su política restrictiva. Una URL opcional vacía es válida; una fila de enlaces de contacto o proyectos con etiqueta sin URL requiere corrección. Los errores de URLs suministradas incluyen la ruta completa y bloquean la salida entera, incluso en enlaces anidados. Los datos ocultos no bloquean la generación.
+Share the HTTP/HTTPS web-link policy across modules. Only contact allows `mailto:` under its restrictive policy. An empty optional URL is valid; a contact or project link row with a label but no URL requires correction. Errors for supplied URLs include the full path and block the entire output, including nested links. Hidden data does not block generation.
 
-Mantener `unsupported_module` para métricas visible. Ofrecer ocultarla mediante una acción explícita que preserve usuario, tarjetas y orden. No descartar configuración ni producir una exportación parcial silenciosa.
+Keep `unsupported_module` for visible metrics. Offer an explicit action to hide it while preserving username, cards, and order. Do not discard configuration or silently produce a partial export.
 
-## Alternativas consideradas
+## Alternatives considered
 
-| Alternativa                                          | Consecuencia                                                                 |
-| ---------------------------------------------------- | ---------------------------------------------------------------------------- |
-| Mostrar los ocho formularios abiertos                | Alarga el recorrido y dificulta concentrarse en una sección.                 |
-| Usar visibilidad para plegar formularios             | Modifica el README cuando la persona solo quiere reducir espacio de edición. |
-| Guardar un segundo orden con solo secciones visibles | Obliga a reconciliarlo con módulos ocultos y el contrato completo.           |
-| Exigir títulos, institución o repositorios           | Excluye contenido parcial útil y perfiles con poca actividad pública.        |
-| Migrar el documento para habilitar formularios       | Cambia un formato que ya representa todos sus datos.                         |
-| Ocultar o borrar métricas automáticamente            | Altera decisiones o configuración del borrador sin una acción de la persona. |
+| Alternative                                           | Consequence                                                               |
+| ----------------------------------------------------- | ------------------------------------------------------------------------- |
+| Show all eight forms open                             | Lengthens the flow and makes it harder to focus on one section.           |
+| Use visibility to collapse forms                      | Changes the README when the person only wants to reduce editing space.    |
+| Store a second order containing only visible sections | Requires reconciling it with hidden modules and the full contract.        |
+| Require titles, institutions, or repositories         | Excludes useful partial content and profiles with little public activity. |
+| Migrate the document to enable forms                  | Changes a format that already represents all its data.                    |
+| Hide or delete metrics automatically                  | Alters draft decisions or configuration without an explicit action.       |
 
-## Consecuencias y revisión
+## Consequences and review
 
-Los perfiles breves y extensos usan la misma composición sin porcentajes de completitud. El plegado no persiste, mientras contenido, visibilidad y orden sí usan el borrador existente. Los formularios repetibles requieren foco explícito al agregar y quitar entradas; los controles de orden requieren nombres distinguibles y tratamiento de los extremos.
+Short and extensive profiles use the same composition without completion percentages. Collapsed state is not persisted, while content, visibility, and order use the existing draft. Repeatable forms require explicit focus when adding and removing entries; order controls need distinct names and handling for the endpoints.
 
-El README continúa limitado al Markdown generado y su vista previa compartida. No se incorporan personalización libre, catálogos remotos, consultas a GitHub, métricas o IA. Revisar esta decisión si cambia el contrato persistido, la política de enlaces o el comportamiento de composición.
+The README remains limited to generated Markdown and its shared preview. This does not add free-form customization, remote catalogs, GitHub queries, metrics, or AI. Review this decision if the persisted contract, link policy, or composition behavior changes.
 
-Ver [editor](../editor.md), [modelo del perfil](../profile-model.md) y [arquitectura](../architecture.md).
+See [editor](../editor.md), [profile model](../profile-model.md), and [architecture](../architecture.md).

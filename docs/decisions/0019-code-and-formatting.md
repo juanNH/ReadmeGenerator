@@ -1,57 +1,57 @@
-# ADR 0019: Código literal y formato visual acotado en secciones propias
+# ADR 0019: Literal Code and Bounded Visual Formatting in Custom Sections
 
-- Estado: aceptada.
-- Fecha: 2026-10-20.
-- Complementa [ADR 0013](0013-custom-sections.md), [ADR 0015](0015-explicit-profile-html.md) y [ADR 0018](0018-readme-import-with-backup.md).
+- Status: accepted.
+- Date: 2026-10-20.
+- Complements [ADR 0013](0013-custom-sections.md), [ADR 0015](0015-explicit-profile-html.md), and [ADR 0018](0018-readme-import-with-backup.md).
 
-## Contexto
+## Context
 
-Una sección personal puede describirse mediante un fragmento TOML o de otro lenguaje. Ese fragmento debe aparecer como código, conservar su escritura y resultar editable sin recurrir a HTML. También se necesitan niveles de título y alineación para texto personal, conservando los documentos existentes y la política de salida de GitHub. Un editor con coloreado facilita escribir HTML, pero no amplía las etiquetas, atributos ni recursos permitidos.
+A personal section may include a TOML fragment or a fragment in another language. It must appear as code, preserve its exact text, and remain editable without relying on HTML. Heading levels and alignment are also needed for personal text, while preserving existing documents and GitHub's output policy. A syntax-highlighted editor makes HTML easier to write, but does not expand the allowed tags, attributes, or resources.
 
-## Decisión
+## Decision
 
-Ampliar aditivamente `ProfileDocument` v2, sin modificar la versión, las claves de almacenamiento ni las estructuras heredadas. El parser permanece estricto y no agrega valores por defecto:
+Extend `ProfileDocument` v2 additively, without changing the version, storage keys, or legacy structures. The parser remains strict and adds no defaults:
 
-- `code` contiene exactamente `{ id, type: "code", source, language }`, con ambos textos obligatorios. `language: ""` representa texto sin lenguaje declarado. `source` se conserva sin recortar, normalizar saltos ni interpretar HTML, Markdown o instrucciones.
-- `paragraph` admite `alignment?: "left" | "center" | "right"`.
-- `heading` admite `level?: 1 | 2 | 3` y `alignment` con esos mismos valores.
-- Una sección propia admite `titleLevel?: 1 | 2 | 3` y `titleAlignment` con esos mismos valores.
+- `code` has exactly `{ id, type: "code", source, language }`, with both text values required. `language: ""` represents text with no declared language. `source` is preserved without trimming, normalizing line breaks, or interpreting HTML, Markdown, or instructions.
+- `paragraph` allows `alignment?: "left" | "center" | "right"`.
+- `heading` allows `level?: 1 | 2 | 3` and `alignment` with the same values.
+- A custom section allows `titleLevel?: 1 | 2 | 3` and `titleAlignment` with the same values.
 
-Las opciones ausentes conservan la salida previa: título de sección con `##`; subtítulo con `###` cuando hay título y `##` cuando no lo hay; párrafos de texto escapado. La izquierda explícita también usa Markdown. No se alinean automáticamente listas, imágenes ni código. Duplicar copia la fuente y todas las opciones, cambiando solo los identificadores correspondientes. Un lector antiguo estricto puede rechazar las ampliaciones y debe conservar el valor original protegido.
+Absent options preserve the previous output: section title as `##`; subtitle as `###` when a section title exists and `##` otherwise; and escaped-text paragraphs. Explicit left alignment also uses Markdown. Lists, images, and code are not aligned automatically. Duplicating copies the source and every option, changing only the corresponding IDs. A strict older reader may reject the additions and must preserve the original protected value.
 
-### Código y lenguajes
+### Code and languages
 
-El catálogo puro de `src/core/code/` ofrece elecciones locales y alias, sin red. Se normalizan mayúsculas, espacios exteriores y alias conocidos. Un identificador desconocido de hasta 64 unidades UTF-16 se admite si es un token alfanumérico con `_`, `+`, `.` o `-`; no se interpreta como atributo ni como contenido ejecutable. Los alias cerrados pueden convertirse a un token canónico seguro. Un lenguaje inválido bloquea la exportación con `invalid_code` en `language`.
+The pure catalog in `src/core/code/` offers local choices and aliases without network access. It normalizes letter case, surrounding whitespace, and known aliases. An unknown identifier of up to 64 UTF-16 code units is accepted if it is an alphanumeric token that may also contain `_`, `+`, `.`, or `-`; it is not interpreted as an attribute or executable content. Known aliases may be converted to a safe canonical token. An invalid language blocks export with `invalid_code` at `language`.
 
-Cada bloque admite hasta 30.000 unidades UTF-16 de fuente y el documento hasta 150.000 unidades de código visible. Los límites son de exportación: una fuente más larga sigue conservándose en el borrador y produce `invalid_code` en `source`. Una sección oculta no participa. Una fuente exactamente vacía se omite; espacios y saltos deliberados sí son código. La longitud del delimitador de backticks supera toda racha existente en la fuente, de modo que el texto pegado no cierre el bloque ni active HTML. Se añade un salto delimitador después de la fuente sin modificarla. El renderizador Markdown puede normalizar saltos según CommonMark; el borrador y la fuente exportada conservan los caracteres escritos.
+Each block allows up to 30,000 UTF-16 code units of source, and the document allows up to 150,000 UTF-16 code units of visible code. These are export limits: longer source remains in the draft and produces `invalid_code` at `source`. Hidden sections are excluded. A source that is exactly empty is omitted; intentional spaces and line breaks are code. The backtick fence is longer than any run in the source, so pasted text cannot close the block or activate HTML. A delimiter line break is appended after the source without changing the source itself. The Markdown renderer may normalize line breaks according to CommonMark; the draft and exported source retain the written characters.
 
-La importación reconoce nodos de código delimitado e indentado como bloques `code`, conserva el contenido del AST y normaliza su lenguaje. Los saltos de línea pueden quedar normalizados por el parser; el respaldo guarda el Markdown original exacto. Los metadatos no representables se notifican. Un token de lenguaje inválido se convierte a texto sin lenguaje con aviso. Los fragmentos de código independientes de un HTML cerrado permanecen editables; si pertenecen a un contexto HTML abierto o a una estructura anidada que exige conservar HTML unido, prevalece la integridad de esa estructura y se avisa si pierde metadatos de lenguaje. No convertir automáticamente `pre/code` de un bloque HTML existente.
+The importer recognizes fenced and indented code nodes as `code` blocks, preserves AST content, and normalizes the language. The parser may normalize line breaks; the backup keeps the original Markdown exactly. Unrepresentable metadata is reported. An invalid language token is converted to plain text with no language and a warning. Independent code fragments inside closed HTML remain editable. If they belong to an open HTML context or a nested structure that must remain together, preserving that structure takes precedence, and any lost language metadata is reported. Do not automatically convert `pre/code` inside an existing HTML block.
 
-### Formato derivado
+### Derived formatting
 
-Los niveles sin alineación especial generan Markdown. Centro y derecha construyen elementos HAST con textos normalizados como valores literales, se serializan con escape contextual y pasan por `analyzeProfileHtml`. Nunca se interpreta el texto personal como HTML. Los párrafos separados conservan unidades `p` alineadas. No se generan CSS, clases, scripts ni atributos libres.
+Levels without special alignment generate Markdown. Center and right alignment build HAST elements with normalized text as literal values, serialize them with contextual escaping, and pass them through `analyzeProfileHtml`. Personal text is never interpreted as HTML. Separate paragraphs remain distinct aligned `p` units. No CSS, classes, scripts, or unrestricted attributes are generated.
 
-El HTML derivado consume los límites vigentes de HTML: 30.000 unidades de fuente por fragmento, 1.500 nodos, profundidad 32 y 150.000 unidades agregadas visibles, compartidas con los bloques HTML explícitos. Los errores señalan `title` o `text` y bloquean la salida. El presupuesto de HTML explícito se revisa antes de analizarlo y cada fragmento derivado se suma antes de su análisis. El código tiene un presupuesto separado porque no se interpreta como HTML.
+Derived HTML uses the current HTML limits: 30,000 source code units per fragment, 1,500 nodes, depth 32, and 150,000 aggregate visible units shared with explicit HTML blocks. Errors point to `title` or `text` and block output. The explicit HTML budget is checked before analysis, and each derived fragment is added to the budget before it is analyzed. Code has a separate budget because it is not interpreted as HTML.
 
-La salida utiliza el contrato existente `customHtml`: unidades completas y cerradas, árbol permitido y rangos UTF-16 exactos sobre el Markdown final. Incluye el título alineado como una unidad propia y conserva la adaptación semántica de encabezados solo en la vista previa. No agregar `dangerouslySetInnerHTML`, `rehypeRaw`, un parser global ni una segunda versión del README. Los metadatos son derivados y no se guardan.
+Output uses the existing `customHtml` contract: complete closed units, an allowed tree, and exact UTF-16 ranges in the final Markdown. The aligned title is included as its own unit; heading semantics are adapted only in the preview. Do not add `dangerouslySetInnerHTML`, `rehypeRaw`, a global parser, or a second README output. Metadata is derived and is not stored.
 
-### Edición de fuente
+### Source editing
 
-La fuente HTML y de código puede presentarse con resaltado, números de línea y ayuda de sangría dentro de una frontera cliente acotada. Debe conservar una alternativa de texto, etiquetas, foco y salida por teclado, selección y escritura exacta. Colorear no implica validar la exportación. La carga del editor es local, no incorpora ejecución de código, cuentas ni servicios remotos. Las decisiones concretas de dependencias y carga se documentan junto a la implementación.
+HTML and code source may be shown with syntax highlighting, line numbers, and indentation help inside a small client boundary. It must preserve a plain-text alternative, labels, focus and keyboard navigation, selection, and exact editing. Highlighting does not validate export. The editor loads locally; it does not execute code or add accounts or remote services. Concrete dependency and loading decisions are documented alongside the implementation.
 
-## Alternativas
+## Alternatives
 
-- Reutilizar HTML `pre/code`: preserva contenido visual, pero pierde lenguaje al filtrar clases y exige escribir etiquetas para un fragmento común.
-- Guardar Markdown libre o reinterpretar todos los párrafos: vuelve ambiguos los campos existentes y amplía la superficie de interpretación.
-- Editor enriquecido universal: requiere otro contrato y más reglas de compatibilidad para necesidades que ya resuelven bloques pequeños.
-- Guardar siempre formato por defecto o migrar a v3: reescribe documentos sin una necesidad contractual y dificulta distinguir una elección explícita.
+- Reuse HTML `pre/code`: preserves visual content, but loses the language when classes are filtered and requires writing tags for a common fragment.
+- Store free-form Markdown or reinterpret all paragraphs: makes existing fields ambiguous and broadens the interpretation surface.
+- Use a universal rich-text editor: requires another contract and more compatibility rules for needs already met by small blocks.
+- Always store formatting defaults or migrate to v3: rewrites documents without a contract need and makes explicit choices harder to distinguish.
 
-## Consecuencias
+## Consequences
 
-Código, HTML y texto ordinario mantienen contratos separados. Los documentos previos conservan su salida; las elecciones nuevas siguen siendo editables y se duplican de forma independiente. La apariencia de sintaxis y la alineación final dependen del renderizador de GitHub; no se promete un tema de colores ni paridad exacta con la vista previa. No se incorpora ejecución de código ni formato inline enriquecido.
+Code, HTML, and ordinary text retain separate contracts. Existing documents keep their output; new choices remain editable and are duplicated independently. Syntax highlighting and final alignment depend on GitHub's renderer; no color theme or exact preview parity is promised. Code execution and rich inline formatting are not added.
 
-## Fuentes
+## Sources
 
-- [GitHub: bloques de código y resaltado](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-and-highlighting-code-blocks).
-- [GFM: delimitadores, encabezados y HTML](https://github.github.io/gfm/).
-- [GitHub Markup: procesamiento y sanitización](https://github.com/github/markup).
+- [GitHub: code blocks and syntax highlighting](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-and-highlighting-code-blocks).
+- [GFM: fences, headings, and HTML](https://github.github.io/gfm/).
+- [GitHub Markup: processing and sanitization](https://github.com/github/markup).

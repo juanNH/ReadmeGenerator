@@ -1,7 +1,7 @@
 import { createEmptyProfile } from "../profile-operations";
 import type { ProfileDocument } from "../profile-schema";
 
-/** Persona e instituciones ficticias; no representa actividad pública real. */
+/** Fictional person and institutions; it does not represent real public activity. */
 export function createKnowledgeExampleProfile(): ProfileDocument {
   const profile = createEmptyProfile("es");
 

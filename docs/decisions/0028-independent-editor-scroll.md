@@ -1,29 +1,29 @@
-# ADR 0028: Desplazamiento independiente en las dos columnas del editor
+# ADR 0028: Independent Scrolling in the Editor's Two Columns
 
-- Estado: aceptada para la implementación.
-- Fecha: 2026-10-20.
-- Producto: GitHub Profile Generator.
+- Status: Accepted for implementation.
+- Date: 2026-10-20.
+- Product: GitHub Profile Generator.
 
-## Contexto
+## Context
 
-Las secciones repetibles y sus opciones pueden hacer muy larga la configuración o el README. Se pidió recorrer ambos lados del editor por separado y adaptar las barras al estilo visual del sitio, manteniendo teclado y uso en teléfono.
+Repeatable sections and their options can make the configuration or README very long. The request was to scroll both sides of the editor independently and adapt the bars to the site's visual style while preserving keyboard and phone use.
 
-## Decisión
+## Decision
 
-Cuando la consulta de contenedor habilita las dos columnas y hay suficiente altura visible, la configuración y la vista previa usan scrollports nativos independientes dentro del área disponible bajo la barra del editor. `useEditorScroll` mide esa área, observa cambios de tamaño y agrupa mediciones en animation frames. El foco profundo y `scrollIntoView` continúan desplazando sus ancestros nativos; no se interceptan rueda, gestos ni teclas.
+When the container query enables two columns and there is enough visible height, configuration and preview use independent native scrollports in the available area below the editor bar. `useEditorScroll` measures that area, observes size changes, and batches measurements in animation frames. Deep focus and `scrollIntoView` continue to scroll their native ancestors; wheel, gestures, and keys are not intercepted.
 
-En teléfono, contenedor estrecho, texto ampliado o altura insuficiente se mantiene el flujo vertical natural de la página. La navegación de secciones conserva su propia fila horizontal, selección, orden y desplazamiento interno.
+On phones, narrow containers, enlarged text, or insufficient height, retain the page's natural vertical flow. Section navigation keeps its own horizontal row, selection, ordering, and internal scrolling.
 
-En escritorio, cambiar de sección o volver a pulsar la activa revela la cabecera completa de su panel, incluido el idioma, sin quitar el foco de navegación. Las acciones que enfocan la configuración también conservan esa cabecera; revisar un error sigue revelando el campo afectado. Ctrl+Inicio actúa sobre la columna enfocada según el comportamiento nativo.
+On desktop, changing sections or selecting the active section again reveals the full panel header, including the language control, without removing focus from navigation. Actions that focus configuration also preserve that header; reviewing an error still reveals the affected field. Ctrl+Home acts on the focused column according to native behavior.
 
-Las barras del editor y su navegación usan colores semánticos, thumb redondeado y pista integrada. Se conserva el control nativo y se restablece su representación en colores forzados. Los paneles tienen nombre accesible y pueden recibir foco para desplazamiento por teclado. El cambio no introduce una biblioteca ni reproduce una scrollbar mediante JavaScript.
+The editor bars and navigation use semantic colors, a rounded thumb, and an integrated track. Keep the native control and restore its rendering in forced-colors mode. Panels have accessible names and can receive focus for keyboard scrolling. This change adds no library and does not recreate a scrollbar in JavaScript.
 
-## Alternativas consideradas
+## Alternatives Considered
 
-- Dos columnas siempre limitadas en altura: dificulta la edición en pantallas bajas o con texto ampliado.
-- Una única página larga en escritorio: pierde el contexto de la otra columna durante la edición.
-- Scrollbars dibujadas con un componente externo: agrega dependencia y obliga a reproducir interacción nativa.
+- Always constrain both columns in height: makes editing harder on short screens or with enlarged text.
+- Keep one long desktop page: loses the other column's context while editing.
+- Draw scrollbars with an external component: adds a dependency and requires reproducing native interaction.
 
-## Verificación
+## Verification
 
-Comprobar rueda y teclado independientes, foco de campos profundos, llegada al primer campo antes de interacción, vuelta al flujo natural en 320 × 568 y con texto al 200 %, ambos idiomas y temas y colores forzados. La emulación no sustituye un dispositivo físico. Ver [desarrollo](../development.md).
+Check independent wheel and keyboard scrolling, focus on deeply nested fields, reaching the first field before interaction, returning to natural flow at 320 × 568 and with text at 200%, both languages and themes, and forced colors. Emulation does not replace a physical device. See [Development](../development.md).

@@ -1,39 +1,39 @@
-# ADR 0003: Documento de perfil versionado y validación estricta
+# ADR 0003: Versioned profile document and strict validation
 
-- Estado: aceptada.
-- Fecha: 2026-10-19.
-- Ámbito: contrato y operaciones puras de `src/core/`.
+- Status: accepted.
+- Date: 2026-10-19.
+- Scope: pure contracts and operations in `src/core/`.
 
-## Contexto
+## Context
 
-El perfil necesita borradores incompletos y módulos opcionales, independientes de la actividad pública. Las entradas externas requieren validación en ejecución además de tipos, sin incorporar framework, navegador, almacenamiento ni servicios al núcleo.
+The profile needs incomplete drafts and optional modules that are independent of public activity. External inputs require runtime validation in addition to types, without adding a framework, browser, storage, or services to the core.
 
-## Decisión
+## Decision
 
-Usar Zod `4.6.7` como dependencia directa y tipos inferidos mediante `z.infer`, evitando duplicar interfaces y validadores. La documentación oficial explica [inferencia y resultados de `safeParse`](https://zod.dev/basics).
+Use Zod `4.6.7` as a direct dependency and infer types with `z.infer`, avoiding duplicate interfaces and validators. The official documentation explains [inference and `safeParse` results](https://zod.dev/basics).
 
-Definir `ProfileDocument` con `schemaVersion: 1`, `contentLocale`, `data`, `moduleOrder` y `visibility`. Todos los módulos están presentes: la opcionalidad se expresa con datos vacíos y visibilidad. El orden incluye cada módulo una vez, también si está oculto.
+Define `ProfileDocument` with `schemaVersion: 1`, `contentLocale`, `data`, `moduleOrder`, and `visibility`. All modules are present: optionality is represented by empty data and visibility. The order includes each module exactly once, including hidden modules.
 
-Mantener una forma JSON canónica: `""` para texto vacío, `[]` para colecciones y `null` para elecciones sin completar. El parser no agrega defaults ni coerción. El llamador suministra identificadores e idioma; no se generan valores por reloj o azar.
+Keep one canonical JSON shape: `""` for empty text, `[]` for collections, and `null` for incomplete selections. The parser does not add defaults or coerce values. The caller supplies identifiers and language; values are not generated from the clock or randomness.
 
-Rechazar claves desconocidas, también anidadas, mediante `z.strictObject`, documentado en la [API oficial](https://zod.dev/api). No descartar datos silenciosamente. Rechazar versiones incompatibles y no anticipar migraciones sin formatos reales que transformar.
+Reject unknown keys, including nested keys, with `z.strictObject`, documented in the [official API](https://zod.dev/api). Do not silently discard data. Reject incompatible versions and do not anticipate migrations without real formats to transform.
 
-Adaptar errores a códigos y rutas del dominio. Las operaciones reciben documentos ya válidos, validan argumentos y devuelven documentos nuevos compartiendo ramas no modificadas. La fábrica crea estructuras independientes.
+Adapt errors to domain codes and paths. Operations receive already-valid documents, validate their arguments, and return new documents while sharing unchanged branches. The factory creates independent structures.
 
-## Alternativas
+## Alternatives
 
-| Alternativa                         | Consecuencia                                                            |
-| ----------------------------------- | ----------------------------------------------------------------------- |
-| Tipos y validación manual separados | Evita la dependencia, pero duplica el contrato y facilita divergencias. |
-| Descartar claves desconocidas       | Puede perder información aparentando una entrada correcta.              |
-| Objetos abiertos                    | Admiten datos fuera del contrato versionado.                            |
-| Omitir módulos o campos vacíos      | Introduce varias representaciones del mismo borrador.                   |
-| Migraciones anticipadas             | Agrega reglas sin formatos anteriores ni evidencia de uso.              |
+| Alternative                          | Consequence                                                                          |
+| ------------------------------------ | ------------------------------------------------------------------------------------ |
+| Separate types and manual validation | Avoids the dependency, but duplicates the contract and makes divergence more likely. |
+| Discard unknown keys                 | Can lose information while making the input appear valid.                            |
+| Open objects                         | Allow data outside the versioned contract.                                           |
+| Omit modules or empty fields         | Introduces multiple representations of the same draft.                               |
+| Anticipate migrations                | Adds rules without previous formats or evidence of use.                              |
 
-## Consecuencias y revisión
+## Consequences and review
 
-Zod es una dependencia explícita del núcleo. Las entradas ajenas al contrato requieren adaptadores explícitos. Los consumidores deben tratar los documentos como inmutables, sin asumir congelación profunda.
+Zod is an explicit dependency of the core. Inputs outside the contract require explicit adapters. Consumers must treat documents as immutable and must not assume deep freezing.
 
-La validación estructural admite texto, fechas y enlaces incompletos; no garantiza exportación segura. Editor, persistencia, generador e integraciones siguen ausentes.
+Structural validation accepts incomplete text, dates, and links; it does not guarantee safe export. The editor, persistence, generator, and integrations are still absent.
 
-Revisar ante evolución real del esquema, formatos persistidos que necesiten migración o requisitos concretos de adaptación. Ver [modelo del perfil](../profile-model.md) y [arquitectura](../architecture.md).
+Review this decision when the schema evolves, persisted formats require migration, or concrete adaptation requirements arise. See [profile model](../profile-model.md) and [architecture](../architecture.md).

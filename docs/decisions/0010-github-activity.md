@@ -1,73 +1,73 @@
-# ADR 0010: Actividad opcional y tarjetas propias de GitHub
+# ADR 0010: Optional activity and first-party GitHub cards
 
-- Estado: aceptada para la implementación; habilitación real sujeta a configuración del despliegue.
-- Fecha: 2026-10-19.
-- Producto: GitHub Profile Generator.
+- Status: accepted for implementation; actual enablement depends on deployment configuration.
+- Date: 2026-10-19.
+- Product: GitHub Profile Generator.
 
-## Contexto
+## Context
 
-El editor mantiene cinco secciones y sirve a personas con poca actividad pública. Se solicitó sumar calendario, resumen, lenguajes y aportes destacados sin convertirlos en requisitos del perfil. `ProfileDocument` v1 ya representa usuario y tarjetas en `metrics`, y aportes manuales en `contributions`; sus nueve IDs deben conservarse sin migración.
+The editor has five sections and serves people with little public activity. Calendar, summary, languages, and highlighted contributions were requested without making them profile requirements. `ProfileDocument` v1 already represents the username and cards in `metrics` and manual contributions in `contributions`; its nine IDs must be retained without migration.
 
-Los datos de GitHub dependen del período, los permisos de la credencial y sus límites. Un token amplio puede hacer accesible información privada que este producto no debe publicar. Una imagen referenciada desde un README necesita un servidor público: localhost permite revisar, pero no alojar imágenes accesibles para GitHub.
+GitHub data depends on the time period, credential permissions, and limits. A broad token can expose private information that this product must not publish. An image referenced from a README needs a public server: localhost allows review but cannot host images GitHub can access.
 
-## Decisión
+## Decision
 
-### Una sección, elecciones independientes
+### One section, independent choices
 
-Usar **Actividad y contribuciones** en el slot `contributions`, con inclusión efectiva `visibility.contributions || visibility.metrics`. El slot `metrics` nunca genera una sección independiente y conserva su posición interna. Recuperar un borrador no normaliza flags. Ocultar desde la navegación apaga ambos; volver a mostrar incluye contribuciones y activa métricas si quedan tarjetas seleccionadas. Cada fuente respeta su flag al generar.
+Use **Activity and contributions** in the `contributions` slot, with effective inclusion `visibility.contributions || visibility.metrics`. The `metrics` slot never generates an independent section and retains its internal position. Draft recovery does not normalize flags. Hiding through navigation turns both flags off; showing again includes contributions and enables metrics if cards remain selected. Each source respects its flag during generation.
 
-Los aportes manuales funcionan sin usuario. El bloque de GitHub es plegable, con tarjetas desactivadas inicialmente y consulta por botón. El formulario no consulta al escribir, abrir o recuperar; las imágenes ya seleccionadas pueden cargar actividad al mostrarse. Las sugerencias se agregan solo tras elegirlas y quedan editables como aportes manuales. Sin ranking, rachas predeterminadas ni inferencias de conocimiento.
+Manual contributions work without a username. The GitHub block is collapsible, with cards disabled initially and queries initiated by a button. The form does not query while typing, opening, or recovering; already-selected images may load activity when displayed. Suggestions are added only after selection and remain editable as manual contributions. No default ranking, streaks, or skill inferences.
 
-### Modelo puro y snapshot temporal
+### Pure model and temporary snapshot
 
-Conservar v1 y la clave del borrador. Persistir únicamente `metrics.username/cards` y entradas elegidas de contribuciones. El snapshot validado de usuario, fecha, período, calendario, recuentos, lenguajes y sugerencias es un contrato remoto separado y temporal. El cliente valida, cancela solicitudes y descarta respuestas de otro usuario; diferencia ceros reales de errores y puede mostrar el último resultado válido con aviso.
+Retain v1 and the draft key. Persist only `metrics.username/cards` and selected contribution entries. The validated snapshot of the username, date, period, calendar, counts, languages, and suggestions is a separate, temporary remote-data contract. The client validates data, cancels requests, and discards responses for a different user; it distinguishes real zeroes from errors and can show the last valid result with a notice.
 
-`core/activity` contiene normalización, contratos y renderizado SVG puro. `server/github` consulta GraphQL mediante endpoint fijo, valida datos y limita recursos. Las rutas JSON y SVG solo coordinan estas responsabilidades. No hay SDK nuevo ni dependencia de un servicio externo de gráficos.
+`core/activity` contains normalization, contracts, and pure SVG rendering. `server/github` queries GraphQL through a fixed endpoint, validates data, and limits resources. JSON and SVG routes only coordinate these responsibilities. There is no new SDK or dependency on an external chart service.
 
-### Datos públicos verificables
+### Verifiable public data
 
-Configurar exclusivamente en servidor un PAT classic dedicado mediante `GITHUB_TOKEN`, fuera de Git y de `NEXT_PUBLIC_`. Exigir `x-oauth-scopes` presente, vacío o exactamente `public_repo` en cada respuesta. Preferir únicamente `public_repo` para las consultas GraphQL de repositorios públicos según la documentación de GitHub; rechazar scopes adicionales, incluidos `repo` y `read:user`, o permisos no verificables como fine-grained. El cliente solo ejecuta lecturas, aunque ese scope permita otras operaciones públicas. La allowlist es una política deliberada del cliente actual, no soporte de todos los mecanismos de autenticación.
+Configure a dedicated classic PAT on the server only through `GITHUB_TOKEN`, outside Git and `NEXT_PUBLIC_`. Require `x-oauth-scopes` to be present, empty, or exactly `public_repo` in every response. Prefer only `public_repo` for GraphQL queries on public repositories according to GitHub documentation; reject additional scopes, including `repo` and `read:user`, and unverifiable permissions such as fine-grained tokens. The client only executes reads, although this scope allows other public operations. The allowlist is a deliberate policy for the current client, not support for all authentication mechanisms.
 
-Rechazar perfiles privados y filtrar repositorios públicos propios no forks y destacados no restringidos. Admitir únicamente recuentos privados anónimos que la persona haya compartido públicamente, sin detalles. Los lenguajes son bytes de repositorios analizados, no conocimientos ni actividad del período del calendario. Limitar a 300 repositorios, 20 lenguajes por repositorio y 100 agregados, con indicador de muestra parcial.
+Reject private profiles and filter to public repositories owned by the user that are not forks, plus eligible public contribution highlights. Allow only anonymous private contribution counts that the person has publicly shared, without details. Language data is bytes from analyzed repositories, not knowledge or activity during the calendar period. Limit processing to 300 repositories, 20 languages per repository, and 100 aggregated languages, with a partial-sample indicator.
 
-**Actualización del 2026-10-20:** la regla inicial de rechazo se implementó exigiendo `userViewType: PUBLIC`, pero ese campo representa una vista y no identifica un ajuste de perfil privado. [ADR 0022](0022-token-owner-public-activity.md) permite también la vista `PRIVATE` del propietario autenticado, validada con `isViewer` y el usuario solicitado, conservando la verificación de scopes y los filtros de datos públicos. El párrafo anterior conserva el contexto de esta decisión inicial.
+**Update on 2026-10-20:** the initial rejection rule was implemented by requiring `userViewType: PUBLIC`, but that field represents a view and does not identify a private profile setting. [ADR 0022](0022-token-owner-public-activity.md) also allows the authenticated owner's `PRIVATE` view, validated with `isViewer` and the requested username, while retaining scope verification and public-data filters. The preceding paragraph preserves the context of this initial decision.
 
-### Caché y alojamiento
+### Cache and hosting
 
-Limitar las consultas a 15 s y las respuestas a 2 MiB. La caché del proceso admite 512 snapshots y 512 fallos, frescura de 30 minutos y último resultado válido hasta 24 horas ante fallos transitorios; deduplica consultas y limita a cuatro distintas simultáneas y 60 por minuto. Respetar cuotas y Retry-After; no servir stale ante inexistencia o configuración inválida. Los límites son por proceso, sin prometer protección distribuida.
+Limit queries to 15 s and responses to 2 MiB. The process cache allows 512 snapshots and 512 failures, with 30-minute freshness and the last valid result retained for up to 24 hours during transient failures; it deduplicates queries and limits concurrency to four distinct queries and 60 per minute. Respect quotas and Retry-After; do not serve stale data when data is missing or configuration is invalid. Limits are per process and do not promise distributed protection.
 
-Las tarjetas son SVG pasivos propios, con texto escapado, colores validados, título/descripción accesibles y fechas explícitas UTC. No incluyen scripts, recursos externos, enlaces ni `foreignObject`. Sus respuestas llevan CSP restrictiva, `nosniff`, estado de actividad y caché. Una imagen no disponible explica el fallo sin inventar ceros.
+Cards are first-party passive SVGs with escaped text, validated colors, accessible titles/descriptions, and explicit UTC dates. They contain no scripts, external resources, links, or `foreignObject`. Responses include a restrictive CSP, `nosniff`, activity status, and caching. An unavailable image explains the failure without inventing zeroes.
 
-`APP_URL` identifica el origen HTTPS público de la aplicación, nunca inferido del Host. La ruta del editor usa `await connection()` para leerlo en ejecución: cambiarlo requiere reiniciar el servicio, no recompilar; las otras páginas mantienen su generación estática. `generateReadme(document, { activityCardBaseUrl? })` genera el único Markdown del producto. Sin origen público válido usa rutas locales para revisar y devuelve éxito con `exportIssues: activity_not_configured`; los consumidores deben bloquear copia/descarga. Desmarcar tarjetas permite exportar el contenido manual. No hay un flujo de configuración de tokens dentro del producto.
+`APP_URL` identifies the application's public HTTPS origin and is never inferred from the Host. The editor route uses `await connection()` to read it at runtime: changing it requires restarting the service, not rebuilding; other pages retain static generation. `generateReadme(document, { activityCardBaseUrl? })` generates the product's only Markdown. Without a valid public origin, it uses local paths for review and returns success with `exportIssues: activity_not_configured`; consumers must block copy/download. Unchecking cards allows manual content to export. The product has no in-product token configuration flow.
 
-La resolución del origen se amplía en [ADR 0036](0036-production-card-origin.md): únicamente Vercel Production puede usar su dominio estable cuando `APP_URL` está vacío. Se conserva la prioridad de configuración explícita y el contrato puro del generador.
+Origin resolution is expanded in [ADR 0036](0036-production-card-origin.md): only Vercel Production may use its stable domain when `APP_URL` is empty. Explicit configuration retains priority, and the generator contract stays pure.
 
-## Alternativas consideradas
+## Alternatives considered
 
-| Alternativa                                   | Motivo de descarte en esta entrega                                            |
-| --------------------------------------------- | ----------------------------------------------------------------------------- |
-| Sexta sección de métricas                     | Divide el mismo tema y complica composición y navegación.                     |
-| Nuevo contrato v2                             | Los campos v1 ya representan las elecciones; migrar no aporta valor.          |
-| Servicio público externo de tarjetas          | Agrega dependencia operativa y política de datos de otro proveedor.           |
-| REST Events para reconstruir calendario anual | Su ventana y límite no representan un calendario anual completo.              |
-| Pedir token a cada persona                    | Aumenta fricción y expone decisiones de operación en el recorrido del perfil. |
-| Permitir un token con permisos amplios        | Cambia visibilidad de datos y puede publicar información privada.             |
-| Guardar snapshots en el borrador              | Duplica información derivada y conserva datos que deberían actualizarse.      |
+| Alternative                                    | Reason for rejection in this delivery                                     |
+| ---------------------------------------------- | ------------------------------------------------------------------------- |
+| A sixth metrics section                        | Splits one topic and complicates composition and navigation.              |
+| A new v2 contract                              | v1 fields already represent the choices; migration adds no value.         |
+| External public card service                   | Adds operational dependency and another provider's data policy.           |
+| REST Events to reconstruct the annual calendar | Its window and limit do not represent a complete calendar year.           |
+| Ask each person for a token                    | Adds friction and exposes operational decisions in the profile flow.      |
+| Allow a token with broad permissions           | Changes data visibility and could publish private information.            |
+| Store snapshots in the draft                   | Duplicates derived information and retains data that should be refreshed. |
 
-## Consecuencias y límites
+## Consequences and limits
 
-El perfil manual permanece disponible sin servicios. Activar las consultas reales requiere una credencial aceptada; exportar gráficos requiere además alojamiento público. Esta decisión no confirma llamadas autenticadas, despliegue público, disponibilidad futura ni resultados de CI: la evidencia ejecutada se registra en [desarrollo](../development.md).
+Manual profiles remain available without services. Enabling live queries requires an accepted credential; exporting charts also requires public hosting. This decision does not confirm authenticated calls, public deployment, future availability, or CI results: executed evidence is recorded in [development](../development.md).
 
-Las tarjetas del README se actualizan según caché y dependen de esta aplicación. Varias instancias requieren controles operativos compartidos si el uso lo justifica. Los datos nunca miden habilidad. La IA permanece fuera de esta integración y los tres módulos retirados no reaparecen.
+README cards refresh according to cache state and depend on this application. Multiple instances require shared operational controls if usage warrants them. The data never measures skill. AI remains outside this integration, and the three retired modules do not return.
 
-## Fuentes
+## Sources
 
-- [GitHub GraphQL: Users](https://docs.github.com/en/graphql/reference/users#contributionscollection): calendario, período, recuentos y visibilidad de aportes.
-- [GitHub GraphQL: Repositories](https://docs.github.com/en/graphql/reference/repos#languageedge): lenguajes medidos por bytes de código.
-- [Scopes de GitHub](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/scopes-for-oauth-apps): alcance público sin scopes y encabezados de permisos.
-- [Autenticación GraphQL](https://docs.github.com/en/graphql/guides/forming-calls-with-graphql): scope `public_repo` documentado para repositorios públicos con PAT classic.
-- [Límites de GraphQL](https://docs.github.com/en/graphql/overview/rate-limits-and-query-limits-for-the-graphql-api): cuotas, errores y reintentos.
-- [Referencia de contribuciones](https://docs.github.com/en/account-and-profile/reference/profile-contributions-reference): criterios y límites del calendario.
-- Guías locales de Next.js instalado: `node_modules/next/dist/docs/01-app/01-getting-started/15-route-handlers.md` y `08-caching.md`. GET dinámico y caché explícita, sin habilitar Cache Components.
+- [GitHub GraphQL: Users](https://docs.github.com/en/graphql/reference/users#contributionscollection): calendar, period, counts, and contribution visibility.
+- [GitHub GraphQL: Repositories](https://docs.github.com/en/graphql/reference/repos#languageedge): languages measured by code bytes.
+- [GitHub scopes](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/scopes-for-oauth-apps): public access without scopes and permission headers.
+- [GraphQL authentication](https://docs.github.com/en/graphql/guides/forming-calls-with-graphql): `public_repo` scope documented for public repositories with a classic PAT.
+- [GraphQL limits](https://docs.github.com/en/graphql/overview/rate-limits-and-query-limits-for-the-graphql-api): quotas, errors, and retries.
+- [Contribution reference](https://docs.github.com/en/account-and-profile/reference/profile-contributions-reference): calendar criteria and limits.
+- Installed Next.js guides: `node_modules/next/dist/docs/01-app/01-getting-started/15-route-handlers.md` and `08-caching.md`. Dynamic GET and explicit caching, without enabling Cache Components.
 
-Esta decisión amplía la actividad dentro del alcance de cinco secciones de [ADR 0008](0008-focused-profile.md) y conserva la política cerrada de imágenes de [ADR 0009](0009-profile-icons.md).
+This decision adds activity within the five-section scope of [ADR 0008](0008-focused-profile.md) and retains the closed image policy of [ADR 0009](0009-profile-icons.md).

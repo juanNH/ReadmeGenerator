@@ -1,21 +1,21 @@
-# ADR 0011: Países opcionales y contactos configurados por entrada
+# ADR 0011: Optional countries and contact configured per entry
 
-- Estado: aceptada.
-- Fecha: 2026-10-19.
+- Status: accepted.
+- Date: 2026-10-19.
 
-## Contexto
+## Context
 
-Ubicación necesita sugerir países y agregar su bandera. El sistema debe mostrarla también cuando la plataforma no soporte el emoji. Contacto requiere crear primero una entrada y configurar dentro su servicio y dirección, conservando nombres personalizados, múltiples webs y proveedores repetidos.
+Location needs to suggest countries and add their flags. The system must also display a flag when the platform does not support the emoji. Contact needs to create an entry first and configure its service and address within it, while preserving custom labels, multiple websites, and repeated providers.
 
-## Decisión
+## Decision
 
-- Conservar el contrato v1: ubicación es texto y cada enlace contiene `id`, `label` y `url`.
-- Elegir un país guarda su bandera Unicode y nombre dentro de `location`. Un catálogo estático de 249 países y territorios aporta nombres EN/ES y SVG de flag-icons fijados a un commit. Solo una bandera seguida del nombre exacto EN/ES del mismo país se convierte a imagen decorativa de 20 × 15, junto al nombre escapado. Los demás valores, incluso ubicaciones propias con emoji, siguen siendo texto libre para conservar su significado accesible.
-- El autocompletado busca nombres de ambos idiomas y códigos, permite teclado y texto propio. No usa geolocalización. Cambiar el idioma de interfaz conserva el valor guardado.
-- Contacto crea una entrada con selector enfocado. La persona elige servicio, web o correo y pasa a URL con Tab, sin cambios de foco al recorrer opciones. El selector es una sugerencia efímera que no sustituye datos; al recuperar se deriva de la URL. El icono siempre se resuelve desde el dominio validado. La etiqueta personalizada sigue en detalles opcionales.
+- Retain the v1 contract: location is text, and each link contains `id`, `label`, and `url`.
+- Selecting a country stores its Unicode flag and name in `location`. A static catalog of 249 countries and territories provides EN/ES names and flag-icons SVGs pinned to a commit. Only a flag followed by the exact EN/ES name of the same country becomes a decorative 20 × 15 image, beside the escaped name. All other values, including custom locations with emoji, remain free text to preserve their accessible meaning.
+- Autocomplete searches names in both languages and codes, supports keyboard input and custom text, and does not use geolocation. Changing the interface language preserves the saved value.
+- Contact creates an entry with the selector focused. The person chooses a service, website, or email and tabs to the URL, without focus changes while moving through options. The selector is a temporary suggestion that does not replace data; on recovery, it is derived from the URL. The icon is always resolved from the validated domain. A custom label remains in optional details.
 
-## Alternativas y consecuencias
+## Alternatives and consequences
 
-Usar solo emoji reduce assets, pero depende del sistema para mostrar la bandera. Agregar un campo de país o proveedor requeriría versionar y migrar un contrato que ya representa la elección; mantenerla como texto y derivar la marca evita esa migración. La vista previa reconoce únicamente el marcado exacto del catálogo y resuelve los SVG locales, conservando el mismo Markdown que copia y descarga.
+Using only emoji reduces assets, but flag display depends on the system. Adding a country or provider field would require versioning and migrating a contract that already represents the choice; keeping it as text and deriving the brand avoids that migration. The preview recognizes only exact catalog markup and resolves local SVGs, preserving the same Markdown for copy and download.
 
-Los recursos de banderas agregan aproximadamente 1,64 MB al repositorio y se solicitan solo al mostrarse; el README referencia su fuente fijada. Requieren mantener catálogo y licencia MIT. Las ubicaciones anteriores no adquieren un país por coincidencia de nombre ni se reescriben. No se infiere nacionalidad, habilidad o actividad a partir de estas elecciones. Ver [recursos de terceros](../../THIRD_PARTY_NOTICES.md).
+Flag assets add approximately 1.64 MB to the repository and are requested only when displayed; the README references their pinned source. The catalog and MIT license must be maintained. Earlier locations do not gain a country from a name match and are not rewritten. Nationality, skill, or activity is not inferred from these choices. See [third-party resources](../../THIRD_PARTY_NOTICES.md).
