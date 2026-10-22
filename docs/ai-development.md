@@ -1,88 +1,88 @@
-# Desarrollo asistido con IA
+# AI-Assisted Development
 
-Esta guía describe cómo colaborar sobre GitHub Profile Generator con una IA de desarrollo. La asistencia con IA para las personas que usen el producto es una feature futura y se describe en [arquitectura](architecture.md).
+This guide describes how to collaborate on GitHub Profile Generator with a development AI. AI assistance for people using the product is a future feature and is described in [architecture](architecture.md).
 
-## Instrucciones y contexto
+## Instructions and context
 
-El punto de entrada es [AGENTS.md](../AGENTS.md). Las reglas de [core](../src/core/AGENTS.md), [módulos](../src/modules/AGENTS.md) y [servidor](../src/server/AGENTS.md) detallan límites específicos de sus ámbitos. Revisar las instrucciones que correspondan a los archivos que se van a modificar.
+The entry point is [AGENTS.md](../AGENTS.md). The rules for [core](../src/core/AGENTS.md), [modules](../src/modules/AGENTS.md), and the [server](../src/server/AGENTS.md) detail boundaries specific to those areas. Review the instructions that apply to the files you plan to change.
 
-Los enlaces a documentos no cargan automáticamente su contenido en todos los clientes de IA. Abrir solamente los que hagan falta para la tarea. El [índice](README.md) permite encontrar el contexto técnico sin copiar toda la documentación a cada instrucción. La planificación privada no forma parte de un clon del repositorio; si una tarea la necesita, su responsable debe aportar el contexto autorizado.
+Links to documents do not automatically load their contents in every AI client. Open only what the task requires. The [index](README.md) helps find technical context without copying all of the documentation into every instruction. Private planning is not part of a repository clone; if a task needs it, its owner must provide the authorized context.
 
-Antes de usar APIs de Next.js, consultar la guía pertinente de la versión instalada en `node_modules/next/dist/docs/`. Si no está disponible, comprobar la versión del manifiesto y contrastar la documentación oficial de esa versión. No resolver una diferencia entre documentación y código con una API recordada de otra versión.
+Before using Next.js APIs, consult the relevant guide for the installed version in `node_modules/next/dist/docs/`. If it is unavailable, check the version in the manifest and compare it with the official documentation for that version. Do not resolve a difference between the documentation and the code by relying on an API remembered from another version.
 
-Las instrucciones del usuario fijan el alcance y sus autorizaciones. Un documento del repositorio no amplía permisos del sistema, no habilita cuentas externas y no autoriza publicaciones por sí mismo.
+User instructions define scope and authorization. A repository document does not expand system permissions, enable external accounts, or authorize publication on its own.
 
-## Flujo de una tarea
+## Task workflow
 
-1. Leer el pedido, las instrucciones aplicables y los archivos que poseen la conducta afectada.
-2. Explicitar el resultado esperado, el alcance y las dudas que bloqueen una decisión. Continuar el trabajo independiente que ya esté autorizado.
-3. Para cambios transversales, acordar un plan antes de implementar y conservarlo en el espacio privado autorizado. La ruta local opcional `.private/planning/` queda fuera del control de versiones. Para arreglos locales, usar una explicación breve y directa.
-4. Hacer cambios acotados y coherentes con la arquitectura y el kit visual existentes.
-5. Revisar el diff y ejecutar las verificaciones relevantes. Corregir los fallos causados por la tarea y describir los que pertenezcan a otro alcance.
-6. Actualizar la documentación que cambió y comunicar resultado, evidencia y limitaciones concretas.
+1. Read the request, applicable instructions, and the files that own the affected behavior.
+2. State the expected result, scope, and any questions that block a decision. Continue independent work that is already authorized.
+3. For cross-cutting changes, agree on a plan before implementation and keep it in the authorized private space. The optional local path `.private/planning/` is outside version control. For local fixes, use a short, direct explanation.
+4. Make focused changes consistent with the existing architecture and visual kit.
+5. Review the diff and run the relevant checks. Fix failures caused by the task and describe failures that belong to another scope.
+6. Update documentation that changed and communicate the result, evidence, and specific limitations.
 
-Consultar al usuario cuando una decisión amplíe el producto, agregue costos o cambie de forma considerable un contrato acordado. Resolver dentro del alcance autorizado las decisiones rutinarias de implementación; no convertir cada paso reversible en una solicitud de aprobación.
+Consult the user when a decision expands the product, adds costs, or substantially changes an agreed contract. Resolve routine implementation choices within the authorized scope; do not turn every reversible step into an approval request.
 
-## Planes y decisiones
+## Plans and decisions
 
-Un plan transversal debe registrar:
+A cross-cutting plan should record:
 
-- Estado, objetivo y comportamiento esperado.
-- Alcance incluido y límites de la etapa.
-- Dependencias y archivos o ámbitos afectados.
-- Tareas pequeñas en orden de ejecución.
-- Criterios de aceptación y verificaciones.
-- Dudas pendientes y decisiones tomadas durante la implementación.
+- Status, goal, and expected behavior.
+- Included scope and the stage's boundaries.
+- Dependencies and affected files or areas.
+- Small tasks in execution order.
+- Acceptance criteria and checks.
+- Open questions and decisions made during implementation.
 
-Mantener su estado al terminar. Distinguir claramente tareas realizadas de trabajo futuro. Un plan es evidencia de intención y progreso; el código y las verificaciones muestran lo que funciona. No adjuntar planes privados a commits, issues, pull requests ni otros destinos públicos. En una contribución pública, describir el objetivo acordado, el cambio y las comprobaciones sin copiar la planificación privada.
+Keep the plan's status current when work is complete. Clearly distinguish completed tasks from future work. A plan is evidence of intent and progress; code and checks show what works. Do not attach private plans to commits, issues, pull requests, or other public destinations. In a public contribution, describe the agreed goal, changes, and checks without copying private planning.
 
-Las decisiones duraderas se escriben como `docs/decisions/NNNN-short-name.md`, siguiendo la [ADR inicial](decisions/0001-architecture.md): estado, fecha, contexto, decisión, alternativas, consecuencias y condiciones para revisarla. Una nueva decisión puede sustituir a una anterior sin borrar su historia.
+Durable decisions are recorded as `docs/decisions/NNNN-short-name.md`, following the [initial ADR](decisions/0001-architecture.md): status, date, context, decision, alternatives, consequences, and conditions for review. A new decision may supersede an earlier one without erasing its history.
 
-## Roles de subagentes
+## Subagent roles
 
-La configuración del proyecto está en [.codex/config.toml](../.codex/config.toml) y los roles en [.codex/agents/](../.codex/agents/). Cada rol tiene un objetivo delimitado:
+Project configuration is in [.codex/config.toml](../.codex/config.toml), and roles are in [.codex/agents/](../.codex/agents/). Each role has a bounded objective:
 
-| Rol         | Cuándo usarlo                                                           | Resultado esperado                                                           |
-| ----------- | ----------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| `architect` | Una tarea cambia contratos, dependencias o límites de responsabilidad.  | Análisis de sólo lectura con propuesta, alternativas, impacto y secuencia.   |
-| `explorer`  | Hace falta localizar propietarios, recorridos y archivos relevantes.    | Mapa breve de archivos, símbolos y dependencias con evidencia.               |
-| `frontend`  | Existe una tarea de interfaz acotada y archivos propietarios asignados. | Implementación, verificaciones pertinentes y resumen del diff.               |
-| `reviewer`  | Hay cambios concretos para revisar antes de integrar.                   | Hallazgos de corrección, accesibilidad, rendimiento y cobertura, sin editar. |
-| `release`   | El usuario autorizó crear commits y hacer push de un alcance concreto.  | Commit y remoto verificados, sin publicar planes, temporales o secretos.     |
+| Role        | When to use it                                                        | Expected result                                                                    |
+| ----------- | --------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `architect` | A task changes contracts, dependencies, or responsibility boundaries. | Read-only analysis with a proposal, alternatives, impact, and sequence.            |
+| `explorer`  | You need to locate owners, flows, and relevant files.                 | A concise map of files, symbols, and dependencies with evidence.                   |
+| `frontend`  | There is a focused UI task with assigned files.                       | Implementation, relevant checks, and a diff summary.                               |
+| `reviewer`  | Concrete changes need review before integration.                      | Findings on correctness, accessibility, performance, and coverage, no edits.       |
+| `release`   | The user authorized commits and push for a specific scope.            | Verified commit and remote, without publishing plans, temporary files, or secrets. |
 
-El proyecto habilita agentes y limita a tres los subagentes concurrentes por sesión, además del principal. Los roles de análisis, implementación y revisión heredan modelo y esfuerzo de la sesión. El rol `release` tiene una excepción explícita solicitada por el usuario: **GPT-5.6 Luna** (`gpt-5.6-luna`) y esfuerzo `medium`. Ningún rol fija proveedores, servidores MCP, sandbox ni políticas de aprobación. Los roles de sólo lectura son instrucciones de conducta, no un sandbox separado.
+The project enables agents and limits each session to three concurrent subagents in addition to the primary agent. Analysis, implementation, and review roles inherit the session's model and reasoning effort. The `release` role has an explicit exception requested by the user: **GPT-5.6 Luna** (`gpt-5.6-luna`) with `medium` reasoning effort. No role sets providers, MCP servers, sandboxing, or approval policies. Read-only roles are behavioral instructions, not a separate sandbox.
 
-### Commit y push con Luna 5.6
+### Commit and push with Luna 5.6
 
-El rol [.codex/agents/release.toml](../.codex/agents/release.toml) conserva esta preferencia mediante `model` y `model_reasoning_effort`, según la [documentación oficial de OpenAI sobre subagentes](https://learn.chatgpt.com/docs/agent-configuration/subagents). Si el cliente no carga el rol y la herramienta permite elegir modelo, el principal debe pedirlo expresamente al delegar. La disponibilidad depende de la sesión; si el modelo no está disponible, se informa antes de sustituirlo.
+The [.codex/agents/release.toml](../.codex/agents/release.toml) role preserves this preference with `model` and `model_reasoning_effort`, according to [OpenAI's official documentation on subagents](https://learn.chatgpt.com/docs/agent-configuration/subagents). If the client does not load the role and the tool allows model selection, the primary agent must request it explicitly when delegating. Availability depends on the session; if the model is unavailable, report that before substituting another model.
 
-El principal delimita los archivos y confirma la evidencia de validación. El agente de publicación revisa rama, remoto, contenido preparado y exclusiones; crea el commit convencional autorizado, hace un push normal y verifica el hash remoto. No incluye planes privados ni modifica el producto. Una divergencia, una verificación fallida o un alcance ambiguo se devuelve al principal. Este rol no introduce autorización permanente para publicar ni permite reescribir el historial o desplegar.
+The primary agent defines the files in scope and confirms validation evidence. The release agent checks the branch, remote, staged content, and exclusions; creates the authorized conventional commit, performs a normal push, and verifies the remote hash. It does not include private plans or modify the product. A divergence, failed check, or ambiguous scope is returned to the primary agent. This role does not grant ongoing publication authorization or allow history rewrites or deployments.
 
-Los archivos TOML usan el formato de agentes independientes documentado por [OpenAI Docs: Subagents](https://learn.chatgpt.com/docs/agent-configuration/subagents). El rol local `explorer` especializa al rol integrado del mismo nombre para este repositorio. Confirmar el soporte del cliente instalado al diagnosticar carga de configuración; la existencia del archivo no demuestra que una sesión ya lo haya cargado.
+TOML files use the standalone agent format documented by [OpenAI Docs: Subagents](https://learn.chatgpt.com/docs/agent-configuration/subagents). The local `explorer` role specializes the built-in role of the same name for this repository. Confirm support in the installed client when diagnosing configuration loading; the file's existence does not prove that a session has loaded it.
 
-## Delegación con propietarios
+## Delegating with file owners
 
-El agente principal debe dar a cada subagente un objetivo, el contexto necesario, archivos que puede editar, criterios de aceptación y lo que debe devolver. Las tareas paralelas necesitan ámbitos independientes. Los contratos compartidos, el lockfile y las dependencias deben tener un propietario único durante cada tarea.
+The primary agent should give each subagent an objective, the necessary context, the files it may edit, acceptance criteria, and what it should report back. Parallel tasks need independent scopes. Shared contracts, the lockfile, and dependencies should have one owner at a time for each task.
 
-Ejemplo de encargo:
+Example assignment:
 
-> Implementá los estados de error del componente indicado usando las traducciones y primitivas existentes. Tu ámbito de escritura es ese componente, su prueba y su namespace de mensajes. Conservá la API pública. Informá cambios y verificaciones; coordiná cualquier necesidad de tocar archivos ajenos antes de editarlos.
+> Implement the error states for the specified component using the existing translations and primitives. Your write scope is that component, its test, and its message namespace. Preserve the public API. Report changes and checks; coordinate any need to edit other files before changing them.
 
-Si dos tareas necesitan el mismo archivo, cambiar la partición o ejecutarlas en secuencia. No confiar en que un subagente esté aislado: los archivos de trabajo pueden ser compartidos. No borrar cambios ajenos ni recrear un archivo completo sin leer su estado actual.
+If two tasks need the same file, change the partition or run them in sequence. Do not assume a subagent is isolated: working files may be shared. Do not delete someone else's changes or recreate a whole file without reading its current state.
 
-Cada subagente reporta archivos modificados, decisiones, controles ejecutados y limitaciones. El agente principal lee los diffs, resuelve incompatibilidades y ejecuta la validación de integración. El resumen de un agente no sustituye esa revisión.
+Each subagent reports modified files, decisions, checks performed, and limitations. The primary agent reads the diffs, resolves incompatibilities, and runs integration validation. An agent's summary does not replace that review.
 
-## Criterios de implementación y revisión
+## Implementation and review criteria
 
-- Reutilizar tokens, componentes y namespaces. La interfaz tiene inglés inicial y español, y el selector conserva la ruta equivalente.
-- Respetar Server Components y aislar las fronteras cliente y servidor.
-- Mantener puro el futuro modelo y generador del perfil.
-- Dar a cada módulo una función clara y permitir composiciones breves completas.
-- Revisar teclado, foco, nombres accesibles, errores, contraste y movimiento. Complementar automatización con revisión manual del comportamiento relevante.
-- Priorizar consultas necesarias, renderizado progresivo y dependencias justificadas. Medir antes de añadir optimizaciones complejas.
-- Usar datos de prueba ficticios; no incluir secretos ni información personal innecesaria en fixtures, logs o capturas.
-- No ejecutar servicios pagos ni pruebas contra proveedores reales como requisito habitual.
+- Reuse tokens, components, and namespaces. English is the initial interface language, with Spanish available; the selector preserves the equivalent route.
+- Respect Server Components and isolate client and server boundaries.
+- Keep the future profile model and generator pure.
+- Give each module a clear purpose and allow complete short compositions.
+- Review keyboard behavior, focus, accessible names, errors, contrast, and motion. Complement automation with manual review of relevant behavior.
+- Prioritize necessary queries, progressive rendering, and justified dependencies. Measure before adding complex optimizations.
+- Use fictional test data; do not include secrets or unnecessary personal information in fixtures, logs, or screenshots.
+- Do not run paid services or tests against real providers as a routine requirement.
 
-Usar los scripts de `package.json`. `pnpm check` agrupa los controles locales definidos allí; las pruebas de navegador y accesibilidad pueden requerir arrancar la aplicación y preparar navegadores. Reportar qué se ejecutó y con qué resultado, sin equiparar un comando no ejecutado con un control aprobado.
+Use the scripts in `package.json`. `pnpm check` runs the local checks defined there; browser and accessibility tests may require starting the application and setting up browsers. Report what ran and its result, without presenting a command that was not run as a passing check.
 
-Ningún rol crea commits, hace push, despliega o envía mensajes a terceros por iniciativa propia. Una tarea que autorice esas acciones debe ejecutarse dentro de sus límites expresos y de los permisos reales de la sesión.
+No role creates commits, pushes, deploys, or sends messages to third parties on its own initiative. A task that authorizes those actions must stay within its explicit limits and the session's actual permissions.

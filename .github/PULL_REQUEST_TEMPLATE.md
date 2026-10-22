@@ -1,23 +1,23 @@
-## Problema y resultado
+## Problem and outcome
 
-Describí la necesidad y el comportamiento observable que produce este cambio.
+Describe the need and the observable behavior this change produces.
 
-## Alcance
+## Scope
 
-Indicá qué parte del producto cubre. Enlazá el issue o documento público relevante cuando exista; no adjuntes planes internos.
+Explain which part of the product this change covers. Link to a related issue or public document if one exists; do not attach internal plans.
 
-## Validación ejecutada
+## Validation performed
 
-Anotá los comandos o revisiones que realmente realizaste y su resultado. Explicá los pasos pendientes o bloqueados.
+List the commands or reviews you actually performed and their results. Explain any checks that are pending or blocked.
 
 - `pnpm check`:
 - `pnpm build`:
-- Navegador y pruebas adicionales, si corresponden:
+- Browser review and any additional checks, where relevant:
 
-## Interfaz y accesibilidad
+## Interface and accessibility
 
-Cuando aplique, incluí capturas o una descripción del resultado y registrá la revisión de teclado, foco, etiquetas y pantallas angostas. Si el cambio no afecta la interfaz, indicá que no aplica.
+Where applicable, include screenshots or describe the result, and note your review of keyboard use, focus, labels, and narrow screens. If the change does not affect the interface, say so.
 
-## Riesgos y limitaciones
+## Risks and limitations
 
-Describí los riesgos concretos, decisiones pendientes o límites que debe conocer quien revise. Actualizá la documentación si cambió el alcance o el estado de una función.
+Describe concrete risks, pending decisions, or limitations reviewers should know about. Update the documentation if the scope or status of a feature changed.
