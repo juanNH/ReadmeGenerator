@@ -128,7 +128,7 @@ Found a bug or have a suggestion? Open an [issue](https://github.com/juanNH/Read
 
 ## Documentation
 
-Detailed guides are currently in Spanish.
+Most detailed product and development guides are currently in Spanish. The [branching guide](docs/branching.md) is available in English.
 
 Despliegue con PAT y sin login: [Vercel Hobby, main/Dev y comprobación de tarjetas](docs/vercel-deployment.md).
 
