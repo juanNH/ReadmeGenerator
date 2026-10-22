@@ -1,40 +1,40 @@
-# ADR 0022: Actividad pública del propietario del token
+# ADR 0022: Public activity for the token owner
 
-- Estado: aceptada para la implementación.
-- Fecha: 2026-10-20.
-- Producto: GitHub Profile Generator.
+- Status: accepted for implementation.
+- Date: 2026-10-20.
+- Product: GitHub Profile Generator.
 
-## Contexto
+## Context
 
-La integración de [ADR 0010](0010-github-activity.md) exige un PAT classic dedicado, verificable y con permisos acotados. El cliente rechazaba cualquier respuesta cuyo `userViewType` fuera `PRIVATE`. Al consultar la propia cuenta con su token, GitHub puede devolver esa vista y bloquear una consulta válida de actividad pública.
+The integration in [ADR 0010](0010-github-activity.md) requires a dedicated classic PAT whose scopes can be verified and are narrowly limited. The client rejected any response whose `userViewType` was `PRIVATE`. When querying their own account with their token, GitHub can return that view and block a valid public-activity query.
 
-`UserViewType` describe la vista disponible para quien consulta; no es un indicador de que el perfil tenga activado un ajuste de privacidad. `isViewer` identifica si la cuenta consultada coincide con la autenticada. GitHub documenta que las contribuciones privadas e internas requieren `read:user`, scope que el cliente excluye, y que `restrictedContributionsCount` solo puede ser distinto de cero si la persona eligió compartir ese recuento.
+`UserViewType` describes the view available to the viewer; it does not indicate whether a profile has a privacy setting enabled. `isViewer` identifies whether the queried account matches the authenticated account. GitHub documents that private and internal contributions require the `read:user` scope, which this client excludes, and that `restrictedContributionsCount` can be nonzero only when the person has chosen to share that count.
 
-## Decisión
+## Decision
 
-Validar `isViewer` como booleano y exigir que `user.login` coincida con el usuario solicitado sin distinguir mayúsculas. Aceptar `userViewType: PUBLIC`; aceptar `PRIVATE` únicamente cuando `isViewer` sea verdadero. Otras vistas `PRIVATE` siguen rechazadas. No usar este enum para inferir o prometer la detección del ajuste de privacidad de un perfil.
+Validate `isViewer` as a boolean and require `user.login` to match the requested username, case-insensitively. Accept `userViewType: PUBLIC`; accept `PRIVATE` only when `isViewer` is true. Continue rejecting other `PRIVATE` views. Do not use this enum to infer or promise detection of a profile’s privacy setting.
 
-Verificar primero `x-oauth-scopes` en cada respuesta: debe estar presente y vacío o ser exactamente `public_repo`. Conservar el rechazo de `repo`, `read:user`, permisos adicionales y credenciales no verificables, incluidos tokens fine-grained. La excepción de propietario no relaja esta frontera.
+Check `x-oauth-scopes` in each response first: it must be present and empty, or exactly `public_repo`. Keep rejecting `repo`, `read:user`, additional permissions, and unverifiable credentials, including fine-grained tokens. The owner exception does not relax this boundary.
 
-Conservar los filtros de repositorios públicos propios no forks y de candidatos públicos no restringidos, además de la validación completa del snapshot. No trasladar `isViewer`, `userViewType` ni campos privados al contrato público. Mantener únicamente los recuentos anónimos restringidos que la persona haya hecho públicos.
+Keep the filters for public, non-fork repositories owned by the user and for eligible public candidates, as well as full snapshot validation. Do not carry `isViewer`, `userViewType`, or private fields into the public contract. Keep only the anonymous restricted-contribution counts that the person has made public.
 
-La corrección no modifica `ActivitySnapshot`, `ProfileDocument`, rutas, dependencias, caché ni generación del README. `GITHUB_TOKEN` sigue siendo exclusivo del servidor y exportar tarjetas requiere el origen HTTPS público configurado en `APP_URL`.
+This fix does not change `ActivitySnapshot`, `ProfileDocument`, routes, dependencies, caching, or README generation. `GITHUB_TOKEN` remains server-only, and exporting cards still requires the public HTTPS origin configured in `APP_URL`.
 
-## Alternativas consideradas
+## Alternatives considered
 
-- Mantener el rechazo de toda vista `PRIVATE`: conserva el bloqueo al consultar al propietario, sin distinguir el alcance de datos de la vista autenticada.
-- Aceptar cualquier vista `PRIVATE`: amplía la aceptación a casos que esta corrección no necesita y pierde la comprobación explícita de propietario.
-- Agregar `read:user` o `repo`: contradice la política pública y permite acceso a información que este producto no debe publicar.
-- Usar otro token o un proveedor externo: agrega configuración o dependencia para resolver un caso que el cliente actual puede validar.
+- Reject every `PRIVATE` view: keeps blocking queries for the token owner without distinguishing the scope of data from the authenticated view.
+- Accept any `PRIVATE` view: broadens acceptance beyond this fix and removes the explicit owner check.
+- Add `read:user` or `repo`: conflicts with the public-data policy and permits access to information this product must not publish.
+- Use another token or an external provider: adds configuration or a dependency to resolve a case the current client can validate.
 
-## Consecuencias y límites
+## Consequences and limits
 
-La misma credencial admitida sirve para consultar al propietario y a otras cuentas con vista pública. La garantía de datos públicos combina los scopes verificados, la semántica documentada de contribuciones y los filtros de cada elemento; no depende solo de `userViewType`.
+The same accepted credential can query the owner and other accounts with a public view. The public-data guarantee combines verified scopes, the documented semantics of contributions, and per-item filters; it does not rely on `userViewType` alone.
 
-Las respuestas incompletas, con otro usuario, `isViewer` inválido o una vista `PRIVATE` ajena fallan de forma cerrada. Los cambios de semántica de GitHub requerirán revisar esta política. La decisión no afirma una consulta autenticada, despliegue o pruebas ya ejecutadas; esa evidencia se registra en [desarrollo](../development.md).
+Incomplete responses, a different user, an invalid `isViewer`, or a `PRIVATE` view for another account fail closed. Changes to GitHub semantics will require reviewing this policy. This decision does not claim that an authenticated query, deployment, or tests have already been run; evidence is recorded in [development](../development.md).
 
-## Fuentes
+## Sources
 
-- [GitHub GraphQL: User, isViewer y UserViewType](https://docs.github.com/en/graphql/reference/users): identidad de la cuenta consultada y vista autenticada.
-- [GitHub GraphQL: ContributionsCollection](https://docs.github.com/en/graphql/reference/users#contributionscollection): alcance de contribuciones privadas/internas y recuentos restringidos compartidos.
-- [Scopes de GitHub](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/scopes-for-oauth-apps): alcance de permisos y encabezado de scopes.
+- [GitHub GraphQL: User, isViewer, and UserViewType](https://docs.github.com/en/graphql/reference/users): identity of the queried account and authenticated view.
+- [GitHub GraphQL: ContributionsCollection](https://docs.github.com/en/graphql/reference/users#contributionscollection): scope of private/internal contributions and shared restricted-contribution counts.
+- [GitHub scopes](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/scopes-for-oauth-apps): permission scopes and the scopes header.

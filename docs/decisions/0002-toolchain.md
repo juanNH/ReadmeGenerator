@@ -1,25 +1,25 @@
-# ADR 0002: Versiones reproducibles y compatibilidad del lint
+# ADR 0002: Reproducible versions and lint compatibility
 
-- Estado: aceptada con una limitación conocida.
-- Fecha: 2026-10-19.
+- Status: accepted with a known limitation.
+- Date: 2026-10-19.
 
-## Decisión
+## Decision
 
-Mantener Next.js 16.4.2 y React 19.3.1, versiones estables consultadas al iniciar la base. Usar Node.js 24.21.0 y pnpm 11.25.0, disponibles en el entorno del proyecto. Las dependencias directas se fijan a sus versiones instaladas; el lockfile fija las transitivas. CI instala con `--frozen-lockfile`.
+Keep Next.js 16.4.2 and React 19.3.1, stable versions checked when the foundation was started. Use Node.js 24.21.0 and pnpm 11.25.0, available in the project environment. Pin direct dependencies to their installed versions; the lockfile pins transitive dependencies. CI installs with `--frozen-lockfile`.
 
-La base usa ESLint 10.13.0 y ejecuta las reglas de Next.js, TypeScript y accesibilidad. ESLint 9, elegido originalmente por el scaffold, ya aparece deprecado en el registro. Se mantiene la versión 10 para conservar un núcleo mantenido.
+The foundation uses ESLint 10.13.0 and runs the Next.js, TypeScript, and accessibility rules. ESLint 9, originally selected by the scaffold, is now listed as deprecated in the registry. Keep version 10 to retain a maintained core.
 
-## Limitación de compatibilidad
+## Compatibility limitation
 
-Tres plugins transitivos de `eslint-config-next` todavía declaran rangos de peer hasta ESLint 9: `eslint-plugin-import` 2.32.0, `eslint-plugin-jsx-a11y` 6.10.2 y `eslint-plugin-react` 7.37.5. pnpm informa esa advertencia. No se ignora ni se altera su declaración mediante overrides.
+Three transitive plugins from `eslint-config-next` still declare peer ranges through ESLint 9: `eslint-plugin-import` 2.32.0, `eslint-plugin-jsx-a11y` 6.10.2, and `eslint-plugin-react` 7.37.5. pnpm reports this warning. Do not ignore it or alter their declarations with overrides.
 
-El lint del código entregado pasa, pero eso demuestra las reglas y entradas ejecutadas; no significa que los plugins anuncien soporte completo para ESLint 10. Ante una falla real de una regla, revisar el caso mínimo y la actualización oficial antes de desactivar controles. Revisar este punto al actualizar Next.js o esos plugins y registrar cuándo desaparece la advertencia.
+The delivered code passes lint, which demonstrates the rules and inputs that were run; it does not mean the plugins declare full support for ESLint 10. If a rule actually fails, review a minimal case and the official update before disabling checks. Revisit this point when updating Next.js or those plugins, and record when the warning disappears.
 
-## Controles
+## Checks
 
-- Mantener formato, tipos, contratos de traducción y pruebas de navegador independientes del lint.
-- Revisar actualizaciones agrupadas de Next/React/configuración mediante PR; Dependabot prepara esos cambios cuando el repositorio ejecute GitHub Actions.
-- Las acciones de CI están fijadas a commits verificados, con permisos de lectura. La configuración local no activa reglas de protección de ramas ni publica el proyecto.
-- Autorizar en pnpm solamente los scripts de compilación nativa usados por la cadena instalada; no habilitar todos los scripts de dependencias indiscriminadamente.
+- Keep formatting, types, translation contracts, and browser tests independent from lint.
+- Review grouped updates to Next/React/configuration through PRs; Dependabot prepares these changes when the repository runs GitHub Actions.
+- CI actions are pinned to verified commits and have read permissions. Local configuration does not enable branch protection rules or publish the project.
+- In pnpm, allow only the native build scripts used by the installed toolchain; do not indiscriminately enable all dependency scripts.
 
-La evidencia ejecutada se registra en [desarrollo](../development.md).
+Execution evidence is recorded in [development](../development.md).

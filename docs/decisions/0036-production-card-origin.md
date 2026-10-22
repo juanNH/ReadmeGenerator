@@ -1,26 +1,26 @@
-# ADR 0036: Origen estable de tarjetas en Vercel Production
+# ADR 0036: Stable Card Origin in Vercel Production
 
-## Estado
+## Status
 
-Aceptada el 20 de octubre de 2026. Amplía la resolución de configuración de [ADR 0010](0010-github-activity.md) y [ADR 0032](0032-vercel-hobby-anonymous-pat.md).
+Accepted on October 20, 2026. Extends configuration resolution from [ADR 0010](0010-github-activity.md) and [ADR 0032](0032-vercel-hobby-anonymous-pat.md).
 
-## Contexto
+## Context
 
-Las tarjetas del editor se dibujan con datos temporales del navegador. Que esa vista previa funcione no demuestra que exista una URL pública para las imágenes del README. La configuración anterior usaba únicamente `APP_URL`: en un despliegue público de Vercel sin esa variable, la vista previa podía funcionar y la exportación permanecía bloqueada.
+Editor cards are rendered with temporary browser data. A working preview does not prove that there is a public URL for README images. The previous configuration used only `APP_URL`: in a public Vercel deployment without that variable, the preview could work while export remained blocked.
 
-Vercel documenta `VERCEL_PROJECT_PRODUCTION_URL` como un dominio estable de producción, personalizado o `vercel.app`, sin esquema y disponible en compilación y ejecución. También lo entrega en Preview, por lo que la variable por sí sola no identifica el entorno actual. Fuente oficial revisada el 20 de octubre de 2026: [variables de sistema de Vercel](https://vercel.com/docs/environment-variables/system-environment-variables).
+Vercel documents `VERCEL_PROJECT_PRODUCTION_URL` as a stable production domain, custom or `vercel.app`, without a scheme and available at build and runtime. It also provides it in Preview, so the variable alone does not identify the current environment. Official source reviewed on October 20, 2026: [Vercel system environment variables](https://vercel.com/docs/environment-variables/system-environment-variables).
 
-## Decisión
+## Decision
 
-- Conservar `APP_URL` explícito como primera opción para todos los entornos. Un valor no vacío pero inválido bloquea el origen; no se oculta el problema con otra dirección.
-- Solo cuando `APP_URL` falta o está vacío y `VERCEL_ENV` es exactamente `production`, anteponer `https://` al dominio puro de `VERCEL_PROJECT_PRODUCTION_URL` y validar mediante la política existente `normalizeActivityBaseUrl`.
-- No usar `Host`, datos de la petición, `VERCEL_URL`, `VERCEL_BRANCH_URL`, `NODE_ENV` ni dominios de despliegues temporales como fallback. Preview y local conservan configuración explícita.
-- Resolver en el servidor durante la solicitud del editor. Al navegador llega únicamente el origen público validado; secretos y variables de infraestructura siguen en el servidor.
-- Conservar una única salida Markdown y `activity_not_configured` cuando falte origen válido. No exportar rutas locales ni Blob URLs. La UI explica que dibujar la vista previa y alojar tarjetas para GitHub requieren recursos distintos.
-- Mantener aportes manuales y proyectos JSON independientes de ese requisito. Excluir tarjetas conserva sus opciones y permite exportar el texto manual.
+- Keep explicit `APP_URL` as the first option in all environments. A non-empty but invalid value blocks the origin; do not hide the problem with another address.
+- Only when `APP_URL` is missing or empty and `VERCEL_ENV` is exactly `production`, prepend `https://` to the bare domain in `VERCEL_PROJECT_PRODUCTION_URL` and validate it with the existing `normalizeActivityBaseUrl` policy.
+- Do not use `Host`, request data, `VERCEL_URL`, `VERCEL_BRANCH_URL`, `NODE_ENV`, or temporary deployment domains as fallbacks. Preview and local environments keep explicit configuration.
+- Resolve on the server during the editor request. Only the validated public origin reaches the browser; secrets and infrastructure variables remain on the server.
+- Keep a single Markdown output and `activity_not_configured` when no valid origin is available. Do not export local paths or Blob URLs. The UI explains that rendering the preview and hosting cards for GitHub require different resources.
+- Keep manual contributions and project JSON independent of this requirement. Excluding cards preserves their options and allows manual text to be exported.
 
-## Alternativas y consecuencias
+## Alternatives and Consequences
 
-Exigir siempre `APP_URL` es portable y continúa disponible, pero provoca una configuración duplicada en Production cuando Vercel ya conoce el dominio estable. Usar el dominio efímero o inferir desde la petición puede producir enlaces temporales, protegidos o controlados por el visitante. Quitar el bloqueo exportaría imágenes que GitHub no puede resolver.
+Always requiring `APP_URL` is portable and remains available, but duplicates configuration in Production when Vercel already knows the stable domain. Using an ephemeral domain or inferring one from the request can produce temporary links, protected links, or links controlled by a visitor. Removing the export block would produce images GitHub cannot resolve.
 
-La resolución no consulta la red y no prueba DNS, disponibilidad, acceso anónimo, Camo ni credenciales. El operador debe habilitar las variables de sistema de Vercel, conservar públicas las rutas `/cards/...` y comprobarlas según la [guía de despliegue](../vercel-deployment.md). Un dominio personalizado o un cambio de dominio seleccionado por Vercel puede requerir fijar `APP_URL` para controlar qué origen se exporta. Los README ya descargados conservan sus URLs.
+Resolution does not query the network and does not test DNS, availability, anonymous access, Camo, or credentials. The operator must enable Vercel system variables, keep `/cards/...` routes public, and verify them according to the [deployment guide](../vercel-deployment.md). A custom domain or a change to Vercel's selected domain may require setting `APP_URL` to control the exported origin. Already downloaded READMEs retain their URLs.

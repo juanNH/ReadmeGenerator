@@ -1,34 +1,34 @@
-# ADR 0035: Tecnologías compactas con etiquetas de catálogo
+# ADR 0035: Compact Technologies with Catalog Tags
 
-- Estado: aceptada.
-- Fecha: 2026-10-20.
+- Status: Accepted.
+- Date: 2026-10-20.
 
-## Contexto
+## Context
 
-Los encabezados de cada categoría y las filas separadas de herramientas ocupaban una parte extensa del README. La referencia visual solicitada usa etiquetas cortas que se ajustan al ancho. El formato de GitHub no admite CSS libre y un servicio de badges externo agregaría una dependencia de red y disponibilidad.
+Category headings and separate tool rows took up a large portion of the README. The requested visual reference uses short tags that wrap to fit the available width. GitHub's format does not support arbitrary CSS, and an external badge service would add a network dependency and availability requirement.
 
-## Decisión
+## Decision
 
-Agregar `data.technologies.layout?: "compact" | "grouped"` exclusivamente a v2. Su ausencia mantiene exactamente la salida previa con encabezados de categorías. El parser y la migración de v1 no agregan valores por defecto; v1 mantiene su esquema cerrado e independiente. La fábrica de un perfil nuevo v2 selecciona `compact` explícitamente. Abrir un JSON o recuperar un borrador conserva su opción o su ausencia.
+Add `data.technologies.layout?: "compact" | "grouped"` exclusively to v2. Its absence preserves the previous output exactly, with category headings. The parser and v1 migration do not add defaults; v1 retains its closed, independent schema. The factory for a new v2 profile explicitly selects `compact`. Opening JSON or recovering a draft preserves the selected option or its absence.
 
-El selector «Diseño en el README» ofrece etiquetas compactas y títulos por categoría. Cambiarlo afecta el mismo Markdown de vista previa, copia y descarga. No reagrupa, renombra ni elimina categorías, ítems, identidades o notas. Todas las ediciones del formulario y operaciones de organización conservan la opción elegida.
+The “README layout” selector offers compact tags and category headings. Changing it updates the same Markdown used by preview, copy, and download. It does not regroup, rename, or remove categories, items, identities, or notes. All form edits and organization operations preserve the selected option.
 
-El modo compacto presenta el nombre de categoría en negrita en la misma fila que las herramientas, con ajuste al ancho. Cada nombre se envuelve en `kbd` y lleva el icono decorativo de 20 × 20 ya fijado en el catálogo cuando existe. Los nombres propios siguen siendo texto sin una marca inferida. Las notas conservan su orden y párrafos; no se ocultan para reducir la altura. Los grupos sin contenido útil se omiten.
+Compact mode displays the category name in bold on the same row as its tools, wrapping to fit the width. Each name is wrapped in `kbd` and, when available, includes the catalog's pinned 20 × 20 decorative icon. Custom names remain text without an inferred brand. Notes keep their order and paragraphs; they are not hidden to reduce height. Groups with no useful content are omitted.
 
-El HTML se construye con nodos de texto HAST, se filtra con `renderProfileHtml` y comparte sus límites y presupuesto con el resto del documento. Los rangos UTF-16 exactos y árboles permitidos se entregan en `customHtml`, sin ampliar `customImages`, habilitar HTML global ni persistir metadatos. Los errores `invalid_html` señalan el grupo afectado; la UI ofrece corregirlo o volver a títulos por categoría. Las tecnologías ocultas no consumen presupuesto.
+HTML is built from HAST text nodes, filtered with `renderProfileHtml`, and shares its limits and budget with the rest of the document. Exact UTF-16 ranges and allowed trees are provided through `customHtml`, without expanding `customImages`, enabling global HTML, or persisting metadata. `invalid_html` errors identify the affected group; the UI offers to fix it or return to category headings. Hidden technologies do not use the budget.
 
-La vista previa reconoce exclusivamente las URLs exactas del catálogo, alternativa vacía y dimensiones 20 × 20 para usar los SVG locales. Conserva el resto de la política de imágenes y HTML. No solicita badges a terceros, crea un endpoint ni requiere `APP_URL`. Los colores provienen de los iconos existentes. El fondo y aspecto de `kbd` dependen del tema y estilos de GitHub; no se promete reproducir fondos sólidos ni píxeles de la referencia.
+The preview recognizes only exact catalog URLs, an empty alternative text value, and 20 × 20 dimensions in order to use local SVGs. The rest of the image and HTML policy remains in place. No third-party badges are requested, no endpoint is created, and `APP_URL` is not required. Colors come from existing icons. The `kbd` background and appearance depend on the theme and GitHub styles; matching solid backgrounds or the reference pixel-for-pixel is not promised.
 
-## Alternativas consideradas
+## Alternatives Considered
 
-- Cambiar todos los borradores a compacto durante la recuperación: alteraría una elección guardada implícita. Se conserva la salida previa cuando falta el campo.
-- Eliminar categorías o notas de la salida: reduce espacio a costa del contenido de la persona. Se mantienen en el orden original.
-- Shields u otro servicio externo: agrega otro host, formato de recursos y dependencia de disponibilidad. Se reutilizan recursos ya atribuidos.
-- SVG con fondo propio: necesita publicar un archivo o endpoint público por badge. La composición con etiquetas evita introducir ese alojamiento.
-- CSS y SVG inline en el README: GitHub puede filtrarlos y ampliarían la frontera de HTML. Se mantiene el esquema vigente.
+- Change all drafts to compact during recovery: would alter an implicit saved choice. Preserve the previous output when the field is absent.
+- Remove categories or notes from output: saves space at the cost of a person's content. Keep their original order.
+- Use Shields or another external service: adds another host, resource format, and availability dependency. Reuse resources that already have attribution.
+- Use SVGs with their own background: requires publishing a file or public endpoint for each badge. Tag composition avoids adding hosting.
+- Use CSS and inline SVG in the README: GitHub may filter them and this would broaden the HTML boundary. Keep the current schema.
 
-## Consecuencias
+## Consequences
 
-Los perfiles nuevos empiezan con una presentación más corta y los existentes pueden elegirla explícitamente. El JSON conserva la opción y toda la estructura original. Un lector v2 anterior estricto puede rechazar `layout` y debe conservar el documento sin sobrescribirlo. Una categoría excepcionalmente grande puede exceder los límites HTML; la alternativa de títulos mantiene el contenido en Markdown. La vista previa local es aproximada y los lectores de GitHub reciben texto visible junto a iconos decorativos.
+New profiles start with a more compact presentation, and existing profiles can select it explicitly. JSON retains the option and all original structure. An older strict v2 reader may reject `layout` and must preserve the document without overwriting it. An exceptionally large category can exceed HTML limits; category headings keep its content in Markdown. The local preview is approximate, and GitHub readers receive visible text beside decorative icons.
 
-Ver [modelo](../profile-model.md), [editor](../editor.md), [ADR 0012](0012-technology-categories.md), [ADR 0015](0015-explicit-profile-html.md) y [ADR 0021](0021-project-files-and-recovery.md).
+See [Profile Model](../profile-model.md), [Editor](../editor.md), [ADR 0012](0012-technology-categories.md), [ADR 0015](0015-explicit-profile-html.md), and [ADR 0021](0021-project-files-and-recovery.md).

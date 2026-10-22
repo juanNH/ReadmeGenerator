@@ -1,30 +1,30 @@
-# ADR 0012: Categorías editables e iconos con nombre
+# ADR 0012: Editable categories and named icons
 
-- Estado: aceptada.
-- Fecha: 2026-10-19.
+- Status: accepted.
+- Date: 2026-10-19.
 
-## Contexto
+## Context
 
-Una fila de iconos sin nombres dificulta reconocer herramientas y el orden de selección mezcla ámbitos. El perfil debe seguir siendo breve: no requiere explicar cada tecnología ni completar una estructura de CV. Los borradores v1 ya conservan grupos, nombres y contextos propios.
+A row of unnamed icons makes tools harder to recognize, and the selection order mixes areas. The profile should remain brief: it should not require an explanation for each technology or a résumé-like structure. Existing v1 drafts already retain groups, names, and custom contexts.
 
-## Decisión
+## Decision
 
-Ampliar el catálogo local de 259 a 358 herramientas con fuentes de iconos ya fijadas y sin nuevas dependencias. Incluir frameworks, ORMs, autenticación, datos, infraestructura, calidad e IA. Esta selección es editorial, no un ranking de uso. La procedencia y las marcas compartidas están en [recursos de terceros](../../THIRD_PARTY_NOTICES.md).
+Expand the local catalog from 259 to 358 tools using already-pinned icon sources and no new dependencies. Include frameworks, ORMs, authentication, data, infrastructure, quality, and AI. This selection is editorial, not a usage ranking. Provenance and shared brand marks are listed in [third-party resources](../../THIRD_PARTY_NOTICES.md).
 
-Usar nueve categorías sugeridas: lenguajes, frontend, backend, móvil y escritorio, datos y mensajería, cloud y DevOps, testing y calidad, IA y automatización, herramientas y diseño. La clasificación resuelve nombres y alias desde core; no se guarda como otro contrato. Al agregar se puede elegir categoría sugerida, existente o ninguna. Crear, renombrar, ordenar, mover herramientas y editar notas son acciones secundarias. Quitar categoría borra solo su título. La edición de título usa un borrador efímero y se aplica al salir o pulsar Enter, para permitir renombrar una categoría vacía sin desmontar el campo enfocado.
+Use nine suggested categories: languages, frontend, backend, mobile and desktop, data and messaging, cloud and DevOps, testing and quality, AI and automation, and tools and design. Core resolves names and aliases; classification is not saved as another contract. When adding, a person can choose a suggested category, an existing category, or none. Creating, renaming, ordering, moving tools, and editing notes are secondary actions. Removing a category deletes only its title. Title editing uses an ephemeral draft and applies on blur or Enter, allowing an empty category to be renamed without unmounting the focused field.
 
-Conservar `ProfileDocument` v1. No reorganizar al recuperar, cambiar idioma o generar el README. Los títulos son contenido personal; las sugerencias usan el idioma de interfaz al crearse. «Organizar por categoría» es explícito, explica el reemplazo de títulos y confirma si ya hay títulos. Conserva herramientas, contextos y duplicados recuperados. Las operaciones son puras e inmutables, reciben una función para nuevos IDs y resuelven colisiones de IDs locales al combinar colecciones. Los grupos internos vacíos sin nombre se ocultan sin borrar datos y no interfieren con el orden visible.
+Retain `ProfileDocument` v1. Do not reorganize on recovery, language changes, or README generation. Titles are personal content; suggestions use the interface language when created. “Organize by category” is explicit, explains that titles will be replaced, and confirms when titles already exist. It preserves recovered tools, contexts, and duplicates. Operations are pure and immutable, receive a function for new IDs, and resolve local ID collisions when collections are combined. Unnamed empty internal groups are hidden without deleting data and do not affect visible order.
 
-Exportar cada herramienta reconocida con icono decorativo de 20 × 20 y nombre visible escapado. Las herramientas propias siguen como texto y las notas mantienen su contenido. La vista previa reconoce únicamente tokens exactos del catálogo y conserva compatibilidad con los tokens anteriores de 32 × 32. No se habilita HTML libre ni imágenes arbitrarias.
+Export each recognized tool with a decorative 20 × 20 icon and escaped visible name. Custom tools remain text, and notes retain their content. The preview recognizes only exact catalog tokens and remains compatible with earlier 32 × 32 tokens. Free-form HTML and arbitrary images are not enabled.
 
-## Alternativas y consecuencias
+## Alternatives and consequences
 
-- Solo iconos: compacto, pero exige reconocer cada marca; se añade el nombre para legibilidad y accesibilidad.
-- Reagrupar siempre: orden uniforme, pero sobrescribe decisiones personales; se usan sugerencias y organización explícita.
-- Añadir un nuevo esquema de categorías: permitiría registrar su origen, pero duplicaría el contrato existente; se reutilizan los grupos v1 sin migración.
-- No todos los productos tienen un icono disponible en las fuentes fijadas. Se admite texto propio y se documentan las marcas de familia compartidas.
-- Los iconos del editor son locales; los exportados dependen de la disponibilidad de las URLs fijadas. La aplicación no integra las herramientas elegidas.
+- Icons only: compact, but each brand must be recognized; names are added for readability and accessibility.
+- Always regroup: consistent order, but overwrites personal choices; suggestions and explicit organization are used instead.
+- Add a new category schema: would let the source be recorded, but would duplicate the existing contract; v1 groups are reused without migration.
+- Not every product has an icon available in the pinned sources. Custom text is allowed, and shared family marks are documented.
+- Editor icons are local; exported icons depend on availability of the pinned URLs. The application does not integrate the selected tools.
 
-## Fuentes de selección
+## Selection sources
 
-La ampliación se contrastó con documentación oficial: [Drizzle](https://orm.drizzle.team/docs/overview), [TypeORM](https://typeorm.io/docs/getting-started/), [Knex](https://knexjs.org/), [TanStack](https://tanstack.com/), [Hono](https://hono.dev/), [Pydantic](https://docs.pydantic.dev/latest/), [Qdrant](https://qdrant.tech/documentation/), [Temporal](https://docs.temporal.io/), [OpenRouter](https://openrouter.ai/docs/quickstart), [Firecrawl](https://docs.firecrawl.dev/) y [vLLM](https://docs.vllm.ai/en/latest/). Las referencias establecen la función de cada herramienta; no acreditan su popularidad.
+The expansion was checked against official documentation: [Drizzle](https://orm.drizzle.team/docs/overview), [TypeORM](https://typeorm.io/docs/getting-started/), [Knex](https://knexjs.org/), [TanStack](https://tanstack.com/), [Hono](https://hono.dev/), [Pydantic](https://docs.pydantic.dev/latest/), [Qdrant](https://qdrant.tech/documentation/), [Temporal](https://docs.temporal.io/), [OpenRouter](https://openrouter.ai/docs/quickstart), [Firecrawl](https://docs.firecrawl.dev/), and [vLLM](https://docs.vllm.ai/en/latest/). These references establish each tool's purpose; they do not establish its popularity.

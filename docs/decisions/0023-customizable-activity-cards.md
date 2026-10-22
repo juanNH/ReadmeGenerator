@@ -1,70 +1,70 @@
-# ADR 0023: Tarjetas de actividad personalizables y adaptaciones de GitHub Stats Extended
+# ADR 0023: Customizable activity cards and GitHub Stats Extended adaptations
 
-- Estado: aceptada para la implementación.
-- Fecha: 2026-10-20.
-- Producto: GitHub Profile Generator.
+- Status: accepted for implementation.
+- Date: 2026-10-20.
+- Product: GitHub Profile Generator.
 
-## Contexto
+## Context
 
-La integración de [ADR 0010](0010-github-activity.md) ofrece calendario, resumen y lenguajes mediante SVG propios. Se necesitan más composiciones y opciones visuales, además de incorporar diseños de GitHub Stats Extended, conservando las consultas públicas, el token exclusivo del servidor y la exportación desde el origen configurado.
+The integration in [ADR 0010](0010-github-activity.md) provides a calendar, summary, and languages through custom SVGs. Additional compositions and visual options are needed, along with designs adapted from GitHub Stats Extended, while retaining public queries, the server-only token, and export from the configured origin.
 
-GitHub Stats Extended publica su código bajo MIT. Esa licencia permite usar, modificar y distribuir el código, también comercialmente, conservando los avisos de copyright y permiso. No equivale a una garantía de disponibilidad de su servicio alojado ni de que todas sus opciones cumplan la política pública de esta aplicación.
+GitHub Stats Extended publishes its code under the MIT license. That license permits using, modifying, and distributing the code, including commercially, while preserving the copyright and permission notices. It does not guarantee the availability of its hosted service or that all of its options comply with this application’s public-data policy.
 
-## Decisión
+## Decision
 
-### Siete tarjetas con una sola fuente de datos
+### Seven cards with a single source of data
 
-Conservar `calendar`, `summary` y `languages` e incorporar cuatro selecciones independientes:
+Keep `calendar`, `summary`, and `languages`, and add four independent selections:
 
-| ID                   | Contenido                                                                                                                                              |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `panorama`           | Calendario, resumen del período y lenguajes de los repositorios analizados, con sus alcances diferenciados.                                            |
-| `monthly`            | Sumas de las contribuciones diarias del calendario agrupadas por mes UTC, identificando los meses parciales.                                           |
-| `extended-stats`     | Adaptación local del diseño de estadísticas de GitHub Stats Extended para commits, PR, issues y revisiones del período disponible.                     |
-| `extended-languages` | Adaptación local de su diseño de lenguajes, con porcentajes calculados sobre todos los bytes de la muestra y agrupación de los restantes como «Otros». |
+| ID                   | Content                                                                                                                                    |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `panorama`           | Calendar, period summary, and languages from the analyzed repositories, with their scopes distinguished.                                   |
+| `monthly`            | Sums of the calendar’s daily contributions grouped by UTC month, with partial months identified.                                           |
+| `extended-stats`     | Local adaptation of GitHub Stats Extended’s statistics design for commits, PRs, issues, and reviews in the available period.               |
+| `extended-languages` | Local adaptation of its language design, with percentages calculated across all bytes in the sample and the remainder grouped as “Others.” |
 
-Las siete usan el mismo `ActivitySnapshot` público ya validado. No se agregan consultas, scopes, dependencias de paquetes ni credenciales. El diseño Extended no habilita su suite completa de métricas: no incluye puntuaciones, rankings, niveles de habilidad ni valores que el snapshot actual no provee. Los porcentajes de lenguajes no incorporan tamaños mínimos visuales que alteren su proporción real. Lenguajes sigue describiendo la muestra de código actual y no el período del calendario.
+All seven use the same validated public `ActivitySnapshot`. No queries, scopes, package dependencies, or credentials are added. The Extended design does not enable its full metrics suite: it includes no scores, rankings, skill levels, or values that the current snapshot does not provide. Language percentages do not use minimum visual sizes that would distort their actual proportions. Languages still describes the current code sample, not the calendar period.
 
-Los aportes con contexto conservan el recorrido existente: título, descripción y enlace manuales, o una sugerencia elegida explícitamente y luego editable. No se publica el borrador en una tarjeta dinámica ni se añaden textos personales a una URL; no se incorpora almacenamiento remoto.
+Contributions with context keep the existing flow: a manually entered title, description, and link, or an explicitly selected and then editable suggestion. The draft is not published in a dynamic card, personal text is not added to a URL, and no remote storage is introduced.
 
-### Apariencia opcional y acotada en v2
+### Optional, bounded appearance in v2
 
-`data.metrics` conserva `username` y `cards` y admite `appearance?`, un objeto estricto de propiedades opcionales:
+`data.metrics` retains `username` and `cards` and accepts `appearance?`, a strict object with optional properties:
 
-- `theme`: `light` o `dark`.
-- `palette`: `forest`, `ocean` o `violet`.
-- `design`: `classic`, `panels` o `minimal`.
-- `size`: `compact` o `wide`.
+- `theme`: `light` or `dark`.
+- `palette`: `forest`, `ocean`, or `violet`.
+- `design`: `classic`, `panels`, or `minimal`.
+- `size`: `compact` or `wide`.
 
-Ausencia conserva la salida anterior de las tres tarjetas originales. Recuperar o migrar no agrega defaults; el esquema v1 conserva exactamente sus tres IDs y no admite `appearance`. Es una ampliación aditiva de v2, sin cambiar versión o clave: un lector antiguo estricto puede rechazar la configuración nueva y debe conservar el valor incompatible.
+When absent, the original three cards retain their previous output. Recovery or migration does not add defaults; the v1 schema keeps exactly its three IDs and does not accept `appearance`. This is an additive v2 extension that does not change the version or key: an older strict reader may reject the new configuration and must preserve the incompatible value.
 
-El formulario mantiene todas las tarjetas desactivadas inicialmente, la consulta explícita y el bloque plegable. Ofrece tres muestras locales decorativas de diseño y controles de apariencia. Restablecer apariencia elimina únicamente esa configuración opcional y conserva usuario, tarjetas y aportes. Las muestras no solicitan GitHub ni se guardan como datos reales.
+The form keeps all cards disabled by default, requires an explicit query, and keeps the section collapsible. It offers three local decorative design samples and appearance controls. Resetting the appearance removes only that optional configuration and preserves the username, cards, and contributions. Samples do not query GitHub and are not saved as real data.
 
-### SVG locales y rutas verificadas
+### Local SVGs and verified routes
 
-Los renderers puros viven en `src/core/activity`. Las adaptaciones Extended se implementan en `render-extended-card.ts` a partir de `stats.ts` y `top-languages.ts` de `packages/core/src/cards`, fijados al commit `0506c4c0e0acab7be096be48d0d59d50852d811f`. Se conserva la licencia íntegra y el copyright de Anurag Hazra, Abhijit Gupta y martin-mfg en `public/licenses/github-stats-extended.txt`, con procedencia en [recursos de terceros](../../THIRD_PARTY_NOTICES.md).
+Pure renderers live in `src/core/activity`. Extended adaptations are implemented in `render-extended-card.ts` from `stats.ts` and `top-languages.ts` in `packages/core/src/cards`, pinned to commit `0506c4c0e0acab7be096be48d0d59d50852d811f`. The full license and copyright of Anurag Hazra, Abhijit Gupta, and martin-mfg are preserved in `public/licenses/github-stats-extended.txt`, with provenance in [third-party notices](../../THIRD_PARTY_NOTICES.md).
 
-La aplicación aloja todos los SVG mediante `/cards/github/{username}/{card}.svg`. La query admite únicamente idioma y los presets de apariencia enumerados, sin duplicados, CSS, colores arbitrarios, URLs o parámetros libres. El generador y la vista previa comparten la construcción y validación exactas de esas rutas; la vista previa resuelve localmente el mismo Markdown. Los SVG siguen siendo pasivos, escapados y sin recursos externos.
+The application serves every SVG at `/cards/github/{username}/{card}.svg`. The query accepts only a language and the listed appearance presets, without duplicates, CSS, arbitrary colors, URLs, or free-form parameters. The generator and preview share the exact route construction and validation; the preview resolves the same Markdown locally. SVGs remain passive, escaped, and free of external resources.
 
-`APP_URL` mantiene el requisito de origen HTTPS público para exportar tarjetas. Sin él se permite la revisión local y se devuelve `activity_not_configured`; copia y descarga siguen bloqueadas mientras haya tarjetas seleccionadas. No se invoca el servicio alojado de GitHub Stats Extended ni se envía el token o el borrador a otro proveedor.
+`APP_URL` remains a public HTTPS origin required to export cards. Without it, local review is allowed and `activity_not_configured` is returned; copy and download remain blocked while cards are selected. The hosted GitHub Stats Extended service is not called, and neither the token nor the draft is sent to another provider.
 
-## Alternativas consideradas
+## Alternatives considered
 
-- Usar imágenes del servicio alojado de Extended: reduce la adaptación local, pero introduce disponibilidad externa y una política de consultas que esta aplicación no controla.
-- Instalar o desplegar su backend completo: añade operación y capacidades que no necesita el contrato público actual.
-- Admitir CSS, colores o URLs libres: amplía la superficie de validación y dificulta conservar rutas y SVG cerrados. Los presets cubren las opciones visuales acordadas.
-- Publicar aportes del borrador en tarjetas dinámicas: exige definir persistencia, publicación y retirada de datos personales; el README manual ya permite dar contexto a los aportes.
-- Sustituir las tres tarjetas anteriores: cambia borradores existentes sin una elección explícita. Las nuevas selecciones son aditivas.
+- Use images from Extended’s hosted service: reduces local adaptation but introduces an external availability dependency and a query policy this application does not control.
+- Install or deploy its full backend: adds operations and capabilities the current public contract does not need.
+- Allow arbitrary CSS, colors, or URLs: expands the validation surface and makes it harder to keep routes and SVGs closed. Presets cover the agreed visual options.
+- Publish draft contributions in dynamic cards: requires decisions about persisting, publishing, and removing personal data; the manual README already allows adding context to contributions.
+- Replace the three existing cards: changes existing drafts without an explicit choice. The new selections are additive.
 
-## Consecuencias y límites
+## Consequences and limits
 
-La personalización y las nuevas tarjetas se guardan con el perfil completo y viajan en los archivos de Proyecto. Los snapshots siguen siendo efímeros. Todos los diseños comparten los límites de muestra, período, caché y datos públicos del cliente existente; una composición nueva no aumenta la cobertura de GitHub.
+Customization and new cards are saved with the complete profile and travel in Project files. Snapshots remain ephemeral. All designs share the existing client’s sample, period, cache, and public-data limits; a new composition does not increase GitHub data coverage.
 
-La integración conserva las obligaciones de atribución MIT y registra el origen fijado del código adaptado. No garantiza exclusividad de los diseños propios ni paridad completa con el servicio Extended. La evidencia de las verificaciones ejecutadas se registra en [desarrollo](../development.md).
+The integration retains MIT attribution obligations and records the pinned source of adapted code. It does not guarantee exclusivity of the original designs or full parity with the Extended service. Evidence for checks actually run is recorded in [development](../development.md).
 
-## Fuentes
+## Sources
 
-- [GitHub Stats Extended, revisión fijada](https://github.com/stats-organization/github-stats-extended/tree/0506c4c0e0acab7be096be48d0d59d50852d811f).
-- [Tarjeta de estadísticas de origen](https://github.com/stats-organization/github-stats-extended/blob/0506c4c0e0acab7be096be48d0d59d50852d811f/packages/core/src/cards/stats.ts).
-- [Tarjeta de lenguajes de origen](https://github.com/stats-organization/github-stats-extended/blob/0506c4c0e0acab7be096be48d0d59d50852d811f/packages/core/src/cards/top-languages.ts).
-- [Licencia MIT de origen](https://github.com/stats-organization/github-stats-extended/blob/0506c4c0e0acab7be096be48d0d59d50852d811f/LICENSE).
+- [GitHub Stats Extended, pinned revision](https://github.com/stats-organization/github-stats-extended/tree/0506c4c0e0acab7be096be48d0d59d50852d811f).
+- [Source statistics card](https://github.com/stats-organization/github-stats-extended/blob/0506c4c0e0acab7be096be48d0d59d50852d811f/packages/core/src/cards/stats.ts).
+- [Source languages card](https://github.com/stats-organization/github-stats-extended/blob/0506c4c0e0acab7be096be48d0d59d50852d811f/packages/core/src/cards/top-languages.ts).
+- [Source MIT license](https://github.com/stats-organization/github-stats-extended/blob/0506c4c0e0acab7be096be48d0d59d50852d811f/LICENSE).

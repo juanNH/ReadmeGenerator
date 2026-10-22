@@ -1,32 +1,32 @@
-# ADR 0033: Títulos enlazados y portada opcional de proyectos
+# ADR 0033: Linked Titles and Optional Project Covers
 
-- Estado: aceptada.
-- Fecha: 2026-10-20.
-- Evolución: ADR 0037 actualiza la composición del formulario y el orden de salida; el título enlazado y el contrato de portada siguen vigentes.
+- Status: Accepted.
+- Date: 2026-10-20.
+- Evolution: ADR 0037 updates the form composition and output order; linked titles and the cover contract remain in effect.
 
-## Contexto
+## Context
 
-La lista de proyectos repetía el nombre y su enlace, y separaba participación y tecnologías en párrafos extensos. Una imagen opcional permite mostrar una app sin pedir un repositorio ni convertir la sección en un CV. La salida debe funcionar como README de GitHub y conservar la política vigente de imágenes y HTML.
+The project list repeated each name and its link, and separated contributions and technologies into long paragraphs. An optional image makes it possible to show an app without requiring a repository or turning the section into a résumé. Output must work as a GitHub README and preserve the current image and HTML policy.
 
-## Decisión
+## Decision
 
-Cada proyecto con nombre genera un encabezado de nivel tres. El primer enlace útil y válido se utiliza como destino del título y se omite de los enlaces adicionales de salida. La etiqueta original se conserva en el documento. Sin nombre, todos los enlaces se muestran con sus etiquetas. El formulario identifica el enlace principal y permite elegir otro reordenando la colección; no agrega una selección persistida paralela. Se validan todos los enlaces y se conservan los errores con sus índices originales.
+Each project with a name generates a level-three heading. The first useful, valid link is used as the title destination and omitted from the additional output links. Its original label remains in the document. Without a name, all links are shown with their labels. The form identifies the primary link and lets the user choose another by reordering the collection; it does not add a separate persisted selection. All links are validated, and errors retain their original indices.
 
-Se agrega `cover?: { url: string; alt: string }` a las entradas de proyectos v2. Es opcional y no se inserta al recuperar documentos anteriores. El esquema de proyectos v1 sigue cerrado e independiente. Una portada vacía se omite; una URL elegida requiere descripción alternativa no vacía. Se reutiliza la normalización de imágenes HTTPS públicas, sin subir archivos, resolver DNS, obtener metadatos, verificar disponibilidad ni incorporar dependencias.
+Add `cover?: { url: string; alt: string }` to v2 project entries. It is optional and is not inserted when recovering older documents. The v1 project schema remains closed and independent. An empty cover is omitted; a selected URL requires non-empty alternative text. Reuse normalization for public HTTPS images without uploading files, resolving DNS, fetching metadata, checking availability, or adding dependencies.
 
-La portada deriva una unidad HTML con un `img` de ancho 480, construida mediante HAST y validada con la política y presupuesto compartido de `renderProfileHtml`. Solo esa unidad se autoriza con rangos UTF-16 exactos en `customHtml`. `customImages` sigue reservado a los bloques personalizados `image`. La vista previa recorre el árbol permitido existente y usa `PublicProfileImage` con carga diferida, decodificación asíncrona y sin referrer. No hay HTML arbitrario, proxy ni una salida alternativa de README. La fuente original de URL y alternativa se conserva en JSON; normalizar afecta únicamente la salida. Los proyectos ocultos no consumen presupuesto ni generan errores de exportación.
+The cover derives an HTML unit with a 480-wide `img`, built with HAST and validated through the policy and shared budget of `renderProfileHtml`. Only that unit is authorized through exact UTF-16 ranges in `customHtml`. `customImages` remains reserved for custom `image` blocks. The preview traverses the existing allowed tree and uses `PublicProfileImage` with lazy loading, asynchronous decoding, and no referrer. There is no arbitrary HTML, proxy, or alternate README output. The original URL and alternative text are retained in JSON; normalization affects output only. Hidden projects do not use the budget or produce export errors.
 
-Descripción, participación, tecnologías y enlaces adicionales siguen siendo opcionales; participación y tecnologías comparten un párrafo compacto. El editor ofrece una composición con título, mini portada y texto, pero la apariencia final depende de GitHub. No se promete una tarjeta con CSS, bordes o diseño idéntico al editor.
+Description, contributions, technologies, and additional links remain optional; contributions and technologies share a compact paragraph. The editor offers a composition with a title, cover thumbnail, and text, but the final appearance depends on GitHub. It does not promise a CSS card, borders, or a layout identical to the editor.
 
-## Alternativas consideradas
+## Alternatives Considered
 
-- Agregar un destino principal persistido: introduce otra referencia que puede quedar obsoleta al eliminar enlaces. Reordenarlos conserva el contrato previo y hace visible la elección.
-- Reutilizar `customImages` para la portada: ampliaría su significado y autorizaría imágenes sin los límites y rangos de la unidad derivada. Se reutiliza el recorrido HTML ya validado.
-- Obtener capturas u OpenGraph de forma automática: requiere red, extracción de sitios y otra frontera de privacidad; se usa una imagen pública explícita.
-- Crear una grilla con tablas y estilos: complica móvil y depende de estilos que GitHub filtra. Se mantiene un orden de lectura lineal con imagen acotada.
+- Persist a primary destination: adds another reference that can become stale when links are removed. Reordering preserves the prior contract and makes the choice visible.
+- Reuse `customImages` for the cover: would broaden its meaning and authorize images without the derived unit's limits and ranges. Reuse the already validated HTML path instead.
+- Fetch screenshots or Open Graph data automatically: requires network access, site extraction, and another privacy boundary; use an explicit public image.
+- Create a grid with tables and styles: complicates mobile layout and depends on styles GitHub filters. Keep a linear reading order with a bounded image.
 
-## Consecuencias
+## Consequences
 
-El archivo JSON conserva la portada completa, incluso incompleta o inválida para publicar. Los lectores v2 antiguos estrictos pueden rechazar este campo y deben conservar el archivo original. El Markdown exportado omite etiquetas del enlace principal aunque permanecen editables en el proyecto. Un fallo de carga de imagen es efímero y no invalida una URL admitida.
+The JSON file retains the full cover, including incomplete or invalid-for-publishing data. Older strict v2 readers may reject this field and must preserve the original file. Exported Markdown omits the primary link's label even though it remains editable in the project. An image load failure is temporary and does not invalidate an accepted URL.
 
-Ver [modelo del perfil](../profile-model.md), [editor](../editor.md), [ADR 0014](0014-custom-visual-blocks.md), [ADR 0015](0015-explicit-profile-html.md) y [ADR 0021](0021-project-files-and-recovery.md).
+See [Profile Model](../profile-model.md), [Editor](../editor.md), [ADR 0014](0014-custom-visual-blocks.md), [ADR 0015](0015-explicit-profile-html.md), and [ADR 0021](0021-project-files-and-recovery.md).

@@ -1,41 +1,41 @@
-# ADR 0034: Presentación y ubicación
+# ADR 0034: Friendly Introduction and Location
 
-## Estado
+## Status
 
-Aceptada el 21 de octubre de 2026; revisada el 22 de octubre de 2026 tras la iteración de producto. Complementa y actualiza la salida por defecto de [ADR 0020](0020-presentation-formatting.md).
+Accepted on October 21, 2026; revised on October 22, 2026, after the product iteration. Complements and updates the default output from [ADR 0020](0020-presentation-formatting.md).
 
-## Contexto
+## Context
 
-La presentación debe ser breve y fácil de adaptar a distintas personas. La ubicación o el país sigue siendo un dato útil, y puede formar parte del nombre visible o del titular. Las ayudas de escritura deben orientar sin modificar el contenido de la persona. El nombre y el titular centrados dan una composición inicial más clara, con controles para quienes prefieran otra alineación.
+The introduction should be brief and easy to adapt for different people. A location or country remains useful and can be part of the displayed name or headline. Writing guidance should help without changing a person's content. Centering the name and headline gives the initial composition more clarity, with controls for people who prefer another alignment.
 
-## Decisión
+## Decision
 
-Agregar en `data.presentation.format` de v2 propiedades opcionales y estrictas:
+Add optional, strict v2 properties under `data.presentation.format`:
 
-- `locationPlacement?: "displayName" | "headline"` permite colocar la ubicación elegida junto al nombre o al titular con «from» o «desde». Sin esta opción, la ubicación aparece en su propia línea. Si el campo seleccionado está vacío, se muestra en una línea propia; no se emite un conector cuando la ubicación está vacía.
+- `locationPlacement?: "displayName" | "headline"` places the selected location next to the name or headline using “from” or “desde.” Without this option, the location appears on its own line. If the selected field is empty, the location appears on a separate line; no connector is emitted when the location is empty.
 
-El saludo se escribe como parte del título completo. El placeholder y la ayuda ofrecen una idea editable, pero no anteponen texto automáticamente ni cambian el formato del titular. No se incorpora una propiedad de saludo automático al esquema v2.
+Write the greeting as part of the full headline. The placeholder and help offer an editable idea, but do not automatically prepend text or change headline formatting. Do not add an automatic-greeting property to the v2 schema.
 
-El campo de país/ubicación permanece visible en el formulario. La persona puede elegir un país del catálogo —con su bandera local— o mantener una ubicación escrita. El generador no infiere ni agrega un país.
+Keep the country/location field visible in the form. A person can choose a country from the catalog—with its local flag—or keep a location they wrote. The generator does not infer or add a country.
 
-Nombre y titular se centran por defecto, también en el estilo clásico. La sección plegable de formato permite cambiar su nivel y alineación; la elección explícita prevalece sobre el valor inicial. Bio y ubicación independiente mantienen sus alineaciones existentes. No se guardan valores por defecto en el documento.
+Center the name and headline by default, including in the classic style. The collapsible formatting section can change their level and alignment; an explicit choice takes precedence over the initial value. Bio and standalone location retain their existing alignments. Do not save default values to the document.
 
-Las ayudas de redacción aparecen como texto asociado a los campos de nombre, titular y bio. No hay botones que inserten sugerencias ni diálogos para reemplazar texto. La escritura sigue siendo literal y solo cambia cuando la persona edita el campo.
+Show writing help as text associated with the name, headline, and bio fields. Do not provide buttons that insert suggestions or dialogs that replace text. Text remains literal and changes only when the person edits the field.
 
-Los placeholders y las ayudas muestran ejemplos completos: «It's great to have you here — I'm Alex Rivera 🌱» y «⌨️ Full-stack developer & Linux enthusiast 🐧», con alternativas en español. Estos ejemplos orientan y nunca se guardan automáticamente.
+Place complete examples in placeholders and help: “It's great to have you here — I'm Alex Rivera 🌱” and “⌨️ Full-stack developer & Linux enthusiast 🐧”, with Spanish alternatives. These examples provide guidance and are never saved automatically.
 
-La ubicación en su propia línea se presenta como «📍 Currently based in 🇦🇷 Argentina» o «📍 Actualmente en 🇦🇷 Argentina». Se conserva también cuando el destino de una ubicación integrada está vacío. La bandera sigue siendo el recurso fijo del país elegido y el texto libre no se transforma en una elección de país.
+Render a standalone location as “📍 Currently based in 🇦🇷 Argentina” or “📍 Actualmente en 🇦🇷 Argentina”. It also remains visible when the destination for an integrated location is empty. The flag remains a fixed resource for the selected country; free-form text is not converted into a country selection.
 
-`displayNameTypography?: "italic" | "monospace"` y `headlineTypography?: "italic" | "monospace"` son elecciones independientes de v2. Ausencia usa el estilo de GitHub y no agrega defaults. Se derivan mediante `em` o `code` con texto escapado, junto con el nivel y la alineación elegidos. La ubicación integrada conserva su propia representación y no se convierte en código. La vista previa, el presupuesto HTML y el JSON de proyecto usan el mismo contrato.
+`displayNameTypography?: "italic" | "monospace"` and `headlineTypography?: "italic" | "monospace"` are independent v2 choices. Absence uses GitHub's style and does not add defaults. Derive them with `em` or `code` and escaped text, along with the selected level and alignment. Integrated location keeps its own representation and is not converted to code. The preview, HTML budget, and project JSON use the same contract.
 
-GitHub elimina estilos CSS del HTML de los README, como documenta [GitHub Markup](https://github.com/github/markup). No se ofrecen familias tipográficas arbitrarias, `font-family`, fuentes descargables ni conversiones Unicode que sustituyan el texto. La alternativa de títulos como imágenes exige otro flujo y queda fuera de esta decisión. Los ejemplos de titular toman como referencia recorridos de [GitHub Profile README Generator](https://github.com/rahuldkjain/github-profile-readme-generator) y la colección [Awesome GitHub Profile README](https://github.com/abhisheknaiidu/awesome-github-profile-readme), sin incorporar código ni recursos de esos proyectos.
+GitHub removes CSS styles from README HTML, as documented by [GitHub Markup](https://github.com/github/markup). Do not offer arbitrary font families, `font-family`, downloadable fonts, or Unicode substitutions that replace the text. Titles rendered as images would require another flow and are outside this decision. Headline examples are inspired by [GitHub Profile README Generator](https://github.com/rahuldkjain/github-profile-readme-generator) and the [Awesome GitHub Profile README](https://github.com/abhisheknaiidu/awesome-github-profile-readme) collection, without incorporating code or assets from those projects.
 
-Los cuatro strings de contenido siguen siendo la fuente de verdad y se conservan exactamente al elegir ubicación o formato, cambiar el idioma, restablecer formato o recuperar un proyecto. No se modifica v1: su esquema continúa rechazando `format`. Lectores v2 anteriores estrictos pueden rechazar las opciones nuevas y deben preservar la fuente protegida. El JSON de proyecto conserva las opciones de formato admitidas.
+The four content strings remain the source of truth and are preserved exactly when selecting a location or format, changing language, resetting formatting, or recovering a project. Do not modify v1: its schema continues to reject `format`. Older strict v2 readers may reject new options and must preserve the protected source. Project JSON retains supported formatting options.
 
-Los títulos centrados o estilizados y los campos que combinan ubicación se construyen con nodos HAST de texto escapado y, cuando corresponde, la bandera local exacta del catálogo. Se validan con el helper HTML existente y comparten política, presupuesto, árboles y rangos UTF-16 de `customHtml`. No interpretan Markdown, HTML escrito, URLs ni iconos arbitrarios. Si un fragmento combinado supera el límite, `invalid_html` identifica los campos que lo componen. No se truncan datos.
+Centered or styled titles and fields that combine a location are built with escaped-text HAST nodes and, where applicable, the exact local flag from the catalog. They are validated with the existing HTML helper and share the policy, budget, trees, and UTF-16 ranges of `customHtml`. They do not interpret Markdown, written HTML, URLs, or arbitrary icons. If a combined fragment exceeds the limit, `invalid_html` identifies its component fields. Data is not truncated.
 
-## Alternativas y consecuencias
+## Alternatives and Consequences
 
-Agregar el saludo al renderizar puede duplicar un saludo que la persona ya escribió; pedir el título completo conserva el control en un único campo. Las ayudas orientan sin alterar el borrador. La ubicación aparece después de About you en el formulario y se puede colocar junto al nombre, al titular o en una línea separada. Inferir un país desde texto libre podría atribuir una ubicación incorrecta, por lo que la selección del catálogo es explícita.
+Adding a greeting at render time could duplicate one the person already wrote; asking for a complete headline keeps control in one field. Help can guide without changing the draft. In the form, location appears after About You and can be placed next to the name, headline, or on a separate line. Inferring a country from free-form text could assign an incorrect location, so choosing from the catalog is explicit.
 
-La salida centrada cambia el aspecto por defecto respecto de documentos anteriores. La persona puede elegir alineación izquierda para recuperar la salida Markdown sencilla o seleccionar derecha. El país es una decisión explícita y no modifica los datos escritos. No se agregan servicios, dependencias ni redacción con IA. GitHub controla el estilo final de los encabezados; la vista previa local sigue siendo aproximada.
+Centered output changes the default appearance compared with older documents. A person can choose left alignment to restore simple Markdown output or choose right alignment. Country selection is explicit and does not change written data. No services, dependencies, or AI writing are added. GitHub controls the final heading style; the local preview remains approximate.
