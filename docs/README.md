@@ -54,6 +54,7 @@ The GitHub Profile Generator documentation describes the product, its available 
 | [Compact technologies](decisions/0035-compact-technologies.md)                                       | Catalog labels, inline categories, and draft compatibility.                                   |
 | [Stable card origin](decisions/0036-production-card-origin.md)                                       | `APP_URL` priority and a fallback to the stable domain in Vercel Production only.             |
 | [Project descriptions and links](decisions/0037-project-description-and-links.md)                    | Description text, cover image, and a single URL for the title.                                |
+| [Indexación de producción y canonicales](decisions/0038-production-indexing-and-canonicals.md)       | Indexación por entorno, URL canónicas localizadas y rutas públicas del sitemap.               |
 | [Third-party notices](../THIRD_PARTY_NOTICES.md)                                                     | Provenance and licenses for icons, flags, the code editor, and Extended cards.                |
 | [Contributing](../CONTRIBUTING.md)                                                                   | Workflow, expectations for changes, and pull requests.                                        |
 

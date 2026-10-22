@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import { ThemeProvider } from "@/components/theme-provider";
 import { routing } from "@/i18n/routing";
 import { geistMono, geistSans } from "@/lib/fonts";
+import { getPublicSiteOrigin, isPublicIndexingEnabled } from "@/server/public-site-origin";
 import "../globals.css";
 
 type LocaleLayoutProps = { children: ReactNode; params: Promise<{ locale: string }> };
@@ -18,11 +19,14 @@ export async function generateMetadata({ params }: LocaleLayoutProps): Promise<M
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   const t = await getTranslations({ locale, namespace: "Metadata" });
+  const origin = getPublicSiteOrigin();
+  const indexable = isPublicIndexingEnabled() && origin !== undefined;
   return {
     title: { default: t("title"), template: "%s · GitHub Profile Generator" },
     description: t("description"),
     applicationName: "GitHub Profile Generator",
-    robots: { index: false, follow: false },
+    ...(origin ? { metadataBase: new URL(origin) } : {}),
+    robots: { index: indexable, follow: indexable },
   };
 }
 

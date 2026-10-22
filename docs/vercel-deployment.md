@@ -62,6 +62,8 @@ When `APP_URL` is empty and `VERCEL_ENV` is exactly `production`, the app uses `
 
 This fallback is not enabled in Preview, development, self-hosted servers, or merely because `NODE_ENV=production`; those environments need an explicit `APP_URL` to export cards. Without a valid origin, data available in the browser can still render the preview, but it cannot provide a URL that GitHub can load. README copy and download remain disabled while cards are included; the JSON project and manual contributions without cards can still be exported.
 
+Search indexing is a separate choice. Vercel Production is indexable only when a valid public origin is available; Preview and local environments remain `noindex`, even when `APP_URL` is set. A self-hosted production build defaults to `noindex`; set `PUBLIC_SITE_INDEXING_ENABLED=true` only when it serves the stable public site over HTTPS.
+
 On `dev`, you can use the branch alias assigned by Vercel as the test origin if it is public. If you point its `APP_URL` at Production, you will be testing the images from `main`, even when the editor is a pre-production build. Do not present that as a test of the new `dev` routes.
 
 ## 4. Anonymous access

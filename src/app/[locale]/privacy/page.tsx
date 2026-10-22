@@ -6,6 +6,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
+import { getPublicPageAlternates } from "@/server/public-site-metadata";
 
 type PrivacyPageProps = { params: Promise<{ locale: string }> };
 
@@ -13,7 +14,12 @@ export async function generateMetadata({ params }: PrivacyPageProps): Promise<Me
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   const t = await getTranslations({ locale, namespace: "Privacy" });
-  return { title: t("metadata.title"), description: t("metadata.description") };
+  const alternates = getPublicPageAlternates(locale, "privacy");
+  return {
+    title: t("metadata.title"),
+    description: t("metadata.description"),
+    ...(alternates ? { alternates } : {}),
+  };
 }
 
 export default async function PrivacyPage({ params }: PrivacyPageProps) {

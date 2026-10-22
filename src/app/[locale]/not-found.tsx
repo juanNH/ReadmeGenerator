@@ -1,8 +1,11 @@
+import type { Metadata } from "next";
 import { ArrowLeft } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
+
+export const metadata: Metadata = { robots: { index: false, follow: false } };
 
 export default async function NotFound() {
   const t = await getTranslations("NotFound");
