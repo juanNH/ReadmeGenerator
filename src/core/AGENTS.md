@@ -42,3 +42,5 @@ Este ámbito contiene `ProfileDocument` v2, sus validaciones, operaciones puras,
 Consultar [arquitectura](../../docs/architecture.md) para cambios que afecten otros ámbitos.
 
 - Formato de Presentación vive en data.presentation.format opcional de v2; v1 usa moduleContentV1Schemas sin esos campos. Ausencia conserva Markdown anterior y migración no agrega defaults. Compartir renderizado HTML derivado, presupuesto y metadatos con customSections; conservar texto literal y bandera de catálogo. Los errores invalid_html señalan el campo concreto. Ver [ADR 0020](../../docs/decisions/0020-presentation-formatting.md).
+
+- Tecnologías v2 admite `layout?: "compact" | "grouped"`. Ausencia conserva la salida anterior; parseo y migración no insertan defaults y v1 permanece cerrado. Solo la fábrica de un perfil nuevo selecciona compact. La composición compacta construye etiquetas `kbd`, iconos fijos y texto HAST, conserva categorías/notas/orden y comparte política, límites y rangos `customHtml`, sin ampliar `customImages`. Todas las operaciones y ediciones conservan layout. Ver [ADR 0035](../../docs/decisions/0035-compact-technologies.md).

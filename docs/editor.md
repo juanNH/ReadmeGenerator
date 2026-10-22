@@ -56,6 +56,8 @@ Existe **un único último respaldo** de importación de README en este navegado
 
 ## Contenido y composición
 
+Tecnologías ofrece «Diseño en el README»: etiquetas compactas con categoría en línea o títulos por categoría. Los perfiles nuevos usan el modo compacto; los borradores anteriores conservan su salida hasta elegir otra. Se mantienen herramientas, notas y orden. Los iconos aportan color, mientras el fondo de las etiquetas depende del tema de GitHub. Ver [decisión de diseño compacto](decisions/0035-compact-technologies.md).
+
 - **Presentación:** nombre opcional y texto libre. Podés contar qué hacés, qué te interesa o qué estás aprendiendo. La frase de encabezado y la ubicación quedan en detalles secundarios y conservan los valores anteriores.
 - **Tecnologías:** buscá por nombre o alias entre 358 herramientas, incluidos frameworks, ORMs, bases de datos, mensajería, infraestructura e IA. Elegí categorías sugeridas o un destino existente; las nuevas selecciones aparecen como chips con icono y nombre. También podés agregar texto propio sin icono. Flechas, Enter y Escape permiten operar las sugerencias con teclado; las herramientas ya elegidas no se agregan otra vez. Los detalles secundarios permiten crear, renombrar y ordenar categorías, mover y ordenar herramientas y editar notas opcionales. Quitar una categoría elimina su título y conserva las herramientas. Recuperar un borrador o cambiar idioma no reorganiza datos; «Organizar por categoría» es una acción explícita que confirma el reemplazo de títulos existentes.
 - **Proyectos:** nombre, descripción, participación, tecnologías y enlaces opcionales. Las tecnologías se agregan como campos de texto, sin exigir un repositorio.

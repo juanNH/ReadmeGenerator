@@ -48,6 +48,7 @@ function legacyContributor(): ProfileDocumentV1 {
     ...createEmptyProfileV1(current.contentLocale),
     data: {
       ...current.data,
+      technologies: { groups: current.data.technologies.groups },
       metrics: {
         username: current.data.metrics.username,
         cards: ["calendar", "summary", "languages"],

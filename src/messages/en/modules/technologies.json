@@ -1,5 +1,10 @@
 {
   "description": "Your favorite tools, at a glance.",
+  "layout": "README layout",
+  "layoutHelp": "Compact chips keep categories and tools on the same row, wrapping as needed. Brand icons keep their colors; chip backgrounds follow the GitHub theme. Notes and your saved categories are preserved.",
+  "layoutCompact": "Compact chips",
+  "layoutGrouped": "Category headings",
+  "compactLimit": "This compact section exceeds the HTML export limits. Shorten the category or notes, split a large category, or choose Category headings to keep everything as Markdown.",
   "searchLabel": "Add technologies",
   "searchPlaceholder": "Search React, Python, Docker…",
   "searchHelp": "Search and select a tool, or add your own name. Use the arrow keys and Enter to choose.",

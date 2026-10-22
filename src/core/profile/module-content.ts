@@ -214,6 +214,9 @@ export const moduleContentV1Schemas = Object.freeze({
 export const moduleContentSchemas = Object.freeze({
   ...moduleContentV1Schemas,
   presentation: presentationV1Schema.extend({ format: presentationFormatSchema.optional() }),
+  technologies: moduleContentV1Schemas.technologies.extend({
+    layout: z.enum(["compact", "grouped"]).optional(),
+  }),
   metrics: z.strictObject({
     username: z.string(),
     cards: uniqueCards(z.enum(metricCardIds)),

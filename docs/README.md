@@ -48,6 +48,7 @@ La documentación de GitHub Profile Generator describe el producto, el estado di
 | [API y alojamiento](github-api-and-hosting.md)                                              | Cuota compartida del PAT, cachés y condiciones de Vercel Hobby ante tráfico público.  |
 | [Despliegue en Vercel](vercel-deployment.md)                                                | Hobby con PAT, main/dev y comprobación anónima de las tarjetas del README.            |
 | [Vercel anónimo con PAT](decisions/0032-vercel-hobby-anonymous-pat.md)                      | Decisión de despliegue inicial, duración de funciones y límites de validación.        |
+| [Tecnologías compactas](decisions/0035-compact-technologies.md)                             | Etiquetas con catálogo local, categorías en línea y compatibilidad de borradores.     |
 | [Recursos de terceros](../THIRD_PARTY_NOTICES.md)                                           | Procedencia y licencias de iconos, banderas, editor de código y tarjetas Extended.    |
 | [Contribuir](../CONTRIBUTING.md)                                                            | Flujo de trabajo, expectativas para cambios y pull requests.                          |
 

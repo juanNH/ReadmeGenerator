@@ -1184,6 +1184,7 @@ describe("one Markdown source in mixed section order", () => {
 
   it("keeps fixed section output unchanged after migrating a v1 profile with no custom sections", () => {
     const expected = createEmptyProfile("es");
+    delete expected.data.technologies.layout;
     expected.visibility.presentation = true;
     expected.visibility.contact = true;
     expected.visibility.metrics = true;

@@ -117,9 +117,11 @@ export function generateReadme(
       case "education":
       case "current":
         continue;
-      case "technologies":
-        content = renderTechnologies(document.data.technologies, labels);
-        break;
+      case "technologies": {
+        const rendered = renderTechnologies(document.data.technologies, labels, errors, htmlBudget);
+        append(rendered.markdown, rendered.htmlFragments);
+        continue;
+      }
       case "projects":
         content = renderProjects(document.data.projects, labels, errors);
         break;
