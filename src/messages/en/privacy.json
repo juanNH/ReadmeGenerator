@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "title": "Privacy and data",
+    "description": "Learn what GitHub Profile Generator stores in your browser and when it requests public data."
+  },
+  "title": "Privacy and data",
+  "eyebrow": "Privacy",
+  "intro": "This app runs without an account. Your profile draft is edited and saved in your browser; the app does not upload the complete profile document to its server.",
+  "device": {
+    "title": "Data kept on your device",
+    "body": "The editor stores its profile draft and recovery backups in browser local storage. Opening a Markdown or project file reads it in the browser before you review and confirm an import. Public activity snapshots may also be kept in IndexedDB for reuse: fresh data is used for up to 30 minutes and older data may be retained for up to 24 hours. Your browser can remove local data, and clearing site data removes these drafts and caches.",
+    "theme": "Your browser also stores the selected appearance preference."
+  },
+  "requests": {
+    "title": "When public data is requested",
+    "body": "Typing a GitHub or WakaTime username does not start a lookup. The editor contacts this app's server only after you choose to search for public activity or request data needed by a selected card. The request contains the public username and the selected options, not your full profile draft. GitHub requests use a deployment credential on the server; it is never sent to your browser. WakaTime uses a separate public username and does not use that GitHub credential.",
+    "about": "Opening the About page may also cause this app's server to request the repository's public star and fork counts from GitHub's API. This fixed request contains no visitor profile data or user-selected username. The counts are cached for up to 6 hours and omitted if unavailable.",
+    "cards": "A published README can load public card URLs from this app. Readers' image requests may cause the server to refresh public data when reusable data is unavailable. These endpoints do not make your profile draft or manual contributions public; the README shows the content you chose to publish."
+  },
+  "images": {
+    "title": "Images you add",
+    "body": "Images you choose for a profile are requested directly by the browser from their public HTTPS host. This app does not upload or proxy them. A README reader or GitHub may request those image URLs too."
+  },
+  "hosting": {
+    "title": "Hosting and public links",
+    "body": "The hosting provider receives network requests needed to serve this site and may keep operational logs. This page does not claim that those provider logs are absent. Source code, license, third-party notices and contribution guidance are available in the public repository.",
+    "githubNotice": "GitHub is a trademark of GitHub, Inc. This independent project is not affiliated with or endorsed by GitHub."
+  },
+  "links": {
+    "title": "Project links",
+    "repository": "Source code",
+    "issues": "Ask for help or report a problem",
+    "contributing": "Contribution guide",
+    "license": "MIT license",
+    "notices": "Third-party notices",
+    "home": "Back to the home page"
+  }
+}
