@@ -34,6 +34,7 @@ import type { ContentLocale, ProfileDocument } from "@/core/profile/profile-sche
 import { generateReadme } from "@/core/readme";
 import { cn } from "@/lib/cn";
 import { EditorModuleForm } from "./editor-module-form";
+import { EmojiInserter } from "./emoji-inserter";
 import { EditorSectionNavigation } from "./editor-section-navigation";
 import {
   moveVisibleSection,
@@ -862,6 +863,7 @@ export function EditorWorkspace({
             compactView === "preview" && "hidden",
           )}
         >
+          <EmojiInserter />
           <Card>
             <CardHeader className="gap-1 border-b border-border px-4 py-2 sm:gap-2 sm:p-6">
               <div className="flex min-w-0 items-center justify-between gap-2 text-xs text-muted-foreground">

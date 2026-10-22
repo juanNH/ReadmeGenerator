@@ -51,6 +51,7 @@ export function PresentationForm({ value, onChange, errors = [] }: PresentationF
         error={fieldError("displayName")}
       >
         <Input
+          data-emoji-target="true"
           autoComplete="nickname"
           value={value.displayName}
           placeholder={t("displayNamePlaceholder")}
@@ -65,6 +66,7 @@ export function PresentationForm({ value, onChange, errors = [] }: PresentationF
           error={fieldError("headline")}
         >
           <Input
+            data-emoji-target="true"
             value={value.headline}
             placeholder={t("headlinePlaceholder")}
             onChange={(event) => onChange({ ...value, headline: event.target.value })}
@@ -78,6 +80,7 @@ export function PresentationForm({ value, onChange, errors = [] }: PresentationF
         error={fieldError("bio")}
       >
         <Textarea
+          data-emoji-target="true"
           value={value.bio}
           placeholder={t("bioPlaceholder")}
           rows={5}

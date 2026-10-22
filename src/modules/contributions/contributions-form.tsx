@@ -497,6 +497,7 @@ export function ContributionsForm({
               </legend>
               <Field htmlFor={`${controlId}-title`} label={t("title")} description={t("titleHelp")}>
                 <Input
+                  data-emoji-target="true"
                   ref={entryRef(item.id)}
                   value={item.title}
                   placeholder={t("titlePlaceholder")}
@@ -509,6 +510,7 @@ export function ContributionsForm({
                 description={t("descriptionHelp")}
               >
                 <Textarea
+                  data-emoji-target="true"
                   rows={2}
                   value={item.description}
                   placeholder={t("descriptionPlaceholder")}

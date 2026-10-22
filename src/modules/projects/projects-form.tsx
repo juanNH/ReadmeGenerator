@@ -53,6 +53,7 @@ export function ProjectsForm({ value, errors, onChange }: ProjectsFormProps) {
             </legend>
             <Field htmlFor={`${controlId}-name`} label={t("name")} description={t("nameHelp")}>
               <Input
+                data-emoji-target="true"
                 ref={entryRef(project.id)}
                 value={project.name}
                 placeholder={t("namePlaceholder")}
@@ -67,6 +68,7 @@ export function ProjectsForm({ value, errors, onChange }: ProjectsFormProps) {
               description={t("projectDescriptionHelp")}
             >
               <Textarea
+                data-emoji-target="true"
                 value={project.description}
                 placeholder={t("projectDescriptionPlaceholder")}
                 onChange={(event) =>
@@ -203,6 +205,7 @@ function ProjectCover({
           error={hasError("alt") ? t("missingCoverAlt") : undefined}
         >
           <Input
+            data-emoji-target="true"
             placeholder={t("coverAltPlaceholder")}
             value={value?.alt ?? ""}
             onChange={(event) => onChange({ url: value?.url ?? "", alt: event.target.value })}

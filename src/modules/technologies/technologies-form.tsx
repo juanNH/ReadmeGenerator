@@ -391,6 +391,7 @@ export function TechnologiesForm({ value, errors, onChange }: TechnologiesFormPr
             description={t("newCategoryHelp")}
           >
             <Input
+              data-emoji-target="true"
               value={newCategoryName}
               placeholder={t("newCategoryPlaceholder")}
               onChange={(event) => setNewCategoryName(event.target.value)}
@@ -664,6 +665,7 @@ function TechnologyGroupList({
             description={t("categoryNameHelp")}
           >
             <Input
+              data-emoji-target="true"
               value={titleValue}
               onChange={(event) => setTitleDraft({ source: group.name, value: event.target.value })}
               onBlur={commitTitle}
@@ -761,6 +763,7 @@ function TechnologyGroupList({
                       label={t("savedName", { number: index + 1 })}
                     >
                       <Input
+                        data-emoji-target="true"
                         value={item.name}
                         onChange={(event) => editTechnology(item.id, "name", event.target.value)}
                       />
@@ -770,6 +773,7 @@ function TechnologyGroupList({
                       label={t("savedNote", { name: item.name.trim() || t("untitled") })}
                     >
                       <Textarea
+                        data-emoji-target="true"
                         rows={2}
                         value={item.context}
                         onChange={(event) => editTechnology(item.id, "context", event.target.value)}

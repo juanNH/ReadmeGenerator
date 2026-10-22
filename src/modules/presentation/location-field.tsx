@@ -62,6 +62,7 @@ export function LocationField({ value, onChange, error }: LocationFieldProps) {
         error={error}
       >
         <Input
+          data-emoji-target="true"
           ref={inputRef}
           role="combobox"
           aria-autocomplete="list"

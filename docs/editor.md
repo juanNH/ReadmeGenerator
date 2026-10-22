@@ -38,6 +38,12 @@ La fila no salta de línea al agregar secciones y sus controles tienen superfici
 
 «Agregar bloque» despliega las diez opciones con muestras. Empieza abierto en una sección vacía y cerrado al recuperar contenido existente; elegir una opción lo cierra y enfoca el nuevo campo. Así se puede editar lo que ya escribiste sin atravesar todas las muestras. Quitar el último bloque abre las opciones y vuelve al botón estable.
 
+## Insertar emojis
+
+En escritorio, el botón visible **Insertar emoji** queda dentro de la columna de configuración y permanece a mano al desplazarte. La ayuda explica que primero hay que enfocar un campo de texto del perfil. Abrí el selector para buscar por nombre o elegir una categoría. Al elegir un emoji, se inserta en la posición del cursor o reemplaza el texto seleccionado; funciona en presentación, tecnologías, proyectos, contribuciones, contacto y texto de secciones personalizadas. No modifica URLs, HTML ni bloques de código. Si no hay un campo de texto enfocado, el emoji se copia al portapapeles.
+
+En dispositivos táctiles el botón se oculta para dejar el selector del teclado a mano.
+
 ## Importar un README existente
 
 1. Pulsá «Importar README» en la barra del editor; en móvil es el icono de archivo. Pegá Markdown o abrí un archivo `.md` UTF-8. La lectura y el análisis ocurren localmente, sin cuenta ni envío del documento a un servidor.

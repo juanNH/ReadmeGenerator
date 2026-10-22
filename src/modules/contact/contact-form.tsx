@@ -163,6 +163,7 @@ export function ContactForm({ value, errors, onChange }: ContactFormProps) {
                 className="pt-3"
               >
                 <Input
+                  data-emoji-target="true"
                   value={link.label}
                   placeholder={provider?.name ?? t("labelPlaceholder")}
                   onChange={(event) => editLink(link.id, "label", event.target.value)}
