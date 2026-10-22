@@ -608,7 +608,7 @@ export function EditorWorkspace({
 
   return (
     <div
-      className="@container/editor min-w-0 space-y-3 [&_input]:scroll-mt-[var(--editor-toolbar-offset)] [&_select]:scroll-mt-[var(--editor-toolbar-offset)] [&_textarea]:scroll-mt-[var(--editor-toolbar-offset)]"
+      className="@container/editor min-w-0 space-y-1 sm:space-y-3 [&_input]:scroll-mt-[var(--editor-toolbar-offset)] [&_select]:scroll-mt-[var(--editor-toolbar-offset)] [&_textarea]:scroll-mt-[var(--editor-toolbar-offset)]"
       style={
         {
           "--editor-toolbar-offset":

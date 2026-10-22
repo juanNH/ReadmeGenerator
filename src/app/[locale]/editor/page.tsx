@@ -33,9 +33,9 @@ export default async function EditorPage({ params }: EditorPageProps) {
       <main
         id="main-content"
         tabIndex={-1}
-        className="mx-auto max-w-[1600px] px-4 pt-4 pb-12 sm:px-8 sm:pt-6 lg:px-10"
+        className="mx-auto max-w-[1600px] px-4 pt-1 pb-12 sm:px-8 sm:pt-6 lg:px-10"
       >
-        <div className="mb-2 max-w-4xl space-y-1 sm:mb-6 sm:space-y-2">
+        <div className="mb-1 max-w-4xl space-y-1 sm:mb-6 sm:space-y-2">
           <p className="hidden font-mono text-xs tracking-[0.14em] text-muted-foreground uppercase sm:block">
             {t("pageEyebrow")}
           </p>

@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import { expect, test, type Page } from "@playwright/test";
 import { createEmptyProfile } from "../../src/core/profile/profile-operations";
 import type { ContentLocale } from "../../src/core/profile/profile-schema";
+import { mobileTest } from "./mobile-test";
 
 const key = "github-profile-generator.profile.v2";
 function profile(locale: ContentLocale) {
@@ -120,37 +121,38 @@ for (const locale of ["en", "es"] as const) {
     await expect(preview.locator("kbd")).toHaveCount(27);
   });
 
-  test(`${locale}: phone-height initial controls and long compact preview stay within the viewport width`, async ({
-    page,
-  }) => {
-    await page.setViewportSize({ width: 390, height: 667 });
-    const { select } = await open(page, locale);
-    // Capture and measure before clicking or focusing the control under evaluation.
-    await page.screenshot({
-      path: `work/previews/compact-technologies-${locale}-mobile-initial.png`,
-      fullPage: false,
-    });
-    const bounds = await select.boundingBox();
-    expect(bounds).not.toBeNull();
-    expect(bounds!.y).toBeGreaterThanOrEqual(0);
-    expect(bounds!.y + bounds!.height).toBeLessThanOrEqual(667);
-    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
-      390,
-    );
-    await page
-      .getByRole("button", { name: locale === "en" ? "Preview" : "Vista previa", exact: true })
-      .click();
-    const preview = page.getByRole("article", {
-      name: locale === "en" ? "README preview" : "Vista previa del README",
-      exact: true,
-    });
-    await expect(preview.locator("kbd")).toHaveCount(26);
-    await page.screenshot({
-      path: `work/previews/compact-technologies-${locale}-mobile-preview.png`,
-      fullPage: true,
-    });
-    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
-      390,
-    );
-  });
+  mobileTest(
+    `${locale}: phone-height initial controls and long compact preview stay within the viewport width`,
+    async ({ page }) => {
+      await page.setViewportSize({ width: 390, height: 667 });
+      const { select } = await open(page, locale);
+      // Capturar y medir antes de hacer clic o enfocar el control evaluado.
+      await page.screenshot({
+        path: `work/previews/compact-technologies-${locale}-mobile-initial.png`,
+        fullPage: false,
+      });
+      const bounds = await select.boundingBox();
+      expect(bounds).not.toBeNull();
+      expect(bounds!.y).toBeGreaterThanOrEqual(0);
+      expect(bounds!.y + bounds!.height).toBeLessThanOrEqual(667);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+        390,
+      );
+      await page
+        .getByRole("button", { name: locale === "en" ? "Preview" : "Vista previa", exact: true })
+        .click();
+      const preview = page.getByRole("article", {
+        name: locale === "en" ? "README preview" : "Vista previa del README",
+        exact: true,
+      });
+      await expect(preview.locator("kbd")).toHaveCount(26);
+      await page.screenshot({
+        path: `work/previews/compact-technologies-${locale}-mobile-preview.png`,
+        fullPage: true,
+      });
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+        390,
+      );
+    },
+  );
 }

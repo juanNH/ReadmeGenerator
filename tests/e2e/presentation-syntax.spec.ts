@@ -2,6 +2,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 import { readFile } from "node:fs/promises";
 import { createEmptyProfile } from "../../src/core/profile/profile-operations";
+import { mobileTest } from "./mobile-test";
 import type { ProfileDocument } from "../../src/core/profile/profile-schema";
 import { generateReadme } from "../../src/core/readme";
 import en from "../../src/messages/en/editor.json" with { type: "json" };
@@ -313,33 +314,36 @@ test("presentation writing tips stay in their field help and never replace user 
     .toBe("I enjoy building useful things, especially tiny tools");
 });
 
-test("presentation on a short phone keeps the first field reachable and supports a long edit", async ({
-  page,
-}) => {
-  await page.setViewportSize({ width: 390, height: 667 });
-  await open(page, introduction("en"), "en");
-  const name = page.getByRole("textbox", { name: en.presentation.displayName, exact: true });
-  // Measure and capture before any control interaction can scroll the page.
-  const initialBox = await name.boundingBox();
-  expect(initialBox!.y).toBeGreaterThanOrEqual(0);
-  expect(initialBox!.y + initialBox!.height).toBeLessThanOrEqual(667);
-  await page.screenshot({ path: "work/previews/presentation-phone-initial.png" });
-  const bio = Array.from({ length: 40 }, (_, index) => `A personal note ${index + 1}.`).join(
-    "\n\n",
-  );
-  await page.getByRole("textbox", { name: en.presentation.bio, exact: true }).fill(bio);
-  await page.locator("#presentation-location-placement").selectOption("headline");
-  await expect.poll(async () => (await stored(page)).data.presentation.bio).toBe(bio);
-  await expect
-    .poll(async () => (await stored(page)).data.presentation.format?.locationPlacement)
-    .toBe("headline");
-  await page.getByRole("button", { name: en.settings.preview, exact: true }).click();
-  const preview = page.getByRole("article", { name: en.preview.documentLabel, exact: true });
-  await expect(preview.getByRole("heading", { name: /Building useful things/ })).toContainText(
-    "from",
-  );
-  await expect(preview).toContainText("A personal note 40.");
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
-  await page.screenshot({ path: "work/previews/presentation-phone-preview.png", fullPage: true });
-});
+mobileTest(
+  "presentation on a short phone keeps the first field reachable and supports a long edit",
+  async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 667 });
+    await open(page, introduction("en"), "en");
+    const name = page.getByRole("textbox", { name: en.presentation.displayName, exact: true });
+    // Medir y capturar antes de que una interacción con controles desplace la página.
+    const initialBox = await name.boundingBox();
+    expect(initialBox!.y).toBeGreaterThanOrEqual(0);
+    expect(initialBox!.y + initialBox!.height).toBeLessThanOrEqual(667);
+    await page.screenshot({ path: "work/previews/presentation-phone-initial.png" });
+    const bio = Array.from({ length: 40 }, (_, index) => `A personal note ${index + 1}.`).join(
+      "\n\n",
+    );
+    await page.getByRole("textbox", { name: en.presentation.bio, exact: true }).fill(bio);
+    await page.locator("#presentation-location-placement").selectOption("headline");
+    await expect.poll(async () => (await stored(page)).data.presentation.bio).toBe(bio);
+    await expect
+      .poll(async () => (await stored(page)).data.presentation.format?.locationPlacement)
+      .toBe("headline");
+    await page.getByRole("button", { name: en.settings.preview, exact: true }).click();
+    const preview = page.getByRole("article", { name: en.preview.documentLabel, exact: true });
+    await expect(preview.getByRole("heading", { name: /Building useful things/ })).toContainText(
+      "from",
+    );
+    await expect(preview).toContainText("A personal note 40.");
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true,
+    );
+    expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+    await page.screenshot({ path: "work/previews/presentation-phone-preview.png", fullPage: true });
+  },
+);
