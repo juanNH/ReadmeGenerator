@@ -14,7 +14,19 @@ Use `<type>/<short-description>` in lowercase English, with words separated by s
 | `chore/`   | Development tools and maintenance    | `chore/git-hooks`                |
 | `ci/`      | Continuous-integration configuration | `ci/repository-guardrails`       |
 
-Keep names short and descriptive. An issue number is optional, for example `fix/123-project-import-focus`. Avoid spaces, accents, uppercase letters, repeated hyphens, extra slashes, dots, underscores, leading or trailing hyphens, trailing punctuation, and personal or secret information. Each name needs one supported prefix and one non-empty description made of lowercase letters and digits separated by single hyphens. These prefixes are a project convention, not a Git or GitHub requirement. The project uses `docs/` for documentation changes; Git does not distinguish it from `doc/`, and neither spelling is a standard. Commit-message types such as `docs`, `feat` and `fix` are a separate convention. Existing branches and open pull requests are not renamed retroactively. `dependabot[bot]` may use its generated branch names; other bot-managed branches follow this convention unless a maintainer explicitly approves an exception.
+Keep names short and descriptive. An issue number is optional, for example `fix/123-project-import-focus`. Avoid spaces, accents, uppercase letters, repeated hyphens, extra slashes, dots, underscores, leading or trailing hyphens, trailing punctuation, and personal or secret information. Each name needs one supported prefix and one non-empty English description made of lowercase letters and digits separated by single hyphens. These prefixes are a project convention, not a Git or GitHub requirement. The project uses `docs/` for documentation changes; Git does not distinguish it from `doc/`, and neither spelling is a standard. Commit-message types such as `docs`, `feat` and `fix` are a separate convention. Existing branches and open pull requests are not renamed retroactively. `dependabot[bot]` may use its generated branch names; other bot-managed branches follow this convention unless a maintainer explicitly approves an exception.
+
+## Commit messages
+
+Write new commit messages in English, including the subject and body. Conventional Commit subjects are recommended; keep them concise and describe the change in English:
+
+```text
+feat: add accessible desktop emoji picker
+fix: preserve editor focus after selection
+docs: clarify branch and commit conventions
+```
+
+This is contributor guidance, not a commit hook. The pull-request branch policy checks the branch prefix and name syntax, but does not determine whether its description is English. It does not validate commit-message language. Existing commit history is not rewritten to apply this convention.
 
 ## Start a branch
 

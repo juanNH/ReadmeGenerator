@@ -8,7 +8,7 @@ The current release includes the Next.js foundation, a bilingual visual kit, `Pr
 
 ## How to work
 
-- Communicate with the maintainer in Spanish; write repository documentation in English. Keep the interface available in English and Spanish, updating both translations together.
+- Communicate with the maintainer in Spanish; write repository documentation in English. Use English for new branch names and commit messages, following the [branching guide](docs/branching.md). Keep the interface available in English and Spanish, updating both translations together.
 - Read the instructions for the affected area, the existing code, and the relevant documentation before editing. Links in this file do not automatically load every document into an AI's context.
 - Continue autonomously within the authorized scope. Ask before expanding the product or introducing costly decisions, paid services, new accounts, or dependencies with significant impact. Suggest alternatives and explain why.
 - Keep internal plans in `.private/planning/`, a local folder ignored by Git. Keep them current for changes that span multiple areas, modify contracts, or alter workflows; avoid formal plans for trivial local fixes. Do not publish plans, roadmaps, or links to these files in commits, issues, or pull requests. If the folder is absent from a fresh checkout, agree on the scope with the responsible person; do not assume private documents are available.
