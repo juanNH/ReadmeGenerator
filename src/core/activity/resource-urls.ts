@@ -1,4 +1,4 @@
-import type { CardAppearance } from "../profile/module-content";
+import type { CardAppearance, CardColumns } from "../profile/module-content";
 import type { ContentLocale } from "../profile/profile-schema";
 import { resourceCardOptionsSchema, type ResourceCardOptions } from "./extended-options";
 import { normalizeActivityBaseUrl } from "./index";
@@ -13,11 +13,12 @@ export function resourceCardUrl(
   baseUrl?: string,
   appearance?: CardAppearance,
   options?: ResourceCardOptions,
+  cardColumns: CardColumns = 1,
 ): string | null {
   const normalized = normalizeResourceTarget(kind, target);
   const origin = baseUrl === undefined ? "" : normalizeActivityBaseUrl(baseUrl);
   if (!normalized || origin === null) return null;
-  const params = new URLSearchParams(cardQuery(locale, appearance));
+  const params = new URLSearchParams(cardQuery(locale, appearance, undefined, cardColumns));
   params.set("target", normalized);
   if (options && Object.keys(options).length) params.set("options", cardConfigJson(options));
   const result = `${origin}/cards/extended/${kind}.svg?${params.toString()}`;
@@ -58,6 +59,7 @@ export function parseResourceCardRequest(filename: string, url: URL) {
     target,
     locale: common.locale,
     appearance: common.appearance,
+    cardColumns: common.cardColumns,
     ...(options ? { options } : {}),
   };
 }
@@ -82,6 +84,7 @@ export function parseResourceCardUrl(value: string, baseUrl?: string) {
       baseUrl,
       input.appearance,
       input.options,
+      input.cardColumns,
     ) !== value
   )
     return null;
@@ -94,6 +97,7 @@ export function parseResourceCardUrl(value: string, baseUrl?: string) {
       undefined,
       input.appearance,
       input.options,
+      input.cardColumns,
     )!,
   };
 }

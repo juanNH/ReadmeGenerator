@@ -7,7 +7,7 @@ function contribution() {
 }
 
 describe("contribution document schema", () => {
-  it("accepts the additive v2 links, images, and repository preview fields", () => {
+  it("accepts v2 links, images, and legacy repository fields", () => {
     const document = createEmptyProfile("en");
     document.data.contributions.items = [
       {
@@ -37,7 +37,11 @@ describe("contribution document schema", () => {
 
   it.each([
     {
-      links: Array.from({ length: 6 }, (_, index) => ({ id: `link-${index}`, label: "", url: "" })),
+      links: Array.from({ length: 11 }, (_, index) => ({
+        id: `link-${index}`,
+        label: "",
+        url: "",
+      })),
     },
     {
       images: Array.from({ length: 4 }, (_, index) => ({

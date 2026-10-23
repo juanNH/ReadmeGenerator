@@ -1,4 +1,4 @@
-import type { ElementContent, Root } from "hast";
+import type { Root } from "hast";
 import { toHtml } from "hast-util-to-html";
 import type { ProfileModuleData } from "../profile/module-content";
 import { renderProfileHtml, type ProfileHtmlBudget } from "./derived-profile-html";
@@ -82,10 +82,31 @@ export function renderContributionItems(
               errors,
             );
           });
+    const repositoryUrl = item.repository?.url.trim();
+    const repositoryTarget = repositoryUrl ? parseGitHubRepositoryUrl(repositoryUrl) : null;
+    if (
+      repositoryUrl &&
+      !item.links?.some((link) => link.url.trim() === repositoryUrl) &&
+      !(!item.links && item.url.trim() === repositoryUrl)
+    ) {
+      const repositoryPath = ["data", "contributions", "items", index, "repository", "url"];
+      if (!repositoryTarget) {
+        errors.push({ code: "invalid_url", path: repositoryPath });
+      } else {
+        links.push(renderLink(repositoryTarget.fullName, repositoryUrl, repositoryPath, errors));
+      }
+    }
+    const description = [item.description, item.repository?.description ?? ""]
+      .filter((value) => value.trim())
+      .filter(
+        (value, descriptionIndex, values) =>
+          values.findIndex((candidate) => candidate.trim() === value.trim()) === descriptionIndex,
+      )
+      .join("\n\n");
     append(
       renderList([
         joinBlocks([
-          renderTitledDescription(item.title, item.description),
+          renderTitledDescription(item.title, description),
           links.filter(Boolean).join(" · "),
         ]),
       ]),
@@ -115,51 +136,6 @@ export function renderContributionItems(
                 children: [],
               },
             ],
-          },
-        ],
-      };
-      const fragment = renderProfileHtml(toHtml(tree), [...path, "url"], errors, htmlBudget);
-      if (fragment) append(fragment.html, fragment);
-    }
-
-    const repository = item.repository;
-    if (repository && (repository.url.trim() || repository.description.trim())) {
-      const path = ["data", "contributions", "items", index, "repository"] as const;
-      const target = parseGitHubRepositoryUrl(repository.url);
-      if (!target) {
-        errors.push({ code: "invalid_url", path: [...path, "url"] });
-        continue;
-      }
-
-      const link: ElementContent = {
-        type: "element",
-        tagName: "a",
-        properties: { href: target.url },
-        children: [
-          {
-            type: "element",
-            tagName: "strong",
-            properties: {},
-            children: [{ type: "text", value: target.fullName }],
-          },
-        ],
-      };
-      const children: ElementContent[] = [link];
-      const description = normalizeInlineText(repository.description);
-      if (description) {
-        children.push(
-          { type: "element", tagName: "br", properties: {}, children: [] },
-          { type: "text", value: description },
-        );
-      }
-      const tree: Root = {
-        type: "root",
-        children: [
-          {
-            type: "element",
-            tagName: "p",
-            properties: {},
-            children,
           },
         ],
       };

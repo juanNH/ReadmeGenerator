@@ -1,4 +1,8 @@
-import { cardAppearanceSchema, type CardAppearance } from "../profile/module-content";
+import {
+  cardAppearanceSchema,
+  type CardAppearance,
+  type CardColumns,
+} from "../profile/module-content";
 import type { ContentLocale } from "../profile/profile-schema";
 import { cardConfigJson } from "./card-config-json";
 import {
@@ -35,13 +39,20 @@ const numericKeys = new Set(["borderRadius", "width", "lineHeight", "numberPreci
 const booleanKeys = new Set(["hideTitle", "hideBorder", "showIcons", "textBold"]);
 export type ProfileCardOptions = {
   locale: ContentLocale;
+  cardColumns: CardColumns;
   appearance?: CardAppearance;
   extended?: { stats?: ExtendedStatsOptions; languages?: ExtendedLanguageOptions };
 };
 
 /** Bounded validated options; never CSS, executable markup or external resources. */
 export function parseCardOptions(params: URLSearchParams): ProfileCardOptions | null {
-  const allowed = ["locale", ...cardAppearanceKeys, "stats", "languages"] as readonly string[];
+  const allowed = [
+    "locale",
+    "columns",
+    ...cardAppearanceKeys,
+    "stats",
+    "languages",
+  ] as readonly string[];
   if (
     params.toString().length > 24_000 ||
     [...params.keys()].some((key) => !allowed.includes(key) || params.getAll(key).length !== 1)
@@ -49,6 +60,8 @@ export function parseCardOptions(params: URLSearchParams): ProfileCardOptions | 
     return null;
   const locale = params.get("locale") ?? "en";
   if (locale !== "en" && locale !== "es") return null;
+  const columns = params.get("columns") ?? "1";
+  if (columns !== "1" && columns !== "2") return null;
   const input: Record<string, unknown> = {};
   for (const key of cardAppearanceKeys) {
     if (!params.has(key)) continue;
@@ -91,6 +104,7 @@ export function parseCardOptions(params: URLSearchParams): ProfileCardOptions | 
   }
   return {
     locale,
+    cardColumns: Number(columns) as CardColumns,
     ...(Object.keys(input).length ? { appearance: parsed.data } : {}),
     ...(Object.keys(extended).length ? { extended } : {}),
   };
@@ -100,8 +114,10 @@ export function cardQuery(
   locale: "en" | "es",
   appearance?: CardAppearance,
   extended?: ProfileCardOptions["extended"],
+  cardColumns: CardColumns = 1,
 ): string {
   const params = new URLSearchParams({ locale });
+  if (cardColumns === 2) params.set("columns", "2");
   for (const key of cardAppearanceKeys) {
     const value = appearance?.[key as keyof CardAppearance];
     if (value !== undefined)

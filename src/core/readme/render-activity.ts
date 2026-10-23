@@ -88,6 +88,7 @@ export function renderActivity(
             origin ?? undefined,
             metrics.appearance,
             metrics.extended?.resourceOptions,
+            metrics.cardColumns ?? 1,
           );
           if (!url) {
             errors.push({
@@ -117,6 +118,7 @@ export function renderActivity(
           : card === "extended-languages"
             ? { languages: metrics.extended?.languages }
             : undefined,
+        metrics.cardColumns ?? 1,
       );
       if (!url) {
         errors.push({ code: "invalid_activity_options", path: ["data", "metrics", "extended"] });
@@ -127,12 +129,14 @@ export function renderActivity(
     }
   }
 
-  const blocks: { markdown: string; htmlFragments: readonly CustomHtmlFragment[] }[] = [];
+  const activityBlocks: { markdown: string; htmlFragments: readonly CustomHtmlFragment[] }[] = [];
   const imageMarkdown = layoutActivityCards(images, metrics.cardColumns ?? 1);
-  if (imageMarkdown) blocks.push({ markdown: imageMarkdown, htmlFragments: [] });
+  if (imageMarkdown) activityBlocks.push({ markdown: imageMarkdown, htmlFragments: [] });
+  const contributionBlocks: { markdown: string; htmlFragments: readonly CustomHtmlFragment[] }[] =
+    [];
   if (highlights.markdown) {
     const heading = `### ${labels.highlights}\n\n`;
-    blocks.push({
+    contributionBlocks.push({
       markdown: `${heading}${highlights.markdown}`,
       htmlFragments: highlights.htmlFragments.map((fragment) => ({
         ...fragment,
@@ -141,6 +145,11 @@ export function renderActivity(
       })),
     });
   }
+
+  const blocks =
+    metrics.contentOrder === "contributions-first"
+      ? [...contributionBlocks, ...activityBlocks]
+      : [...activityBlocks, ...contributionBlocks];
 
   const content = joinBlocks(blocks.map((block) => block.markdown));
   const sectionHeading = content ? `## ${labels.activity}\n\n` : "";

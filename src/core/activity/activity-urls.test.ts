@@ -52,11 +52,26 @@ describe("GitHub activity identifiers and public image URLs", () => {
       username: "alex",
       card: "calendar",
       locale: "es",
+      cardColumns: 1,
       localUrl: path,
     });
     expect(
       parseActivityCardUrl(`https://profiles.example.com${path}`, "https://profiles.example.com"),
-    ).toEqual({ username: "alex", card: "calendar", locale: "es", localUrl: path });
+    ).toEqual({
+      username: "alex",
+      card: "calendar",
+      locale: "es",
+      cardColumns: 1,
+      localUrl: path,
+    });
+    const twoColumnPath = "/cards/github/alex/calendar.svg?locale=es&columns=2";
+    expect(activityCardUrl("alex", "calendar", "es", undefined, undefined, undefined, 2)).toBe(
+      twoColumnPath,
+    );
+    expect(parseActivityCardUrl(twoColumnPath)).toMatchObject({
+      cardColumns: 2,
+      localUrl: twoColumnPath,
+    });
   });
 
   it("keeps Extended cards recognizable when counters change after ranking is enabled", () => {

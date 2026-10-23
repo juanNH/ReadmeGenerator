@@ -1,4 +1,4 @@
-import type { CardAppearance } from "../profile/module-content";
+import type { CardAppearance, CardColumns } from "../profile/module-content";
 import { extendedThemes } from "./extended-themes";
 
 const accents = {
@@ -76,6 +76,20 @@ export function resolveCardAppearance(appearance: CardAppearance = {}) {
 }
 
 export type ResolvedCardAppearance = ReturnType<typeof resolveCardAppearance>;
+
+export function cardTypographyScale(columns: CardColumns = 1): number {
+  return columns === 2 ? 1.4 : 1;
+}
+
+/** Keep cards readable when GitHub scales two SVGs into one table row. */
+export function scaleCardTypography(svg: string, columns: CardColumns = 1): string {
+  const scale = cardTypographyScale(columns);
+  if (scale === 1) return svg;
+  return svg.replace(/font-size="([\d.]+)"/g, (_, value: string) => {
+    const size = Number(value) * scale;
+    return `font-size="${Number.isInteger(size) ? size : size.toFixed(2)}"`;
+  });
+}
 
 /** Passive SVG background from validated colors, never CSS or an external URL. */
 export function cardBackground(appearance: ResolvedCardAppearance, height: number): string {
