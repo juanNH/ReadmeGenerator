@@ -127,16 +127,19 @@ export function generateReadme(
         append(rendered.markdown, rendered.htmlFragments);
         continue;
       }
-      case "contributions":
-        content = renderActivity(
+      case "contributions": {
+        const rendered = renderActivity(
           document,
           labels,
           errors,
           exportIssues,
           options.activityCardBaseUrl,
           activityCards,
+          htmlBudget,
         );
-        break;
+        append(rendered.markdown, rendered.htmlFragments);
+        continue;
+      }
       case "contact":
         content = renderContact(document.data.contact, labels, errors);
         break;

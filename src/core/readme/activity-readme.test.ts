@@ -44,6 +44,26 @@ describe("one optional activity and contributions section", () => {
     expect(result.exportIssues).toEqual([
       { code: "activity_not_configured", path: ["data", "metrics"] },
     ]);
+    expect(result.markdown).not.toContain("| [![");
+  });
+
+  it("keeps selected card order in two-column rows and gives an odd card its own row", () => {
+    const profile = activityProfile();
+    profile.data.metrics.cardColumns = 2;
+    const result = generateReadme(profile, { activityCardBaseUrl: "https://profiles.example.com" });
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+
+    const calendar = result.markdown.indexOf("[![GitHub contribution calendar");
+    const summary = result.markdown.indexOf("[![GitHub activity summary");
+    const languages = result.markdown.indexOf("[![Languages in analyzed repositories");
+    expect(calendar).toBeGreaterThanOrEqual(0);
+    expect(calendar).toBeLessThan(summary);
+    expect(summary).toBeLessThan(languages);
+    expect(result.markdown).toContain("| --- | --- |");
+    expect(result.markdown).toContain("| --- |");
+    expect(result.markdown.match(/^\| \[!\[/gm)).toHaveLength(2);
+    expect(result.markdown.match(/^\| \[!\[.*\| \[!\[/gm)).toHaveLength(1);
   });
 
   it("keeps manual content exportable after excluding cards without deleting choices", () => {

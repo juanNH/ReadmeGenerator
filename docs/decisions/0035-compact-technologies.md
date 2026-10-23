@@ -17,7 +17,7 @@ Compact mode displays the category name in bold on the same row as its tools, wr
 
 HTML is built from HAST text nodes, filtered with `renderProfileHtml`, and shares its limits and budget with the rest of the document. Exact UTF-16 ranges and allowed trees are provided through `customHtml`, without expanding `customImages`, enabling global HTML, or persisting metadata. `invalid_html` errors identify the affected group; the UI offers to fix it or return to category headings. Hidden technologies do not use the budget.
 
-The preview recognizes only exact catalog URLs, an empty alternative text value, and 20 × 20 dimensions in order to use local SVGs. The rest of the image and HTML policy remains in place. No third-party badges are requested, no endpoint is created, and `APP_URL` is not required. Colors come from existing icons. The `kbd` background and appearance depend on the theme and GitHub styles; matching solid backgrounds or the reference pixel-for-pixel is not promised.
+The preview recognizes only exact catalog URLs, an empty alternative text value, and 20 × 20 dimensions in order to use local SVGs. Compact tags use inline-flex alignment and bounded wrapping in the local preview so the icon and label occupy the available chip area without clipping. The rest of the image and HTML policy remains in place. No third-party badges are requested, no endpoint is created, and `APP_URL` is not required. Colors come from existing icons. GitHub controls the published `kbd` styling, so matching its appearance pixel-for-pixel is not promised.
 
 ## Alternatives Considered
 

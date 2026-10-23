@@ -3,6 +3,7 @@
 import { createContext, createElement, useContext, type ReactNode } from "react";
 import type { Element } from "hast";
 import ReactMarkdown, { type Components } from "react-markdown";
+import remarkGfm from "remark-gfm";
 import Image from "next/image";
 import { FileText, PenLine } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -106,6 +107,7 @@ export function ReadmePreview({
                 [remarkCustomHtml, { fragments: customHtml }],
                 [remarkPreviewHeadings, { fragments: customHtml }],
                 remarkProfileIcons,
+                remarkGfm,
               ]}
               allowedElements={[
                 "h1",
@@ -123,6 +125,12 @@ export function ReadmePreview({
                 "hr",
                 "blockquote",
                 "div",
+                "table",
+                "thead",
+                "tbody",
+                "tr",
+                "th",
+                "td",
                 "pre",
                 "code",
               ]}
@@ -130,6 +138,26 @@ export function ReadmePreview({
                 img: PreviewImage,
                 p: PreviewParagraph,
                 div: PreviewHtmlSlot,
+                table: ({ children }) => (
+                  <div
+                    role="group"
+                    aria-label={t("htmlTable")}
+                    tabIndex={0}
+                    className="my-4 max-w-full min-w-0 overflow-x-auto rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                  >
+                    <table className="w-full table-fixed border-collapse text-left text-sm">
+                      {children}
+                    </table>
+                  </div>
+                ),
+                th: ({ children }) => (
+                  <th className="border border-border bg-surface-raised px-3 py-2 align-top font-semibold">
+                    {children}
+                  </th>
+                ),
+                td: ({ children }) => (
+                  <td className="border border-border px-3 py-2 align-top">{children}</td>
+                ),
                 pre: PreviewCodeBlock,
                 code: ({ children }) => (
                   <code className="rounded bg-surface-raised px-1 font-mono text-[0.9em]">
@@ -266,7 +294,14 @@ const PreviewImage: Components["img"] = ({ src, alt }) => {
 };
 
 const PreviewLink: Components["a"] = ({ href, children, node }) => {
-  const { activityCardBaseUrl } = useContext(PreviewImagesContext);
+  const { activityCardBaseUrl, markdown } = useContext(PreviewImagesContext);
+  const sourceStart = node?.position?.start.offset;
+  const sourceEnd = node?.position?.end.offset;
+  // remark-gfm linkifies bare URLs too; only render links explicitly emitted by the README generator.
+  const isExplicitMarkdownLink =
+    sourceStart !== undefined &&
+    sourceEnd !== undefined &&
+    markdown.slice(sourceStart, sourceEnd).startsWith("[");
   const image = node?.children.length === 1 ? node.children[0] : undefined;
   const card =
     href && image?.type === "element" && image.tagName === "img" && image.properties.src === href
@@ -276,6 +311,8 @@ const PreviewLink: Components["a"] = ({ href, children, node }) => {
   // The card owns its image link and retry control; avoid nesting a button inside this link.
   return card ? (
     <span className="block max-w-full min-w-0">{children}</span>
+  ) : !isExplicitMarkdownLink ? (
+    <>{children}</>
   ) : (
     <a href={href} target="_blank" rel="noopener noreferrer">
       {children}
