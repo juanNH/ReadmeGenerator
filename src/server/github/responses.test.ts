@@ -28,11 +28,12 @@ describe("public activity routes", () => {
   it("accepts only local SVG variants and supported locales", () => {
     expect(
       parseCardRequest("Octocat", "calendar.svg", new URL("https://app.example.com?locale=es")),
-    ).toEqual({ username: "octocat", card: "calendar", locale: "es" });
+    ).toEqual({ username: "octocat", card: "calendar", locale: "es", cardColumns: 1 });
     expect(parseCardRequest("octocat", "summary.svg", new URL("https://app.example.com"))).toEqual({
       username: "octocat",
       card: "summary",
       locale: "en",
+      cardColumns: 1,
     });
     expect(parseCardRequest("octocat", "other.svg", new URL("https://app.example.com"))).toBeNull();
     expect(

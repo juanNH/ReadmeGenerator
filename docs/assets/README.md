@@ -2,13 +2,15 @@
 
 These assets show the current GitHub Profile Generator interface. They were captured in English on October 23, 2026, using the light theme and fictional data from the [demo project](../examples/demo-profile.project.json). They contain no credentials, real account data or activity queries. Activity card examples use local decorative samples when shown.
 
-| Asset                                                    | Content                                                                         |
-| -------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| [editor-overview.jpg](editor-overview.jpg)               | Technology order controls and aligned compact tags in the live README preview.  |
-| [activity-contributions.jpg](activity-contributions.jpg) | Contribution editing, ordinary links, and a public image in the README preview. |
-| [activity-card-layout.jpg](activity-card-layout.jpg)     | One/two card row choices and their live GFM table layout using local samples.   |
-| [project-files.jpg](project-files.jpg)                   | The current project JSON import dialog and its local review safeguards.         |
-| [readme-import-review.jpg](readme-import-review.jpg)     | Detected Markdown sections and conversion notices before confirming an import.  |
+The activity layout captures use the fictional `example-dev` label and local decorative cards. They do not search GitHub or load account data.
+
+| Asset                                                    | Content                                                                                     |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| [editor-overview.jpg](editor-overview.jpg)               | Technology order controls and aligned compact tags in the live README preview.              |
+| [activity-contributions.jpg](activity-contributions.jpg) | Contribution editing with multiple ordinary links and a public image in the README preview. |
+| [activity-card-layout.jpg](activity-card-layout.jpg)     | Activity/contribution order, one/two card row choices, and local layout samples.            |
+| [project-files.jpg](project-files.jpg)                   | The current project JSON import dialog and its local review safeguards.                     |
+| [readme-import-review.jpg](readme-import-review.jpg)     | Detected Markdown sections and conversion notices before confirming an import.              |
 
 The main README uses static screenshots and written instructions so the product flow stays available without animation.
 

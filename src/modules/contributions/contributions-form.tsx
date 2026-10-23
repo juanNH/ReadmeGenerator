@@ -243,7 +243,11 @@ export function ContributionsForm({
                 {t("activity.cardColumns.help")}
               </p>
             </div>
-            <div role="group" aria-label={t("activity.cardColumns.label")} className="flex gap-2">
+            <div
+              role="group"
+              aria-label={t("activity.cardColumns.label")}
+              className="flex flex-wrap gap-2"
+            >
               {([1, 2] as const).map((columns) => (
                 <Button
                   key={columns}
@@ -266,7 +270,11 @@ export function ContributionsForm({
                 {t("activity.contentOrder.help")}
               </p>
             </div>
-            <div role="group" aria-label={t("activity.contentOrder.label")} className="flex gap-2">
+            <div
+              role="group"
+              aria-label={t("activity.contentOrder.label")}
+              className="flex flex-wrap gap-2"
+            >
               {(["activity-first", "contributions-first"] as const).map((contentOrder) => (
                 <Button
                   key={contentOrder}
