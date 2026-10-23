@@ -33,6 +33,7 @@ describe("public activity routes", () => {
       username: "octocat",
       card: "summary",
       locale: "en",
+      cardColumns: 1,
     });
     expect(parseCardRequest("octocat", "other.svg", new URL("https://app.example.com"))).toBeNull();
     expect(
