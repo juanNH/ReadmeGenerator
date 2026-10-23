@@ -15,6 +15,8 @@ The branch name `dev` is lowercase. In **Project Settings → Environments → P
 
 Workflow: develop on a working branch, open a PR to `dev`, review its Preview, then open a PR from `dev` to `main`. Keep `dev` after the merge. CI checks pushes to both branches and PRs. Publication approval, creation of remote branches, and branch protection rules are managed in GitHub; this configuration does not publish changes by itself.
 
+A Preview may require an authenticated Vercel session. Being able to open it while signed in does not establish anonymous access. Keep Deployment Protection enabled; do not expose a protected Preview just to test README images.
+
 ## 1. Validate the version
 
 With Node 24 and pnpm 11.25.0:
@@ -69,6 +71,8 @@ On `dev`, you can use the branch alias assigned by Vercel as the test origin if 
 ## 4. Anonymous access
 
 The effective origin, whether explicit or resolved from Production, and `/cards/...` must respond without a session, cookies, a password, or authentication redirects. Review **Deployment Protection**. You can protect Previews if you do not need to check their images from GitHub; a protected URL cannot be used for that test. Validating the origin syntax does not verify availability or anonymous access.
+
+On October 22, 2026, the `dev` Preview for commit `7b44bdc` was marked **Ready** in Vercel and `/en` opened in a Vercel-authenticated browser session. Anonymous `HEAD` requests to `/en` and `/en/social-preview` returned `302` redirects to Vercel SSO and `X-Robots-Tag: noindex`. This records authenticated access and the observed anonymous redirects only. It does not establish anonymous behavior for `/cards/...`, Production availability, or rendering by GitHub or Camo. Keep SSO enabled and treat the Preview as protected; no card route or remote README image was tested.
 
 Cards are outside `/en` and `/es`; the language goes in `?locale=en` or `?locale=es`. Do not add rewrites to the editor. Responses include `image/svg+xml`, a passive CSP, `nosniff`, public caching, and `X-Activity-State`.
 
@@ -125,4 +129,4 @@ Run on October 20, 2026, on Windows, with Node 24 and the production build:
 - `cards:check` on that file: eight URLs passed GET/HEAD checks, `ready` state, passive SVG, and cache headers. Transport was explicitly replaced with loopback; the example domain was not contacted.
 - Checked for the literal token in the 54 files under `.next/static`: not found. This is a scoped check of the reviewed build, not a security certification.
 
-The stable domain `readme-generator-ashy.vercel.app` resolved and returned HTTPS 200 on October 22, 2026. This check does not verify the current deployment's Linux installation, CDN behavior, or image rendering on GitHub/Camo. Recheck steps 5 and 6 against the candidate deployment before relying on those paths.
+Vercel listed the Production deployment from `main` at commit `8aaa13b` as **Ready** on October 20, 2026, with the stable domain `readme-generator-ashy.vercel.app`. On October 22, 2026 (Buenos Aires), anonymous `HEAD` requests to `/en` returned `200`; `/en/social-preview`, `/robots.txt`, and `/sitemap.xml` returned `404`. This confirms the listed public response statuses and indicates that this Production deployment does not yet contain the P11/P12 routes. It does not verify the current deployment's Linux installation, CDN behavior, card routes, or image rendering by GitHub/Camo. This Production deployment is separate from the SSO-protected `dev` Preview described above; do not infer that their routes or access behavior match. Recheck steps 5 and 6 against the candidate deployment before relying on those paths.
