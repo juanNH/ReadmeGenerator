@@ -337,7 +337,7 @@ test("featured GitHub contributions are explicitly copied once and remain editab
   await expect(page.getByRole("button", { name: "Download README", exact: true })).toBeEnabled();
 });
 
-test("manual contributions support ordered links, public images, repository previews, and reordering", async ({
+test("manual contributions support multiple links, public images, and reordering", async ({
   page,
 }) => {
   await stubActivity(page);
@@ -370,6 +370,13 @@ test("manual contributions support ordered links, public images, repository prev
     .fill("Temporary link");
   await page.getByRole("button", { name: "Remove link 2", exact: true }).click();
   await expect(linkLabels).toBeFocused();
+  await page.getByRole("button", { name: "Add link", exact: true }).click();
+  await expect(linkLabels.nth(1)).toBeFocused();
+  await linkLabels.nth(1).fill("Project repository");
+  await page
+    .getByRole("textbox", { name: "Link URL", exact: true })
+    .nth(1)
+    .fill("https://github.com/example/guide");
   await page.getByText("Images", { exact: true }).click();
   await page.getByRole("button", { name: "Add image", exact: true }).click();
   const imageUrls = page.getByRole("textbox", { name: "Image URL", exact: true });
@@ -384,13 +391,6 @@ test("manual contributions support ordered links, public images, repository prev
   await expect(imageUrls.nth(1)).toBeFocused();
   await page.getByRole("button", { name: "Remove image 2", exact: true }).click();
   await expect(imageUrls).toBeFocused();
-  await page.getByRole("button", { name: "Add repository preview", exact: true }).click();
-  await page
-    .getByRole("textbox", { name: "Repository URL", exact: true })
-    .fill("https://github.com/example/guide");
-  await page
-    .getByRole("textbox", { name: "Repository description", exact: true })
-    .fill("A community guide.");
   await addManualContribution(page, "Community response");
   await page.getByRole("button", { name: "Move Community response up", exact: true }).click();
 
@@ -405,18 +405,19 @@ test("manual contributions support ordered links, public images, repository prev
       label: "Contributor guide",
       url: "https://example.com/contributing",
     },
+    {
+      id: expect.any(String),
+      label: "Project repository",
+      url: "https://github.com/example/guide",
+    },
   ]);
   expect(saved.data.contributions.items[1]?.images?.[0]).toMatchObject({
     url: "https://images.example.com/guide.png",
     alt: "Updated contributor guide",
   });
-  expect(saved.data.contributions.items[1]?.repository).toEqual({
-    url: "https://github.com/example/guide",
-    description: "A community guide.",
-  });
   const preview = page.getByRole("article", { name: "README preview", exact: true });
   await expect(preview).toContainText("Community response");
-  await expect(preview).toContainText("example/guide");
+  await expect(preview).toContainText("Project repository");
   await expect(preview.locator("img")).toHaveCount(1);
   await expect(page.getByRole("button", { name: "Download README", exact: true })).toBeEnabled();
 });
