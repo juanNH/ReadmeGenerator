@@ -13,7 +13,7 @@ The GitHub Profile Generator documentation describes the product, its available 
 | [Editor](editor.md)                                                                                  | Visual blocks, HTML, code, formatting, imports, and draft backups.                            |
 | [Extended public suite](github-stats-extended.md)                                                    | Card families, counters, options, opt-in ranking, and compatibility limits.                   |
 | [Open source](open-source.md)                                                                        | MIT, attribution, contributions, inventory, and distribution preparation.                     |
-| [Branching and pull requests](branching.md)                                                          | Branch names, work from clones and forks, and the integration workflow.                       |
+| [Branching and pull requests](branching.md)                                                          | Branch and commit naming, forks, and integration workflow.                                    |
 | [Repository guardrails](repository-guardrails.md)                                                    | Branch validation in CI and the limits of available enforcement.                              |
 | [Design system](design-system.md)                                                                    | Internal tooling, tokens, components, and accessibility criteria.                             |
 | [AI-assisted development](ai-development.md)                                                         | Context, delegation, and review of AI-assisted changes.                                       |

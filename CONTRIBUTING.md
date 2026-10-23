@@ -6,7 +6,7 @@ GitHub Profile Generator is a visual editor for GitHub profile READMEs, with a p
 
 Use Node.js `24.21.0` and pnpm `11.25.0`. The [development guide](docs/development.md) covers installation, commands, and what each check verifies.
 
-Create a branch for your change and keep each proposal focused on one goal. The [branching guide](docs/branching.md) explains prefixes, how to create a branch, and the pull request workflow. Discuss scope expansions or decisions that change the product before implementing them.
+Create an English-named branch for your change and keep each proposal focused on one goal. The [branching guide](docs/branching.md) explains prefixes, commit messages, how to create a branch, and the pull request workflow. Discuss scope expansions or decisions that change the product before implementing them.
 
 ## Change guidelines
 
@@ -57,7 +57,7 @@ Use the repository template to explain:
 - The accessibility impact and, where relevant, visual evidence.
 - Risks, limitations, or pending decisions that affect review.
 
-Conventional commit messages such as `feat:`, `fix:`, or `docs:` are recommended to keep the history readable. Restrictive commit-message hooks are not required.
+Write commit messages in English, including the subject and body. Conventional Commit subjects such as `feat: add project links`, `fix: preserve editor focus`, or `docs: clarify branch policy` are recommended to keep the history readable. CI checks branch-name syntax for pull requests, but does not check whether branch descriptions or commit messages are in English; this language convention is maintained through contributor guidance.
 
 ## Issues
 
