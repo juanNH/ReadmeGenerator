@@ -5,18 +5,18 @@
 
 ## Context
 
-Manual contributions previously held one optional URL and appeared in their saved order without controls to change it. People need to describe work with several destinations, an illustrative image, or a repository reference, and to choose which contribution appears first. These details must remain optional and must not require a GitHub account or API request.
+Manual contributions previously held one optional URL and appeared in their saved order without controls to change it. People need to describe work with several destinations or an illustrative image, and to choose which contribution appears first. These details must remain optional and must not require a GitHub account or API request.
 
 ## Decision
 
-Extend only the v2 contribution item with optional `links` (up to five entries), `images` (up to three public HTTPS URLs with alternative text), and `repository` (a GitHub repository URL and a description written by the user). Keep the existing `url` field for v1 compatibility. When `links` is absent, generation uses the legacy URL; when it is present, it is authoritative. V1 remains strict and migration does not insert the new properties.
+Extend only the v2 contribution item with optional `links` (up to ten entries) and `images` (up to three public HTTPS URLs with alternative text). Keep the existing `url` field for compatibility. When `links` is absent, generation uses the legacy URL; when it is present, it is authoritative. The optional v2 `repository: { url, description }` field is retained only to parse drafts made by the former repository preview. It renders as a normal link and contribution description; the first edit moves it into `links` and `description`. V1 remains strict and recovery does not insert or migrate fields.
 
-The editor adds, removes, edits, and reorders contributions with explicit keyboard-accessible move controls. Images and repository descriptions are rendered through the existing filtered derived-HTML policy and shared budget, with exact `customHtml` ranges. They do not extend `customImages`. A repository preview is derived only from the entered owner/name, URL, and description; it does not query GitHub. Link and image order is preserved.
+The editor adds, removes, edits, and reorders contributions with explicit keyboard-accessible move controls. Images use the existing filtered derived-HTML policy and shared budget, with exact `customHtml` ranges; they do not extend `customImages`. Repository URLs use the ordinary link editor. Link and image order is preserved.
 
 ## Alternatives Considered
 
 - Replace `url` in v2: would discard the legacy shape or require a migration on recovery. Keep it as the fallback when the additive field is absent.
-- Fetch repository metadata or upload images: would add network behavior, credentials or hosting requirements. Use manually entered public URLs and descriptions.
+- Fetch repository metadata or upload images: would add network behavior, credentials or hosting requirements. Use manually entered public URLs and image descriptions.
 - Sort contributions automatically: would change user intent. Keep the saved order and expose move up/down controls.
 
 ## Consequences

@@ -9,7 +9,7 @@ Activity cards previously occupied a full row each. People want to choose a more
 
 ## Decision
 
-Add the optional v2 field `metrics.cardColumns?: 1 | 2`. A new profile explicitly starts with two cards per row; an absent field in a recovered or migrated document keeps the previous one-card-per-row output. The editor exposes one or two cards per row. Generation preserves card order, pairs consecutive cards in GitHub Flavored Markdown tables, and leaves an unpaired last card by itself. The preview enables `remark-gfm` and renders tables in a horizontally scrollable, keyboard-focusable container.
+Add the optional v2 field `metrics.cardColumns?: 1 | 2`. A new profile explicitly starts with two cards per row; an absent field in a recovered or migrated document keeps the previous one-card-per-row output. The editor exposes one or two cards per row. Generation preserves card order, pairs consecutive cards in GitHub Flavored Markdown tables, and leaves an unpaired last card by itself. In two-column mode, the shared SVG renderer increases text sizes to compensate for GitHub scaling each image to half the row width. The preview enables `remark-gfm` and renders tables in a horizontally scrollable, keyboard-focusable container.
 
 V1 remains strict. Recovery, migration, and project opening do not add the field. No card is selected or reordered as a side effect of changing the layout.
 
@@ -21,6 +21,6 @@ V1 remains strict. Recovery, migration, and project opening do not add the field
 
 ## Consequences
 
-New profiles can use the available README width more efficiently. Existing profile JSON remains compatible with its previous output until a person chooses a layout. GitHub controls final styling and may wrap the table on narrow screens; the local preview is an approximation of that presentation.
+New profiles can use the available README width more efficiently. Existing profile JSON remains compatible with its previous output until a person chooses a layout. GitHub controls final styling and may wrap the table on narrow screens; the local preview is an approximation of that presentation. See [ADR 0041](0041-activity-contribution-order-and-readable-cards.md) for the independent order control for activity and manual contributions.
 
 See [Profile Model](../profile-model.md), [Editor](../editor.md), and [ADR 0031](0031-browser-persistent-activity-cache.md).

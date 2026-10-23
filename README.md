@@ -20,16 +20,16 @@ A short profile can tell a story. Every section is optional: start with a few wo
 | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Who you are**                       | A centered intro with writing examples, an optional country line, and italic or monospace title styles.                                                        |
 | **What you build with**               | A searchable technology catalog with icons, editable categories and custom names.                                                                              |
-| **What you do**                       | Projects and contributions with editable order, multiple links, public images and a manual repository preview.                                                 |
+| **What you do**                       | Projects and contributions with editable order, up to ten links per contribution, and public images.                                                           |
 | **Your own content**                  | Repeatable sections with text, lists, links, headings, quotes, dividers, public images, filtered HTML and syntax-highlighted code.                             |
 | **Where to find you**                 | Social profiles, a portfolio, websites and email.                                                                                                              |
 | **Public activity, if you choose it** | Ten optional card types with themes, colors and a one- or two-card row layout; they require the configuration described [below](#optional-activity-and-cards). |
 
 Reorder sections by dragging, using the keyboard or pressing the arrow buttons. Hide a section while keeping its content. On desktop, editing and preview appear side by side; on smaller screens, switch between them. Light and dark themes are available.
 
-![English Activity and contributions editor showing manual contribution order and links, with the preview displaying a public image and repository link with its description.](docs/assets/activity-contributions.jpg)
+![English Activity and contributions editor showing manual contribution order and multiple links beside the live README preview.](docs/assets/activity-contributions.jpg)
 
-_Contributions stay manual and editable. The repository preview uses the entered URL and description; it does not query GitHub._
+_Contributions stay manual and editable. Add repository URLs as ordinary links and include any context in the contribution description._
 
 ## How it works
 

@@ -259,6 +259,33 @@ export function ContributionsForm({
               ))}
             </div>
           </div>
+          <div className="space-y-2 rounded-md border border-border p-3">
+            <div className="space-y-1">
+              <p className="text-sm font-medium">{t("activity.contentOrder.label")}</p>
+              <p className="text-xs leading-5 text-muted-foreground">
+                {t("activity.contentOrder.help")}
+              </p>
+            </div>
+            <div role="group" aria-label={t("activity.contentOrder.label")} className="flex gap-2">
+              {(["activity-first", "contributions-first"] as const).map((contentOrder) => (
+                <Button
+                  key={contentOrder}
+                  type="button"
+                  variant={
+                    (metrics.contentOrder ?? "activity-first") === contentOrder
+                      ? "primary"
+                      : "outline"
+                  }
+                  aria-pressed={(metrics.contentOrder ?? "activity-first") === contentOrder}
+                  onClick={() => onActivityChange({ ...metrics, contentOrder }, metricsVisible)}
+                >
+                  {t(
+                    `activity.contentOrder.${contentOrder === "activity-first" ? "activityFirst" : "contributionsFirst"}`,
+                  )}
+                </Button>
+              ))}
+            </div>
+          </div>
           {activityCardGroups.map((group) => (
             <fieldset key={group.id} className="min-w-0 space-y-1">
               <legend className="pb-1 text-xs font-semibold text-muted-foreground">

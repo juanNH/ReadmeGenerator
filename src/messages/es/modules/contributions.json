@@ -32,9 +32,15 @@
     "choose": "¿Qué te gustaría incluir?",
     "cardColumns": {
       "label": "Tarjetas por fila",
-      "help": "Elegí una o dos tarjetas seleccionadas por fila. GitHub puede acomodarlas en pantallas angostas.",
+      "help": "Dos tarjetas ocupan el ancho del README y agrandan el texto para facilitar la lectura.",
       "one": "Una por fila",
       "two": "Dos por fila"
+    },
+    "contentOrder": {
+      "label": "Orden de las secciones",
+      "help": "Elegí si aparecen primero las tarjetas de actividad o tus contribuciones.",
+      "activityFirst": "Actividad primero",
+      "contributionsFirst": "Contribuciones primero"
     },
     "groups": {
       "own": "Tarjetas propias",
@@ -325,7 +331,7 @@
   "urlPlaceholder": "https://example.com/guia-comunitaria",
   "invalidUrl": "Ingresá una dirección válida http:// o https:// sin espacios ni credenciales de acceso, o dejá este campo vacío.",
   "linksTitle": "Enlaces",
-  "linksHelp": "Agregá hasta cinco destinos. Si dejás la etiqueta vacía, en el README se muestra «Más información».",
+  "linksHelp": "Agregá hasta diez destinos. Si dejás la etiqueta vacía, en el README se muestra «Más información».",
   "linkLabel": "Etiqueta del enlace",
   "linkLabelPlaceholder": "Documentación",
   "linkUrl": "URL del enlace",
@@ -333,7 +339,7 @@
   "addLink": "Agregar enlace",
   "removeLink": "Quitar enlace {number}",
   "removeLinkVisible": "Quitar enlace",
-  "linkLimit": "Cada contribución puede tener hasta cinco enlaces.",
+  "linkLimit": "Cada contribución puede tener hasta diez enlaces.",
   "imagesTitle": "Imágenes",
   "imagesHelp": "Agregá hasta tres imágenes disponibles públicamente. Cada una necesita un texto alternativo descriptivo para exportar.",
   "imageUrl": "URL de la imagen",
@@ -347,16 +353,6 @@
   "removeImage": "Quitar imagen {number}",
   "removeImageVisible": "Quitar imagen",
   "imageLimit": "Cada contribución puede tener hasta tres imágenes.",
-  "repositoryTitle": "Vista previa del repositorio de GitHub",
-  "repositoryHelp": "Ingresá una URL HTTPS pública github.com/propietario/repositorio y una descripción opcional. No se consultan datos del repositorio.",
-  "repositoryUrl": "URL del repositorio",
-  "repositoryUrlPlaceholder": "https://github.com/propietario/repositorio",
-  "repositoryDescription": "Descripción del repositorio",
-  "repositoryDescriptionPlaceholder": "Una descripción breve del repositorio",
-  "repositoryInvalid": "Ingresá una URL HTTPS de github.com con la ruta propietario/repositorio exacta.",
-  "repositoryPreview": "Vista previa: {repository}",
-  "addRepository": "Agregar vista previa del repositorio",
-  "removeRepository": "Quitar vista previa del repositorio",
   "moveUp": "Subir {title}",
   "moveDown": "Bajar {title}",
   "moveUpVisible": "Subir",
@@ -365,5 +361,5 @@
   "add": "Agregar contribución",
   "remove": "Quitar contribución {number}",
   "removeVisible": "Quitar contribución",
-  "removeHelp": "Quitar esta entrada elimina su título, descripción, enlaces, imágenes y vista previa del repositorio. Para conservarlos, ocultá la sección."
+  "removeHelp": "Quitar esta entrada elimina su título, descripción, enlaces e imágenes. Para conservarlos, ocultá la sección."
 }

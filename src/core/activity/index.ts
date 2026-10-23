@@ -1,6 +1,7 @@
 import {
   profileActivityCardIds,
   type CardAppearance,
+  type CardColumns,
   type MetricCardId,
 } from "../profile/module-content";
 import type { ContentLocale } from "../profile/profile-schema";
@@ -44,6 +45,7 @@ export function activityCardUrl(
   baseUrl?: string,
   appearance?: CardAppearance,
   extended?: ProfileCardOptions["extended"],
+  cardColumns: CardColumns = 1,
 ): string | null {
   const normalized = normalizeGitHubUsername(username);
   if (!normalized) return null;
@@ -56,7 +58,7 @@ export function activityCardUrl(
       : card === "extended-languages"
         ? { languages: extended?.languages }
         : undefined;
-  const result = `${origin}/cards/github/${normalized}/${card}.svg?${cardQuery(locale, appearance, cardOptions)}`;
+  const result = `${origin}/cards/github/${normalized}/${card}.svg?${cardQuery(locale, appearance, cardOptions, cardColumns)}`;
   return result.length <= 12_000 ? result : null;
 }
 
@@ -79,6 +81,7 @@ export function parseActivityCardUrl(value: string, baseUrl?: string) {
         baseUrl,
         options.appearance,
         options.extended,
+        options.cardColumns,
       ) === value
     ) {
       return {
@@ -92,6 +95,7 @@ export function parseActivityCardUrl(value: string, baseUrl?: string) {
           undefined,
           options.appearance,
           options.extended,
+          options.cardColumns,
         )!,
       };
     }

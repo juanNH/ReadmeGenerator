@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { contributionLinksMax } from "@/core/profile/module-content";
 import { reorderContributionItem } from "@/core/profile/contribution-operations";
 import type { ProfileModuleData } from "@/core/profile/module-content";
 import type { ReadmeIssue } from "@/core/readme";
@@ -17,7 +18,10 @@ type ContributionLink = NonNullable<ContributionItem["links"]>[number];
 type ContributionImage = NonNullable<ContributionItem["images"]>[number];
 type SuggestedHighlight = ActivitySnapshot["highlights"][number];
 
-type EditorLink = { readonly link: ContributionLink; readonly legacy: boolean };
+type EditorLink = {
+  readonly link: ContributionLink;
+  readonly legacy: false | "url" | "repository";
+};
 
 type ContributionItemsEditorProps = {
   value: ProfileModuleData["contributions"];
@@ -27,10 +31,51 @@ type ContributionItemsEditorProps = {
 };
 
 function editorLinks(item: ContributionItem): EditorLink[] {
-  if (item.links !== undefined) return item.links.map((link) => ({ link, legacy: false }));
-  return item.url.trim()
-    ? [{ link: { id: "legacy-link", label: "", url: item.url }, legacy: true }]
-    : [];
+  const links: EditorLink[] =
+    item.links !== undefined
+      ? item.links.map((link) => ({ link, legacy: false }))
+      : item.url.trim()
+        ? [{ link: { id: "legacy-url", label: "", url: item.url }, legacy: "url" }]
+        : [];
+  const repository = item.repository;
+  const repositoryUrl = repository?.url.trim() ?? "";
+  if (repository && repositoryUrl && !links.some(({ link }) => link.url.trim() === repositoryUrl)) {
+    const usedIds = new Set(links.map(({ link }) => link.id));
+    let id = "legacy-repository";
+    let suffix = 2;
+    while (usedIds.has(id)) id = `legacy-repository-${suffix++}`;
+    links.push({
+      link: {
+        id,
+        label: parseGitHubRepositoryUrl(repositoryUrl)?.fullName ?? "",
+        url: repository.url,
+      },
+      legacy: "repository",
+    });
+  }
+  return links;
+}
+
+function mergeDescriptions(...values: string[]) {
+  return values
+    .filter((value) => value.trim())
+    .filter(
+      (value, index, all) =>
+        all.findIndex((candidate) => candidate.trim() === value.trim()) === index,
+    )
+    .join("\n\n");
+}
+
+function migrateLegacyContribution(item: ContributionItem): ContributionItem {
+  const links = editorLinks(item).map(({ link }) => link);
+  const next: ContributionItem = {
+    ...item,
+    description: mergeDescriptions(item.description, item.repository?.description ?? ""),
+    url: "",
+    links,
+  };
+  delete next.repository;
+  return next;
 }
 
 function hasIssue(
@@ -50,7 +95,8 @@ function suggestionIsAdded(items: readonly ContributionItem[], url: string) {
   return items.some(
     (item) =>
       (item.links === undefined && item.url.trim() === url) ||
-      item.links?.some((link) => link.url.trim() === url),
+      item.links?.some((link) => link.url.trim() === url) ||
+      item.repository?.url.trim() === url,
   );
 }
 
@@ -107,7 +153,11 @@ export function ContributionItemsEditor({
   }
 
   function updateEntry(id: string, update: (item: ContributionItem) => ContributionItem) {
-    onChange({ items: value.items.map((item) => (item.id === id ? update(item) : item)) });
+    onChange({
+      items: value.items.map((item) =>
+        item.id === id ? update(migrateLegacyContribution(item)) : item,
+      ),
+    });
   }
 
   function addEntry() {
@@ -155,7 +205,7 @@ export function ContributionItemsEditor({
 
   function addLink(item: ContributionItem) {
     const current = editorLinks(item).map(({ link }) => link);
-    if (current.length >= 5) return;
+    if (current.length >= contributionLinksMax) return;
     const id = crypto.randomUUID();
     pendingNestedFocus.current = { kind: "links", key: nestedEntryKey(item.id, id) };
     updateEntry(item.id, (currentItem) => ({
@@ -233,21 +283,6 @@ export function ContributionItemsEditor({
     }));
   }
 
-  function updateRepository(item: ContributionItem, field: "url" | "description", text: string) {
-    updateEntry(item.id, (currentItem) => ({
-      ...currentItem,
-      repository: { ...(currentItem.repository ?? { url: "", description: "" }), [field]: text },
-    }));
-  }
-
-  function removeRepository(item: ContributionItem) {
-    updateEntry(item.id, (currentItem) => {
-      const next = { ...currentItem };
-      delete next.repository;
-      return next;
-    });
-  }
-
   return (
     <section aria-labelledby={`${baseId}-title`} className="space-y-5">
       <div className="space-y-1">
@@ -307,8 +342,6 @@ export function ContributionItemsEditor({
       {value.items.map((item, index) => {
         const controlId = `${baseId}-entry-${index}`;
         const links = editorLinks(item);
-        const repository = item.repository;
-        const repositoryTarget = repository ? parseGitHubRepositoryUrl(repository.url) : null;
         const itemTitle = item.title.trim() || t("entry", { number: index + 1 });
         const linkSectionPath = ["data", "contributions", "items", index] as const;
         return (
@@ -363,7 +396,9 @@ export function ContributionItemsEditor({
                 onChange={(event) =>
                   updateEntry(item.id, (currentItem) => ({
                     ...currentItem,
-                    description: event.target.value,
+                    description: item.repository?.description
+                      ? mergeDescriptions(event.target.value, item.repository.description)
+                      : event.target.value,
                   }))
                 }
               />
@@ -375,9 +410,12 @@ export function ContributionItemsEditor({
                 <p className="text-xs leading-5 text-muted-foreground">{t("linksHelp")}</p>
               </div>
               {links.map(({ link, legacy }, linkIndex) => {
-                const urlPath = legacy
-                  ? [...linkSectionPath, "url"]
-                  : [...linkSectionPath, "links", linkIndex, "url"];
+                const urlPath =
+                  legacy === "url"
+                    ? [...linkSectionPath, "url"]
+                    : legacy === "repository"
+                      ? [...linkSectionPath, "repository", "url"]
+                      : [...linkSectionPath, "links", linkIndex, "url"];
                 return (
                   <div key={link.id} className="space-y-3 border-t border-border pt-3">
                     <Field htmlFor={`${controlId}-link-${linkIndex}-label`} label={t("linkLabel")}>
@@ -397,7 +435,7 @@ export function ContributionItemsEditor({
                     <Field
                       htmlFor={`${controlId}-link-${linkIndex}-url`}
                       label={t("linkUrl")}
-                      description={legacy ? t("urlHelp") : undefined}
+                      description={legacy === "url" ? t("urlHelp") : undefined}
                       error={hasIssue(errors, "invalid_url", urlPath) ? t("invalidUrl") : undefined}
                     >
                       <Input
@@ -427,7 +465,7 @@ export function ContributionItemsEditor({
                   if (control) nestedInputs.current.linkAddButtons.set(item.id, control);
                   else nestedInputs.current.linkAddButtons.delete(item.id);
                 }}
-                disabled={links.length >= 5}
+                disabled={links.length >= contributionLinksMax}
                 aria-describedby={`${controlId}-link-limit`}
                 onClick={() => addLink(item)}
               >
@@ -533,77 +571,6 @@ export function ContributionItemsEditor({
                 </p>
               </div>
             </details>
-
-            {repository ? (
-              <details className="rounded-lg border border-border bg-surface-raised/30 p-3" open>
-                <summary className="cursor-pointer rounded-sm text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring">
-                  {t("repositoryTitle")}
-                </summary>
-                <div className="mt-3 space-y-3">
-                  <p className="text-xs leading-5 text-muted-foreground">{t("repositoryHelp")}</p>
-                  <Field
-                    htmlFor={`${controlId}-repository-url`}
-                    label={t("repositoryUrl")}
-                    description={
-                      repositoryTarget
-                        ? t("repositoryPreview", { repository: repositoryTarget.fullName })
-                        : undefined
-                    }
-                    error={
-                      hasIssue(errors, "invalid_url", [...linkSectionPath, "repository", "url"])
-                        ? t("repositoryInvalid")
-                        : undefined
-                    }
-                  >
-                    <Input
-                      type="url"
-                      inputMode="url"
-                      autoComplete="off"
-                      spellCheck={false}
-                      value={repository.url}
-                      placeholder={t("repositoryUrlPlaceholder")}
-                      onChange={(event) => updateRepository(item, "url", event.target.value)}
-                    />
-                  </Field>
-                  <Field
-                    htmlFor={`${controlId}-repository-description`}
-                    label={t("repositoryDescription")}
-                  >
-                    <Textarea
-                      data-emoji-target="true"
-                      rows={2}
-                      value={repository.description}
-                      placeholder={t("repositoryDescriptionPlaceholder")}
-                      onChange={(event) =>
-                        updateRepository(item, "description", event.target.value)
-                      }
-                    />
-                  </Field>
-                  <Button
-                    variant="ghost"
-                    aria-label={t("removeRepository")}
-                    onClick={() => removeRepository(item)}
-                  >
-                    <Trash2 aria-hidden="true" />
-                    {t("removeRepository")}
-                  </Button>
-                </div>
-              </details>
-            ) : (
-              <Button
-                variant="outline"
-                aria-label={t("addRepository")}
-                onClick={() =>
-                  updateEntry(item.id, (currentItem) => ({
-                    ...currentItem,
-                    repository: { url: "", description: "" },
-                  }))
-                }
-              >
-                <Plus aria-hidden="true" />
-                {t("addRepository")}
-              </Button>
-            )}
 
             <div className="space-y-1">
               <Button

@@ -114,7 +114,7 @@ describe("manual contribution rendering", () => {
     expect(empty.htmlFragments).toEqual([]);
   });
 
-  it("derives exact, escaped image and repository HTML ranges without customImages", () => {
+  it("keeps legacy repository details as normal link text beside safe image HTML", () => {
     const result = render(
       entry({
         images: [
@@ -131,7 +131,7 @@ describe("manual contribution rendering", () => {
       }),
     );
     expect(result.errors).toEqual([]);
-    expect(result.htmlFragments).toHaveLength(2);
+    expect(result.htmlFragments).toHaveLength(1);
     for (const fragment of result.htmlFragments) {
       expect(result.markdown.slice(fragment.start, fragment.end)).toBe(fragment.html);
       expect(fragment.tree.children[0]).toMatchObject({ type: "element", tagName: "div" });
@@ -140,9 +140,8 @@ describe("manual contribution rendering", () => {
     expect(result.htmlFragments[0]?.html).toContain(
       'alt="Screenshot <script>alert(&#x22;x&#x22;)</script>"',
     );
-    expect(result.htmlFragments[1]?.html).toContain("Example/project");
-    expect(result.htmlFragments[1]?.html).toContain("&#x3C;script>safe text&#x3C;/script>");
-    expect(result.markdown).toContain("https://github.com/Example/project");
+    expect(result.markdown).toContain("[Example/project](<https://github.com/Example/project/>)");
+    expect(result.markdown).toContain("safe text");
   });
 
   it("shares the aggregate HTML budget and points an overflow to the contributing field", () => {

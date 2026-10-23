@@ -2,7 +2,9 @@ import type { CardAppearance } from "../profile/module-content";
 import type { ContentLocale } from "../profile/profile-schema";
 import {
   cardBackground,
+  cardTypographyScale,
   resolveCardAppearance,
+  scaleCardTypography,
   type ResolvedCardAppearance,
 } from "./card-appearance";
 import type { ResourceKind, ResourceSnapshot } from "./resource-types";
@@ -10,6 +12,7 @@ import type { ExtendedMetric } from "./extended-types";
 import type { repositoryContributionStatIds } from "./extended-options";
 
 export type ResourceCardRenderOptions = {
+  cardColumns?: 1 | 2;
   appearance?: CardAppearance;
   stale?: boolean;
   showOwner?: boolean;
@@ -197,10 +200,16 @@ function heading(
   title: string,
   y: number,
   theme: ResolvedCardAppearance,
+  cardColumns: 1 | 2,
 ): string {
   if (theme.hideTitle) return "";
   const x = theme.showIcons ? 48 : 24;
-  const line = boundedLines(title, Math.floor((theme.width - x - 24) / 11), 1)[0] ?? "";
+  const line =
+    boundedLines(
+      title,
+      Math.floor((theme.width - x - 24) / (11 * cardTypographyScale(cardColumns))),
+      1,
+    )[0] ?? "";
   return (
     (theme.showIcons ? icon(kind, 24, y - 15, theme) : "") +
     text(x, y, line, `font-size="19" font-weight="650" fill="${theme.title}"`)
@@ -232,9 +241,13 @@ function statistic(
   theme: ResolvedCardAppearance,
   width: number,
   kind: "stars" | "forks" | "files" | "comments",
+  cardColumns: 1 | 2,
 ): string {
   const valueText = number(value, locale, theme);
-  const fontSize = Math.min(22, width / (Array.from(valueText).length * 0.63));
+  const fontSize = Math.min(
+    22,
+    width / (Array.from(valueText).length * 0.63 * cardTypographyScale(cardColumns)),
+  );
   return (
     (theme.showIcons ? icon(kind, x, y - 12, theme) : "") +
     text(x + (theme.showIcons ? 22 : 0), y, label, `font-size="12" fill="${theme.muted}"`) +
@@ -254,6 +267,7 @@ function metadataCard(
 ): string {
   const t = labels[locale];
   const theme = resolveCardAppearance(options.appearance);
+  const cardColumns = options.cardColumns ?? 1;
   const defaultTitle =
     snapshot.kind === "repository"
       ? options.showOwner
@@ -262,7 +276,7 @@ function metadataCard(
       : `Gist · ${snapshot.target.slice(0, 12)}${snapshot.target.length > 12 ? "…" : ""}`;
   const title = theme.customTitle ?? defaultTitle;
   const owner = options.showOwner ? `${t.owner}: @${snapshot.owner}` : t[snapshot.kind];
-  const maxUnits = Math.floor((theme.width - 56) / 7.5);
+  const maxUnits = Math.floor((theme.width - 56) / (7.5 * cardTypographyScale(cardColumns)));
   const description = boundedLines(
     snapshot.description || t.noDescription,
     maxUnits,
@@ -298,7 +312,7 @@ function metadataCard(
   const thirdColumn = Math.round((theme.width * 2) / 3) + 8;
   const statisticWidth = secondColumn - 48;
   const body =
-    heading(snapshot.kind, title, 34, theme) +
+    heading(snapshot.kind, title, 34, theme, cardColumns) +
     text(24, theme.hideTitle ? 34 : 56, owner, `font-size="11" fill="${theme.muted}"`) +
     description
       .map((line, index) =>
@@ -313,7 +327,17 @@ function metadataCard(
     (theme.design === "panels"
       ? `<rect x="16" y="${statsY - 16}" width="${theme.width - 32}" height="64" rx="8" fill="${theme.panel}"/>`
       : "") +
-    statistic(24, statsY, t.stars, snapshot.stars, locale, theme, statisticWidth, "stars") +
+    statistic(
+      24,
+      statsY,
+      t.stars,
+      snapshot.stars,
+      locale,
+      theme,
+      statisticWidth,
+      "stars",
+      cardColumns,
+    ) +
     statistic(
       secondColumn,
       statsY,
@@ -323,6 +347,7 @@ function metadataCard(
       theme,
       statisticWidth,
       "forks",
+      cardColumns,
     ) +
     (snapshot.language
       ? `<circle cx="${thirdColumn}" cy="${statsY + 5}" r="5" fill="${snapshot.language.color ?? theme.accent}"/>` +
@@ -347,6 +372,7 @@ function metadataCard(
           theme,
           statisticWidth,
           "files",
+          cardColumns,
         ) +
         statistic(
           secondColumn,
@@ -357,6 +383,7 @@ function metadataCard(
           theme,
           statisticWidth,
           "comments",
+          cardColumns,
         )
       : "") +
     (contributionRows.length
@@ -424,7 +451,7 @@ function wakaTimeCard(
     : t.lastSevenDays;
   const title = theme.customTitle ?? t.wakatime;
   let body =
-    heading("wakatime", title, 34, theme) +
+    heading("wakatime", title, 34, theme, options.cardColumns ?? 1) +
     text(
       24,
       56 - titleOffset,
@@ -489,30 +516,36 @@ export function renderResourceCard(
   locale: ContentLocale,
   options: ResourceCardRenderOptions = {},
 ): string {
-  return snapshot.kind === "wakatime"
-    ? wakaTimeCard(snapshot, locale, options)
-    : metadataCard(snapshot, locale, options);
+  return scaleCardTypography(
+    snapshot.kind === "wakatime"
+      ? wakaTimeCard(snapshot, locale, options)
+      : metadataCard(snapshot, locale, options),
+    options.cardColumns,
+  );
 }
 
 export function renderResourceUnavailable(
   kind: ResourceKind,
   locale: ContentLocale,
-  options: Pick<ResourceCardRenderOptions, "appearance"> = {},
+  options: Pick<ResourceCardRenderOptions, "appearance" | "cardColumns"> = {},
 ): string {
   const t = labels[locale];
   const theme = resolveCardAppearance(options.appearance);
   const title = theme.customTitle ?? t[kind];
   const titleOffset = theme.hideTitle ? 22 : 0;
   const body =
-    heading(kind, title, 34, theme) +
+    heading(kind, title, 34, theme, options.cardColumns ?? 1) +
     text(24, 81 - titleOffset, t.unavailable, 'font-size="14"') +
     text(24, 108 - titleOffset, t.unavailableHelp, `font-size="12" fill="${theme.muted}"`);
-  return frame(
-    title,
-    `${title}. ${t.unavailable} ${t.unavailableHelp}`,
-    locale,
-    theme,
-    144 - titleOffset,
-    body,
+  return scaleCardTypography(
+    frame(
+      title,
+      `${title}. ${t.unavailable} ${t.unavailableHelp}`,
+      locale,
+      theme,
+      144 - titleOffset,
+      body,
+    ),
+    options.cardColumns,
   );
 }

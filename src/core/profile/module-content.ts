@@ -43,6 +43,9 @@ export const metricCardIds = Object.freeze([
   "extended-wakatime",
 ] as const);
 export type MetricCardId = (typeof metricCardIds)[number];
+export type CardColumns = 1 | 2;
+export type ActivityContentOrder = "activity-first" | "contributions-first";
+export const contributionLinksMax = 10;
 
 function uniqueCards<T extends z.ZodType<string>>(schema: T) {
   return z.array(schema).superRefine((cards, context) => {
@@ -230,12 +233,13 @@ export const moduleContentSchemas = Object.freeze({
   contributions: z.strictObject({
     items: entriesWithUniqueIds(
       moduleContentV1Schemas.contributions.shape.items.element.extend({
-        links: entriesWithUniqueIds(linkSchema).max(5).optional(),
+        links: entriesWithUniqueIds(linkSchema).max(contributionLinksMax).optional(),
         images: entriesWithUniqueIds(
           z.strictObject({ id: entryIdSchema, url: z.string(), alt: z.string() }),
         )
           .max(3)
           .optional(),
+        // Accepted only to recover v2 drafts created before repository previews were retired.
         repository: z.strictObject({ url: z.string(), description: z.string() }).optional(),
       }),
     ),
@@ -247,6 +251,7 @@ export const moduleContentSchemas = Object.freeze({
     username: z.string(),
     cards: uniqueCards(z.enum(metricCardIds)),
     cardColumns: z.union([z.literal(1), z.literal(2)]).optional(),
+    contentOrder: z.enum(["activity-first", "contributions-first"]).optional(),
     appearance: cardAppearanceSchema.optional(),
     extended: extendedOptionsSchema.optional(),
   }),

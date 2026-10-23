@@ -32,9 +32,15 @@
     "choose": "What would you like to include?",
     "cardColumns": {
       "label": "Cards per row",
-      "help": "Choose one or two selected cards per row. GitHub may wrap them on narrow screens.",
+      "help": "Two cards fill the README width together, with larger text for readability.",
       "one": "One per row",
       "two": "Two per row"
+    },
+    "contentOrder": {
+      "label": "Section order",
+      "help": "Choose whether activity cards or your contributions appear first.",
+      "activityFirst": "Activity first",
+      "contributionsFirst": "Contributions first"
     },
     "groups": {
       "own": "Our activity cards",
@@ -317,7 +323,7 @@
   "urlPlaceholder": "https://example.com/community-guide",
   "invalidUrl": "Enter a valid http:// or https:// address without spaces or sign-in credentials, or leave this field empty.",
   "linksTitle": "Links",
-  "linksHelp": "Add up to five destinations. A blank label is shown as “More information” in your README.",
+  "linksHelp": "Add up to ten destinations. A blank label is shown as “More information” in your README.",
   "linkLabel": "Link label",
   "linkLabelPlaceholder": "Documentation",
   "linkUrl": "Link URL",
@@ -325,7 +331,7 @@
   "addLink": "Add link",
   "removeLink": "Remove link {number}",
   "removeLinkVisible": "Remove link",
-  "linkLimit": "Each contribution can have up to five links.",
+  "linkLimit": "Each contribution can have up to ten links.",
   "imagesTitle": "Images",
   "imagesHelp": "Add up to three publicly accessible images. Each image needs descriptive alt text before export.",
   "imageUrl": "Image URL",
@@ -339,16 +345,6 @@
   "removeImage": "Remove image {number}",
   "removeImageVisible": "Remove image",
   "imageLimit": "Each contribution can have up to three images.",
-  "repositoryTitle": "GitHub repository preview",
-  "repositoryHelp": "Enter a public HTTPS github.com/owner/repository URL and an optional description. Repository details are not fetched.",
-  "repositoryUrl": "Repository URL",
-  "repositoryUrlPlaceholder": "https://github.com/owner/repository",
-  "repositoryDescription": "Repository description",
-  "repositoryDescriptionPlaceholder": "A short description of the repository",
-  "repositoryInvalid": "Enter an HTTPS github.com URL with exactly an owner/repository path.",
-  "repositoryPreview": "Preview: {repository}",
-  "addRepository": "Add repository preview",
-  "removeRepository": "Remove repository preview",
   "moveUp": "Move {title} up",
   "moveDown": "Move {title} down",
   "moveUpVisible": "Move up",
@@ -357,5 +353,5 @@
   "add": "Add contribution",
   "remove": "Remove contribution {number}",
   "removeVisible": "Remove contribution",
-  "removeHelp": "Removing this entry deletes its title, description, links, images, and repository preview from your draft. Hide the section instead to keep them."
+  "removeHelp": "Removing this entry deletes its title, description, links, and images from your draft. Hide the section instead to keep them."
 }
