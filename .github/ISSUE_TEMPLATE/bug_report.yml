@@ -1,48 +1,49 @@
-name: Informar un error
-description: Describir un problema reproducible en el alcance disponible.
-title: "[Error]: "
+name: Report a bug
+description: Describe a reproducible problem within the available scope.
+title: "[Bug]: "
 body:
   - type: markdown
     attributes:
       value: |
-        Indicá qué ocurrió y cómo reproducirlo. Usá ejemplos ficticios y evitá incluir credenciales o información privada.
+        Describe what happened and how to reproduce it. Use fictional examples and do not include credentials or private information.
+        Do not use this form for a suspected security vulnerability. Follow the [security policy](https://github.com/juanNH/ReadmeGenerator/blob/dev/SECURITY.md) to report it privately.
   - type: textarea
     id: problem
     attributes:
-      label: Problema
-      description: ¿Qué estabas intentando hacer y qué sucedió?
+      label: Problem
+      description: What were you trying to do, and what happened?
     validations:
       required: true
   - type: textarea
     id: steps
     attributes:
-      label: Pasos para reproducir
+      label: Steps to reproduce
       placeholder: |
-        1. Abrir la ruta...
-        2. Activar el control...
-        3. Observar...
+        1. Open the route...
+        2. Activate the control...
+        3. Observe...
     validations:
       required: true
   - type: textarea
     id: expected
     attributes:
-      label: Resultado esperado
+      label: Expected result
     validations:
       required: true
   - type: textarea
     id: actual
     attributes:
-      label: Resultado actual
+      label: Actual result
     validations:
       required: true
   - type: input
     id: environment
     attributes:
-      label: Entorno
-      description: Navegador, sistema y tamaño de pantalla; versión o commit si se conoce.
-      placeholder: "Navegador y versión, sistema, ruta afectada"
+      label: Environment
+      description: Browser, operating system, and screen size; include the version or commit if known.
+      placeholder: "Browser and version, operating system, affected route"
   - type: textarea
     id: evidence
     attributes:
-      label: Evidencia y contexto adicional
-      description: Capturas, errores o detalles de teclado y accesibilidad que ayuden a reproducir el problema.
+      label: Evidence and additional context
+      description: Screenshots, errors, or keyboard and accessibility details that may help reproduce the problem.

@@ -1,45 +1,45 @@
-# ADR 0001: Una aplicación Next.js con límites por responsabilidad
+# ADR 0001: A Next.js application with responsibility boundaries
 
-- Estado: aceptada para la base inicial.
-- Fecha: 2026-10-19.
-- Producto: GitHub Profile Generator.
+- Status: accepted for the initial foundation.
+- Date: 2026-10-19.
+- Product: GitHub Profile Generator.
 
-## Contexto
+## Context
 
-El producto compondrá README de perfiles mediante nueve módulos opcionales. Necesita una interfaz accesible y visual, guardado local inicial y exportación. A futuro puede consultar GitHub y asistir con IA, operaciones que pueden necesitar secretos, control de uso y ejecución del lado del servidor.
+The product will compose profile READMEs through nine optional modules. It needs an accessible, visual interface, initial local saving, and export. In the future, it may query GitHub and provide AI assistance, operations that may require secrets, usage controls, and server-side execution.
 
-La entrega actual prepara el proyecto, el kit visual bilingüe y la documentación. El editor y el documento versionado del perfil todavía no están implementados.
+The current delivery prepares the project, bilingual visual kit, and documentation. The editor and versioned profile document have not yet been implemented.
 
-## Decisión
+## Decision
 
-Mantener un repositorio y una aplicación Next.js App Router con TypeScript estricto, Node.js 24 y pnpm. Las versiones exactas se fijan en el manifiesto y el lockfile. Usar Server Components por defecto y fronteras cliente pequeñas para interacción.
+Keep one repository and one Next.js App Router application with strict TypeScript, Node.js 24, and pnpm. Pin exact versions in the manifest and lockfile. Use Server Components by default and small client boundaries for interaction.
 
-Organizar por responsabilidad: `app` compone rutas; `components/ui` ofrece primitivas; `features` coordina recorridos; `modules` presenta secciones; `core` contendrá contratos y generación pura; `server` albergará servicios exclusivos del servidor. Crear código cuando una necesidad concreta lo justifique, sin capas genéricas anticipadas.
+Organize by responsibility: `app` composes routes; `components/ui` provides primitives; `features` coordinates user flows; `modules` presents sections; `core` will contain contracts and pure generation; `server` will host server-only services. Create code when a concrete need justifies it, without adding generic layers in advance.
 
-Construir un kit con tokens, Tailwind CSS, primitivas Radix, componentes con enfoque shadcn, variantes CVA, Lucide y `next-themes`. Mantener inglés como idioma inicial y español como alternativa completa con `next-intl` y rutas localizadas.
+Build a kit with tokens, Tailwind CSS, Radix primitives, shadcn-style components, CVA variants, Lucide, and `next-themes`. Keep English as the default language and Spanish as a complete alternative with `next-intl` and localized routes.
 
-La futura IA propondrá cambios sobre el documento del perfil y reutilizará el generador existente. La base no instala proveedores ni expone endpoints de IA. Las credenciales de cualquier integración permanecerán en código exclusivo del servidor.
+Future AI assistance will propose changes to the profile document and reuse the existing generator. The foundation does not install providers or expose AI endpoints. Credentials for any integration will remain in server-only code.
 
-## Alternativas consideradas
+## Alternatives considered
 
-| Alternativa                                       | Ventaja                                             | Motivo de la decisión                                                                                                          |
-| ------------------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| SPA estática con backend incorporado después      | Editor inicial sencillo y despliegue estático.      | Next.js ya fue elegido para conservar interfaz e integraciones futuras en una aplicación.                                      |
-| Frontend y API independientes                     | Despliegue y escalado separados.                    | La base actual no necesita esa operación adicional. Se reconsiderará ante requisitos reales.                                   |
-| Monorepo con paquetes compartidos desde el inicio | Separación distribuible de contratos y componentes. | Un solo consumidor no requiere publicar ni administrar varios paquetes. Los límites internos permiten extraerlos más adelante. |
-| Generación libre del README mediante IA           | Flexibilidad inmediata de redacción.                | El producto requiere edición estructurada, salida predecible y revisión de sugerencias; el generador será determinista.        |
+| Alternative                                  | Advantage                                             | Reason for the decision                                                                                                  |
+| -------------------------------------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| Static SPA with a backend added later        | A simple initial editor and static deployment.        | Next.js was already chosen to keep the interface and future integrations in one application.                             |
+| Separate frontend and API                    | Separate deployment and scaling.                      | The current foundation does not need that additional operational burden. Reconsider if real requirements arise.          |
+| Monorepo with shared packages from the start | Distributable separation of contracts and components. | A single consumer does not need to publish or manage multiple packages. Internal boundaries allow extracting them later. |
+| Free-form README generation with AI          | Immediate writing flexibility.                        | The product needs structured editing, predictable output, and review of suggestions; generation will be deterministic.   |
 
-## Consecuencias
+## Consequences
 
-- La UI y los servicios futuros pueden evolucionar dentro de una aplicación.
-- Los límites cliente/servidor requieren atención explícita en imports y datos serializados.
-- El modelo y el generador podrán probarse sin navegador ni proveedores.
-- El kit bilingüe permite validar decisiones visuales antes del editor.
-- La persistencia local inicial no proporciona sincronización entre dispositivos.
-- Un perfil de GitHub sigue sujeto al formato que GitHub admite; la personalización del editor debe respetar esa salida.
+- The UI and future services can evolve within one application.
+- Client/server boundaries require explicit attention to imports and serialized data.
+- The model and generator can be tested without a browser or providers.
+- The bilingual kit allows visual decisions to be validated before the editor.
+- Initial local persistence does not provide cross-device synchronization.
+- A GitHub profile remains subject to the format GitHub accepts; editor customization must respect that output.
 
-## Revisión futura
+## Future review
 
-Revisar la decisión si aparecen varios consumidores del modelo, ejecución asíncrona independiente, sincronización persistente o requisitos de despliegue separados. Documentar una nueva decisión que sustituya ésta y explique su evidencia; no cambiar estructura sólo por anticipar crecimiento.
+Review this decision if there are multiple model consumers, independent asynchronous execution, persistent synchronization, or separate deployment requirements. Document a new decision that supersedes this one and explains its evidence; do not change the structure solely in anticipation of growth.
 
-Ver [arquitectura](../architecture.md).
+See [architecture](../architecture.md).

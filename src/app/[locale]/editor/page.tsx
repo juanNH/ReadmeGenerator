@@ -3,6 +3,7 @@ import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
+import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { EditorWorkspace } from "@/features/editor/editor-workspace";
 import { routing } from "@/i18n/routing";
@@ -14,7 +15,11 @@ export async function generateMetadata({ params }: EditorPageProps): Promise<Met
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   const t = await getTranslations({ locale, namespace: "Editor" });
-  return { title: t("metaTitle"), description: t("metaDescription") };
+  return {
+    title: t("metaTitle"),
+    description: t("metaDescription"),
+    robots: { index: false, follow: false },
+  };
 }
 
 export default async function EditorPage({ params }: EditorPageProps) {
@@ -33,9 +38,9 @@ export default async function EditorPage({ params }: EditorPageProps) {
       <main
         id="main-content"
         tabIndex={-1}
-        className="mx-auto max-w-[1600px] px-4 pt-4 pb-12 sm:px-8 sm:pt-6 lg:px-10"
+        className="mx-auto max-w-[1600px] px-4 pt-1 pb-12 sm:px-8 sm:pt-6 lg:px-10"
       >
-        <div className="mb-2 max-w-4xl space-y-1 sm:mb-6 sm:space-y-2">
+        <div className="mb-1 max-w-4xl space-y-1 sm:mb-6 sm:space-y-2">
           <p className="hidden font-mono text-xs tracking-[0.14em] text-muted-foreground uppercase sm:block">
             {t("pageEyebrow")}
           </p>
@@ -67,6 +72,7 @@ export default async function EditorPage({ params }: EditorPageProps) {
           />
         </NextIntlClientProvider>
       </main>
+      <SiteFooter />
     </>
   );
 }

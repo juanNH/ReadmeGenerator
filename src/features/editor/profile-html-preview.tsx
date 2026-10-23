@@ -9,6 +9,7 @@ import { normalizePublicImageUrl } from "@/core/readme/public-image";
 import { normalizeWebUrl } from "@/core/readme/web-url";
 import { PublicProfileImage } from "./public-profile-image";
 import { findCountryByIconUrl } from "@/core/location";
+import { findTechnologyByIconUrl } from "@/core/technologies";
 
 const allowedTags = new Set([
   "h1",
@@ -132,6 +133,25 @@ export function ProfileHtmlPreview({ fragment }: { fragment: CustomHtmlFragment 
       const src =
         typeof properties.src === "string" ? normalizePublicImageUrl(properties.src) : null;
       if (!src || typeof properties.alt !== "string") return null;
+      const technology = findTechnologyByIconUrl(src);
+      if (
+        technology &&
+        properties.alt === "" &&
+        Number(properties.width) === 20 &&
+        Number(properties.height) === 20
+      )
+        return (
+          <Image
+            key={path}
+            src={technology.iconPath}
+            alt=""
+            aria-hidden="true"
+            width={20}
+            height={20}
+            unoptimized
+            className="inline-block size-5 shrink-0 align-middle"
+          />
+        );
       const country = findCountryByIconUrl(src);
       if (
         country &&
@@ -320,8 +340,10 @@ function elementClassName(node: Element, align: string) {
         ? "my-4 border-l-4 border-accent/50 pl-4 text-muted-foreground"
         : tag === "caption"
           ? "mb-2 text-left font-medium"
-          : tag === "code" || tag === "kbd"
-            ? "rounded bg-surface-raised px-1 font-mono text-[0.9em]"
-            : "";
+          : tag === "kbd"
+            ? "inline-block rounded border border-border bg-surface-raised px-2 py-0.5 align-middle font-sans text-xs leading-6"
+            : tag === "code"
+              ? "rounded bg-surface-raised px-1 font-mono text-[0.9em]"
+              : "";
   return `${base} ${align}`.trim() || undefined;
 }

@@ -13,10 +13,89 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  foundation:
-    name: Check, build and browser accessibility
+  branch-policy:
+    name: Branch policy
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Check out trusted base revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.event.pull_request.base.sha || github.sha }}
+          persist-credentials: false
+      - name: Install Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version-file: .nvmrc
+      - name: Detect the trusted branch policy implementation
+        id: branch-policy
+        run: |
+          if [[ -f scripts/check-github-branch-policy.mjs ]]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Evaluate branch policy from trusted base
+        if: steps.branch-policy.outputs.available == 'true'
+        run: node scripts/check-github-branch-policy.mjs
+      - name: Bootstrap validation while policy is absent from the base
+        if: steps.branch-policy.outputs.available != 'true'
+        env:
+          BRANCH_POLICY_SOURCE_BRANCH: ${{ github.head_ref }}
+          BRANCH_POLICY_PULL_REQUEST_AUTHOR: ${{ github.event.pull_request.user.login }}
+          BRANCH_POLICY_TARGET_BRANCH: ${{ github.base_ref }}
+          BRANCH_POLICY_EVENT_NAME: ${{ github.event_name }}
+          BRANCH_POLICY_HEAD_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name }}
+          BRANCH_POLICY_BASE_REPOSITORY: ${{ github.repository }}
+        run: |
+          node --input-type=module --eval '
+            const sourceBranch = process.env.BRANCH_POLICY_SOURCE_BRANCH;
+            const targetBranch = process.env.BRANCH_POLICY_TARGET_BRANCH;
+            const sameRepository =
+              process.env.BRANCH_POLICY_HEAD_REPOSITORY === process.env.BRANCH_POLICY_BASE_REPOSITORY;
+
+            if (
+              process.env.BRANCH_POLICY_EVENT_NAME === "pull_request" &&
+              sourceBranch === "dev" &&
+              targetBranch === "main" &&
+              sameRepository
+            ) {
+              console.log("Branch policy bootstrap: same-repository dev-to-main promotion is allowed.");
+            } else if (process.env.BRANCH_POLICY_PULL_REQUEST_AUTHOR === "dependabot[bot]") {
+              if (targetBranch === "dev" || targetBranch === "main") {
+                console.log(`Branch policy bootstrap: Dependabot pull request targeting ${targetBranch} is allowed.`);
+              } else {
+                console.error("Branch policy bootstrap failed: Dependabot pull requests must target the dev or main integration branch.");
+                process.exitCode = 1;
+              }
+            } else {
+              let validateBranchName;
+              try {
+                ({ validateBranchName } = await import("./scripts/check-branch-name.mjs"));
+              } catch {
+                console.error("Branch policy bootstrap failed: the trusted base does not contain the shared branch-name validator.");
+                process.exitCode = 1;
+              }
+
+              if (validateBranchName) {
+                const error = sourceBranch ? validateBranchName(sourceBranch) : "GitHub did not provide a source branch.";
+                if (error) {
+                  console.error(`Branch policy bootstrap failed: ${error}`);
+                  process.exitCode = 1;
+                } else {
+                  console.log(`Branch policy bootstrap passed: ${sourceBranch}.`);
+                }
+              }
+            }
+          '
+
+  foundation:
+    name: Static checks and unit tests
+    needs: branch-policy
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
     env:
       NEXT_TELEMETRY_DISABLED: "1"
     steps:
@@ -38,11 +117,61 @@ jobs:
         run: pnpm licenses:generate
       - name: Check code, translations and documentation
         run: pnpm check
+      - name: Test branch policy context handling
+        run: node --test scripts/check-github-branch-policy.test.mjs scripts/check-github-branch-policy.integration.test.mjs
+
+  browser:
+    name: Browser accessibility (shard ${{ matrix.shard }}/2)
+    needs: branch-policy
+    runs-on: ubuntu-latest
+    container:
+      # Keep this version aligned with @playwright/test in package.json.
+      image: mcr.microsoft.com/playwright:v1.64.1-noble@sha256:7852dc5a7d72f5fe458a597d690f6c42fbc8e9e26ddfa95f8e6ef552558d9bbf
+      options: --user 1001 --shm-size=1gb
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2]
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Install pnpm
+        uses: pnpm/action-setup@f520eceda224fe1a4aed5a2a27a194379a409996 # v6
+      - name: Install Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
       - name: Build production app
         run: pnpm build
-      - name: Install test browser
-        run: pnpm exec playwright install --with-deps chromium
       - name: Check browser interactions and accessibility
-        run: pnpm test:e2e
+        run: pnpm exec playwright test --shard=${{ matrix.shard }}/2
       - name: Check exported public card routes with controlled providers
+        if: matrix.shard == 1
         run: pnpm test:e2e:cards
+
+  quality:
+    name: Check, build and browser accessibility
+    needs: [foundation, browser]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Require every quality suite to pass
+        env:
+          FOUNDATION_RESULT: ${{ needs.foundation.result }}
+          BROWSER_RESULT: ${{ needs.browser.result }}
+        run: |
+          if [[ "$FOUNDATION_RESULT" != "success" || "$BROWSER_RESULT" != "success" ]]; then
+            echo "::error::Foundation and both browser shards must pass."
+            exit 1
+          fi
+          echo "Foundation and both browser shards passed."

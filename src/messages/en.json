@@ -1,7 +1,23 @@
 {
   "Metadata": {
     "title": "GitHub Profile Generator",
-    "description": "Make your GitHub profile feel like you. A short intro, your favorite tools and whatever else you want to share."
+    "description": "Make your GitHub profile feel like you. A short intro, your favorite tools and whatever else you want to share.",
+    "socialTitle": "A GitHub profile, shaped around you"
+  },
+  "SocialSharing": {
+    "alt": "GitHub Profile Generator social preview: a visual README editor shaped around your story.",
+    "eyebrow": "A PROFILE README, SHAPED BY YOU",
+    "title": "Your GitHub profile.",
+    "titleAccent": "On your terms.",
+    "description": "A visual editor for a README that leaves room for your story.",
+    "sectionsTitle": "A few building blocks",
+    "sectionAbout": "About you",
+    "sectionTools": "Tools",
+    "sectionProjects": "Projects",
+    "sectionActivity": "Activity",
+    "sectionContact": "Contact",
+    "note": "No account needed",
+    "footer": "Choose what you share. Leave the rest out."
   },
   "Navigation": {
     "home": "GitHub Profile Generator home",
@@ -9,6 +25,7 @@
     "modules": "Modules",
     "howItWorks": "How it works",
     "editor": "Create your profile",
+    "about": "About",
     "skip": "Skip to content"
   },
   "Controls": {
@@ -90,9 +107,65 @@
     },
     "closingTitle": "A little space. A better first impression.",
     "closingDescription": "Clear content, purposeful details and a design that leaves room for you.",
-    "closingAction": "Create your profile",
-    "footer": "Built around people, at every stage.",
-    "footerNote": "Independent project. Not affiliated with GitHub."
+    "closingAction": "Create your profile"
+  },
+  "About": {
+    "metaTitle": "About",
+    "metaDescription": "Why GitHub Profile Generator exists and the many ways people can help it grow.",
+    "eyebrow": "A tool shaped by a real need",
+    "title": "A profile is yours to describe.",
+    "lede": "GitHub Profile Generator began with a simple wish: make a profile that could reflect what I wanted to share, in my own way.",
+    "originTitle": "Why I started building it",
+    "originStory": "I wanted to refresh my GitHub profile, but I couldn't find a tool with enough flexibility to express the things I had in mind. I started this project to make a space where a short introduction, favorite tools, selected work, contributions, and contact links could come together on the writer's terms.",
+    "productBelief": "A profile does not need to prove anything. Public activity is only one part of a person's story, and it is fine to have little or none to show. This editor keeps its sections optional so people can choose what feels right for them.",
+    "helpEyebrow": "Open source is a shared effort",
+    "helpTitle": "There are many ways to take part.",
+    "helpIntro": "You don't need to start with code. A thoughtful report, a clearer explanation, or a recommendation to the right person can all move a project forward.",
+    "paths": {
+      "feedback": {
+        "title": "Help improve the experience",
+        "description": "Found a confusing step or something that doesn't work as expected? Describe what happened and what you were trying to do. Ideas for features are welcome too.",
+        "action": "Share feedback"
+      },
+      "build": {
+        "title": "Make something together",
+        "description": "Contribute code, improve documentation, or help make the editor easier to use. The contribution guide explains the setup and review process.",
+        "action": "Read the contribution guide"
+      },
+      "share": {
+        "title": "Help others find it",
+        "description": "If this editor could help someone shape their profile, pass it along. You can also star the repository to make it easier for others to discover.",
+        "action": "Explore the repository",
+        "stats": {
+          "star": "Stars",
+          "stars": "{count} on GitHub",
+          "fork": "Forks",
+          "forks": "{count} on GitHub"
+        }
+      }
+    },
+    "closingTitle": "Curious to try it?",
+    "closingDescription": "Start with the parts of your profile you want to share. You can leave the rest for another time.",
+    "closingAction": "Open the editor"
+  },
+  "Footer": {
+    "brand": "GitHub Profile Generator",
+    "description": "A flexible space to shape a GitHub profile in your own words.",
+    "explore": "Explore",
+    "exploreNavigation": "Explore the site",
+    "editor": "Profile editor",
+    "about": "About the project",
+    "privacy": "Privacy",
+    "project": "Project",
+    "projectNavigation": "Project resources",
+    "repository": "GitHub repository",
+    "issues": "Issues and feedback",
+    "contributing": "Contribution guide",
+    "license": "MIT License",
+    "notices": "Third-party notices",
+    "copyright": "© {year} GitHub Profile Generator",
+    "openSource": "Open source under",
+    "independent": "An independent project, not affiliated with GitHub."
   },
   "NotFound": {
     "title": "This page isn't here.",

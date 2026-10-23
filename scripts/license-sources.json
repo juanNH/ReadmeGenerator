@@ -65,6 +65,13 @@
       "kind": "upstream-context"
     },
     {
+      "id": "husky-9.1.7-license",
+      "file": "public/licenses/supplemental/husky-9.1.7-license.txt",
+      "url": "https://raw.githubusercontent.com/typicode/husky/799e84b716d0e03db80db5d5b0dcdd15b9d555fc/LICENSE",
+      "sha256": "a84ab50793627920239781ad6a48a749bc2fe37707e47fdf8e6cb1f55bc747ab",
+      "kind": "upstream-notice"
+    },
+    {
       "id": "imurmurhash-0.1.4-license",
       "file": "public/licenses/supplemental/imurmurhash-0.1.4-license.txt",
       "url": "https://raw.githubusercontent.com/jensyt/imurmurhash-js/9f40361c7e2835a9b7b8eaa1cbab2a9f94ee22a2/LICENSE",
@@ -1015,6 +1022,18 @@
           "sha256": "aa99847033c240a621fe987f0e06b754f388f22abd11a05bdf9cdd00794b7350"
         }
       ]
+    },
+    {
+      "name": "husky",
+      "version": "9.1.7",
+      "license": "MIT",
+      "registry": {
+        "url": "https://registry.npmjs.org/husky/9.1.7",
+        "integrity": "sha512-5gs5ytaNjBrh5Ow3zrvdUUY+0VxIuWVL4i9irt6friV+BqdCfmV11CQTWMiBYWHbXhco+J1kHfTOUkePhCDvMA==",
+        "gitHead": "799e84b716d0e03db80db5d5b0dcdd15b9d555fc"
+      },
+      "notices": ["husky-9.1.7-license"],
+      "revision": "799e84b716d0e03db80db5d5b0dcdd15b9d555fc"
     },
     {
       "name": "imurmurhash",

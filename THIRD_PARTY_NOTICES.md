@@ -1,56 +1,56 @@
-# Recursos de terceros
+# Third-party resources
 
-## GitHub Stats Extended: tarjetas, temas y ranking opcional
+## GitHub Stats Extended: cards, themes, and optional ranking
 
-Las tarjetas locales `extended-stats` y `extended-languages`, implementadas en `src/core/activity/render-extended-card.ts` y `render-extended-profile.ts`, adaptan la composición SVG de [GitHub Stats Extended](https://github.com/stats-organization/github-stats-extended/tree/0506c4c0e0acab7be096be48d0d59d50852d811f), fijado al commit `0506c4c0e0acab7be096be48d0d59d50852d811f`. Sus fuentes son [stats.ts](https://github.com/stats-organization/github-stats-extended/blob/0506c4c0e0acab7be096be48d0d59d50852d811f/packages/core/src/cards/stats.ts) y [top-languages.ts](https://github.com/stats-organization/github-stats-extended/blob/0506c4c0e0acab7be096be48d0d59d50852d811f/packages/core/src/cards/top-languages.ts), bajo `packages/core/src/cards/`. Los colores de `src/core/activity/extended-themes.ts` adaptan el [catálogo de temas](https://github.com/stats-organization/github-stats-extended/blob/0506c4c0e0acab7be096be48d0d59d50852d811f/packages/core/src/themes/index.ts) de esa revisión. La fórmula de `src/core/activity/activity-rank.ts` adapta [calculateRank.ts](https://github.com/stats-organization/github-stats-extended/blob/0506c4c0e0acab7be096be48d0d59d50852d811f/packages/core/src/calculateRank.ts), conservando la procedencia en su encabezado.
+The local `extended-stats` and `extended-languages` cards, implemented in `src/core/activity/render-extended-card.ts` and `render-extended-profile.ts`, adapt the SVG composition from [GitHub Stats Extended](https://github.com/stats-organization/github-stats-extended/tree/0506c4c0e0acab7be096be48d0d59d50852d811f), pinned to commit `0506c4c0e0acab7be096be48d0d59d50852d811f`. Their sources are [stats.ts](https://github.com/stats-organization/github-stats-extended/blob/0506c4c0e0acab7be096be48d0d59d50852d811f/packages/core/src/cards/stats.ts) and [top-languages.ts](https://github.com/stats-organization/github-stats-extended/blob/0506c4c0e0acab7be096be48d0d59d50852d811f/packages/core/src/cards/top-languages.ts) under `packages/core/src/cards/`. The colors in `src/core/activity/extended-themes.ts` adapt that revision's [theme catalog](https://github.com/stats-organization/github-stats-extended/blob/0506c4c0e0acab7be096be48d0d59d50852d811f/packages/core/src/themes/index.ts). The formula in `src/core/activity/activity-rank.ts` adapts [calculateRank.ts](https://github.com/stats-organization/github-stats-extended/blob/0506c4c0e0acab7be096be48d0d59d50852d811f/packages/core/src/calculateRank.ts), with provenance retained in its header.
 
-El código se distribuye bajo licencia MIT, copyright (c) 2020 Anurag Hazra, Abhijit Gupta, martin-mfg. Se conserva íntegra la licencia con sus avisos en [public/licenses/github-stats-extended.txt](public/licenses/github-stats-extended.txt), a partir de la [licencia de la revisión fijada](https://github.com/stats-organization/github-stats-extended/blob/0506c4c0e0acab7be096be48d0d59d50852d811f/LICENSE). Permite usar, modificar y distribuir el código con los avisos requeridos y sin garantía.
+The code is distributed under the MIT License, copyright (c) 2020 Anurag Hazra, Abhijit Gupta, martin-mfg. The complete license and its notices are preserved in [public/licenses/github-stats-extended.txt](public/licenses/github-stats-extended.txt), based on the [license at the pinned revision](https://github.com/stats-organization/github-stats-extended/blob/0506c4c0e0acab7be096be48d0d59d50852d811f/LICENSE). It permits using, modifying, and distributing the code with the required notices and without warranty.
 
-La adaptación utiliza consultas de datos públicos, traducciones y renderizado pasivo de esta aplicación. Ofrece la fórmula de ranking únicamente por elección explícita, identificada como una fórmula de actividad que no mide habilidad; si sus datos requeridos no están disponibles o son parciales, informa esa limitación. Las opciones visuales y de consulta se validan localmente. No instala paquetes del proyecto de origen, incorpora su backend ni llama a su servicio alojado. Las tarjetas de repositorios y Gists se implementan localmente a partir de sus metadatos públicos; no agregan una licencia de código copiado de esos renderizadores. Las tarjetas se sirven desde el despliegue de GitHub Profile Generator. El nombre identifica la procedencia del diseño y no implica respaldo ni paridad con toda la suite original. Ver [ADR 0023](docs/decisions/0023-customizable-activity-cards.md) y la [guía de distribución](docs/open-source.md).
+The adaptation uses public-data queries, translations, and passive rendering in this application. The ranking formula is available only by explicit choice and is identified as an activity formula that does not measure skill; if its required data is unavailable or partial, that limitation is reported. Visual and query options are validated locally. The source project’s packages and backend are not installed or incorporated, and its hosted service is not called. Repository and Gist cards are implemented locally from public metadata; they do not add a license for renderer code copied from that project. Cards are served from the GitHub Profile Generator deployment. The name identifies the design’s origin and does not imply endorsement or parity with the entire original suite. See [ADR 0023](docs/decisions/0023-customizable-activity-cards.md) and the [distribution guide](docs/open-source.md).
 
-## Tipografías Geist y Geist Mono
+## Geist and Geist Mono fonts
 
-La aplicación incorpora [Geist](https://github.com/vercel/geist-font) y Geist Mono mediante `@fontsource-variable/geist@5.3.0` y `@fontsource-variable/geist-mono@5.3.0`, sin modificar sus archivos de fuente. Los paquetes y revisiones quedan fijados en `package.json` y `pnpm-lock.yaml`; sus metadatos de distribución proceden de [Fontsource](https://github.com/fontsource/font-files).
+The application includes [Geist](https://github.com/vercel/geist-font) and Geist Mono through `@fontsource-variable/geist@5.3.0` and `@fontsource-variable/geist-mono@5.3.0`, without modifying their font files. The packages and revisions are pinned in `package.json` and `pnpm-lock.yaml`; their distribution metadata comes from [Fontsource](https://github.com/fontsource/font-files).
 
-Ambas fuentes están bajo SIL Open Font License 1.1, con copyright 2024 The Geist Project Authors. Se conservan íntegros los textos y avisos de los paquetes instalados en [public/licenses/geist.txt](public/licenses/geist.txt) y [public/licenses/geist-mono.txt](public/licenses/geist-mono.txt). La licencia del código de la aplicación no sustituye OFL ni cambia las condiciones de las fuentes o sus derivados.
+Both fonts are under the SIL Open Font License 1.1, copyright 2024 The Geist Project Authors. The complete texts and notices from the installed packages are preserved in [public/licenses/geist.txt](public/licenses/geist.txt) and [public/licenses/geist-mono.txt](public/licenses/geist-mono.txt). The application’s code license does not replace the OFL or change the terms for the fonts or their derivatives.
 
-## Iconos de interfaz · Lucide y Feather
+## Interface icons · Lucide and Feather
 
-Los iconos de interfaz proceden de [lucide-react 1.59.0](https://github.com/lucide-icons/lucide). El paquete declara ISC, copyright (c) 2026 Lucide Icons and Contributors, e identifica los iconos derivados de Feather bajo MIT, copyright (c) 2013-present Cole Bemis. Su archivo completo, con la lista original de iconos derivados y ambos avisos, se conserva en [public/licenses/lucide.txt](public/licenses/lucide.txt). Estos iconos de interfaz son independientes de las colecciones de marcas del catálogo.
+The interface icons come from [lucide-react 1.59.0](https://github.com/lucide-icons/lucide). The package declares ISC, copyright (c) 2026 Lucide Icons and Contributors, and identifies icons derived from Feather under MIT, copyright (c) 2013-present Cole Bemis. Its complete file, including the original list of derived icons and both notices, is preserved in [public/licenses/lucide.txt](public/licenses/lucide.txt). These interface icons are separate from the brand collections in the catalog.
 
-## Dependencias instaladas y sus avisos
+## Installed dependencies and their notices
 
-El [inventario público de dependencias](public/licenses/dependencies.txt) conserva los textos completos de licencia y avisos encontrados en el árbol instalado, incluso los incluidos dentro de paquetes que incorporan otras bibliotecas. Incluye herramientas de desarrollo y paquetes opcionales de la plataforma indicada en su encabezado; no equivale a afirmar que todos estén incluidos en el JavaScript del navegador. Registra nombre, versión, licencia declarada, procedencia y archivo original de cada texto.
+The [public dependency inventory](public/licenses/dependencies.txt) preserves the complete license texts and notices found in the installed dependency tree, including those bundled inside packages that incorporate other libraries. It includes development tools and optional packages for the platform listed in its heading; this does not mean every package is included in browser JavaScript. For each text, it records the name, version, declared license, source, and original file.
 
-La revisión del 20 de octubre de 2026 resolvió las veinte ausencias de aviso raíz con fuentes oficiales de las versiones exactas: archivos de sus repositorios fijados, avisos completos dentro del código o README, licencias enlazadas por los autores y términos oficiales complementarios. [scripts/license-sources.json](scripts/license-sources.json) relaciona esos paquetes y sus variantes nativas verificadas con 27 copias en [public/licenses/supplemental/](public/licenses/supplemental/), URLs, revisiones, integridad npm y SHA-256. Los textos y la declaración original se conservan juntos, distinguiendo un aviso del origen de una referencia general de licencia.
+The October 20, 2026 review resolved twenty missing root notices using official sources for the exact versions: files in pinned repositories, complete notices in source code or READMEs, licenses linked by the authors, and supplementary official terms. [scripts/license-sources.json](scripts/license-sources.json) maps those packages and their verified native variants to 27 copies in [public/licenses/supplemental/](public/licenses/supplemental/), along with URLs, revisions, npm integrity, and SHA-256. The texts and original declarations are kept together, distinguishing a source notice from a general license reference.
 
-`stable-hash@0.0.5`, `server-only@0.0.1` y `client-only@0.0.1` declaran MIT sin suministrar una línea original de copyright. Se conserva su contexto original completo, incluido el código y manifiesto de ambos marcadores, y la plantilla MIT de SPDX como referencia separada. El catálogo identifica `not supplied upstream`; no atribuye esos paquetes a un titular supuesto ni completa los campos de la plantilla. `keyv@4.5.4` es un residuo local revisado con el archivo oficial y todos sus archivos comprobados, identificado como `installed-tree-only`; el lockfile actual usa `5.6.0`. La [guía open source](docs/open-source.md) detalla cada caso y sus límites.
+`stable-hash@0.0.5`, `server-only@0.0.1`, and `client-only@0.0.1` declare MIT without providing an original copyright line. Their complete original context is preserved, including the code and manifest for both marker packages, along with the SPDX MIT template as a separate reference. The catalog marks them `not supplied upstream`; it does not attribute these packages to an assumed rights holder or fill in the template fields. `keyv@4.5.4` is a reviewed local remnant with its official file and all files checked, marked `installed-tree-only`; the current lockfile uses `5.6.0`. The [open-source guide](docs/open-source.md) explains each case and its limitations.
 
-Se genera sin dependencias adicionales ni consultas de red mediante `pnpm licenses:generate` y se verifica con `pnpm licenses:check`. La comprobación falla ante una nueva ausencia sin resolución revisada, un texto de evidencia modificado o una integridad de paquete distinta de la fijada. El procedimiento, las limitaciones del inventario y la preparación de fuentes, bundles y binarios se describen en [docs/open-source.md](docs/open-source.md). MIT para el código propio no relicencia estos componentes. Los avisos de los wrappers nativos no certifican el conjunto completo de componentes de sus binarios. La instalación actual también incluye condiciones como MPL-2.0, CC-BY-4.0 y las de binarios sharp/libvips; revisar el artefacto de destino y sus obligaciones antes de redistribuirlo.
+It is generated without additional dependencies or network requests using `pnpm licenses:generate` and checked with `pnpm licenses:check`. The check fails when a new missing notice has no reviewed resolution, evidence text changes, or package integrity differs from the pinned value. The process, inventory limitations, and preparation of sources, bundles, and binaries are described in [docs/open-source.md](docs/open-source.md). MIT for the project’s own code does not relicense these components. Notices for native wrappers do not certify the complete set of components in their binaries. The current installation also includes terms such as MPL-2.0, CC-BY-4.0, and those applicable to sharp/libvips binaries; review the target artifact and its obligations before redistribution.
 
-## Banderas de países y territorios · flag-icons
+## Country and territory flags · flag-icons
 
-Los 249 SVG de `public/country-flags/` proceden de [flag-icons 7.3.2](https://github.com/lipis/flag-icons/tree/fe15c16e7463d0c66d6c5730e9d0e832438d98e1), fijado al commit `fe15c16e7463d0c66d6c5730e9d0e832438d98e1`. Se copian sin modificaciones desde `flags/4x3/{code}.svg`, para las entradas de dos letras con `iso: true` del [catálogo de origen](https://github.com/lipis/flag-icons/blob/fe15c16e7463d0c66d6c5730e9d0e832438d98e1/country.json). Los códigos representan países y territorios; la selección no infiere nacionalidad ni ubicación y no usa geolocalización.
+The 249 SVGs in `public/country-flags/` come from [flag-icons 7.3.2](https://github.com/lipis/flag-icons/tree/fe15c16e7463d0c66d6c5730e9d0e832438d98e1), pinned to commit `fe15c16e7463d0c66d6c5730e9d0e832438d98e1`. They are copied without modifications from `flags/4x3/{code}.svg` for two-letter entries marked `iso: true` in the [source catalog](https://github.com/lipis/flag-icons/blob/fe15c16e7463d0c66d6c5730e9d0e832438d98e1/country.json). The codes represent countries and territories; selection does not infer nationality or location and does not use geolocation.
 
-La colección se distribuye bajo licencia MIT, copyright (c) 2013 Panayiotis Lipiridis. La licencia íntegra se conserva en [public/country-flags/LICENSE.txt](public/country-flags/LICENSE.txt).
+The collection is distributed under the MIT License, copyright (c) 2013 Panayiotis Lipiridis. The complete license is preserved in [public/country-flags/LICENSE.txt](public/country-flags/LICENSE.txt).
 
-Los nombres en inglés y español se generaron una sola vez mediante `Intl.DisplayNames` de Node.js 24.21.0, ICU 78.3 y CLDR 48.0. Se guardan como datos estáticos en `src/core/location/country-names.ts`; el editor no descarga catálogos ni depende de los nombres regionales del navegador durante el uso. El README utiliza únicamente las URLs de banderas fijadas al mismo commit; la vista previa usa sus equivalentes locales. Las banderas se muestran como imágenes para que su presentación no dependa del soporte de emoji del sistema.
+The English and Spanish names were generated once using `Intl.DisplayNames` from Node.js 24.21.0, ICU 78.3, and CLDR 48.0. They are stored as static data in `src/core/location/country-names.ts`; the editor does not download catalogs or rely on the browser’s regional names during use. The README uses only flag URLs pinned to the same commit; the preview uses their local equivalents. Flags are displayed as images so their appearance does not depend on system emoji support.
 
-## Iconos de contacto · Simple Icons
+## Contact icons · Simple Icons
 
-Los 13 SVG de `public/contact-icons/` proceden de [Simple Icons 11.15.0](https://github.com/simple-icons/simple-icons/tree/0af835e2949a9222965522780e5e0810d3c53382), fijados al commit `0af835e2949a9222965522780e5e0810d3c53382`. Se conserva su licencia CC0-1.0 en [public/contact-icons/LICENSE.txt](public/contact-icons/LICENSE.txt). Los nombres y las marcas pertenecen a sus respectivos titulares; la inclusión permite identificarlos y no implica respaldo.
+The 13 SVGs in `public/contact-icons/` come from [Simple Icons 11.15.0](https://github.com/simple-icons/simple-icons/tree/0af835e2949a9222965522780e5e0810d3c53382), pinned to commit `0af835e2949a9222965522780e5e0810d3c53382`. Its CC0-1.0 license is preserved in [public/contact-icons/LICENSE.txt](public/contact-icons/LICENSE.txt). Names and marks belong to their respective owners; inclusion identifies them and does not imply endorsement.
 
 ## Devicon
 
-248 SVG de `public/technology-icons/` proceden de [Devicon](https://github.com/devicons/devicon), fijado al [commit 6a37858047b0e8d9c9c0e68f4a071fc410652e89](https://github.com/devicons/devicon/commit/6a37858047b0e8d9c9c0e68f4a071fc410652e89). React y React Native comparten el original de React; SvelteKit utiliza la marca de su familia Svelte. Los nombres locales cambian, pero los contenidos SVG se conservan.
+248 SVGs in `public/technology-icons/` come from [Devicon](https://github.com/devicons/devicon), pinned to [commit 6a37858047b0e8d9c9c0e68f4a071fc410652e89](https://github.com/devicons/devicon/commit/6a37858047b0e8d9c9c0e68f4a071fc410652e89). React and React Native share the React original; SvelteKit uses the Svelte family mark. Local names may differ, but SVG contents are preserved.
 
-El catálogo de `src/core/technologies/index.ts` relaciona cada archivo local con su URL pública fijada al mismo commit. No se consulta Devicon para buscar o seleccionar herramientas durante el uso del editor.
+The catalog in `src/core/technologies/index.ts` maps each local file to its public URL pinned to the same commit. Devicon is not queried when searching for or selecting tools in the editor.
 
-Devicon se distribuye bajo licencia MIT. La copia completa se conserva en [public/technology-icons/LICENSE.txt](public/technology-icons/LICENSE.txt).
+Devicon is distributed under the MIT License. The complete copy is preserved in [public/technology-icons/LICENSE.txt](public/technology-icons/LICENSE.txt).
 
-Los nombres, logotipos y marcas pertenecen a sus respectivos titulares y se utilizan para identificación. Su inclusión no implica respaldo; se aplican las políticas de marca de cada titular, tal como indica el proyecto original.
+Names, logos, and marks belong to their respective owners and are used for identification. Their inclusion does not imply endorsement; each owner’s trademark policies apply, as stated by the original project.
 
-### Licencia MIT de Devicon
+### Devicon MIT License
 
 ```text
 The MIT License (MIT)
@@ -76,39 +76,39 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-## Simple Icons: tecnologías y herramientas de IA
+## Simple Icons: technologies and AI tools
 
-82 SVG del catálogo de tecnologías proceden de [Simple Icons](https://github.com/simple-icons/simple-icons), fijado al [commit c71c69e3a27e4436936b831c72643e6513b9f49b](https://github.com/simple-icons/simple-icons/commit/c71c69e3a27e4436936b831c72643e6513b9f49b). Incluyen herramientas de IA, ORMs, interfaces, autenticación, datos, infraestructura, calidad y diseño. Las entradas de TanStack Query, Router, Table, Form y Start comparten la marca TanStack; no se presentan como logotipos exclusivos de cada biblioteca. Actix Web utiliza la marca Actix y los alias Oxlint/Oxfmt remiten a la familia Oxc.
+82 SVGs in the technology catalog come from [Simple Icons](https://github.com/simple-icons/simple-icons), pinned to [commit c71c69e3a27e4436936b831c72643e6513b9f49b](https://github.com/simple-icons/simple-icons/commit/c71c69e3a27e4436936b831c72643e6513b9f49b). They include AI tools, ORMs, interfaces, authentication, data, infrastructure, quality, and design. The TanStack Query, Router, Table, Form, and Start entries share the TanStack mark; they are not presented as logos unique to each library. Actix Web uses the Actix mark, and the Oxlint/Oxfmt aliases refer to the Oxc family.
 
-Los contenidos se copian sin modificaciones desde `icons/{slug}.svg`; los nombres locales se relacionan con los originales mediante `src/core/technologies/index.ts`. JetBrains AI utiliza la marca de su familia JetBrains; no se presenta como un logotipo exclusivo del asistente. Los SVG monocromos conservan el color original de la colección y se muestran sobre un fondo claro en el editor.
+The contents are copied without modifications from `icons/{slug}.svg`; local names are mapped to the originals through `src/core/technologies/index.ts`. JetBrains AI uses the JetBrains family mark; it is not presented as a logo unique to the assistant. Monochrome SVGs retain the collection’s original color and are displayed on a light background in the editor.
 
-Simple Icons publica la colección bajo CC0 1.0 Universal. La copia completa se conserva en [public/technology-icons/LICENSE-SIMPLE-ICONS.txt](public/technology-icons/LICENSE-SIMPLE-ICONS.txt). Los logotipos siguen siendo marcas de sus titulares; la licencia del catálogo no sustituye sus directrices. Consultar el [aviso legal de la colección fijada](https://github.com/simple-icons/simple-icons/blob/c71c69e3a27e4436936b831c72643e6513b9f49b/DISCLAIMER.md).
+Simple Icons publishes the collection under CC0 1.0 Universal. The complete copy is preserved in [public/technology-icons/LICENSE-SIMPLE-ICONS.txt](public/technology-icons/LICENSE-SIMPLE-ICONS.txt). Logos remain the marks of their owners; the catalog license does not replace their guidelines. See the [legal notice for the pinned collection](https://github.com/simple-icons/simple-icons/blob/c71c69e3a27e4436936b831c72643e6513b9f49b/DISCLAIMER.md).
 
-## Lobe Icons: herramientas de IA
+## Lobe Icons: AI tools
 
-28 SVG del catálogo de tecnologías proceden de [Lobe Icons](https://github.com/lobehub/lobe-icons), fijado al [commit 8a1b2821bb768c484fe8da20c5e1838b6bf551a9](https://github.com/lobehub/lobe-icons/commit/8a1b2821bb768c484fe8da20c5e1838b6bf551a9). Son `antigravity`, `cerebras`, `chatgpt`, `cline`, `codex`, `cohere`, `crewai`, `deepseek`, `dify`, `firecrawl`, `fireworks`, `gemini-cli`, `groq`, `junie`, `langfuse`, `langsmith`, `llamaindex`, `lm-studio`, `mastra`, `mcp`, `openai`, `openrouter`, `qwen`, `replicate`, `roo-code`, `v0`, `vllm` y `windsurf`.
+28 SVGs in the technology catalog come from [Lobe Icons](https://github.com/lobehub/lobe-icons), pinned to [commit 8a1b2821bb768c484fe8da20c5e1838b6bf551a9](https://github.com/lobehub/lobe-icons/commit/8a1b2821bb768c484fe8da20c5e1838b6bf551a9). They are `antigravity`, `cerebras`, `chatgpt`, `cline`, `codex`, `cohere`, `crewai`, `deepseek`, `dify`, `firecrawl`, `fireworks`, `gemini-cli`, `groq`, `junie`, `langfuse`, `langsmith`, `llamaindex`, `lm-studio`, `mastra`, `mcp`, `openai`, `openrouter`, `qwen`, `replicate`, `roo-code`, `v0`, `vllm`, and `windsurf`.
 
-Los contenidos se copian sin modificaciones desde `packages/static-svg/icons/{asset}.svg`. ChatGPT y OpenAI comparten la marca de OpenAI; Codex utiliza su propio SVG de Codex. Las correspondencias y URLs fijadas están en `src/core/technologies/index.ts`. Los nombres de productos, marcas y logotipos pertenecen a sus titulares; su presencia identifica una herramienta y no implica respaldo ni integración con ella.
+The contents are copied without modifications from `packages/static-svg/icons/{asset}.svg`. ChatGPT and OpenAI share the OpenAI mark; Codex uses its own Codex SVG. Mappings and pinned URLs are in `src/core/technologies/index.ts`. Product names, marks, and logos belong to their owners; their presence identifies a tool and does not imply endorsement or integration with it.
 
-Lobe Icons se distribuye bajo licencia MIT, copyright (c) 2023 LobeHub. La copia completa con el aviso de copyright se conserva en [public/technology-icons/LICENSE-LOBE-ICONS.txt](public/technology-icons/LICENSE-LOBE-ICONS.txt).
+Lobe Icons is distributed under the MIT License, copyright (c) 2023 LobeHub. The complete copy with its copyright notice is preserved in [public/technology-icons/LICENSE-LOBE-ICONS.txt](public/technology-icons/LICENSE-LOBE-ICONS.txt).
 
-En total, el catálogo de tecnologías incluye 358 entradas y 358 SVG locales. Buscar y seleccionar herramientas no consulta a estos proveedores ni carga un paquete de iconos remoto. El README exportado referencia únicamente las URLs fijadas de esas entradas.
+In total, the technology catalog contains 358 entries and 358 local SVGs. Searching for and selecting tools does not query these providers or load a remote icon package. The exported README references only the pinned URLs for those entries.
 
-### Criterio de ampliación del catálogo
+### Catalog expansion criteria
 
-La ampliación incorpora frameworks, bibliotecas, ORMs, autenticación, plataformas de datos, infraestructura y herramientas de IA con identidades verificables en las colecciones fijadas. La clasificación es una sugerencia editorial modificable; no representa un ranking de uso, una recomendación técnica ni un nivel de habilidad.
+The expansion adds frameworks, libraries, ORMs, authentication, data platforms, infrastructure, and AI tools with identities verifiable in the pinned collections. Categories are editable editorial suggestions; they do not represent usage rankings, technical recommendations, or skill levels.
 
-Las familias y funciones se contrastaron con documentación primaria, entre ellas [Drizzle ORM](https://orm.drizzle.team/docs/overview), [TypeORM](https://typeorm.io/docs/getting-started/), [Knex.js](https://knexjs.org/), [TanStack](https://tanstack.com/), [Hono](https://hono.dev/), [Pydantic](https://docs.pydantic.dev/latest/), [Better Auth](https://better-auth.com/docs/introduction), [Qdrant](https://qdrant.tech/documentation/) y [Temporal](https://docs.temporal.io/). El catálogo mantiene las rutas y contenidos de los iconos existentes. No se inventan logotipos para herramientas ausentes de las fuentes admitidas; siguen disponibles como texto propio.
+Families and features were checked against primary documentation, including [Drizzle ORM](https://orm.drizzle.team/docs/overview), [TypeORM](https://typeorm.io/docs/getting-started/), [Knex.js](https://knexjs.org/), [TanStack](https://tanstack.com/), [Hono](https://hono.dev/), [Pydantic](https://docs.pydantic.dev/latest/), [Better Auth](https://better-auth.com/docs/introduction), [Qdrant](https://qdrant.tech/documentation/), and [Temporal](https://docs.temporal.io/). The catalog preserves the paths and contents of existing icons. Logos are not invented for tools missing from the approved sources; those tools remain available as custom text.
 
-## CodeMirror y Lezer: edición y resaltado de código
+## CodeMirror and Lezer: code editing and highlighting
 
-La aplicación utiliza [CodeMirror 6](https://github.com/codemirror/dev) para la edición de fuentes y [Lezer](https://github.com/lezer-parser/highlight) para análisis y resaltado local. Los paquetes directos y versiones exactas constan en `package.json`; el árbol completo está fijado en `pnpm-lock.yaml`. Incluye state, view, language, commands, gramáticas HTML/JavaScript/JSON/Python/Markdown/PHP, modos heredados seleccionados y highlight. Se cargan en el navegador bajo demanda; no envían la fuente a un servicio.
+The application uses [CodeMirror 6](https://github.com/codemirror/dev) to edit source code and [Lezer](https://github.com/lezer-parser/highlight) for local parsing and highlighting. Direct packages and exact versions are listed in `package.json`; the full dependency tree is pinned in `pnpm-lock.yaml`. It includes state, view, language, commands, HTML/JavaScript/JSON/Python/Markdown/PHP grammars, selected legacy modes, and highlight. They load on demand in the browser and do not send source code to a service.
 
-Estos paquetes se distribuyen bajo licencia MIT por Marijn Haverbeke y otros colaboradores. Cada paquete instalado conserva su archivo `LICENSE` con los avisos y condiciones completos; las licencias también se publican en sus repositorios oficiales. La instalación no altera el período mínimo de antigüedad de paquetes del repositorio. El resaltado no modifica la licencia del contenido que escribe una persona ni la política del HTML admitido.
+These packages are distributed under the MIT License by Marijn Haverbeke and other contributors. Each installed package retains its `LICENSE` file with the complete notices and terms; the licenses are also published in their official repositories. This installation does not change the repository’s minimum package-age window. Highlighting does not change the license of content a person writes or the policy for allowed HTML.
 
-### Avisos MIT conservados
+### Preserved MIT notices
 
-CodeMirror (`@codemirror/*`), copiado del paquete fijado:
+CodeMirror (`@codemirror/*`), copied from the pinned package:
 
 ```text
 MIT License
@@ -134,7 +134,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ```
 
-Lezer (`@lezer/highlight`), copiado del paquete fijado:
+Lezer (`@lezer/highlight`), copied from the pinned package:
 
 ```text
 MIT License

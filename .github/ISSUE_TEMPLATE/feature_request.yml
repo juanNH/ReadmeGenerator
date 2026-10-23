@@ -1,35 +1,35 @@
-name: Proponer una mejora
-description: Presentar una necesidad y un resultado observable.
-title: "[Propuesta]: "
+name: Request a feature
+description: Describe a user need and an observable outcome.
+title: "[Feature]: "
 body:
   - type: textarea
     id: need
     attributes:
-      label: Necesidad de la persona
-      description: ¿Quién necesita la mejora y qué quiere lograr?
+      label: User need
+      description: Who needs this improvement, and what are they trying to achieve?
     validations:
       required: true
   - type: textarea
     id: proposal
     attributes:
-      label: Propuesta
-      description: Describí el comportamiento que imaginás sin exigir una solución técnica específica.
+      label: Proposal
+      description: Describe the behavior you have in mind without requiring a specific technical solution.
     validations:
       required: true
   - type: textarea
     id: success
     attributes:
-      label: Criterio de éxito
-      description: ¿Qué tendría que poder hacer la persona para considerar resuelta la necesidad?
+      label: Success criterion
+      description: What should the person be able to do for this need to be considered met?
     validations:
       required: true
   - type: textarea
     id: context
     attributes:
-      label: Relación con el producto
-      description: Módulo o paso del recorrido relacionado y alternativas que consideraste. No adjuntes planificación interna.
+      label: Product context
+      description: Related product section or workflow, and alternatives you considered. Do not attach internal planning.
   - type: textarea
     id: accessibility
     attributes:
-      label: Interfaz y accesibilidad
-      description: Consideraciones para teclado, lectura, pantallas angostas o comprensión, cuando corresponda.
+      label: Interface and accessibility
+      description: Considerations for keyboard use, reading, narrow screens, or clarity, where relevant.

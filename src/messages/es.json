@@ -1,7 +1,23 @@
 {
   "Metadata": {
     "title": "GitHub Profile Generator",
-    "description": "Dale tu toque a tu perfil de GitHub. Una intro breve, tus herramientas y lo que tengas ganas de compartir."
+    "description": "Dale tu toque a tu perfil de GitHub. Una intro breve, tus herramientas y lo que tengas ganas de compartir.",
+    "socialTitle": "Un perfil de GitHub a tu manera"
+  },
+  "SocialSharing": {
+    "alt": "Vista previa de GitHub Profile Generator: un editor visual de README a tu manera.",
+    "eyebrow": "UN README DE PERFIL, A TU MANERA",
+    "title": "Tu perfil de GitHub.",
+    "titleAccent": "A tu manera.",
+    "description": "Un editor visual para crear un README con lugar para tu historia.",
+    "sectionsTitle": "Algunas piezas para empezar",
+    "sectionAbout": "Sobre vos",
+    "sectionTools": "Herramientas",
+    "sectionProjects": "Proyectos",
+    "sectionActivity": "Actividad",
+    "sectionContact": "Contacto",
+    "note": "Sin crear una cuenta",
+    "footer": "Elegí qué compartir. Dejá afuera lo demás."
   },
   "Navigation": {
     "home": "Inicio de GitHub Profile Generator",
@@ -9,6 +25,7 @@
     "modules": "Módulos",
     "howItWorks": "Cómo funciona",
     "editor": "Crear tu perfil",
+    "about": "Acerca del proyecto",
     "skip": "Saltar al contenido"
   },
   "Controls": {
@@ -90,9 +107,65 @@
     },
     "closingTitle": "Un pequeño espacio. Una mejor presentación.",
     "closingDescription": "Contenido claro, detalles cuidados y un diseño que te da lugar.",
-    "closingAction": "Crear tu perfil",
-    "footer": "Pensado para personas, en cada etapa.",
-    "footerNote": "Proyecto independiente. Sin afiliación con GitHub."
+    "closingAction": "Crear tu perfil"
+  },
+  "About": {
+    "metaTitle": "Acerca del proyecto",
+    "metaDescription": "Por qué existe GitHub Profile Generator y de qué maneras se puede ayudar a que crezca.",
+    "eyebrow": "Una herramienta nacida de una necesidad",
+    "title": "Tu perfil, contado a tu manera.",
+    "lede": "GitHub Profile Generator empezó con un deseo sencillo: crear un perfil que pudiera reflejar lo que quería compartir, a mi manera.",
+    "originTitle": "Por qué empecé a construirlo",
+    "originStory": "Quería actualizar mi perfil de GitHub, pero no encontraba una herramienta con la flexibilidad necesaria para expresar lo que tenía en mente. Empecé este proyecto para crear un espacio donde pudieran convivir una presentación breve, las herramientas favoritas, algunos trabajos, contribuciones y enlaces de contacto, según lo que cada persona quiera mostrar.",
+    "productBelief": "Un perfil no tiene que demostrar nada. La actividad pública es solo una parte de la historia de alguien, y está bien tener poca o ninguna para mostrar. Por eso las secciones del editor son opcionales: cada persona elige lo que le representa.",
+    "helpEyebrow": "El código abierto se construye entre varias personas",
+    "helpTitle": "Hay muchas formas de participar.",
+    "helpIntro": "No hace falta empezar escribiendo código. Un reporte claro, una explicación más sencilla o recomendar la herramienta a la persona indicada también ayudan a que el proyecto avance.",
+    "paths": {
+      "feedback": {
+        "title": "Ayudá a mejorar la experiencia",
+        "description": "¿Encontraste un paso confuso o algo que no funciona como esperabas? Contá qué pasó y qué estabas intentando hacer. También podés proponer ideas.",
+        "action": "Compartir una sugerencia"
+      },
+      "build": {
+        "title": "Construyamos algo en conjunto",
+        "description": "Podés colaborar con código, mejorar la documentación o ayudar a que el editor sea más fácil de usar. La guía explica cómo preparar el entorno y revisar los cambios.",
+        "action": "Leer la guía para contribuir"
+      },
+      "share": {
+        "title": "Ayudá a que otras personas lo encuentren",
+        "description": "Si este editor puede servirle a alguien que quiera armar su perfil, compartíselo. También podés dejar una estrella en el repositorio para que más personas lo descubran.",
+        "action": "Conocer el repositorio",
+        "stats": {
+          "star": "Estrellas",
+          "stars": "{count} en GitHub",
+          "fork": "Forks",
+          "forks": "{count} en GitHub"
+        }
+      }
+    },
+    "closingTitle": "¿Querés probarlo?",
+    "closingDescription": "Empezá por las partes del perfil que tengas ganas de compartir. El resto puede esperar.",
+    "closingAction": "Abrir el editor"
+  },
+  "Footer": {
+    "brand": "GitHub Profile Generator",
+    "description": "Un espacio flexible para crear tu perfil de GitHub con tus propias palabras.",
+    "explore": "Explorar",
+    "exploreNavigation": "Explorar el sitio",
+    "editor": "Editor de perfiles",
+    "about": "Acerca del proyecto",
+    "privacy": "Privacidad",
+    "project": "Proyecto",
+    "projectNavigation": "Recursos del proyecto",
+    "repository": "Repositorio de GitHub",
+    "issues": "Problemas y sugerencias",
+    "contributing": "Guía para contribuir",
+    "license": "Licencia MIT",
+    "notices": "Avisos de terceros",
+    "copyright": "© {year} GitHub Profile Generator",
+    "openSource": "Código abierto bajo la",
+    "independent": "Proyecto independiente, sin afiliación con GitHub."
   },
   "NotFound": {
     "title": "Esta página no está acá.",

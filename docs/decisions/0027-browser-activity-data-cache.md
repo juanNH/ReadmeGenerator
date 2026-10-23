@@ -1,39 +1,39 @@
-# ADR 0027: Consultar datos públicos por cobertura y renderizar tarjetas en el navegador
+# ADR 0027: Fetch Public Data by Coverage and Render Cards in the Browser
 
-- Estado: aceptada; el recorrido de búsqueda se amplía en [ADR 0029](0029-account-first-activity-search.md), que permite buscar antes de seleccionar y completar faltantes automáticamente después.
-- Fecha: 2026-10-20.
-- Producto: GitHub Profile Generator.
-- Amplía [ADR 0025](0025-activity-data-cache-and-preview-batching.md) y sustituye la aprobación de URLs del editor de [ADR 0026](0026-explicit-card-loading-and-local-samples.md).
+- Status: Accepted. The search flow is extended in [ADR 0029](0029-account-first-activity-search.md), which allows searching before choosing cards and automatically fetching missing data afterward.
+- Date: 2026-10-20.
+- Product: GitHub Profile Generator.
+- Extends [ADR 0025](0025-activity-data-cache-and-preview-batching.md) and replaces the editor URL approval from [ADR 0026](0026-explicit-card-loading-and-local-samples.md).
 
-## Contexto
+## Context
 
-La selección con muestras evita consultar mientras se configura, pero cada nueva apariencia todavía necesita un SVG HTTP. Precargar JSON y luego solicitar ese SVG tampoco asegura reutilización en un despliegue con varias instancias. Se pidió una búsqueda centralizada, caché temporal en navegador, animación de carga y consultas únicamente por información faltante.
+Choosing from samples avoids requests while configuring, but each new appearance still requires an HTTP SVG. Prefetching JSON and then requesting that SVG does not guarantee reuse in a deployment with multiple instances. The requested flow was a centralized search, temporary browser caching, loading animation, and requests only for missing information.
 
-## Decisión
+## Decision
 
-`useActivityData` coordina una caché en memoria de la instancia montada del editor. «Buscar y mostrar tarjetas» consulta los JSON existentes para la unión de datos necesarios, con hasta tres fuentes simultáneas. Las cinco tarjetas propias comparten el snapshot básico; Extended agrupa estadísticas y lenguajes compatibles; cada recurso y sus aportes conservan identidades y dependencias independientes. El acceso a GitHub y WakaTime permanece en el servidor con sus límites vigentes.
+`useActivityData` coordinates an in-memory cache for the mounted editor instance. “Search and show cards” requests the existing JSON endpoints for the union of needed data, with up to three sources in flight at once. The five built-in cards share the basic snapshot; Extended groups compatible statistics and languages; each resource and its contributions retain independent identities and dependencies. GitHub and WakaTime access stays on the server with its existing limits.
 
-La caché valida envelopes, snapshots e identidad. Extended registra cobertura a partir del plan pedido: un null/partial consultado es un resultado, mientras un campo no solicitado sigue faltando. Las claves de datos comparten reglas puras con el servidor y distinguen usuario, filtros y períodos efectivos; excluyen apariencia, orden, idioma y transformaciones locales de lenguajes. Agregar un contador consulta solo su cobertura faltante. La primera búsqueda, los datos nuevos y los vencidos requieren una acción explícita; cambiar una opción cubierta actualiza la vista previa inmediatamente.
+The cache validates envelopes, snapshots, and identity. Extended records coverage from the requested plan: a queried null or partial value is a result, while a field that was not requested remains missing. Data keys share pure rules with the server and distinguish user, filters, and effective periods; they exclude appearance, order, language, and local language transformations. Adding a counter requests only missing coverage. The first search, new data, and expired data require explicit action; changing a covered option updates the preview immediately.
 
-La frescura es de 30 minutos desde la fecha original de los datos, con invalidación temporal UTC donde corresponde. Los resultados anteriores conservan su antigüedad y estado, sin rejuvenecer al agregar campos. La caché limita entradas y memoria; no se persiste en `ProfileDocument`, almacenamiento del navegador, archivo de proyecto o Markdown. Reemplazar, importar, restaurar, borrar y comenzar un borrador cancelan la generación en vuelo y vacían datos. Una respuesta tardía no puede restaurarlos.
+Freshness is 30 minutes from the original data timestamp, with temporal invalidation at UTC boundaries where applicable. Older results retain their age and status; adding fields does not make them fresh again. The cache limits entry count and memory; it is not persisted in `ProfileDocument`, browser storage, project files, or Markdown. Replacing, importing, restoring, deleting, or starting a draft cancels in-flight work and clears data. A late response cannot restore it.
 
-Cada tarjeta muestra una muestra animada mientras falta su información y un error con reintento cuando corresponde. Los éxitos independientes pueden mostrarse sin esperar al resto. La animación respeta la preferencia de movimiento reducido; los estados y nombres usan el idioma de interfaz. Los ceros, ausencia y parcialidad conservan significados diferentes.
+Each card shows an animated sample while its information is missing and an error with retry when appropriate. Independent successes can appear without waiting for the rest. Animation respects the reduced-motion preference; states and names use the interface language. Zero, absence, and partial data retain distinct meanings.
 
-### Vista previa local y salida pública
+### Local preview and public output
 
-La vista previa reconoce las mismas URLs exactas de `ReadmeResult.activityCards?` y usa los renderizadores SVG puros de `core`, compartidos con las rutas públicas. Una Blob URL temporal encapsula exclusivamente el SVG generado internamente en un elemento de imagen; no se inserta markup en el DOM. Cada URL se revoca al cambiar o desmontar. No se admite SVG escrito por el usuario, imágenes Blob en el documento ni HTML más amplio.
+The preview recognizes the same exact URLs from `ReadmeResult.activityCards?` and uses the pure SVG renderers from `core`, shared with the public routes. A temporary Blob URL wraps only the internally generated SVG in an image element; no markup is inserted into the DOM. Each URL is revoked when changed or unmounted. User-written SVG, Blob images in the document, and broader HTML are not allowed.
 
-Las URLs, el Markdown, los enlaces de las tarjetas y los errores de exportación siguen siendo los del generador. Los SVG públicos continúan siendo dinámicos y consultando según su caché. La caché del navegador mejora la edición de esa pestaña; no es una caché distribuida, no multiplica la cuota del PAT y no vuelve innecesaria la infraestructura para tráfico masivo.
+URLs, Markdown, card links, and export errors remain those produced by the generator. Public SVGs remain dynamic and fetch data according to their cache. Browser caching improves editing in that tab; it is not a distributed cache, does not multiply the PAT quota, and does not eliminate infrastructure needs for large-scale traffic.
 
-## Alternativas consideradas
+## Alternatives Considered
 
-- Precargar todas las métricas: históricos, búsquedas y destinos externos agregan costo y espera aunque no se usen.
-- Precargar JSON y seguir solicitando SVG: mantiene viajes de red y puede repetir datos en otra instancia del servidor.
-- Guardar snapshots en el perfil o localStorage: mezcla datos efímeros con contenido propio y agrega recuperación de información vencida.
-- Cachear únicamente por usuario: mezcla filtros, períodos y recursos con alcances distintos.
-- Interpretar cualquier null como cobertura: oculta campos que nunca se pidieron.
-- Renderizar otro README para la vista previa: separa la salida de copia/descarga; se conserva el mismo Markdown y solo cambia la resolución de las tarjetas permitidas.
+- Prefetch every metric: historical data, searches, and external destinations add cost and wait time even when unused.
+- Prefetch JSON and continue requesting SVGs: keeps network round trips and can repeat data across server instances.
+- Save snapshots in the profile or localStorage: mixes ephemeral data with user-authored content and complicates recovery of expired data.
+- Cache only by user: mixes filters, periods, and resources with different scopes.
+- Treat every null as coverage: hides fields that were never requested.
+- Render a separate README for the preview: diverges from copy/download output; keep the same Markdown and resolve only the allowed cards differently.
 
-## Verificación
+## Verification
 
-Comprobar cero consultas antes de Buscar, agrupación básica y Extended, solicitudes faltantes, personalización sin HTTP SVG/JSON, frescura original, claves de filtros y años, nulos consultados, límites de memoria, cancelación/reset, errores parciales y reintentos. Comparar la salida de los mismos renderizadores y verificar que no se expongan credenciales ni se guarden snapshots. Los resultados ejecutados se registran en [desarrollo](../development.md).
+Check that there are no requests before Search, that basic and Extended requests are grouped, only missing data is requested, customization makes no HTTP SVG/JSON requests, original freshness is retained, filter/year keys are distinct, queried nulls count as coverage, memory limits apply, cancellation/reset works, partial errors and retries behave as expected. Compare output from the same renderers and confirm that credentials are never exposed and snapshots are not saved. Executed results are recorded in [Development](../development.md).

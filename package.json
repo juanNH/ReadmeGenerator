@@ -1,6 +1,6 @@
 {
   "name": "github-profile-generator",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "license": "MIT",
   "author": "Juan Nicolas Herrera",
@@ -20,12 +20,14 @@
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:cards": "playwright test --config tests/e2e/exported-cards.config.ts",
     "test:a11y": "playwright test --grep accessibility",
+    "test:branch-names": "node --test scripts/check-branch-name.test.mjs scripts/install.test.mjs scripts/pre-push-detached.test.mjs",
     "cards:check": "node scripts/check-public-cards.mjs",
     "test:cards": "node --test scripts/check-public-cards.test.mjs",
     "docs:check": "node scripts/check-doc-links.mjs",
     "licenses:check": "node scripts/check-licenses.mjs",
     "licenses:generate": "node scripts/check-licenses.mjs --write",
-    "check": "pnpm licenses:check && pnpm lint && pnpm typecheck && pnpm format:check && pnpm docs:check && pnpm test && pnpm test:cards"
+    "check": "pnpm licenses:check && pnpm lint && pnpm typecheck && pnpm format:check && pnpm docs:check && pnpm test && pnpm test:cards && pnpm test:branch-names",
+    "prepare": "node .husky/install.mjs"
   },
   "dependencies": {
     "@codemirror/commands": "6.11.1",
@@ -49,6 +51,7 @@
     "@radix-ui/react-switch": "1.4.1",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
+    "emoji-picker-react": "5.0.0",
     "hast-util-from-html": "2.0.3",
     "hast-util-sanitize": "5.0.2",
     "hast-util-to-html": "9.0.5",
@@ -79,6 +82,7 @@
     "eslint": "10.13.0",
     "eslint-config-next": "16.4.2",
     "eslint-config-prettier": "10.1.8",
+    "husky": "9.1.7",
     "prettier": "3.9.10",
     "prettier-plugin-tailwindcss": "0.8.1",
     "tailwindcss": "4.3.3",

@@ -70,7 +70,7 @@ function freezeDeep<T>(value: T): T {
 describe("README sections and export readiness", () => {
   it("renders presentation with optional fields and stable spacing", () => {
     expect(markdown(generateReadme(presentationProfile()))).toBe(
-      "# Alex Rivera\n\n## I build useful things\n\nI enjoy learning\\.\n\nCurrently exploring accessible interfaces\\.\n\nLocation: Argentina\n",
+      '<div><h1 align="center">Alex Rivera</h1></div>\n\n<div><h2 align="center">I build useful things</h2></div>\n\nI enjoy learning\\.\n\nCurrently exploring accessible interfaces\\.\n\n📍 Currently based in Argentina\n',
     );
   });
 
@@ -81,10 +81,10 @@ describe("README sections and export readiness", () => {
   });
 
   it.each([
-    ["displayName", "Alex", "# Alex\n"],
-    ["headline", "Developer", "## Developer\n"],
+    ["displayName", "Alex", '<div><h1 align="center">Alex</h1></div>\n'],
+    ["headline", "Developer", '<div><h2 align="center">Developer</h2></div>\n'],
     ["bio", "Learning in public", "Learning in public\n"],
-    ["location", "Argentina", "Location: Argentina\n"],
+    ["location", "Argentina", "📍 Currently based in Argentina\n"],
   ] as const)("allows presentation to contain only %s", (field, value, expected) => {
     const profile = createEmptyProfile("en");
     profile.visibility.presentation = true;
@@ -98,9 +98,9 @@ describe("README sections and export readiness", () => {
     profile.visibility.contact = true;
     profile.data.contact.links = [{ id: "mail", label: "Correo", url: "mailto:alex@example.com" }];
     const output = markdown(generateReadme(profile));
-    expect(output).toContain("Ubicación: Argentina");
+    expect(output).toContain("📍 Actualmente en Argentina");
     expect(output).toContain("## Contacto\n\n- [Correo](<mailto:alex@example.com>)");
-    expect(output).not.toContain("Location:");
+    expect(output).not.toContain("Currently based in");
   });
 
   it("follows sectionOrder for combined sections", () => {
@@ -114,7 +114,9 @@ describe("README sections and export readiness", () => {
       ),
     ];
     const output = markdown(generateReadme(profile));
-    expect(output.indexOf("## Contact")).toBeLessThan(output.indexOf("# Alex Rivera"));
+    expect(output.indexOf("## Contact")).toBeLessThan(
+      output.indexOf('<h1 align="center">Alex Rivera</h1>'),
+    );
   });
 
   it("omits hidden data including invalid links and unsupported sections", () => {
@@ -227,6 +229,7 @@ describe("plain-text Markdown escaping", () => {
     profile.visibility.presentation = true;
     profile.data.presentation.displayName =
       '![image](https://evil.test) <img src=x onerror="alert(1)"> &copy;';
+    profile.data.presentation.format = { displayNameAlignment: "left" };
     expect(markdown(generateReadme(profile))).toBe(
       '# \\!\\[image\\]\\(https&#58;//evil\\.test\\) &lt;img src\\=x onerror\\="alert\\(1\\)"&gt; &amp;copy;\n',
     );

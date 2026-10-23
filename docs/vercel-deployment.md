@@ -1,23 +1,25 @@
-# Vercel Hobby con PAT y sin login
+# Vercel Hobby with a PAT and no login
 
-Quienes usan el editor escriben un usuario público y pulsan **Buscar datos**. No se registran ni autorizan una App: el PAT pertenece al operador del servidor. Este primer despliegue no necesita GitHub App, OAuth, base de datos ni servicios adicionales.
+People using the editor enter a public username and click **Search data**. They do not sign up or authorize an App: the PAT belongs to the server operator. This first deployment does not need a GitHub App, OAuth, a database, or additional services.
 
-Referencias externas revisadas el 20 de octubre de 2026. Hobby permite uso personal no comercial y tiene cuotas; la licencia MIT del repositorio no determina las condiciones del hosting. Ver [Hobby](https://vercel.com/docs/plans/hobby) y [API, cachés y alojamiento](github-api-and-hosting.md).
+External references checked on October 20, 2026. Hobby allows personal, non-commercial use and has quotas; the repository's MIT license does not determine the hosting terms. See [Hobby](https://vercel.com/docs/plans/hobby) and [API, caches, and hosting](github-api-and-hosting.md).
 
-## Ramas y entornos
+## Branches and environments
 
-| Rama   | Entorno Vercel | Uso                                                                  |
-| ------ | -------------- | -------------------------------------------------------------------- |
-| `main` | Production     | Versión pública estable y URLs de tarjetas para los README.          |
-| `dev`  | Preview        | Preproducción para probar los cambios antes de integrarlos a `main`. |
+| Branch | Vercel environment | Use                                                                             |
+| ------ | ------------------ | ------------------------------------------------------------------------------- |
+| `main` | Production         | Stable public release and card URLs for READMEs.                                |
+| `dev`  | Preview            | Pre-production environment for testing changes before merging them into `main`. |
 
-El nombre `dev` va en minúsculas. En **Project Settings → Environments → Production → Branch Tracking**, elegí `main`. Los pushes a `dev` generan Preview; no hace falta un Custom Environment de pago. La selección de Production Branch se realiza en Vercel, no en `vercel.json`. Ver [ramas de producción y preview](https://vercel.com/docs/git).
+The branch name `dev` is lowercase. In **Project Settings → Environments → Production → Branch Tracking**, select `main`. Pushes to `dev` create Previews; a paid Custom Environment is not needed. Select the Production Branch in Vercel, not in `vercel.json`. See [Production and Preview branches](https://vercel.com/docs/git).
 
-Flujo: desarrollar en una rama de trabajo, abrir PR hacia `dev`, revisar su Preview y después abrir PR de `dev` a `main`. Conservar `dev` tras la integración. La CI comprueba pushes a ambas ramas y los PR. La aprobación de publicación, creación de ramas remotas y reglas de protección se administra en GitHub; esta configuración no publica cambios por sí sola.
+Workflow: develop on a working branch, open a PR to `dev`, review its Preview, then open a PR from `dev` to `main`. Keep `dev` after the merge. CI checks pushes to both branches and PRs. Publication approval, creation of remote branches, and branch protection rules are managed in GitHub; this configuration does not publish changes by itself.
 
-## 1. Validar la versión
+A Preview may require an authenticated Vercel session. Being able to open it while signed in does not establish anonymous access. Keep Deployment Protection enabled; do not expose a protected Preview just to test README images.
 
-Con Node 24 y pnpm 11.25.0:
+## 1. Validate the version
+
+With Node 24 and pnpm 11.25.0:
 
 ```sh
 pnpm install --frozen-lockfile
@@ -27,98 +29,104 @@ pnpm build
 pnpm test:e2e:cards
 ```
 
-Revisá el diff de avisos tras `licenses:generate`: el inventario instalado puede variar entre Windows y Linux. La última suite usa fixtures de proveedores y un token ficticio en un servidor de producción local separado. Comprueba las diez familias, URLs, respuestas HTTP y renderizado; no usa el PAT ni demuestra funcionamiento de Camo remoto. Conserva el perfil del navegador habitual.
+Review the notices diff after `licenses:generate`: the installed dependency inventory can vary between Windows and Linux. The last suite uses provider fixtures and a dummy token in a separate local production server. It checks all ten families, URLs, HTTP responses, and rendering; it does not use the PAT or prove that remote Camo works. Keep your regular browser profile.
 
-La versión revisada debe estar publicada en el repositorio conectado a Vercel. Los `.env*.local`, claves y planes privados se mantienen fuera de Git. `.vercelignore` también los excluye de una subida mediante CLI. Las credenciales se configuran en el panel del hosting.
+The reviewed version must be pushed to the repository connected to Vercel. Keep `.env*.local`, keys, and private plans out of Git. `.vercelignore` also excludes them from CLI uploads. Configure credentials in the hosting dashboard.
 
-## 2. Crear el proyecto
+## 2. Create the project
 
-1. En una cuenta Hobby, elegí **Add New → Project** e importá el repositorio. Si pertenece a una organización, revisá las restricciones en [límites de Vercel](https://vercel.com/docs/limits).
-2. Conservá **Framework Preset: Next.js** y la raíz del proyecto como **Root Directory**.
-3. Elegí **Node.js 24.x**, también exigido por `package.json`. Ver [versiones de Node](https://vercel.com/docs/functions/runtimes/node-js/node-js-versions).
-4. [vercel.json](../vercel.json) fija `corepack pnpm install --frozen-lockfile`, `pnpm build` y Fluid Compute. Conservá la salida automática de Next.js: no es una exportación estática.
-5. Agregá `ENABLE_EXPERIMENTAL_COREPACK=1` a Production y Preview para respetar `packageManager`. Ver [Corepack](https://vercel.com/docs/builds/configure-a-build#corepack).
-6. Verificá **Production → Branch Tracking: main**. Usá los despliegues de `dev` para preproducción.
+1. In a Hobby account, choose **Add New → Project** and import the repository. If it belongs to an organization, review the restrictions in [Vercel limits](https://vercel.com/docs/limits).
+2. Keep **Framework Preset: Next.js** and the project root as the **Root Directory**.
+3. Choose **Node.js 24.x**, also required by `package.json`. See [Node.js versions](https://vercel.com/docs/functions/runtimes/node-js/node-js-versions).
+4. [vercel.json](../vercel.json) sets `corepack pnpm install --frozen-lockfile`, `pnpm build`, and Fluid Compute. Keep Next.js's automatic output; this is not a static export.
+5. Add `ENABLE_EXPERIMENTAL_COREPACK=1` to Production and Preview to respect `packageManager`. See [Corepack](https://vercel.com/docs/builds/configure-a-build#corepack).
+6. Verify **Production → Branch Tracking: main**. Use deployments from `dev` for pre-production.
 
-Las funciones tienen presupuestos explícitos de 75 segundos para JSON/tarjetas de perfil y 150 para recursos Extended. Repositorio con aportes puede esperar primero un recurso y después estadísticas, hasta unos 120 segundos de presupuestos encadenados. Se conservan los límites de red y colas. Hobby con Fluid admite hasta 300 segundos según la [documentación de duración](https://vercel.com/docs/functions/configuring-functions/duration).
+Functions have explicit time budgets of 75 seconds for profile JSON/cards and 150 seconds for Extended resources. A repository with contributions can first wait for a resource and then for statistics, for up to roughly 120 seconds across chained budgets. Network and queue limits remain in place. Hobby with Fluid supports up to 300 seconds according to the [duration documentation](https://vercel.com/docs/functions/configuring-functions/duration).
 
-## 3. Variables por entorno
+## 3. Environment variables
 
-En **Project → Settings → Environment Variables**:
+In **Project → Settings → Environment Variables**:
 
-| Variable                       | Production (`main`)                                                           | Preview de `dev`                                                                               |
-| ------------------------------ | ----------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| `GITHUB_TOKEN`                 | PAT classic dedicado con solo `public_repo`, como el que funciona localmente. | PAT dedicado a pruebas si necesitás búsquedas reales; vacío permite edición manual y muestras. |
-| `APP_URL`                      | Origen HTTPS estable de producción.                                           | Vacío para muestras; para probar exportación, origen HTTPS público de preproducción.           |
-| `ENABLE_EXPERIMENTAL_COREPACK` | `1`.                                                                          | `1`.                                                                                           |
+| Variable                       | Production (`main`)                                                              | Preview of `dev`                                                                                          |
+| ------------------------------ | -------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `GITHUB_TOKEN`                 | Dedicated classic PAT with only `public_repo`, like the one that works locally.  | PAT dedicated to tests if you need real searches; leaving it empty allows manual editing and sample data. |
+| `APP_URL`                      | Explicit, stable HTTPS origin; when empty, the Vercel Production domain is used. | Leave empty for samples; to test exports, use a public HTTPS pre-production origin.                       |
+| `ENABLE_EXPERIMENTAL_COREPACK` | `1`.                                                                             | `1`.                                                                                                      |
 
-Las variables de Preview sin filtro se aplican a todas sus ramas. Limitá explícitamente `GITHUB_TOKEN` y el origen de prueba a `dev` si querés que estén disponibles únicamente en esa rama. Si reutilizás el PAT entre entornos, comparten la cuota de la misma cuenta. Ver [entornos](https://vercel.com/docs/deployments/environments) y [variables por rama](https://vercel.com/docs/environment-variables).
+Unfiltered Preview variables apply to all Preview branches. Explicitly limit `GITHUB_TOKEN` and the test origin to `dev` if you want them available only on that branch. If you reuse a PAT across environments, they share the same account quota. See [environments](https://vercel.com/docs/deployments/environments) and [branch-specific variables](https://vercel.com/docs/environment-variables).
 
-`GITHUB_TOKEN` es exclusivo del servidor: no usar `NEXT_PUBLIC_`, URLs ni README. `public_repo` también permite escritura en GitHub, pero este cliente ejecuta únicamente lecturas y filtra datos públicos; rechaza scopes adicionales y credenciales no verificables.
+`GITHUB_TOKEN` is server-only: never use `NEXT_PUBLIC_`, URLs, or README content. `public_repo` also permits writes on GitHub, but this client performs reads only and filters public data; it rejects additional scopes and unverifiable credentials.
 
-`APP_URL` debe ser un origen como `https://tu-proyecto.vercel.app`, sin ruta, query ni fragmento. No se deduce de `Host` o `VERCEL_URL`. Usá el dominio estable de producción para los README definitivos; los previews temporales no son enlaces duraderos.
+`APP_URL` must be an origin such as `https://your-project.vercel.app`, with no path, query, or fragment. It takes precedence in every environment. If a non-empty value is invalid, it must be corrected; it is not silently replaced. The app does not infer it from `Host`, `VERCEL_URL`, or `VERCEL_BRANCH_URL`.
 
-Si aún no conocés el dominio, hacé el primer despliegue sin `APP_URL`; después agregá el dominio asignado y ejecutá **Redeploy**. Mientras falta, las tarjetas son una vista previa local y bloquean exportación.
+When `APP_URL` is empty and `VERCEL_ENV` is exactly `production`, the app uses `https://` plus `VERCEL_PROJECT_PRODUCTION_URL`, after validating the domain and the existing public-origin policy. Vercel defines this value as the shortest production domain, either a custom domain or a `vercel.app` domain, available at build time and runtime without a scheme. Enable **Environment Variables → Enable access to System Environment Variables**. The editor reads this value per request; after changing Vercel configuration, run **Redeploy**. See the official [system environment variables](https://vercel.com/docs/environment-variables/system-environment-variables) and [ADR 0036](decisions/0036-production-card-origin.md).
 
-En `dev` podés usar el alias de rama asignado por Vercel como origen de prueba si es público. Si apuntás su `APP_URL` a producción, estarás probando las imágenes de `main`, aunque el editor sea de preproducción. No presentar ese resultado como prueba de las rutas nuevas de `dev`.
+This fallback is not enabled in Preview, development, self-hosted servers, or merely because `NODE_ENV=production`; those environments need an explicit `APP_URL` to export cards. Without a valid origin, data available in the browser can still render the preview, but it cannot provide a URL that GitHub can load. README copy and download remain disabled while cards are included; the JSON project and manual contributions without cards can still be exported.
 
-## 4. Acceso anónimo
+Search indexing is a separate choice. Vercel Production is indexable only when a valid public origin is available; Preview and local environments remain `noindex`, even when `APP_URL` is set. A self-hosted production build defaults to `noindex`; set `PUBLIC_SITE_INDEXING_ENABLED=true` only when it serves the stable public site over HTTPS.
 
-El dominio de `APP_URL` y `/cards/...` deben responder sin sesión, cookies, contraseña o redirecciones de autenticación. Revisá **Deployment Protection**. Podés proteger previews si no necesitás comprobar sus imágenes desde GitHub; una URL protegida no sirve para esa prueba.
+On `dev`, you can use the branch alias assigned by Vercel as the test origin if it is public. If you point its `APP_URL` at Production, you will be testing the images from `main`, even when the editor is a pre-production build. Do not present that as a test of the new `dev` routes.
 
-Las tarjetas están fuera de `/en` y `/es`; el idioma va en `?locale=en` o `?locale=es`. No agregar rewrites hacia el editor. Las respuestas incluyen `image/svg+xml`, CSP pasiva, `nosniff`, caché pública y `X-Activity-State`.
+## 4. Anonymous access
 
-GitHub usa Camo y necesita acceso público a la imagen. Que funcione en tu sesión o en localhost no alcanza. Ver [diagnóstico oficial de imágenes](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/about-anonymized-urls).
+The effective origin, whether explicit or resolved from Production, and `/cards/...` must respond without a session, cookies, a password, or authentication redirects. Review **Deployment Protection**. You can protect Previews if you do not need to check their images from GitHub; a protected URL cannot be used for that test. Validating the origin syntax does not verify availability or anonymous access.
 
-## 5. Comprobar las tarjetas publicadas
+On October 22, 2026, the `dev` Preview for commit `7b44bdc` was marked **Ready** in Vercel and `/en` opened in a Vercel-authenticated browser session. Anonymous `HEAD` requests to `/en` and `/en/social-preview` returned `302` redirects to Vercel SSO and `X-Robots-Tag: noindex`. This records authenticated access and the observed anonymous redirects only. It does not establish anonymous behavior for `/cards/...`, Production availability, or rendering by GitHub or Camo. Keep SSO enabled and treat the Preview as protected; no card route or remote README image was tested.
 
-Sin token ni cookies del visitante:
+Cards are outside `/en` and `/es`; the language goes in `?locale=en` or `?locale=es`. Do not add rewrites to the editor. Responses include `image/svg+xml`, a passive CSP, `nosniff`, public caching, and `X-Activity-State`.
 
-```sh
-pnpm cards:check --origin https://tu-proyecto.vercel.app --username juannh
-```
+GitHub uses Camo and needs public access to the image. Working in your session or on localhost is not enough. See the [official image troubleshooting guide](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/about-anonymized-urls).
 
-Eso comprueba las siete tarjetas de perfil. Para incluir opciones y recursos que realmente exportaste, descargá el README desde el editor:
+## 5. Check deployed cards
 
-```sh
-pnpm cards:check --origin https://tu-proyecto.vercel.app --readme ./README-exportado.md
-```
-
-El archivo se lee localmente. Solo se solicitan imágenes de tarjetas del origen indicado; iconos y recursos de otros servidores se ignoran. Se comprueban GET/HEAD anónimos, SVG pasivo, dimensiones, caché y estado. `unavailable` falla aunque responda HTTP 200; `stale` se informa como anterior. Un resultado correcto comprueba las URLs, no publica contenido ni prueba Camo.
-
-Para probar los mismos paths contra una compilación local:
+Without a token or visitor cookies:
 
 ```sh
-pnpm cards:check --origin https://tu-proyecto.vercel.app --readme ./README-exportado.md --local-origin http://127.0.0.1:3100
+pnpm cards:check --origin https://your-project.vercel.app --username juannh
 ```
 
-`--local-origin` permite únicamente loopback y sustituye el transporte. No comprueba DNS, HTTPS, Vercel, CDN ni GitHub.
+This checks the seven profile cards. To include options and resources you actually exported, download the README from the editor:
 
-## 6. Revisar dentro de GitHub
+```sh
+pnpm cards:check --origin https://your-project.vercel.app --readme ./README-exported.md
+```
 
-1. En el editor publicado, buscá el usuario, elegí tarjetas y descargá el README.
-2. Pegá el Markdown en una edición de README en GitHub y usá **Preview** antes de guardar.
-3. Revisá las imágenes, idioma, colores y contadores. Repositorios/Gists deben existir y ser públicos; WakaTime requiere estadísticas públicas.
-4. Si falta una imagen, abrí su URL en una ventana privada y ejecutá `cards:check` con el archivo. HTML de protección o SVG `unavailable` no son tarjetas listas.
-5. Tras guardar, revisá la vista pública. Camo puede mostrar una versión anterior: no promete actualización inmediata.
+The file is read locally. Only card images from the specified origin are requested; icons and resources from other servers are ignored. The tool checks anonymous GET/HEAD requests, passive SVG, dimensions, caching, and state. `unavailable` fails even when the response is HTTP 200; `stale` is reported as old data. A successful result checks the URLs; it does not publish content or test Camo.
 
-Las maquetas y snapshots de IndexedDB no viajan en el Markdown. Las tarjetas actuales son imágenes dinámicas del servidor/CDN; todavía no existe exportación de SVG estático. La caché del navegador acelera la edición, pero no sirve imágenes a quien lee el README.
+To test the same paths against a local build:
 
-## 7. Observar el consumo
+```sh
+pnpm cards:check --origin https://your-project.vercel.app --readme ./README-exported.md --local-origin http://127.0.0.1:3100
+```
 
-Revisá funciones, CPU y transferencia en Vercel y cuota restante en GitHub. Repetir una misma URL permite observar `x-vercel-cache`; la retención es de mejor esfuerzo. Evitá parámetros aleatorios para forzar recargas: crean nuevas claves.
+`--local-origin` only allows loopback and replaces the transport. It does not check DNS, HTTPS, Vercel, the CDN, or GitHub.
 
-Cada perfil nuevo y cada renovación de tarjetas publicadas puede consumir cuota aunque el autor haya cerrado el editor. Las cachés y límites de servidor son por proceso; no se coordinan globalmente entre instancias. Esta preparación permite comenzar y medir, no garantiza usuarios por hora ni capacidad ilimitada. Los controles distribuidos se evaluarán con tráfico medido.
+## 6. Review in GitHub
 
-## Validación de esta preparación
+1. In the deployed editor, search for the user, choose cards, and download the README.
+2. Paste the Markdown into a README edit on GitHub and use **Preview** before saving.
+3. Check images, language, colors, and counters. Repositories/Gists must exist and be public; WakaTime requires public statistics.
+4. If an image is missing, open its URL in a private window and run `cards:check` with the file. A protection page or an `unavailable` SVG is not a ready card.
+5. After saving, check the public view. Camo may show an older version; an immediate update is not guaranteed.
 
-Ejecutada el 20 de octubre de 2026 en Windows, con Node 24 y la compilación de producción:
+Editor mockups and IndexedDB snapshots are not included in the Markdown. Current cards are dynamic server/CDN images; static SVG export is not available yet. The browser cache speeds up editing, but it does not serve images to people reading the README.
 
-- `pnpm check`: licencias sin avisos pendientes, lint, tipos, formato, enlaces de 53 documentos, 1.415 pruebas Vitest y 28 del comprobador correctos.
-- `pnpm build`: correcto. SWC necesitó acceso a su caché nativa fuera del sandbox de Windows; no se modificaron permisos ni dependencias.
-- `pnpm test:e2e:cards`: 19 casos correctos con proveedores controlados. Diez familias en EN/ES, 20 URLs y 20 imágenes decodificadas, XML pasivo y entradas inválidas.
-- PAT real, solo lecturas públicas y navegador aislado: descarga de README con ocho tarjetas, 18 contadores y un repositorio público; ocho imágenes decodificadas y ningún error de página o Authorization enviado por el navegador.
-- `cards:check` sobre ese archivo: ocho URLs con GET/HEAD, estado `ready`, SVG pasivo y cabeceras de caché correctos. Se sustituyó explícitamente el transporte por loopback; no se contactó el dominio de ejemplo.
-- Comprobación del token literal en los 54 archivos de `.next/static`: no encontrado. Esto es una comprobación acotada del build revisado, no una certificación de seguridad.
+## 7. Observe usage
 
-Todavía no existe un proyecto/dominio público de Vercel para esta revisión. Quedan pendientes la instalación Linux efectiva, el comportamiento de CDN y las imágenes en GitHub/Camo. Los pasos 5 y 6 deben completarse después del primer despliegue.
+Review function usage, CPU, and transfer in Vercel, and remaining quota on GitHub. Repeating the same URL lets you observe `x-vercel-cache`; retention is best effort. Avoid random query parameters to force reloads: they create new cache keys.
+
+Each new profile and each refresh of published cards can consume quota even after the author closes the editor. Server caches and limits are per process; they are not coordinated globally across instances. This setup is a starting point for measurement, not a guarantee of users per hour or unlimited capacity. Distributed controls will be evaluated using measured traffic.
+
+## Validation of this setup
+
+Run on October 20, 2026, on Windows, with Node 24 and the production build:
+
+- `pnpm check`: no pending license notices; lint, types, formatting, links in 53 documents, 1,415 Vitest tests, and 28 card-checker tests passed.
+- `pnpm build`: passed. SWC needed access to its native cache outside the Windows sandbox; no permissions or dependencies were changed.
+- `pnpm test:e2e:cards`: 19 cases passed with controlled providers. Ten families in EN/ES, 20 URLs and 20 decoded images, passive XML, and invalid inputs.
+- Real PAT, public read-only requests, and an isolated browser: downloaded a README with eight cards, 18 counters, and one public repository; eight images decoded with no page errors or `Authorization` header sent by the browser.
+- `cards:check` on that file: eight URLs passed GET/HEAD checks, `ready` state, passive SVG, and cache headers. Transport was explicitly replaced with loopback; the example domain was not contacted.
+- Checked for the literal token in the 54 files under `.next/static`: not found. This is a scoped check of the reviewed build, not a security certification.
+
+Vercel listed the Production deployment from `main` at commit `8aaa13b` as **Ready** on October 20, 2026, with the stable domain `readme-generator-ashy.vercel.app`. On October 22, 2026 (Buenos Aires), anonymous `HEAD` requests to `/en` returned `200`; `/en/social-preview`, `/robots.txt`, and `/sitemap.xml` returned `404`. This confirms the listed public response statuses and indicates that this Production deployment does not yet contain the P11/P12 routes. It does not verify the current deployment's Linux installation, CDN behavior, card routes, or image rendering by GitHub/Camo. This Production deployment is separate from the SSO-protected `dev` Preview described above; do not infer that their routes or access behavior match. Recheck steps 5 and 6 against the candidate deployment before relying on those paths.

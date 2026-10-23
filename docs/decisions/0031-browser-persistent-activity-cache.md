@@ -1,41 +1,41 @@
-# ADR 0031: Guardar los datos públicos de actividad en el navegador
+# ADR 0031: Persist Public Activity Data in the Browser
 
-- Estado: aceptada para la implementación.
-- Fecha: 2026-10-20.
-- Producto: GitHub Profile Generator.
-- Amplía [ADR 0030](0030-all-profile-counters-prefetch.md) y sustituye la caché exclusivamente en memoria del editor de [ADR 0027](0027-browser-activity-data-cache.md).
+- Status: Accepted for implementation.
+- Date: 2026-10-20.
+- Product: GitHub Profile Generator.
+- Extends [ADR 0030](0030-all-profile-counters-prefetch.md) and replaces the editor's memory-only cache from [ADR 0027](0027-browser-activity-data-cache.md).
 
-## Contexto
+## Context
 
-La búsqueda ya prepara los 18 contadores, pero sus datos se perdían al recargar porque vivían solo en RAM. Se pidió conservar la primera carga completa en el navegador de cada persona y reutilizarla al agregar componentes, sin exigir almacenamiento persistente del backend.
+Search now prepares all 18 counters, but the data was lost on reload because it lived only in RAM. The request was to retain each person's first complete load in the browser and reuse it when adding components, without requiring persistent backend storage.
 
-## Decisión
+## Decision
 
-Guardar la caché de datos públicos en IndexedDB nativo del navegador, con un formato versionado independiente de `ProfileDocument`, localStorage del borrador, archivos de proyecto y Markdown. Conservar identidad, filtros, período y fecha original; guardar únicamente entradas validadas y acotadas. No guardar token, credenciales, autorizaciones para consultar, errores, solicitudes pendientes, SVG ni Blob URLs.
+Store the public-data cache in the browser's native IndexedDB, using a versioned format separate from `ProfileDocument`, draft localStorage, project files, and Markdown. Preserve identity, filters, period, and original timestamp; store only validated, bounded entries. Do not store tokens, credentials, query authorization, errors, pending requests, SVGs, or Blob URLs.
 
-La frescura sigue siendo de 30 minutos desde la consulta original; datos anteriores pueden mostrarse como tales hasta 24 horas. La recuperación no rejuvenece fechas. La limpieza de entradas vencidas se realiza al acceder o guardar; no se promete que el navegador ejecute tareas mientras la aplicación está cerrada. Los límites de entradas y tamaño se mantienen acotados y la caché es descartable.
+Freshness remains 30 minutes from the original query; older data may be shown as such for up to 24 hours. Recovery does not refresh timestamps. Expired entries are cleaned up on access or save; the browser is not expected to run tasks while the app is closed. Entry count and size remain bounded, and the cache is disposable.
 
-La reutilización exige coincidencia de alcance y día UTC. Cruzar esa fecha o el año implícito puede dejar la consulta pendiente hasta Buscar; retener filas anteriores no autoriza mezclar períodos ni consultar automáticamente.
+Reuse requires a matching scope and UTC day. Crossing that date or an implicit year boundary may leave a request pending until Search; retaining earlier rows does not authorize mixing periods or querying automatically.
 
-Al montar, restaurar asíncronamente sin HTTP. Los datos cubiertos pueden mostrarse y personalizarse directamente. Recuperar datos no autoriza nuevas consultas: faltantes o vencidos esperan Buscar en una sesión que todavía no buscó. Buscar espera la lectura inicial para no duplicar una carga que ya existe. Escribir usuario, abrir formularios o recuperar borrador no consulta GitHub.
+Restore asynchronously on mount without HTTP. Covered data can be shown and customized directly. Restoring data does not authorize new requests: missing or expired data waits for Search in a session that has not searched yet. Search waits for the initial read to avoid duplicating an existing load. Typing a username, opening forms, or recovering a draft does not query GitHub.
 
-Agrupar escrituras asíncronas y confirmar «guardado» solo al completar la transacción. Mientras tanto, indicar que se está guardando. Al desmontar o recargar, cancelar trabajo en vuelo y conservar la caché. Borrar, comenzar, importar, reemplazar o restaurar el perfil purga la caché y su activación, invalidando lecturas, escrituras y respuestas anteriores. El ciclo adicional de efectos de Strict Mode no debe provocar una purga ni dejar la sesión inutilizable.
+Batch asynchronous writes and confirm “saved” only after the transaction completes. Until then, indicate that data is being saved. Unmounting or reloading cancels in-flight work and retains the cache. Deleting, starting, importing, replacing, or restoring the profile purges the cache and its activation, invalidating previous reads, writes, and responses. The extra effect cycle in Strict Mode must not purge the cache or leave the session unusable.
 
-Si IndexedDB falla, queda bloqueado o alcanza su cuota, continuar con RAM e informar que esos datos estarán disponibles mientras el editor siga abierto. El borrador y sus mecanismos de protección no dependen de que esta caché pueda guardarse.
+If IndexedDB fails, is blocked, or reaches its quota, continue with RAM and explain that the data will remain available only while the editor is open. The draft and its protection mechanisms do not depend on saving this cache.
 
-## Alternativas consideradas
+## Alternatives Considered
 
-- Solo RAM: reutiliza datos durante la edición, pero no satisface la recarga solicitada.
-- localStorage: adecuado para datos pequeños; su API síncrona y almacenamiento de cadenas resultan menos apropiados para snapshots potencialmente grandes.
-- sessionStorage: síncrono y limitado a la pestaña; no aporta las operaciones asíncronas de IndexedDB.
-- Servicio de caché remoto: introduce infraestructura fuera del alcance solicitado.
+- RAM only: reuses data during editing but does not meet the reload request.
+- localStorage: suitable for small data; its synchronous API and string storage are less appropriate for potentially large snapshots.
+- sessionStorage: synchronous and limited to the tab; it does not provide IndexedDB's asynchronous operations.
+- Remote cache service: introduces infrastructure outside the requested scope.
 
-IndexedDB permite almacenar datos estructurados con operaciones asíncronas por origen. La retención depende también del navegador, las cuotas y la eliminación de datos del sitio. No solicitar permisos de almacenamiento persistente ni mostrar avisos adicionales. Fuentes: [IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API), [transacción completada](https://developer.mozilla.org/en-US/docs/Web/API/IDBTransaction/complete_event) y [cuotas y eliminación](https://developer.mozilla.org/en-US/docs/Web/API/Storage_API/Storage_quotas_and_eviction_criteria).
+IndexedDB can store structured data with asynchronous, origin-scoped operations. Retention also depends on the browser, quotas, and site-data eviction. Do not request persistent-storage permission or show additional notices. Sources: [IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API), [transaction complete](https://developer.mozilla.org/en-US/docs/Web/API/IDBTransaction/complete_event), and [quotas and eviction](https://developer.mozilla.org/en-US/docs/Web/API/Storage_API/Storage_quotas_and_eviction_criteria).
 
-## Consecuencias
+## Consequences
 
-Cada navegador/dispositivo conserva su propia copia; no se sincroniza entre personas u orígenes. Las visitas posteriores pueden reutilizar datos sin solicitudes a la aplicación mientras estén disponibles. La primera carga o un nuevo alcance siguen pasando por el servidor para proteger el token; esto no elimina cuotas ni garantiza capacidad para miles de búsquedas nuevas.
+Each browser/device keeps its own copy; it is not synced across people or origins. Later visits may reuse data without application requests while it remains available. The first load or a new scope still goes through the server to protect the token; this does not remove quotas or guarantee support for thousands of new searches.
 
-## Verificación
+## Verification
 
-Comprobar recarga con datos frescos y cero HTTP, vencimiento sin consulta automática, identidad/alcance, caché inválida, límites, bloqueo/cuota, Strict Mode y reset durante lecturas/escrituras. Mantener snapshots fuera del perfil y sus respaldos. Resultados en [desarrollo](../development.md).
+Check reload with fresh data and zero HTTP requests, expiration without automatic queries, identity/scope, invalid cache, limits, blocked storage/quota, Strict Mode, and reset during reads/writes. Keep snapshots out of the profile and its backups. Results are recorded in [Development](../development.md).

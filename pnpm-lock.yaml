@@ -71,6 +71,9 @@ importers:
       clsx:
         specifier: 2.1.1
         version: 2.1.1
+      emoji-picker-react:
+        specifier: 5.0.0
+        version: 5.0.0(react@19.3.1)
       hast-util-from-html:
         specifier: 2.0.3
         version: 2.0.3
@@ -156,6 +159,9 @@ importers:
       eslint-config-prettier:
         specifier: 10.1.8
         version: 10.1.8(eslint@10.13.0(jiti@2.7.0)(supports-color@7.2.0))
+      husky:
+        specifier: 9.1.7
+        version: 9.1.7
       prettier:
         specifier: 3.9.10
         version: 3.9.10
@@ -1719,6 +1725,12 @@ packages:
   electron-to-chromium@1.5.459:
     resolution: {integrity: sha512-4SC9HHSFjO/liAhifpdOL5hG9b4BP7/5G3y3UPZVO8trlAXr1CaUEEJL0gWK3kOcYcZrOA5rkwG45Gra/lTIgg==}
 
+  emoji-picker-react@5.0.0:
+    resolution: {integrity: sha512-TiWM6Fbhi42SyfdVx20jJuqOOszY/sO/XyiBcTlIgMEkgN7LOxIk2pXJybfvC0qDD/ld9iT0feM3qg9tH1C/Pg==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      react: '>=16.8'
+
   emoji-regex@9.2.2:
     resolution: {integrity: sha512-L18DaJsXSUk2+42pv8mLs5jJT2hqFkFE4j21wOmgbUqsZ2hL72NsUU785g9RXgo3s0ZNgVl42TiHp3ZtOv/Vyg==}
 
@@ -2095,6 +2107,11 @@ packages:
 
   html-void-elements@3.0.0:
     resolution: {integrity: sha512-bEqo66MRXsUGxWHV5IP0PUiAWwoEjba4VCzg0LjFJBpchPaTfyfCKTG6bc5F8ucKec3q5y6qOdGyYTSBEvhCrg==}
+
+  husky@9.1.7:
+    resolution: {integrity: sha512-5gs5ytaNjBrh5Ow3zrvdUUY+0VxIuWVL4i9irt6friV+BqdCfmV11CQTWMiBYWHbXhco+J1kHfTOUkePhCDvMA==}
+    engines: {node: '>=18'}
+    hasBin: true
 
   icu-minify@4.14.9:
     resolution: {integrity: sha512-PmO+fNnC3K3mfPKTnm3RrPERrhQZnjm1AlpyZQ0ShbXi8Y/kYZ3YOde8TEjCLz9k3P2DmzkBn8lykGrCAi1Ajw==}
@@ -3003,6 +3020,9 @@ packages:
   shebang-regex@3.0.0:
     resolution: {integrity: sha512-7++dFhtcx3353uBaq8DDR4NuxBetBzC7ZQOhmTQInHEd6bSrXdiEyzCvG07Z44UYdLShWUyXt5M/yhz8ekcb1A==}
     engines: {node: '>=8'}
+
+  shipstyles@1.0.0:
+    resolution: {integrity: sha512-1AcihfXo/mSxqeOdoKqq/5TNv+vSH0dBYPFq88PUX5FBkK5pRmY5TP9SuMNio85PQ+euUI67+KpSVk1cUVDCgA==}
 
   side-channel-list@1.0.1:
     resolution: {integrity: sha512-mjn/0bi/oUURjc5Xl7IaWi/OJJJumuoJFQJfDDyO46+hBWsfaVM65TBHq2eoZBhzl9EchxOijpkbRC8SVBQU0w==}
@@ -4814,6 +4834,11 @@ snapshots:
 
   electron-to-chromium@1.5.459: {}
 
+  emoji-picker-react@5.0.0(react@19.3.1):
+    dependencies:
+      react: 19.3.1
+      shipstyles: 1.0.0
+
   emoji-regex@9.2.2: {}
 
   enhanced-resolve@5.26.0:
@@ -5390,6 +5415,8 @@ snapshots:
   html-url-attributes@3.0.1: {}
 
   html-void-elements@3.0.0: {}
+
+  husky@9.1.7: {}
 
   icu-minify@4.14.9:
     dependencies:
@@ -6515,6 +6542,8 @@ snapshots:
       shebang-regex: 3.0.0
 
   shebang-regex@3.0.0: {}
+
+  shipstyles@1.0.0: {}
 
   side-channel-list@1.0.1:
     dependencies:

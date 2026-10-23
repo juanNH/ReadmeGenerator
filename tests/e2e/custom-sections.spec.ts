@@ -396,7 +396,7 @@ test("authored titles cannot collide with provisional or disambiguated navigatio
   expect(markdown).not.toContain("## Custom section 2 · custom 2\n");
 });
 
-test("consecutive lists stay independent across empty blocks, untitled sections and built-in lists", async ({
+test("list blocks retain authored items and alternate markers across sections", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1600, height: 1100 });
@@ -447,8 +447,27 @@ test("consecutive lists stay independent across empty blocks, untitled sections 
   );
   await openEditor(page, profile);
   const preview = page.getByRole("article", { name: "README preview", exact: true });
-  await expect(preview.locator("ul")).toHaveCount(4);
+  await expect(preview.locator("ul")).toHaveCount(3);
   await expect(preview.locator("ol")).toHaveCount(3);
+  for (const item of [
+    "one first",
+    "one second",
+    "two first",
+    "two second",
+    "three first",
+    "three second",
+    "four first",
+    "four second",
+    "five first",
+    "five second",
+    "six first",
+    "six second",
+  ]) {
+    await expect(preview.getByText(item, { exact: true })).toBeVisible();
+  }
+  for (const unordered of await preview.locator("ul").all()) {
+    await expect(unordered.locator(":scope > li")).toHaveCount(2);
+  }
   for (const ordered of await preview.locator("ol").all()) {
     await expect(ordered.locator(":scope > li")).toHaveCount(2);
     expect(await ordered.evaluate((element: HTMLOListElement) => element.start)).toBe(1);
@@ -459,6 +478,7 @@ test("consecutive lists stay independent across empty blocks, untitled sections 
   expect(markdown).toContain("1. three first");
   expect(markdown).toContain("1) four first");
   expect(markdown).toContain("1. five first");
+  expect(markdown).toContain("* six first");
 });
 
 test("Spanish list choices explain points and automatic numbering before writing", async ({

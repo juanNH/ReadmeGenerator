@@ -10,7 +10,6 @@ import {
   Download,
   Eye,
   FileUp,
-  FolderOpen,
   Globe2,
   PenLine,
   Plus,
@@ -35,6 +34,7 @@ import type { ContentLocale, ProfileDocument } from "@/core/profile/profile-sche
 import { generateReadme } from "@/core/readme";
 import { cn } from "@/lib/cn";
 import { EditorModuleForm } from "./editor-module-form";
+import { EmojiInserter } from "./emoji-inserter";
 import { EditorSectionNavigation } from "./editor-section-navigation";
 import {
   moveVisibleSection,
@@ -53,6 +53,7 @@ import { useProfileDraft } from "./use-profile-draft";
 import { localActivityCardSources } from "./activity-card-requests";
 import { useActivityData } from "./use-activity-data";
 import { useEditorScroll } from "./use-editor-scroll";
+import { downloadProjectFile } from "./download-project-file";
 
 function ImportLoading() {
   const t = useTranslations("Editor");
@@ -95,6 +96,16 @@ function revealConfiguration(heading: HTMLHeadingElement | null, moveFocus = fal
   else if (!moveFocus) heading?.scrollIntoView({ block: "start" });
 }
 
+function focusInvalidControl(panel: HTMLElement | undefined) {
+  const control = panel?.querySelector<HTMLElement>('[aria-invalid="true"]');
+  let details = control?.closest("details");
+  while (details) {
+    details.open = true;
+    details = details.parentElement?.closest("details") ?? null;
+  }
+  control?.focus();
+}
+
 export function EditorWorkspace({
   initialContentLocale,
   activityCardBaseUrl,
@@ -103,6 +114,7 @@ export function EditorWorkspace({
   activityCardBaseUrl?: string;
 }) {
   const t = useTranslations("Editor");
+  const projectText = useTranslations("Project");
   const formText = useTranslations("EditorModules");
   const moduleLabels = useTranslations("Modules");
   const {
@@ -130,8 +142,12 @@ export function EditorWorkspace({
   const [compactView, setCompactView] = useState<"edit" | "preview">("edit");
   const [importOpen, setImportOpen] = useState(false);
   const [projectOpen, setProjectOpen] = useState(false);
+  const [projectDownloadFeedback, setProjectDownloadFeedback] = useState<{
+    success: boolean;
+    message: string;
+  } | null>(null);
   const editorScrollRef = useEditorScroll();
-  const projectTriggerRef = useRef<HTMLButtonElement>(null);
+  const projectReturnFocusRef = useRef<HTMLButtonElement | null>(null);
   const importTriggerRef = useRef<HTMLButtonElement>(null);
   const [toolbarSize, setToolbarSize] = useState({ height: 0, sticky: true });
   const toolbarRef = useRef<HTMLDivElement>(null);
@@ -197,11 +213,12 @@ export function EditorWorkspace({
   const hasImageUrlErrors = readmeErrors.some(
     (error) =>
       error.code === "invalid_url" &&
-      error.path[0] === "customSections" &&
-      typeof error.path[1] === "number" &&
-      error.path[2] === "blocks" &&
-      typeof error.path[3] === "number" &&
-      profile.customSections[error.path[1]]?.blocks[error.path[3]]?.type === "image",
+      ((error.path[0] === "customSections" &&
+        typeof error.path[1] === "number" &&
+        error.path[2] === "blocks" &&
+        typeof error.path[3] === "number" &&
+        profile.customSections[error.path[1]]?.blocks[error.path[3]]?.type === "image") ||
+        (error.path[0] === "data" && error.path[1] === "projects" && error.path[4] === "cover")),
   );
   const hasInvalidUsername = readmeErrors.some((error) => error.code === "invalid_username");
   const hasInvalidActivityOptions = readmeErrors.some(
@@ -286,11 +303,7 @@ export function EditorWorkspace({
     else if (pending.kind === "navigation") revealConfiguration(configurationHeadingRef.current);
     else if (pending.kind === "title")
       panelRefs.current.get(pending.id)?.querySelector<HTMLInputElement>("input")?.focus();
-    else if (pending.kind === "error")
-      panelRefs.current
-        .get(pending.id)
-        ?.querySelector<HTMLElement>('[aria-invalid="true"]')
-        ?.focus();
+    else if (pending.kind === "error") focusInvalidControl(panelRefs.current.get(pending.id));
     else {
       const control = moveRefs.current.get(`${pending.id}-${pending.kind}`);
       const alternative = moveRefs.current.get(
@@ -304,6 +317,7 @@ export function EditorWorkspace({
 
   function editDocument(next: ProfileDocument) {
     setExportFeedback("idle");
+    setProjectDownloadFeedback(null);
     setClearFeedback(null);
     updateDocument(next);
   }
@@ -368,8 +382,7 @@ export function EditorWorkspace({
   function reviewErrors(id: EditableSectionId) {
     setSelectedId(id);
     setCompactView("edit");
-    if (activeId === id && compactView === "edit")
-      panelRefs.current.get(id)?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
+    if (activeId === id && compactView === "edit") focusInvalidControl(panelRefs.current.get(id));
     else pendingFocus.current = { id, kind: "error" };
   }
 
@@ -490,6 +503,7 @@ export function EditorWorkspace({
       setSelectedId(null);
       setCompactView("edit");
       setProjectOpen(false);
+      setProjectDownloadFeedback(null);
       startNewDraft();
       activityData.reset();
     }
@@ -503,6 +517,7 @@ export function EditorWorkspace({
     pendingReadmeImportOpen = false;
     setImportOpen(false);
     setProjectOpen(false);
+    setProjectDownloadFeedback(null);
     setSelectedId(null);
     setCompactView("edit");
     setExportFeedback("idle");
@@ -520,6 +535,7 @@ export function EditorWorkspace({
     pendingReadmeImportOpen = false;
     setImportOpen(false);
     setProjectOpen(false);
+    setProjectDownloadFeedback(null);
     setCompactView("edit");
     const id = visibleEditableSections(next)[0] ?? null;
     setSelectedId(id);
@@ -529,19 +545,49 @@ export function EditorWorkspace({
   }
 
   function changeImportOpen(open: boolean) {
-    if (open) setProjectOpen(false);
+    if (open) {
+      setProjectOpen(false);
+    }
     pendingReadmeImportOpen = open;
     setImportOpen(open);
     if (!open) importTriggerRef.current?.focus();
   }
 
-  function changeProjectOpen(open: boolean) {
+  function changeProjectOpen(open: boolean, trigger?: HTMLButtonElement) {
     if (open) {
       pendingReadmeImportOpen = false;
       setImportOpen(false);
+      projectReturnFocusRef.current = trigger ?? null;
     }
     setProjectOpen(open);
-    if (!open) projectTriggerRef.current?.focus();
+  }
+
+  useEffect(() => {
+    if (projectOpen) return;
+    projectReturnFocusRef.current?.focus();
+    projectReturnFocusRef.current = null;
+  }, [projectOpen]);
+
+  function openProjectDialog(trigger: HTMLButtonElement) {
+    setProjectDownloadFeedback(null);
+    changeProjectOpen(true, trigger);
+  }
+
+  function saveProject() {
+    if (isLoading) return;
+    const result = downloadProjectFile(profile);
+    setProjectDownloadFeedback({
+      success: result.success,
+      message: result.success
+        ? projectText("downloaded")
+        : projectText(
+            result.code === "too_large"
+              ? "errors.download_too_large"
+              : result.code === "download"
+                ? "errors.download"
+                : "errors.download_invalid",
+          ),
+    });
   }
 
   function completeProject(next: ProfileDocument) {
@@ -549,6 +595,7 @@ export function EditorWorkspace({
     setClearFeedback(null);
     setExportFeedback("idle");
     setProjectOpen(false);
+    setProjectDownloadFeedback(null);
     setCompactView("edit");
     pendingFocus.current = null;
     pendingViewScroll.current = null;
@@ -561,7 +608,7 @@ export function EditorWorkspace({
 
   return (
     <div
-      className="@container/editor min-w-0 space-y-3 [&_input]:scroll-mt-[var(--editor-toolbar-offset)] [&_select]:scroll-mt-[var(--editor-toolbar-offset)] [&_textarea]:scroll-mt-[var(--editor-toolbar-offset)]"
+      className="@container/editor min-w-0 space-y-1 sm:space-y-3 [&_input]:scroll-mt-[var(--editor-toolbar-offset)] [&_select]:scroll-mt-[var(--editor-toolbar-offset)] [&_textarea]:scroll-mt-[var(--editor-toolbar-offset)]"
       style={
         {
           "--editor-toolbar-offset":
@@ -569,47 +616,72 @@ export function EditorWorkspace({
         } as CSSProperties
       }
     >
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2
-          ref={workspaceHeadingRef}
-          tabIndex={-1}
-          id="editor-content-title"
-          className="sr-only text-lg font-semibold tracking-tight focus:not-sr-only sm:not-sr-only"
-        >
-          {t("workspaceTitle")}
-        </h2>
-        <div className="ml-auto flex max-w-full min-w-0 items-center gap-2 sm:gap-3">
-          <p className="flex min-w-0 items-center gap-2 text-xs leading-5 text-muted-foreground">
+      <div className="space-y-1 sm:space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2
+            ref={workspaceHeadingRef}
+            tabIndex={-1}
+            id="editor-content-title"
+            className="sr-only text-lg font-semibold tracking-tight focus:not-sr-only sm:not-sr-only"
+          >
+            {t("workspaceTitle")}
+          </h2>
+          <p className="ml-auto flex min-w-0 items-center gap-2 text-xs leading-5 text-muted-foreground">
             <Save className="size-3.5 shrink-0" aria-hidden="true" />
             {isLoading ? t("storage.loading") : t(`storage.${storageStatus}`)}
           </p>
-          <Button
-            ref={projectTriggerRef}
-            variant={projectOpen ? "secondary" : "ghost"}
-            size="icon"
-            className="shrink-0 sm:w-auto sm:px-3"
-            disabled={isLoading}
-            aria-label={t("project.action")}
-            title={t("project.action")}
-            aria-controls="project-panel"
-            aria-expanded={projectOpen}
-            onClick={() => changeProjectOpen(!projectOpen)}
-          >
-            <FolderOpen aria-hidden="true" />
-            <span className="hidden sm:inline">{t("project.action")}</span>
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="shrink-0 text-destructive sm:w-auto sm:px-3"
-            disabled={isLoading}
-            aria-label={t("reset.action")}
-            title={t("reset.action")}
-            onClick={clearCurrentReadme}
-          >
-            <Trash2 aria-hidden="true" />
-            <span className="hidden sm:inline">{t("reset.action")}</span>
-          </Button>
+        </div>
+        <div role="group" aria-label={t("project.files")} className="space-y-1.5">
+          <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_minmax(0,1fr)_2.75rem] gap-1 sm:flex sm:flex-wrap sm:gap-2">
+            <Button
+              variant="outline"
+              className="px-0 text-xs sm:px-4 sm:text-sm"
+              disabled={isLoading}
+              aria-describedby="project-files-help"
+              onClick={saveProject}
+            >
+              <Download className="hidden sm:block" aria-hidden="true" />
+              <span className="sm:hidden">{t("project.saveCompact")}</span>
+              <span className="hidden sm:inline">{t("project.save")}</span>
+            </Button>
+            <Button
+              variant="outline"
+              className="px-0 text-xs sm:px-4 sm:text-sm"
+              disabled={isLoading}
+              aria-describedby="project-files-help"
+              onClick={(event) => openProjectDialog(event.currentTarget)}
+            >
+              <FileUp className="hidden sm:block" aria-hidden="true" />
+              <span className="sm:hidden">{t("project.openCompact")}</span>
+              <span className="hidden sm:inline">{t("project.open")}</span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="shrink-0 text-destructive sm:w-auto sm:px-3"
+              disabled={isLoading}
+              aria-label={t("reset.action")}
+              title={t("reset.action")}
+              onClick={clearCurrentReadme}
+            >
+              <Trash2 aria-hidden="true" />
+              <span className="hidden sm:inline">{t("reset.action")}</span>
+            </Button>
+          </div>
+          <p id="project-files-help" className="text-xs leading-5 text-muted-foreground">
+            {t("project.help")}
+          </p>
+          {projectDownloadFeedback && (
+            <p
+              role={projectDownloadFeedback.success ? "status" : "alert"}
+              className={cn(
+                "text-xs leading-5",
+                projectDownloadFeedback.success ? "text-muted-foreground" : "text-destructive",
+              )}
+            >
+              {projectDownloadFeedback.message}
+            </p>
+          )}
         </div>
       </div>
       {clearFeedback === "memory_only" && (
@@ -741,20 +813,18 @@ export function EditorWorkspace({
           }
         />
       </div>
-      <div id="project-panel" hidden={!projectOpen}>
-        {projectOpen && (
-          <ProjectPanel
-            profile={profile}
-            isLoading={isLoading}
-            projectBackup={projectBackup}
-            projectBackupStatus={projectBackupStatus}
-            onReplace={replaceWithProject}
-            onRestore={restoreProjectBackup}
-            onComplete={completeProject}
-            onClose={() => changeProjectOpen(false)}
-          />
-        )}
-      </div>
+      {projectOpen && (
+        <ProjectPanel
+          profile={profile}
+          isLoading={isLoading}
+          projectBackup={projectBackup}
+          projectBackupStatus={projectBackupStatus}
+          onReplace={replaceWithProject}
+          onRestore={restoreProjectBackup}
+          onComplete={completeProject}
+          onClose={() => changeProjectOpen(false)}
+        />
+      )}
       <div id="readme-import-panel" hidden={!importOpen}>
         {importOpen && (
           <ReadmeImportPanel
@@ -793,6 +863,7 @@ export function EditorWorkspace({
             compactView === "preview" && "hidden",
           )}
         >
+          <EmojiInserter />
           <Card>
             <CardHeader className="gap-1 border-b border-border px-4 py-2 sm:gap-2 sm:p-6">
               <div className="flex min-w-0 items-center justify-between gap-2 text-xs text-muted-foreground">

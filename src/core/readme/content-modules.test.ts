@@ -113,7 +113,10 @@ describe("manual content export and optional sections", () => {
     profile.sectionOrder.reverse();
     const output = markdown(generateReadme(profile));
     const headings = [...output.matchAll(/^#{1,2} (.+)$/gm)].map((match) => match[1]);
-    expect(headings).toEqual(["Contact", "Contributions", "Projects", "Technologies", "Alex"]);
+    expect(headings).toEqual(["Contact", "Contributions", "Projects", "Technologies"]);
+    expect(output.indexOf("## Technologies")).toBeLessThan(
+      output.indexOf('<h1 align="center">Alex</h1>'),
+    );
     expect(output.indexOf("Testing")).toBeLessThan(output.indexOf("Accessibility"));
     const frozen = freezeDeep(profile);
     const original = JSON.stringify(frozen);
@@ -201,7 +204,7 @@ describe("technology text and saved groups", () => {
 
 describe("projects and manual contributions", () => {
   it.each([
-    [projectEntry({ name: "Small project" }), "**Small project**"],
+    [projectEntry({ name: "Small project" }), "### Small project"],
     [projectEntry({ description: "An accessible form" }), "An accessible form"],
     [projectEntry({ role: "Testing and documentation" }), "Role: Testing and documentation"],
     [
@@ -209,16 +212,16 @@ describe("projects and manual contributions", () => {
       "Technologies: TypeScript, Git",
     ],
     [
-      projectEntry({ links: [{ id: "site", label: "Preview", url: "https://example.com/demo" }] }),
-      "[Preview](<https://example.com/demo>)",
+      projectEntry({ name: "Small project", titleUrl: "https://example.com/demo" }),
+      "### [Small project](<https://example.com/demo>)",
     ],
   ])("exports a useful partial project without a repository: %j", (entry, expected) => {
     expect(markdown(generateReadme(profileFor("projects", { items: [entry] })))).toBe(
-      `## Projects\n\n- ${expected}\n`,
+      `## Projects\n\n${expected}\n`,
     );
   });
 
-  it("localizes generated project labels while preserving text and technology order", () => {
+  it("localizes project details and uses one legacy URL only for the title", () => {
     const profile = profileFor(
       "projects",
       {
@@ -238,7 +241,7 @@ describe("projects and manual contributions", () => {
       "es",
     );
     expect(markdown(generateReadme(profile))).toBe(
-      "## Proyectos\n\n- **My app**\n  \n  Rol: Contributor\n  \n  Tecnologías: React, TypeScript\n  \n  [https&#58;//example\\.com/demo](<https://example.com/demo>) · [Code](<https://example.com/code>)\n",
+      "## Proyectos\n\n### [My app](<https://example.com/demo>)\n\nRol: Contributor · Tecnologías: React, TypeScript\n",
     );
   });
 
@@ -338,7 +341,7 @@ describe("shared web URL policy", () => {
     expect(markdown(generateReadme(profile))).toBe("Still exportable\n");
   });
 
-  it("reports original row and nested link indices without returning a partial README", () => {
+  it("reports original indices for the first useful project link and contributions without a partial README", () => {
     const profile = createEmptyProfile("en");
     profile.visibility.projects = true;
     profile.visibility.contributions = true;
@@ -361,7 +364,6 @@ describe("shared web URL policy", () => {
       success: false,
       errors: [
         { code: "invalid_url", path: ["data", "projects", "items", 1, "links", 1, "url"] },
-        { code: "invalid_url", path: ["data", "projects", "items", 1, "links", 2, "url"] },
         { code: "invalid_url", path: ["data", "contributions", "items", 0, "url"] },
       ],
     });
@@ -369,6 +371,7 @@ describe("shared web URL policy", () => {
 
   it("keeps Markdown and HTML text inert across active content modules and web destinations", () => {
     const profile = createEmptyProfile("en");
+    delete profile.data.technologies.layout;
     const plain = "<script>[text](javascript:alert(1))</script>";
     const escaped = "&lt;script&gt;\\[text\\]\\(javascript&#58;alert\\(1\\)\\)&lt;/script&gt;";
     profile.visibility.technologies = true;
@@ -397,11 +400,11 @@ describe("shared web URL policy", () => {
     const output = markdown(generateReadme(freezeDeep(profile)));
     expect(output).not.toContain("<script>");
     expect(output).not.toContain("[text](javascript:");
-    expect(output).toContain(`### ${escaped}`);
+    expect(output).toContain(`### [${escaped}](<https://example.com/a(b)?first=1&amp;copy;=2>)`);
     expect(output).toContain(`- **${escaped}**: ${escaped}`);
     expect(output).toContain(`Role: ${escaped}`);
     expect(output).toContain(`Technologies: ${escaped}`);
-    expect(output).toContain(`[${escaped}](<https://example.com/a(b)?first=1&amp;copy;=2>)`);
+    expect(output).not.toContain("Repository");
     expect(profile).toEqual(before);
   });
 });

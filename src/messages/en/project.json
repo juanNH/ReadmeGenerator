@@ -1,15 +1,13 @@
 {
-  "title": "Your project",
-  "description": "Save a complete copy and keep editing it in another browser, whenever you like.",
-  "privacy": "Project files are processed on this device. Reviewing a file keeps your current draft until you confirm replacement.",
-  "close": "Close project",
-  "saveTitle": "Save your work",
-  "saveHelp": "The project file keeps your text, order, categories, formatting and hidden content. You can save unfinished work, even when its README is not ready to export. Publish your README.md on GitHub; keep this file for editing.",
+  "title": "Import a project JSON",
+  "description": "Choose a project file to review it before replacing your current profile.",
+  "privacy": "Only JSON files with this generator’s supported project structure can be imported. Files are read on this device; your current profile stays unchanged until you confirm replacement.",
+  "close": "Close project import",
   "downloadCurrent": "Download project",
   "downloaded": "Project downloaded.",
-  "openHelp": "Choose a project previously saved by this generator. You will review its contents before deciding whether to replace your current profile.",
-  "openFile": "Open project file",
-  "fileHelp": "Choose a UTF-8 .json file, up to {limit} MiB. The file is read locally and never uploaded.",
+  "openHelp": "Choose a project JSON previously saved by this generator. Arbitrary JSON and GitHub profile or API exports are not compatible.",
+  "openFile": "Choose project JSON file",
+  "fileHelp": "Choose a UTF-8 project JSON file, up to {limit} MiB. It must use this generator’s supported project structure; it is read locally and never uploaded.",
   "readingFile": "Reading your project…",
   "reviewReady": "Project opened for review. Your current profile has not changed.",
   "reviewHelp": "Check the content language, sections and their visibility. Opening replaces the whole profile, including hidden content; it does not merge projects.",
@@ -27,7 +25,7 @@
   "confirmRestore": "Confirm restoration",
   "cancelRestore": "Cancel restoration",
   "steps": {
-    "source": "Open a saved project",
+    "source": "Choose a project JSON file",
     "review": "1. Review your project",
     "confirm": "2. Confirm replacement",
     "restore": "Review the profile to restore"
@@ -46,7 +44,7 @@
   "memory": {
     "title": "Your work could not be saved safely",
     "help": "The backup or profile could not be saved, or browser storage is protected. You can keep editing in this tab with automatic saving paused. Reloading or closing may bring back the previously saved profile. A recovery copy may already be available.",
-    "saveFirst": "Use “Download project” above to keep a copy of your current work before continuing. You can download the opened project from the editor afterward.",
+    "saveFirst": "Download a copy of your current profile before continuing. You can export the opened project from the editor afterward.",
     "continue": "Continue only in memory",
     "cancel": "Go back without replacing"
   },

@@ -279,6 +279,8 @@ export function ContributionsForm({
                     project: (chunks) => (
                       <a
                         href="https://github.com/stats-organization/github-stats-extended"
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="rounded-sm text-accent underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
                       >
                         {chunks}
@@ -456,6 +458,8 @@ export function ContributionsForm({
                     <div className="min-w-0 space-y-1">
                       <a
                         href={item.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="block text-sm font-medium [overflow-wrap:anywhere] text-accent underline-offset-4 hover:underline"
                       >
                         {item.title || item.url}
@@ -497,6 +501,7 @@ export function ContributionsForm({
               </legend>
               <Field htmlFor={`${controlId}-title`} label={t("title")} description={t("titleHelp")}>
                 <Input
+                  data-emoji-target="true"
                   ref={entryRef(item.id)}
                   value={item.title}
                   placeholder={t("titlePlaceholder")}
@@ -509,6 +514,7 @@ export function ContributionsForm({
                 description={t("descriptionHelp")}
               >
                 <Textarea
+                  data-emoji-target="true"
                   rows={2}
                   value={item.description}
                   placeholder={t("descriptionPlaceholder")}

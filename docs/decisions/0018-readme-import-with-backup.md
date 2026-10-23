@@ -1,31 +1,31 @@
-# ADR 0018: Importar README mediante revisión y respaldo
+# ADR 0018: README Import with Review and Backup
 
-- Estado: aceptada para el primer incremento de importación.
-- Fecha: 2026-10-20.
-- Complementa ADR 0004, 0013, 0015 y 0017.
+- Status: accepted for the first import increment.
+- Date: 2026-10-20.
+- Complements ADRs 0004, 0013, 0015, and 0017.
 
-## Contexto
+## Context
 
-Una persona con un README existente necesita continuar editando su contenido. El Markdown publicado omite información del documento del editor, como secciones ocultas e identidades, por lo que no tiene una inversa exacta. También puede combinar texto, referencias, tablas y HTML que no caben en los campos visuales planos. El guardado diferido del borrador no ofrece por sí mismo respaldo antes de reemplazar.
+Someone with an existing README needs to continue editing its content. Published Markdown omits information from the editor document, such as hidden sections and identities, so it cannot be converted back exactly. It may also combine text, references, tables, and HTML that do not fit into plain visual fields. Deferred draft saving does not, by itself, provide a backup before replacement.
 
-## Decisión
+## Decision
 
-- Pegar texto o abrir un `.md` UTF-8 local. Analizar sin red ni escritura del borrador; imponer límites antes y durante el análisis.
-- Analizar Markdown estructuralmente y revisar referencias y contenedores antes de dividirlo en secciones. Mantener el documento unido cuando dividir HTML rompa su contexto, con aviso explícito.
-- Reconocer encabezados HTML raíz completos sobre el árbol original y sus rangos, manteniendo contexto entre bloques e inline. La cabecera inicial puede reunir nombre y frase con niveles distintos; un H2 que acompaña a un H1 sin cuerpo entre ellos puede ser una frase, mientras que un H2 inicial independiente sigue definiendo jerarquía. Usar separadores H2, o H3 cuando no hay separadores H2, sin cortar encabezados dentro de tablas, desplegables u otros contenedores. Una estructura incierta conserva HTML unido. Los títulos detectados nombran la revisión y permanecen en el HTML con su nivel y atributos admitidos, sin duplicarlos como títulos generados.
-- Proponer secciones personalizadas en el orden detectado. Convertir contenido compatible a bloques existentes; representar estructuras complejas mediante HTML admitido y revisable. No inferir módulos fijos, tecnologías ni trayectoria por un título o icono.
-- Conservar el original entero y sus rangos. Mostrar original y resultado como código durante revisión, sin montar imágenes, tarjetas ni HTML remoto. Seleccionar secciones es una decisión explícita; los errores impiden aplicar la sección afectada y las exclusiones se informan antes de confirmar.
-- Reutilizar `ProfileDocument` v2, el analizador HTML y el generador. No introducir Markdown crudo, ampliar etiquetas o URLs ni habilitar interpretación global de HTML. Copia, descarga y vista previa del perfil aplicado siguen usando la misma salida.
-- Guardar el perfil anterior completo y el Markdown original en un registro lateral versionado de último respaldo. Guardar ese registro antes de escribir el candidato. Ofrecer descarga independiente de ambos y restauración confirmada, conservando el respaldo.
-- Cuando no hay almacenamiento utilizable o existe un valor protegido, requerir una elección explícita para continuar solo en memoria. Conservar los valores guardados inválidos y v1; esa elección no rehabilita escrituras automáticas. Invalidar debounce y flush anteriores al reemplazo para que no sobrescriban el resultado.
-- Hacer el recorrido bilingüe, con panel accesible desde la barra horizontal. Cerrar o revisar no reemplaza el perfil; confirmar devuelve al formulario importado.
+- Paste text or open a local UTF-8 `.md` file. Analyze it without network access or writing to the draft; enforce limits before and during analysis.
+- Parse Markdown structurally and inspect references and containers before splitting it into sections. Keep the document together when splitting HTML would break its context, and show an explicit warning.
+- Recognize complete root-level HTML headings against the original tree and its ranges, preserving context across block and inline nodes. The opening header may combine a name and tagline at different levels; an H2 that follows an H1 with no body between them may be a tagline, while an independent opening H2 still establishes hierarchy. Use H2 separators, or H3 separators when there are no H2 separators, without splitting headings inside tables, disclosures, or other containers. When the structure is uncertain, keep the HTML together. Detected titles name the review section and remain in the HTML with their level and allowed attributes; do not duplicate them as generated titles.
+- Propose custom sections in the detected order. Convert compatible content to existing blocks; represent complex structures with allowed, reviewable HTML. Do not infer fixed modules, technologies, or career history from a title or icon.
+- Preserve the entire original source and its ranges. Show the source and result as code during review, without rendering images, cards, or remote HTML. Selecting sections is an explicit decision; errors prevent the affected section from being applied, and exclusions are reported before confirmation.
+- Reuse `ProfileDocument` v2, the HTML analyzer, and the generator. Do not introduce raw Markdown, expand allowed tags or URLs, or enable global HTML interpretation. Copy, download, and preview of the applied profile continue to use the same output.
+- Save the complete previous profile and the original Markdown in a versioned sidecar record containing the latest backup. Save that record before writing the candidate. Offer separate downloads for both and confirmed restoration, while retaining the backup.
+- When storage is unusable or a protected value exists, require an explicit choice to continue in memory only. Preserve invalid stored values and v1; this choice does not re-enable automatic saving. Invalidate earlier debounces and flushes so they cannot overwrite the replacement.
+- Keep the flow bilingual, with a panel accessible from the horizontal bar. Closing or reviewing does not replace the profile; confirming returns to the imported form.
 
-## Alternativas
+## Alternatives
 
-Reconstruir los módulos automáticamente a partir de títulos puede asignar contenido incorrecto. Pegar todo como texto escapado pierde formato. Un bloque genérico de Markdown original ampliaría el contrato de persistencia, exportación y seguridad; queda para una necesidad posterior. Usar IA para el parsing agrega incertidumbre y servicios sin ser necesario para este alcance.
+Reconstructing modules automatically from titles can assign content incorrectly. Pasting everything as escaped text loses formatting. A generic raw-Markdown block would expand the persistence, export, and security contracts; it is deferred until a future need. Using AI for parsing adds uncertainty and services without being necessary for this scope.
 
-## Consecuencias
+## Consequences
 
-El README importado conserva lo que se puede representar y expone diferencias, sin prometer identidad visual o textual con GitHub. Los formatos incompatibles necesitan corrección o exclusión consciente. El respaldo conserva el perfil anterior, incluidos ocultos; no recupera configuración que el README de entrada nunca tuvo. Las rutas relativas y anclas requieren corrección según la política actual. Se mantiene un único último respaldo; no es un historial ni una sincronización entre dispositivos.
+The imported README preserves what can be represented and makes differences visible, without promising visual or textual parity with GitHub. Incompatible formats require correction or an informed exclusion. The backup preserves the previous profile, including hidden content; it cannot recover settings that were never present in the input README. Relative paths and anchors need correction under the current policy. Only the latest backup is kept; this is neither a history nor cross-device synchronization.
 
-Las dependencias de parsing se declaran directamente y con versiones fijadas; se reutiliza el ecosistema presente en el renderizador. Las pruebas protegen ausencia de escritura/cargas durante análisis, entradas hostiles y límites, conversión y orden, confirmación, fallos de almacenamiento, recuperación y escrituras pendientes. Accesibilidad automática y emulación no sustituyen dispositivos físicos o lectores de pantalla.
+Parsing dependencies are declared directly and pinned; the renderer's existing ecosystem is reused. Tests protect against writes or loads during analysis, hostile inputs and limits, conversion and ordering, confirmation, storage failures, recovery, and pending writes. Automated accessibility checks and emulation do not replace physical devices or screen readers.

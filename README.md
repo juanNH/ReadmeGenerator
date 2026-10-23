@@ -8,9 +8,9 @@ Introduce yourself, share your tools and show what you build. Choose your sectio
 
 [How it works](#how-it-works) · [Save and continue later](#save-and-continue-later) · [Run locally](#run-locally) · [Documentation](#documentation) · [Contribute](CONTRIBUTING.md)
 
-![English editor showing the introduction for a fictional profile named Alex Rivera on the left and a live README preview with technologies on the right.](docs/assets/editor-overview.jpg)
+![Current English desktop editor with optional profile sections, project controls, custom content, and a live README preview for fictional profile Alex Rivera.](docs/assets/editor-overview.jpg)
 
-_A real editor screenshot with a fictional profile. Open the [example project](docs/examples/demo-profile.project.json) from Project to explore it._
+_Current editor screenshot with fictional data. Open the [example project](docs/examples/demo-profile.project.json) with **Import project (.json)** to explore it._
 
 ## What you can create
 
@@ -18,7 +18,7 @@ A short profile can tell a story. Every section is optional: start with a few wo
 
 | What you want to share                | What the editor offers                                                                                                             |
 | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| **Who you are**                       | An introduction, interests, a short headline and an optional location, with heading sizes and alignment controls.                  |
+| **Who you are**                       | A centered intro with writing examples, an optional country line, and italic or monospace title styles.                            |
 | **What you build with**               | A searchable technology catalog with icons, editable categories and custom names.                                                  |
 | **What you do**                       | Projects and contributions to code, documentation, reviews or communities, with context and links.                                 |
 | **Your own content**                  | Repeatable sections with text, lists, links, headings, quotes, dividers, public images, filtered HTML and syntax-highlighted code. |
@@ -26,15 +26,6 @@ A short profile can tell a story. Every section is optional: start with a few wo
 | **Public activity, if you choose it** | Ten optional card types with themes and colors; they require the configuration described [below](#optional-activity-and-cards).    |
 
 Reorder sections by dragging, using the keyboard or pressing the arrow buttons. Hide a section while keeping its content. On desktop, editing and preview appear side by side; on smaller screens, switch between them. Light and dark themes are available.
-
-<details>
-<summary>Watch an animated editor tour</summary>
-
-![English editor tour showing the introduction, technology selection and options to save and open a JSON project for a fictional profile.](docs/assets/editor-tour.gif)
-
-The animation shows real editor states using the same fictional profile. The screenshot above offers a still view without opening the animation.
-
-</details>
 
 ## How it works
 
@@ -53,25 +44,33 @@ The app prepares the file; you decide when to publish it. GitHub applies its own
 | `README.md`                   | Publishing your introduction on GitHub.                                                     |
 | `github-profile.project.json` | Reopening your profile in this generator to keep editing its fields, sections and settings. |
 
-1. Open **Project → Download project** to save your work.
-2. When you return, choose **Project → Open project file** and select that `.json` file.
+1. Choose **Export project (.json)** below the editor heading to download your work.
+2. When you return, choose **Import project (.json)** beside it, then select that `.json` file in the dialog.
 3. Review the summary and confirm replacement of the open profile. The app first tries to save a recovery copy of your previous profile.
+
+![Current project import dialog showing local file selection and the review-before-replacement safeguards.](docs/assets/project-files.jpg)
+
+_Project files stay on your device. The dialog explains the supported JSON format and keeps the current profile unchanged until you confirm._
+
+On mobile, the same buttons read **Export JSON** and **Import JSON**. Import accepts only JSON files with this generator’s project structure; generic JSON and GitHub profile or API exports are not compatible.
 
 The project keeps your text, order, categories, formatting and hidden content. You can also save unfinished work, even when the README still needs corrections. Opening a project replaces the whole profile after confirmation; it does not merge two projects. Local files up to **4 MiB** are processed on your device.
 
-![English editor Project panel with Download project and Open project file options, explaining that the fictional profile's project file is processed locally.](docs/assets/project-files.jpg)
+Want to try it first? Download the [example project](docs/examples/demo-profile.project.json) and import it with **Import project (.json)**. It uses fictional data and links to `example.com`.
 
-Want to try it first? Save the [example project](docs/examples/demo-profile.project.json) and open it from that panel. It uses fictional data and links to `example.com`.
-
-> Browser drafts do not sync across devices and can be lost if you clear browser data. Keep the JSON file to continue editing. The [editor guide](docs/editor.md#guardar-y-abrir-proyectos) explains local backups and recovery in Spanish.
+> Browser drafts do not sync across devices and can be lost if you clear browser data. Keep the JSON file to continue editing. See the [editor guide](docs/editor.md#save-and-open-projects) for local backups and recovery.
 
 ## Start with an existing README
 
 Use **Import README** to paste Markdown or open a `.md` file. The editor analyzes it and proposes custom sections that you can review and exclude before confirming.
 
+![README import review showing detected sections and conversion notices before the profile is replaced.](docs/assets/readme-import-review.jpg)
+
+_The review is text-only: images remain unloaded, and nothing replaces your profile until you confirm._
+
 The conversion reports formatting changes and content that needs attention; it does not automatically reconstruct the original fields of a JSON project. Before replacing the profile, the app tries to save both the previous profile and the original Markdown. Images and cards remain inactive during review.
 
-Read the [import and recovery guide](docs/editor.md#importar-un-readme-existente) for its limits and the options available if storage fails.
+Read the [import and recovery guide](docs/editor.md#import-an-existing-readme) for its limits and the options available if storage fails.
 
 ## Run locally
 
@@ -108,7 +107,9 @@ Cards include a calendar, summary, languages, overview and monthly activity, plu
 
 Without a configured public origin, you can review cards locally; README copy and download remain disabled while cards are selected. Deselect them to export your manually entered content. Saving the JSON project remains available.
 
-Configuration and limits are documented in [.env.example](.env.example), [GitHub and hosting](docs/development.md#configurar-actividad-de-github) and [supported cards](docs/github-stats-extended.md). Public activity does not determine a person's ability, and the optional rank does not measure it either.
+On Vercel Production, an empty `APP_URL` uses the project's stable production domain from Vercel's system environment variables. Preview and local instances still need an explicit `APP_URL` to export cards. The card URLs must be publicly accessible without authentication. See the [deployment guide](docs/vercel-deployment.md#3-environment-variables).
+
+Configuration and limits are documented in [.env.example](.env.example), the [GitHub API and hosting guide](docs/github-api-and-hosting.md), and the [supported card matrix](docs/github-stats-extended.md). Public activity does not determine a person's ability, and the optional rank does not measure it either.
 
 ## Your data
 
@@ -120,24 +121,25 @@ Public images load from their original servers. Optional searches contact GitHub
 
 The project uses **Next.js App Router, React, TypeScript, Tailwind CSS and next-intl**. The profile model and Markdown generator live in a core independent of the interface, network and storage.
 
-Run `pnpm check` and `pnpm build` to review a change; browser checks use Playwright. See [CONTRIBUTING.md](CONTRIBUTING.md) for setup and checks appropriate to each change. The internal `/design-system` catalog is available only in development.
+Run `pnpm check` and `pnpm build` to review a change; browser checks use Playwright. See [CONTRIBUTING.md](CONTRIBUTING.md) for setup and checks appropriate to each change, and the [branching guide](docs/branching.md) for branch names and pull-request targets. The internal `/design-system` catalog is available only in development.
 
 Found a bug or have a suggestion? Open an [issue](https://github.com/juanNH/ReadmeGenerator/issues) with the expected behavior and, for a bug, the steps to reproduce it. Keep credentials and private data out of reports.
 
 ## Documentation
 
-Detailed guides are currently in Spanish.
+The guides below cover the editor, product, development, hosting, and architecture.
 
-Despliegue con PAT y sin login: [Vercel Hobby, main/Dev y comprobación de tarjetas](docs/vercel-deployment.md).
+Deploy with a PAT and without sign-in: [Vercel Hobby, main/dev, and card checks](docs/vercel-deployment.md).
 
 | To…                                               | Read                                                                          |
 | ------------------------------------------------- | ----------------------------------------------------------------------------- |
 | Use the editor, save projects and import Markdown | [Editor guide](docs/editor.md)                                                |
 | Understand the product and its limits             | [Product](docs/product.md)                                                    |
 | Install, configure and verify the app             | [Development](docs/development.md)                                            |
-| Configure queries and publish cards               | [GitHub and hosting](docs/development.md#configurar-actividad-de-github)      |
+| Configure queries and publish cards               | [GitHub API and hosting](docs/github-api-and-hosting.md)                      |
 | Understand the architecture and data format       | [Architecture](docs/architecture.md) · [Profile model](docs/profile-model.md) |
 | Explore the other guides and decisions            | [Documentation index](docs/README.md)                                         |
+| Review the release history                        | [Changelog](CHANGELOG.md)                                                     |
 
 ## License
 

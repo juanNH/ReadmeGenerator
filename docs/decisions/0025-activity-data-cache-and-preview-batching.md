@@ -1,59 +1,59 @@
-# ADR 0025: Reutilización de datos de actividad y agrupación de cambios
+# ADR 0025: Reusing activity data and batching changes
 
-- Estado: aceptada para la implementación.
-- Fecha: 2026-10-20.
-- Producto: GitHub Profile Generator.
-- Amplía [ADR 0024](0024-extended-public-suite-and-mit.md).
+- Status: accepted for implementation.
+- Date: 2026-10-20.
+- Product: GitHub Profile Generator.
+- Extends [ADR 0024](0024-extended-public-suite-and-mit.md).
 
-## Contexto
+## Context
 
-Cambiar la selección de contadores generaba otra URL de tarjeta y otra entrada de caché Extended para la combinación completa. Se repetían consultas aunque los datos ya estuvieran disponibles. Los clics rápidos podían iniciar solicitudes para configuraciones intermedias que no llegarían a utilizarse.
+Changing the selected counters generated another card URL and another Extended cache entry for the full combination. Queries were repeated even when the data was already available. Rapid clicks could start requests for intermediate configurations that would never be used.
 
-Se autorizó optimizar consultas, caché y vista previa, con pruebas. GitHub App y la infraestructura de producción se evaluarán después; se considera Vercel gratuito como posible alojamiento.
+Optimization of queries, caching, and preview was authorized, with tests. GitHub App and production infrastructure will be evaluated later; Vercel Hobby is considered as a possible host.
 
-## Decisión
+## Decision
 
-### Cobertura por dato y dependencias
+### Coverage by data field and dependencies
 
-Conservar la caché explícita en `src/server/github`, sin activar Cache Components ni introducir servicios o dependencias. Separar los campos necesarios para una tarjeta de sus opciones visuales. La selección y el orden de contadores, el icono de ranking y la presentación o ponderación de lenguajes no identifican datos nuevos.
+Keep the explicit cache in `src/server/github` without enabling Cache Components or introducing services or dependencies. Separate the fields a card needs from its visual options. Counter selection and order, the ranking icon, and language presentation or weighting do not identify new data.
 
-Guardar cobertura explícita por métrica o muestra de lenguajes, aislada por usuario, generación de credenciales, día UTC y filtros efectivos. Las claves incluyen únicamente las dependencias de ese campo: período de commits, inclusión de repositorios propios o filtros de repositorios cuando corresponda. Los filtros equivalentes se normalizan como conjuntos. Ausencia de roles en estadísticas significa sin filtro de afiliación; en lenguajes y estrellas corresponde al conjunto de repositorios propio por defecto.
+Store explicit coverage per metric or language sample, isolated by user, credential generation, UTC day, and effective filters. Keys include only the dependencies of that field: commit period, inclusion of the user’s own repositories, or repository filters as applicable. Equivalent filters are normalized as sets. In statistics, an absent role filter means no affiliation filter; for languages and stars it means the default set of the user’s own repositories.
 
-Consultar solo la cobertura faltante o vencida. Reutilizar campos adicionales que ya llegaron en la misma respuesta sin solicitar históricos o las 18 métricas anticipadamente. El ranking necesita seis entradas y el porcentaje de PR fusionados necesita PR totales y fusionadas. Un valor nulo o parcial consultado cuenta como cobertura; no se confunde con un campo nunca consultado ni se reemplaza por cero.
+Query only missing or expired coverage. Reuse additional fields already returned in the same response without requesting historical data or all 18 metrics in advance. Ranking needs six inputs, and the merged-PR percentage needs total and merged PRs. A queried null or partial value counts as covered; it is not confused with a field that has never been queried and is not replaced with zero.
 
-Coordinar solicitudes compatibles en vuelo y volver a comprobar faltantes antes de consultar. Cada solicitud Extended conserva un plazo total de 60 segundos al esperar otras consultas, entrar en cola y acceder a la red; esta última sigue limitada a 15 segundos y usa el remanente disponible. La cola admite un plazo menor al máximo habitual de 45 segundos. Mantener la revalidación al comenzar, hasta 32 solicitudes seguidoras por usuario y aislamiento de generaciones anteriores. Los fallos de identidad o configuración invalidan la cobertura correspondiente y no habilitan resultados antiguos; una credencial inválida invalida también otras consultas en vuelo de esa generación.
+Coordinate compatible requests already in flight and check for missing data again before querying. Each Extended request keeps a total 60-second budget while waiting on other queries, entering the queue, and accessing the network; network access itself remains limited to 15 seconds and uses the remaining budget. The queue may wait less than its usual maximum of 45 seconds. Keep revalidation when work starts, up to 32 follow-up requests per user, and isolation from prior generations. Identity or configuration failures invalidate the corresponding coverage and do not enable stale results; an invalid credential also invalidates other in-flight queries from that generation.
 
-Cada dato conserva su fecha: incorporar un contador nuevo no vuelve recientes los anteriores. El snapshot combinado informa la fecha más antigua utilizada y no mezcla métricas temporales de intervalos UTC diferentes. Recalcular el plan y los faltantes al comenzar la consulta, porque pueden vencer datos o cambiar el año durante la cola. El año implícito de commits se muestra según su intervalo temporal, sin derivarlo de la fecha agregada de un contador más antiguo. Mantener frescura de 30 minutos, resultado anterior hasta 24 horas solo ante fallos transitorios y un máximo de 512 entradas combinadas de datos y fallos por servicio.
+Each data field retains its own timestamp: adding a new counter does not make older data fresh again. The combined snapshot reports the oldest timestamp used and does not mix time-based metrics from different UTC intervals. Recalculate the plan and missing fields when the query starts because data can expire or the year can change while waiting in the queue. The implicit commit year is shown according to its time interval, not derived from the aggregate timestamp of an older counter. Keep 30-minute freshness, previous results for up to 24 hours only on transient failures, and a maximum of 512 combined data and failure entries per service.
 
-### Vista previa tras una pausa breve
+### Preview after a short pause
 
-La URL del Markdown y el documento cambian inmediatamente. Para una tarjeta ya montada, la vista previa espera 400 ms desde el último cambio antes de solicitar la imagen nueva. La primera carga y el reintento explícito son inmediatos. Volver a la imagen ya cargada no necesita otra descarga.
+The Markdown URL and document change immediately. For a card that is already mounted, the preview waits 400 ms after the last change before requesting the new image. The first load and an explicit retry are immediate. Returning to an already loaded image does not require another download.
 
-Conservar la imagen válida de la misma identidad y el aviso de actualización. Descartar respuestas tardías y cancelar el temporizador al desmontar u ocultar la tarjeta. Cambiar usuario, familia o destino mantiene la separación de identidades existente. El debounce no persiste imágenes, snapshots ni estados en el documento.
+Keep a valid image for the same identity and show an update notice. Discard late responses and cancel the timer when the card unmounts or is hidden. Changing the user, family, or destination preserves the existing identity separation. Debouncing does not persist images, snapshots, or state in the document.
 
-### Alojamiento futuro
+### Future hosting
 
-La caché de memoria y el planificador siguen siendo por proceso. Una instancia nueva o paralela puede necesitar consultar otra vez; esta mejora no crea caché compartida ni una cuota global. La cuota del PAT continúa compartida por quienes utilicen ese servidor. Los SVG conservan sus encabezados públicos de caché para navegador y CDN.
+The in-memory cache and scheduler remain per process. A new or parallel instance may need to query again; this improvement does not create a shared cache or global quota. The PAT quota remains shared by everyone using that server. SVGs keep their public cache headers for browsers and CDNs.
 
-Vercel Hobby admite uso personal no comercial y tiene cuotas. Antes de desplegar se deben revisar esas condiciones, la configuración de Fluid y el plazo total de cada ruta. La cola puede esperar hasta 45 segundos antes del presupuesto de red de 15 segundos; las tarjetas de repositorio con aportes pueden encadenar dos operaciones. No alcanza con asumir el tiempo predeterminado de una función antigua. Esta decisión no configura ni publica un despliegue.
+Vercel Hobby allows personal, non-commercial use and has quotas. Review those terms, Fluid configuration, and the total timeout for each route before deployment. The queue may wait up to 45 seconds before the 15-second network budget; repository cards with contributions may chain two operations. Do not assume an old function’s default duration is sufficient. This decision does not configure or publish a deployment.
 
-## Alternativas consideradas
+## Alternatives considered
 
-- Precargar las 18 métricas y todo el histórico: aumenta el coste inicial y solicita datos que podrían no usarse.
-- Mantener una caché por combinación de opciones: multiplica entradas y repite datos al agregar o quitar contadores.
-- Retrasar el documento o el Markdown: hace que copia, guardado y vista previa expresen configuraciones diferentes.
-- Agregar una base de datos, caché remota o GitHub App: requiere decisiones de operación fuera de este ajuste.
-- Migrar a cachés de framework: no garantiza almacenamiento compartido con la configuración actual y amplía el cambio sin resolver por sí mismo la cobertura incremental.
+- Prefetch all 18 metrics and all historical data: increases initial cost and requests data that may never be used.
+- Keep a cache per option combination: multiplies entries and repeats data when counters are added or removed.
+- Delay the document or Markdown: makes copying, saving, and preview show different configurations.
+- Add a database, remote cache, or GitHub App: requires operational decisions outside this change.
+- Migrate to framework caches: does not guarantee shared storage with the current configuration and expands the change without solving incremental coverage by itself.
 
-## Consecuencias
+## Consequences
 
-Editar apariencia o reutilizar contadores cargados evita consultas adicionales a GitHub mientras su cobertura siga fresca. Un contador nuevo puede requerir red y sigue sujeto a latencia, cuotas y límites públicos. Los clics agrupados evitan imágenes intermedias; las solicitudes ya iniciadas conservan los presupuestos del servidor.
+Editing appearance or reusing loaded counters avoids additional GitHub queries while the coverage is fresh. A new counter may require a network request and remains subject to latency, quotas, and public limits. Batching clicks avoids intermediate images; requests already started keep the server budgets.
 
-El contrato persistido v2, las URLs admitidas, los filtros públicos, la licencia y las condiciones de exportación se mantienen. Las pruebas deben medir solicitudes y verificar cobertura, antigüedad, fallos, credenciales, cambios rápidos y respuestas tardías. Los resultados ejecutados se registran en [desarrollo](../development.md).
+The persisted v2 contract, accepted URLs, public filters, license, and export requirements remain unchanged. Tests must measure requests and verify coverage, age, failures, credentials, rapid changes, and late responses. Results actually obtained are recorded in [development](../development.md).
 
-## Fuentes oficiales
+## Official sources
 
-- [Vercel Hobby](https://vercel.com/docs/plans/hobby): condiciones y cuotas, consultadas el 20 de octubre de 2026.
-- [Límites de funciones](https://vercel.com/docs/functions/limitations): con Fluid, Hobby permite hasta 300 segundos; sin Fluid, el predeterminado es 10 y el máximo configurable 60.
-- [Caché CDN](https://vercel.com/docs/caching/cdn-cache) y [encabezados de caché](https://vercel.com/docs/caching/cache-control-headers).
-- Guías de la versión instalada de Next.js en `node_modules/next/dist/docs/01-app/03-api-reference/01-directives/use-cache.md` y `04-functions/unstable_cache.md`.
+- [Vercel Hobby](https://vercel.com/docs/plans/hobby): terms and quotas, reviewed October 20, 2026.
+- [Function limits](https://vercel.com/docs/functions/limitations): with Fluid, Hobby allows up to 300 seconds; without Fluid, the default is 10 and the configurable maximum is 60.
+- [CDN cache](https://vercel.com/docs/caching/cdn-cache) and [cache-control headers](https://vercel.com/docs/caching/cache-control-headers).
+- Documentation for the installed Next.js version in `node_modules/next/dist/docs/01-app/03-api-reference/01-directives/use-cache.md` and `04-functions/unstable_cache.md`.

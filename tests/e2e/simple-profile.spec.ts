@@ -89,15 +89,15 @@ test("a fresh profile offers five optional sections and a short introduction wit
   await page.getByRole("textbox", { name: "Display name", exact: true }).fill("Alex Example");
   const bio = "I enjoy building useful interfaces and learning Docker";
   await page.getByRole("textbox", { name: "About you", exact: true }).fill(bio);
-  await expect(page.getByRole("textbox", { name: "Headline", exact: true })).toHaveCount(0);
-  await expect(page.getByRole("combobox", { name: "Location", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("textbox", { name: "Headline", exact: true })).toBeVisible();
+  await expect(page.getByRole("combobox", { name: "Location", exact: true })).toBeVisible();
   const preview = page.getByRole("article", { name: "README preview", exact: true });
   await expect(preview).toContainText("Alex Example");
   await expect(preview).toContainText(bio);
   await expect(preview.getByRole("heading", { name: "Knowledge", exact: true })).toHaveCount(0);
   await expect(preview.getByRole("heading", { name: "Right now", exact: true })).toHaveCount(0);
   const markdown = await downloadReadme(page);
-  expect(markdown).toContain("# Alex Example");
+  expect(markdown).toContain('<h1 align="center">Alex Example</h1>');
   expect(markdown).toContain(bio);
   const stored = await storedProfile(page);
   expect(stored.schemaVersion).toBe(2);
@@ -170,9 +170,9 @@ test("technologies autocomplete with local icons, accept custom names and avoid 
   await page.screenshot({ path: "work/previews/simple-technologies-desktop.png", fullPage: true });
   const markdown = await downloadReadme(page);
   expect(markdown).toMatch(
-    /<img width="20" height="20" src="https:\/\/raw\.githubusercontent\.com\/devicons\/devicon\/[a-f0-9]{40}\/icons\/react\/react-original\.svg" alt="" \/>/,
+    /<img width="20" height="20" src="https:\/\/raw\.githubusercontent\.com\/devicons\/devicon\/[a-f0-9]{40}\/icons\/react\/react-original\.svg" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">/,
   );
-  expect(markdown).toContain("&nbsp;React");
+  expect(markdown).toContain("> React</kbd>");
   expect(markdown).toContain("My small toolkit");
   await page.reload();
   await expect(page.getByRole("button", { name: "Remove React", exact: true })).toBeVisible();

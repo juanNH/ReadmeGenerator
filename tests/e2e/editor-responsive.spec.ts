@@ -2,6 +2,7 @@ import { showCustomBlockPicker } from "./editor-test-helpers";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Locator, type Page } from "@playwright/test";
 import { createEmptyProfile } from "../../src/core/profile/profile-operations";
+import { mobileTest } from "./mobile-test";
 import type { ProfileDocument } from "../../src/core/profile/profile-schema";
 
 type Locale = "en" | "es";
@@ -251,185 +252,200 @@ async function storedProfile(page: Page): Promise<ProfileDocument> {
 for (const locale of ["en", "es"] as const) {
   for (const theme of ["light", "dark"] as const) {
     for (const width of widths) {
-      test(`responsive editor: seven sections at ${width}px ${locale} ${theme}`, async ({
-        page,
-      }) => {
-        await page.setViewportSize({ width, height: 900 });
-        await page.emulateMedia({ colorScheme: theme });
-        await openEditor(page, locale);
-        await expectNavigationLayout(page, locale);
-        await openCustomConfiguration(page, locale);
-        if (width === 320 || width === 1657) {
-          await page.locator("#editor-section-title").scrollIntoViewIfNeeded();
-          await page.screenshot({
-            path: `work/previews/editor-responsive-${locale}-${theme}-${width}-configuration.png`,
-          });
-        }
-        await expect(await showPreview(page, locale)).toContainText(unbrokenTitle);
-        if (width === 320 || width === 1657) {
-          await page.evaluate(() => scrollTo(0, 0));
-          await page.screenshot({
-            path: `work/previews/editor-responsive-${locale}-${theme}-${width}.png`,
-            fullPage: true,
-          });
-        }
-      });
+      const viewportTest = width <= 390 ? mobileTest : test;
+      viewportTest(
+        `responsive editor: seven sections at ${width}px ${locale} ${theme}`,
+        async ({ page }) => {
+          await page.setViewportSize({ width, height: 900 });
+          await page.emulateMedia({ colorScheme: theme });
+          await openEditor(page, locale);
+          await expectNavigationLayout(page, locale);
+          await openCustomConfiguration(page, locale);
+          if (width === 320 || width === 1657) {
+            await page.locator("#editor-section-title").scrollIntoViewIfNeeded();
+            await page.screenshot({
+              path: `work/previews/editor-responsive-${locale}-${theme}-${width}-configuration.png`,
+            });
+          }
+          await expect(await showPreview(page, locale)).toContainText(unbrokenTitle);
+          if (width === 320 || width === 1657) {
+            await page.evaluate(() => scrollTo(0, 0));
+            await page.screenshot({
+              path: `work/previews/editor-responsive-${locale}-${theme}-${width}.png`,
+              fullPage: true,
+            });
+          }
+        },
+      );
     }
 
     for (const width of [320, 1657]) {
-      test(`accessibility: responsive editor with a real URL error at ${width}px ${locale} ${theme}`, async ({
-        page,
-      }) => {
-        await page.setViewportSize({ width, height: 900 });
-        await page.emulateMedia({ colorScheme: theme });
-        await openEditor(page, locale, responsiveProfile(locale, true));
-        const navigation = await openNavigation(page, locale);
-        await expectNavigationLayout(page, locale);
-        const url = page.getByRole("textbox", { name: "URL", exact: true });
-        await expect(url).toHaveAttribute("aria-invalid", "true");
-        await expect(
-          navigation.getByRole("button", {
-            name: `${locale === "en" ? "Review fields in" : "Revisar campos en"} ${copy[locale].custom}`,
-            exact: true,
-          }),
-        ).toHaveCount(1);
-        expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
-        await url.fill("https://example.com/notes");
-        await expect(url).not.toHaveAttribute("aria-invalid", "true");
-        expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
-        await expect(await showPreview(page, locale)).toContainText("A preserved personal note.");
-        expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
-      });
+      const viewportTest = width === 320 ? mobileTest : test;
+      viewportTest(
+        `accessibility: responsive editor with a real URL error at ${width}px ${locale} ${theme}`,
+        async ({ page }) => {
+          await page.setViewportSize({ width, height: 900 });
+          await page.emulateMedia({ colorScheme: theme });
+          await openEditor(page, locale, responsiveProfile(locale, true));
+          const navigation = await openNavigation(page, locale);
+          await expectNavigationLayout(page, locale);
+          const url = page.getByRole("textbox", { name: "URL", exact: true });
+          await expect(url).toHaveAttribute("aria-invalid", "true");
+          await expect(
+            navigation.getByRole("button", {
+              name: `${locale === "en" ? "Review fields in" : "Revisar campos en"} ${copy[locale].custom}`,
+              exact: true,
+            }),
+          ).toHaveCount(1);
+          expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+          await url.fill("https://example.com/notes");
+          await expect(url).not.toHaveAttribute("aria-invalid", "true");
+          expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+          await expect(await showPreview(page, locale)).toContainText("A preserved personal note.");
+          expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+        },
+      );
     }
   }
 
   for (const width of [320, 1280]) {
-    test(`responsive editor: 200 percent text at ${width}px ${locale}`, async ({ page }) => {
-      await page.setViewportSize({ width, height: 900 });
-      await page.emulateMedia({ colorScheme: width === 320 ? "light" : "dark" });
-      await openEditor(page, locale);
-      // Ampliación de texto y medidas rem; no se presenta como zoom nativo del navegador.
-      await page.evaluate(() => {
-        document.documentElement.style.fontSize = "32px";
-      });
-      await expect(page.locator("html")).toHaveCSS("font-size", "32px");
-      await expectNavigationLayout(page, locale);
-      await openCustomConfiguration(page, locale);
-      await page.locator("#editor-section-title").scrollIntoViewIfNeeded();
-      await page.screenshot({
-        path: `work/previews/editor-text-200-${locale}-${width}-configuration.png`,
-      });
-      expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
-      await expect(await showPreview(page, locale)).toContainText(unbrokenTitle);
-      await page
-        .getByRole("article", { name: copy[locale].document, exact: true })
-        .scrollIntoViewIfNeeded();
-      await page.screenshot({
-        path: `work/previews/editor-text-200-${locale}-${width}-preview.png`,
-      });
-      expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
-    });
+    const responsiveTest = width === 320 ? mobileTest : test;
+    responsiveTest(
+      `responsive editor: 200 percent text at ${width}px ${locale}`,
+      async ({ page }) => {
+        await page.setViewportSize({ width, height: 900 });
+        await page.emulateMedia({ colorScheme: width === 320 ? "light" : "dark" });
+        await openEditor(page, locale);
+        // Ampliación de texto y medidas rem; no se presenta como zoom nativo del navegador.
+        await page.evaluate(() => {
+          document.documentElement.style.fontSize = "32px";
+        });
+        await expect(page.locator("html")).toHaveCSS("font-size", "32px");
+        await expectNavigationLayout(page, locale);
+        await openCustomConfiguration(page, locale);
+        await page.locator("#editor-section-title").scrollIntoViewIfNeeded();
+        await page.screenshot({
+          path: `work/previews/editor-text-200-${locale}-${width}-configuration.png`,
+        });
+        expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+        await expect(await showPreview(page, locale)).toContainText(unbrokenTitle);
+        await page
+          .getByRole("article", { name: copy[locale].document, exact: true })
+          .scrollIntoViewIfNeeded();
+        await page.screenshot({
+          path: `work/previews/editor-text-200-${locale}-${width}-preview.png`,
+        });
+        expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+      },
+    );
 
-    test(`responsive editor: every fixed form with enlarged text at ${width}px ${locale}`, async ({
-      page,
-    }) => {
-      await page.setViewportSize({ width, height: 900 });
-      await openEditor(page, locale);
-      await page.evaluate(() => {
-        document.documentElement.style.fontSize = "32px";
-      });
-      for (const label of copy[locale].modules) {
-        const navigation = await openNavigation(page, locale);
-        await navigation.getByRole("button", { name: label, exact: true }).click();
-        await expect(page.locator("#editor-section-title")).toHaveText(label);
-        await expectNoHorizontalOverflow(page);
-        const form = page.getByRole("region", { name: label, exact: true });
-        expect(
-          await form.getByRole("button").evaluateAll((elements) =>
-            elements.flatMap((element) => {
-              const rect = element.getBoundingClientRect();
-              return rect.width && element.scrollWidth > element.clientWidth + 1
-                ? [element.getAttribute("aria-label") ?? element.textContent]
-                : [];
-            }),
-          ),
-          label,
-        ).toEqual([]);
-      }
-    });
+    const viewportTest = width === 320 ? mobileTest : test;
+    viewportTest(
+      `responsive editor: every fixed form with enlarged text at ${width}px ${locale}`,
+      async ({ page }) => {
+        await page.setViewportSize({ width, height: 900 });
+        await openEditor(page, locale);
+        await page.evaluate(() => {
+          document.documentElement.style.fontSize = "32px";
+        });
+        for (const label of copy[locale].modules) {
+          const navigation = await openNavigation(page, locale);
+          await navigation.getByRole("button", { name: label, exact: true }).click();
+          await expect(page.locator("#editor-section-title")).toHaveText(label);
+          await expectNoHorizontalOverflow(page);
+          const form = page.getByRole("region", { name: label, exact: true });
+          expect(
+            await form.getByRole("button").evaluateAll((elements) =>
+              elements.flatMap((element) => {
+                const rect = element.getBoundingClientRect();
+                return rect.width && element.scrollWidth > element.clientWidth + 1
+                  ? [element.getAttribute("aria-label") ?? element.textContent]
+                  : [];
+              }),
+            ),
+            label,
+          ).toEqual([]);
+        }
+      },
+    );
   }
 
-  test(`responsive editor: selection, inclusion and mobile preview preserve writing ${locale}`, async ({
-    page,
-  }) => {
-    await page.setViewportSize({ width: 360, height: 850 });
-    await page.emulateMedia({ colorScheme: "dark" });
-    const profile = responsiveProfile(locale);
-    await openEditor(page, locale, profile);
-    let navigation = await openNavigation(page, locale);
-    await navigation.getByRole("button", { name: copy[locale].custom, exact: true }).click();
-    await expect(
-      navigation.getByRole("button", { name: copy[locale].custom, exact: true }),
-    ).toBeFocused();
-    await expect(page.getByRole("textbox", { name: copy[locale].title, exact: true })).toHaveValue(
-      copy[locale].custom,
-    );
-    const text = page.getByRole("textbox", { name: copy[locale].text, exact: true });
-    await text.fill("This edited note must survive hiding and view changes.");
-    navigation = await openNavigation(page, locale);
-    const inclusion = navigation.getByRole("checkbox", { name: copy[locale].custom, exact: true });
-    await inclusion.uncheck();
-    await expect(inclusion).toBeFocused();
-    await expect(inclusion).toBeEnabled();
-    expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
-    await expect(
-      navigation.getByRole("button", {
-        name: `${locale === "en" ? "Add and edit" : "Agregar y editar"} ${copy[locale].custom}`,
+  mobileTest(
+    `responsive editor: selection, inclusion and mobile preview preserve writing ${locale}`,
+    async ({ page }) => {
+      await page.setViewportSize({ width: 360, height: 850 });
+      await page.emulateMedia({ colorScheme: "dark" });
+      const profile = responsiveProfile(locale);
+      await openEditor(page, locale, profile);
+      let navigation = await openNavigation(page, locale);
+      await navigation.getByRole("button", { name: copy[locale].custom, exact: true }).click();
+      await expect(
+        navigation.getByRole("button", { name: copy[locale].custom, exact: true }),
+      ).toBeFocused();
+      await expect(
+        page.getByRole("textbox", { name: copy[locale].title, exact: true }),
+      ).toHaveValue(copy[locale].custom);
+      const text = page.getByRole("textbox", { name: copy[locale].text, exact: true });
+      await text.fill("This edited note must survive hiding and view changes.");
+      navigation = await openNavigation(page, locale);
+      const inclusion = navigation.getByRole("checkbox", {
+        name: copy[locale].custom,
         exact: true,
-      }),
-    ).toHaveAccessibleDescription(copy[locale].editing);
-    await expect(await showPreview(page, locale)).not.toContainText(
-      "This edited note must survive hiding and view changes.",
-    );
-    await page.getByRole("button", { name: copy[locale].edit, exact: true }).click();
-    await expect(text).toHaveValue("This edited note must survive hiding and view changes.");
-    navigation = await openNavigation(page, locale);
-    await navigation.getByRole("checkbox", { name: copy[locale].custom, exact: true }).check();
-    await expect(await showPreview(page, locale)).toContainText(
-      "This edited note must survive hiding and view changes.",
-    );
-    profile.customSections[0]!.blocks[0] = {
-      id: "note",
-      type: "paragraph",
-      text: "This edited note must survive hiding and view changes.",
-    };
-    await expect.poll(() => storedProfile(page)).toEqual(profile);
-    await expectNoHorizontalOverflow(page);
-  });
+      });
+      await inclusion.uncheck();
+      await expect(inclusion).toBeFocused();
+      await expect(inclusion).toBeEnabled();
+      expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+      await expect(
+        navigation.getByRole("button", {
+          name: `${locale === "en" ? "Add and edit" : "Agregar y editar"} ${copy[locale].custom}`,
+          exact: true,
+        }),
+      ).toHaveAccessibleDescription(copy[locale].editing);
+      await expect(await showPreview(page, locale)).not.toContainText(
+        "This edited note must survive hiding and view changes.",
+      );
+      await page.getByRole("button", { name: copy[locale].edit, exact: true }).click();
+      await expect(text).toHaveValue("This edited note must survive hiding and view changes.");
+      navigation = await openNavigation(page, locale);
+      await navigation.getByRole("checkbox", { name: copy[locale].custom, exact: true }).check();
+      await expect(await showPreview(page, locale)).toContainText(
+        "This edited note must survive hiding and view changes.",
+      );
+      profile.customSections[0]!.blocks[0] = {
+        id: "note",
+        type: "paragraph",
+        text: "This edited note must survive hiding and view changes.",
+      };
+      await expect.poll(() => storedProfile(page)).toEqual(profile);
+      await expectNoHorizontalOverflow(page);
+    },
+  );
 
-  test(`accessibility: keyboard reaches the persistent add action after horizontal navigation ${locale}`, async ({
-    page,
-  }) => {
-    await page.setViewportSize({ width: 360, height: 720 });
-    await openEditor(page, locale);
-    const navigation = await openNavigation(page, locale);
-    await navigation.getByRole("checkbox").first().focus();
-    const add = page.getByRole("button", { name: copy[locale].add, exact: true });
-    let reached = false;
-    for (let count = 0; count < 55; count++) {
-      await page.keyboard.press("Tab");
-      reached = await add.evaluate((element) => element === document.activeElement);
-      if (reached) break;
-    }
-    expect(reached).toBe(true);
-    await expectFocusedInsideViewport(add);
-    await expectNoHorizontalOverflow(page);
-    await add.press("Enter");
-    await expect(
-      page.getByRole("textbox", { name: copy[locale].title, exact: true }),
-    ).toBeFocused();
-    await expect.poll(async () => (await storedProfile(page)).customSections.length).toBe(3);
-  });
+  mobileTest(
+    `accessibility: keyboard reaches the persistent add action after horizontal navigation ${locale}`,
+    async ({ page }) => {
+      await page.setViewportSize({ width: 360, height: 720 });
+      await openEditor(page, locale);
+      const navigation = await openNavigation(page, locale);
+      await navigation.getByRole("checkbox").first().focus();
+      const add = page.getByRole("button", { name: copy[locale].add, exact: true });
+      let reached = false;
+      for (let count = 0; count < 55; count++) {
+        await page.keyboard.press("Tab");
+        reached = await add.evaluate((element) => element === document.activeElement);
+        if (reached) break;
+      }
+      expect(reached).toBe(true);
+      await expectFocusedInsideViewport(add);
+      await expectNoHorizontalOverflow(page);
+      await add.press("Enter");
+      await expect(
+        page.getByRole("textbox", { name: copy[locale].title, exact: true }),
+      ).toBeFocused();
+      await expect.poll(async () => (await storedProfile(page)).customSections.length).toBe(3);
+    },
+  );
 }
 
 async function expectFocusedInsideViewport(control: Locator) {

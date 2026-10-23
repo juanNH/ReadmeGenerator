@@ -84,13 +84,15 @@ describe("presentation formatting contract", () => {
 });
 
 describe("presentation formatting output", () => {
-  it("retains the exact original output when format is absent or default choices are explicit", () => {
-    const expected = {
+  it("centers the name and headline by default while explicit left alignment keeps Markdown", () => {
+    const centered = generateReadme(profile());
+    expect(centered).toMatchObject({
       success: true,
       markdown:
-        "# Juan\n\n## I build things\n\nA few words\\.\n\nMy interests\\.\n\nLocation: Argentina\n",
-    };
-    expect(generateReadme(profile())).toEqual(expected);
+        '<div><h1 align="center">Juan</h1></div>\n\n<div><h2 align="center">I build things</h2></div>\n\nA few words\\.\n\nMy interests\\.\n\n📍 Currently based in Argentina\n',
+    });
+    if (!centered.success) throw new Error("Expected centered presentation");
+    expect(centered.customHtml).toHaveLength(2);
     expect(
       generateReadme(
         profile({
@@ -104,12 +106,25 @@ describe("presentation formatting output", () => {
           },
         }),
       ),
-    ).toEqual(expected);
+    ).toEqual({
+      success: true,
+      markdown:
+        "# Juan\n\n## I build things\n\nA few words\\.\n\nMy interests\\.\n\n📍 Currently based in Argentina\n",
+    });
   });
 
-  it("uses native Markdown for chosen heading levels when alignment stays left", () => {
+  it("uses native Markdown for chosen heading levels with explicit left alignment", () => {
     const result = generateReadme(
-      profile({ bio: "", location: "", format: { displayNameLevel: 3, headlineLevel: 1 } }),
+      profile({
+        bio: "",
+        location: "",
+        format: {
+          displayNameLevel: 3,
+          displayNameAlignment: "left",
+          headlineLevel: 1,
+          headlineAlignment: "left",
+        },
+      }),
     );
     expect(result).toEqual({ success: true, markdown: "### Juan\n\n# I build things\n" });
   });
@@ -171,7 +186,7 @@ describe("presentation formatting output", () => {
     if (!result.success) throw new Error(JSON.stringify(result.errors));
     const flag = countryCatalog.find((country) => country.code === "AR");
     expect(flag).toBeDefined();
-    expect(result.markdown).toContain('align="center">Ubicación: <img');
+    expect(result.markdown).toContain('align="center">📍 Actualmente en <img');
     expect(result.markdown).toContain(`src="${flag!.iconUrl}" alt=""`);
     expect(result.markdown).toContain('width="20" height="15"');
     expect(result.customImages).toBeUndefined();

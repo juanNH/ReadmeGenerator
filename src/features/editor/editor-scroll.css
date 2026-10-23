@@ -53,6 +53,81 @@
   min-width: 0;
 }
 
+.desktop-emoji-inserter {
+  display: none;
+  position: sticky;
+  top: var(--editor-toolbar-offset);
+  z-index: 30;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 0.75rem;
+  background: var(--surface);
+  padding: 0.75rem;
+  box-shadow: var(--shadow-panel);
+}
+
+.desktop-emoji-inserter__hint {
+  min-width: 0;
+  color: var(--foreground);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.desktop-emoji-inserter__trigger {
+  min-height: 2.75rem;
+  padding-inline: 1rem;
+  flex-shrink: 0;
+}
+
+.desktop-emoji-inserter__panel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.5rem);
+  z-index: 40;
+  max-width: calc(100vw - 2rem);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--surface);
+  box-shadow: var(--shadow-panel);
+}
+
+.profile-emoji-picker {
+  --epr-bg-color: var(--surface);
+  --epr-category-label-bg-color: var(--surface);
+  --epr-text-color: var(--foreground);
+  --epr-border-color: var(--border);
+  --epr-search-input-bg-color: var(--surface-raised);
+  --epr-highlight-color: var(--accent);
+  --epr-hover-bg-color: var(--surface-raised);
+  --epr-focus-bg-color: var(--surface-raised);
+}
+
+.desktop-emoji-inserter__feedback {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.5rem);
+  z-index: 40;
+  width: max-content;
+  max-width: min(24rem, calc(100vw - 2rem));
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--surface);
+  padding: 0.5rem 0.75rem;
+  color: var(--foreground);
+  font-size: 0.75rem;
+  line-height: 1.25rem;
+  box-shadow: var(--shadow-panel);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .desktop-emoji-inserter {
+    display: flex;
+  }
+}
+
 /* Match the existing two-column breakpoint, relative to the editor's text size. */
 @container editor (min-width: 75em) {
   @media (min-height: 44rem) {
@@ -72,6 +147,12 @@
       /* Leave room for a focused border without clipping it against the scrollport. */
       padding: 4px;
       margin: -4px;
+    }
+
+    .editor-scroll-grid[data-editor-scroll-ready="true"]
+      > [data-editor-scroll-panel="configuration"]
+      > .desktop-emoji-inserter {
+      top: 0;
     }
 
     .editor-scroll-grid[data-editor-scroll-ready="true"]

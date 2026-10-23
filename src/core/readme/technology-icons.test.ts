@@ -82,6 +82,7 @@ describe("catalog icons and profile text", () => {
 
   it("exports selected tools with decorative icons and visible names while keeping custom names inert", () => {
     const profile = createEmptyProfile("en");
+    delete profile.data.technologies.layout;
     profile.visibility.technologies = true;
     profile.data.technologies.groups = [
       {
@@ -108,6 +109,7 @@ describe("catalog icons and profile text", () => {
 
   it("keeps readable catalog names in order and escapes their punctuation outside icon markup", () => {
     const profile = createEmptyProfile("en");
+    delete profile.data.technologies.layout;
     profile.visibility.technologies = true;
     profile.data.technologies.groups = [
       {

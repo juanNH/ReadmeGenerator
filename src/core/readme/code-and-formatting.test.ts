@@ -260,7 +260,7 @@ describe("safe formatting from plain authored fields", () => {
     const result = generateReadme(document);
     expect(result.success).toBe(true);
     if (!result.success) return;
-    expect(result.markdown.startsWith("# Name 🌟\n\n")).toBe(true);
+    expect(result.markdown.startsWith('<div><h1 align="center">Name 🌟</h1></div>\n\n')).toBe(true);
     expect(
       result.customHtml?.every(
         (fragment) => result.markdown.slice(fragment.start, fragment.end) === fragment.html,

@@ -3,6 +3,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("server-only", () => ({}));
 
 import { activityFixture, fixtureNow, githubResponse, languagesFixture } from "./test-fixtures";
+import { createEmptyProfile } from "@/core/profile/profile-operations";
+import { generateReadme } from "@/core/readme/generate-readme";
 
 beforeEach(() => {
   vi.resetModules();
@@ -171,5 +173,120 @@ describe("GitHub activity service", () => {
     expect(getPublicActivityBaseUrl()).toBeUndefined();
     vi.stubEnv("APP_URL", "https://profiles.example.com/path");
     expect(getPublicActivityBaseUrl()).toBeUndefined();
+  });
+});
+
+describe("public activity card hosting", () => {
+  beforeEach(() => {
+    vi.stubEnv("APP_URL", undefined);
+    vi.stubEnv("VERCEL_ENV", undefined);
+    vi.stubEnv("VERCEL_PROJECT_PRODUCTION_URL", undefined);
+    vi.stubEnv("VERCEL_URL", "temporary-deployment.vercel.app");
+    vi.stubEnv("VERCEL_BRANCH_URL", "preview-branch.vercel.app");
+  });
+
+  it.each(["profiles.example.com", "my-profile.vercel.app"])(
+    "uses Vercel's stable production domain when APP_URL is absent: %s",
+    async (domain) => {
+      vi.stubEnv("VERCEL_ENV", "production");
+      vi.stubEnv("VERCEL_PROJECT_PRODUCTION_URL", domain);
+      const { getPublicActivityBaseUrl } = await import("./activity-service");
+      expect(getPublicActivityBaseUrl()).toBe(`https://${domain}`);
+    },
+  );
+
+  it("prioritizes an explicit public origin in every environment", async () => {
+    vi.stubEnv("APP_URL", " https://chosen.example.com/ ");
+    vi.stubEnv("VERCEL_PROJECT_PRODUCTION_URL", "automatic.example.com");
+    const { getPublicActivityBaseUrl } = await import("./activity-service");
+    for (const environment of [undefined, "preview", "production"]) {
+      vi.stubEnv("VERCEL_ENV", environment);
+      expect(getPublicActivityBaseUrl()).toBe("https://chosen.example.com");
+    }
+  });
+
+  it.each([undefined, "preview", "development", "staging"])(
+    "does not use the production domain outside production: %s",
+    async (environment) => {
+      vi.stubEnv("VERCEL_ENV", environment);
+      vi.stubEnv("VERCEL_PROJECT_PRODUCTION_URL", "profiles.example.com");
+      const { getPublicActivityBaseUrl } = await import("./activity-service");
+      expect(getPublicActivityBaseUrl()).toBeUndefined();
+    },
+  );
+
+  it("treats an empty APP_URL as unconfigured and reevaluates the environment", async () => {
+    vi.stubEnv("APP_URL", "  ");
+    vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("VERCEL_PROJECT_PRODUCTION_URL", "profiles.example.com");
+    const { getPublicActivityBaseUrl } = await import("./activity-service");
+    expect(getPublicActivityBaseUrl()).toBe("https://profiles.example.com");
+    vi.stubEnv("VERCEL_ENV", "preview");
+    expect(getPublicActivityBaseUrl()).toBeUndefined();
+  });
+
+  it.each([
+    "http://profiles.example.com",
+    "https://localhost",
+    "https://127.0.0.1",
+    "https://user:password@profiles.example.com",
+    "https://profiles.example.com/path",
+    "https://profiles.example.com?query=1",
+    "https://profiles.example.com/#fragment",
+    "https://profiles.example.com:444",
+  ])("does not hide invalid explicit configuration with a fallback: %s", async (origin) => {
+    vi.stubEnv("APP_URL", origin);
+    vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("VERCEL_PROJECT_PRODUCTION_URL", "profiles.example.com");
+    const { getPublicActivityBaseUrl } = await import("./activity-service");
+    expect(getPublicActivityBaseUrl()).toBeUndefined();
+  });
+
+  it.each([
+    undefined,
+    "",
+    "localhost",
+    "127.0.0.1",
+    "service.internal",
+    "https://profiles.example.com",
+    "profiles.example.com/",
+    "profiles.example.com/path",
+    "profiles.example.com\\path",
+    "user:password@profiles.example.com",
+    "profiles.example.com:443",
+    "profiles.example.com?query=1",
+    "profiles.example.com#fragment",
+    "profiles.example.com\n.evil.example.com",
+  ])("rejects a production value that is not a public bare domain: %s", async (domain) => {
+    vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("VERCEL_PROJECT_PRODUCTION_URL", domain);
+    const { getPublicActivityBaseUrl } = await import("./activity-service");
+    expect(getPublicActivityBaseUrl()).toBeUndefined();
+  });
+
+  it("exports configured production cards and manual contributions without provider requests", async () => {
+    vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("VERCEL_PROJECT_PRODUCTION_URL", "profiles.example.com");
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    const { getPublicActivityBaseUrl } = await import("./activity-service");
+    const profile = createEmptyProfile("en");
+    profile.visibility.contributions = true;
+    profile.visibility.metrics = true;
+    profile.data.metrics = { username: "example-dev", cards: ["calendar", "extended-languages"] };
+    profile.data.contributions.items = [
+      { id: "guide", title: "A community guide", description: "", url: "" },
+    ];
+
+    const result = generateReadme(profile, { activityCardBaseUrl: getPublicActivityBaseUrl() });
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.exportIssues).toBeUndefined();
+    expect(result.activityCards).toEqual([
+      "https://profiles.example.com/cards/github/example-dev/calendar.svg?locale=en",
+      "https://profiles.example.com/cards/github/example-dev/extended-languages.svg?locale=en",
+    ]);
+    expect(result.markdown).toContain("A community guide");
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 });

@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "title": "Privacidad y datos",
+    "description": "Conocé qué guarda GitHub Profile Generator en tu navegador y cuándo consulta datos públicos."
+  },
+  "title": "Privacidad y datos",
+  "eyebrow": "Privacidad",
+  "intro": "La aplicación funciona sin una cuenta. El borrador del perfil se edita y guarda en tu navegador; la aplicación no sube el documento completo del perfil a su servidor.",
+  "device": {
+    "title": "Datos guardados en tu dispositivo",
+    "body": "El editor guarda el borrador del perfil y las copias de recuperación en el almacenamiento local del navegador. Al abrir un archivo Markdown o de proyecto, el navegador lo lee antes de que revises y confirmes una importación. También puede conservar datos públicos de actividad en IndexedDB para reutilizarlos: los datos frescos se usan hasta 30 minutos y los anteriores pueden conservarse hasta 24 horas. El navegador puede quitar datos locales y, si borrás los datos del sitio, se eliminan borradores y cachés.",
+    "theme": "El navegador también guarda la preferencia de apariencia elegida."
+  },
+  "requests": {
+    "title": "Cuándo se consultan datos públicos",
+    "body": "Escribir un usuario de GitHub o WakaTime no inicia una consulta. El editor se comunica con el servidor de esta aplicación solo después de que pedís buscar actividad pública o datos que necesita una tarjeta seleccionada. La solicitud incluye el usuario público y las opciones elegidas, no el borrador completo del perfil. Las consultas a GitHub usan una credencial del despliegue en el servidor; nunca se envía a tu navegador. WakaTime usa un usuario público independiente y no utiliza esa credencial de GitHub.",
+    "about": "Al abrir Acerca del proyecto, el servidor de esta aplicación también puede consultar en la API de GitHub las estrellas y bifurcaciones públicas del repositorio. Esa solicitud fija no incluye datos del perfil de quien visita ni un nombre de usuario elegido. Los conteos se guardan en caché hasta 6 horas y se omiten si no están disponibles.",
+    "cards": "Un README publicado puede cargar las URLs públicas de tarjetas de esta aplicación. Las solicitudes de imágenes de quienes lo leen pueden hacer que el servidor actualice datos públicos cuando no haya datos reutilizables. Estos endpoints no publican el borrador del perfil ni tus aportes manuales: el README muestra el contenido que decidiste publicar."
+  },
+  "images": {
+    "title": "Imágenes que agregás",
+    "body": "El navegador solicita directamente las imágenes que elegís para el perfil al host HTTPS público correspondiente. Esta aplicación no las sube ni las pasa por un proxy. Quienes leen el README o GitHub también pueden solicitar esas URLs."
+  },
+  "hosting": {
+    "title": "Alojamiento y enlaces públicos",
+    "body": "El proveedor de alojamiento recibe las solicitudes de red necesarias para servir el sitio y puede conservar registros operativos. Esta página no afirma que esos registros del proveedor no existan. El código fuente, la licencia, los avisos de terceros y la guía para contribuir están disponibles en el repositorio público.",
+    "githubNotice": "GitHub es una marca de GitHub, Inc. Este proyecto independiente no está afiliado ni cuenta con el respaldo de GitHub."
+  },
+  "links": {
+    "title": "Enlaces del proyecto",
+    "repository": "Código fuente",
+    "issues": "Pedir ayuda o reportar un problema",
+    "contributing": "Guía para contribuir",
+    "license": "Licencia MIT",
+    "notices": "Avisos de terceros",
+    "home": "Volver al inicio"
+  }
+}

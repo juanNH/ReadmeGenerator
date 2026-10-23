@@ -1,64 +1,64 @@
-# Cómo contribuir
+# Contributing
 
-GitHub Profile Generator es un editor visual de README para perfiles de GitHub, con vista previa, exportación e importación local y archivos de proyecto para continuar editando. Antes de proponer cambios, revisá la [definición del producto](docs/product.md) y la [arquitectura](docs/architecture.md). La documentación pública describe las funciones disponibles y sus límites; la planificación de desarrollo se mantiene privada.
+GitHub Profile Generator is a visual editor for GitHub profile READMEs, with a preview, export, local import, and project files you can use to continue editing later. Before proposing a change, review the [product definition](docs/product.md) and [architecture](docs/architecture.md). Public documentation describes the features that are available and their limits; development planning stays private. Please follow the [Code of Conduct](CODE_OF_CONDUCT.md). For suspected security vulnerabilities, use the private reporting process in [SECURITY.md](SECURITY.md), not a public issue.
 
-## Preparación
+## Getting started
 
-Usá Node.js `24.21.0` y pnpm `11.25.0`. Los pasos de instalación, los comandos y el alcance de cada comprobación están en la [guía de desarrollo](docs/development.md).
+Use Node.js `24.21.0` and pnpm `11.25.0`. The [development guide](docs/development.md) covers installation, commands, and what each check verifies.
 
-Creá una rama para el cambio y mantené cada propuesta enfocada en un objetivo. Las ampliaciones de alcance o decisiones que cambien el producto deben discutirse antes de desarrollarlas.
+Create an English-named branch for your change and keep each proposal focused on one goal. The [branching guide](docs/branching.md) explains prefixes, commit messages, how to create a branch, and the pull request workflow. Discuss scope expansions or decisions that change the product before implementing them.
 
-## Criterios para los cambios
+## Change guidelines
 
-- Documentación en español y nombres de código en inglés.
-- Interfaz en inglés por omisión y traducción al español, con mensajes separados y un selector funcional. Los cambios de texto deben contemplar ambos idiomas.
-- Usar el kit visual y sus patrones antes de incorporar variantes nuevas.
-- Permitir navegación con teclado, foco visible, etiquetas claras y estados comprensibles.
-- Mantener todos los módulos de perfil opcionales. Ocultar una sección debe conservar sus datos.
-- Conservar el recorrido manual sin cuenta y distinguir los conocimientos declarados de las métricas públicas.
-- Documentar como planificada cualquier función que todavía no esté disponible.
-- Incorporar dependencias y adaptaciones de proyectos con mantenimiento activo verificado en sus fuentes oficiales. Fijar la revisión de los recursos copiados y conservar su procedencia, licencias y avisos.
+- Write repository documentation in English and keep code names in English.
+- Keep English as the default interface language and Spanish as a fully supported option, with separate message catalogs and a working language selector. Update both translations when changing interface text.
+- Reuse the visual system and its patterns before adding new variants.
+- Support keyboard navigation, visible focus, clear labels, and understandable states.
+- Keep every profile section optional. Hiding a section must preserve its data.
+- Preserve the manual, no-account workflow and distinguish self-described skills from public activity metrics.
+- Mark features that are not available yet as planned rather than presenting them as implemented.
+- Add dependencies and adapt third-party projects only after verifying active maintenance in official sources. Pin the revision of copied resources and preserve their source, licenses, and notices.
 
-Los contratos de perfil y las salidas generadas necesitan pruebas de comportamiento. Para cambios visuales o de interacción, revisá también el navegador, el teclado y los estados relevantes. Elegí comprobaciones que cubran el cambio sin duplicar pruebas que solo reproduzcan su implementación.
+Changes to profile contracts and generated output need behavior tests. For visual or interaction changes, also review the browser, keyboard behavior, and relevant states. Choose checks that cover the change without duplicating tests that merely mirror its implementation.
 
-## Licencia de las contribuciones
+## License for contributions
 
-El código propio de este proyecto se publica bajo [MIT](LICENSE), con el aviso de copyright de Juan Nicolas Herrera. Al enviar una contribución de código propio, ofrecela bajo esa misma licencia y asegurate de tener autorización para aportarla. Cada persona conserva la titularidad de su contribución; no se solicita una cesión de derechos.
+The project's original code is released under [MIT](LICENSE), with a copyright notice for Juan Nicolas Herrera. By submitting your own code, you offer it under the same license and confirm that you are authorized to contribute it. You retain ownership of your contribution; no separate rights assignment is requested.
 
-Cuando reutilices código, fuentes, iconos, datos u otros recursos, conservá sus avisos originales y documentá la fuente, versión o commit, licencia y modificaciones en [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). La licencia MIT del proyecto no sustituye la licencia de esos materiales ni concede derechos sobre marcas. No copies código con condiciones desconocidas ni sustituyas avisos ajenos por el copyright del proyecto.
+When reusing code, fonts, icons, data, or other resources, preserve their original notices and document the source, version or commit, license, and modifications in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). The project's MIT license does not replace the licenses for those materials or grant trademark rights. Do not copy code with unknown terms or replace another party's notices with the project's copyright.
 
-Para cambios de dependencias o recursos de terceros, seguí el [procedimiento de licencias y distribución](docs/open-source.md), regenerá los avisos y revisá el diff. No hace falta una cuenta adicional ni firmar un acuerdo separado para contribuir.
+For dependency or third-party resource changes, follow the [licensing and distribution procedure](docs/open-source.md), regenerate the notices, and review the diff. You do not need an additional account or a separate agreement to contribute.
 
-## Validación de una propuesta
+## Validating a proposal
 
 ```sh
 pnpm check
 pnpm build
 ```
 
-Si cambiaste dependencias o recursos distribuidos, ejecutá también `pnpm licenses:generate` y `pnpm licenses:check`; revisá las advertencias del inventario y los avisos incluidos en el artefacto de destino.
+If you changed dependencies or distributed resources, also run `pnpm licenses:generate` and `pnpm licenses:check`. Review inventory warnings and the notices included in the relevant distribution artifact.
 
-Cuando el cambio afecta pantallas o componentes, agregá las comprobaciones que correspondan:
+For changes that affect screens or components, add the checks that apply:
 
 ```sh
 pnpm test:e2e
 pnpm test:a11y
 ```
 
-Indicá qué ejecutaste y cuál fue el resultado. Si una comprobación no se pudo completar, explicá el motivo. No describas como aprobado un comando que no se ejecutó.
+State which checks you ran and their results. If a check could not be completed, explain why. Do not report a command as passing if you did not run it.
 
 ## Pull requests
 
-Usá la plantilla del repositorio para explicar:
+Use the repository template to explain:
 
-- El problema y el resultado observable.
-- El alcance del cambio y el objetivo acordado, sin adjuntar planificación privada.
-- Las comprobaciones ejecutadas y su resultado.
-- El efecto en accesibilidad y, cuando corresponda, evidencia visual.
-- Los riesgos, limitaciones o decisiones pendientes que afecten la revisión.
+- The problem and its observable outcome.
+- The scope of the change and the agreed goal, without attaching private planning.
+- The checks you ran and their results.
+- The accessibility impact and, where relevant, visual evidence.
+- Risks, limitations, or pending decisions that affect review.
 
-Los commits convencionales, por ejemplo `feat:`, `fix:` o `docs:`, son recomendados para mantener un historial legible. No se exige un formato mediante hooks restrictivos.
+Write commit messages in English, including the subject and body. Conventional Commit subjects such as `feat: add project links`, `fix: preserve editor focus`, or `docs: clarify branch policy` are recommended to keep the history readable. CI checks branch-name syntax for pull requests, but does not check whether branch descriptions or commit messages are in English; this language convention is maintained through contributor guidance.
 
 ## Issues
 
-Usá la plantilla de error para informar pasos reproducibles, resultado esperado y resultado actual. Para una propuesta, describí la necesidad de la persona y un criterio observable de éxito. Evitá incluir datos personales, credenciales o información de repositorios privados en los ejemplos.
+Use the bug report template to provide reproducible steps, the expected result, and the actual result. For a feature request, describe the person's need and an observable success criterion. Avoid including personal data, credentials, or information from private repositories in examples.

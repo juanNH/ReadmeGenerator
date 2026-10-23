@@ -21,7 +21,10 @@ export function PresentationFormatFields({ value, onChange }: PresentationFormat
       <Field htmlFor={`presentation-${field}`} label={t("format.alignment")}>
         <select
           className={selectClassName}
-          value={value?.[field] ?? "left"}
+          value={
+            value?.[field] ??
+            (field === "displayNameAlignment" || field === "headlineAlignment" ? "center" : "left")
+          }
           onChange={(event) =>
             onChange({ ...value, [field]: event.target.value as "left" | "center" | "right" })
           }
@@ -39,13 +42,35 @@ export function PresentationFormatFields({ value, onChange }: PresentationFormat
         <select
           className={selectClassName}
           value={String(value?.[field] ?? defaultLevel)}
-          onChange={(event) =>
-            onChange({ ...value, [field]: Number(event.target.value) as 1 | 2 | 3 })
-          }
+          onChange={(event) => {
+            onChange({ ...value, [field]: Number(event.target.value) as 1 | 2 | 3 });
+          }}
         >
           <option value="1">{t("format.heading1")}</option>
           <option value="2">{t("format.heading2")}</option>
           <option value="3">{t("format.heading3")}</option>
+        </select>
+      </Field>
+    );
+  }
+
+  function typographyField(field: "displayNameTypography" | "headlineTypography") {
+    return (
+      <Field htmlFor={`presentation-${field}`} label={t("format.typography")}>
+        <select
+          className={selectClassName}
+          value={value?.[field] ?? ""}
+          onChange={(event) => {
+            const updated = { ...value };
+            if (event.target.value === "italic" || event.target.value === "monospace")
+              updated[field] = event.target.value;
+            else delete updated[field];
+            onChange(Object.keys(updated).length ? updated : undefined);
+          }}
+        >
+          <option value="">{t("format.typographyDefault")}</option>
+          <option value="italic">{t("format.typographyItalic")}</option>
+          <option value="monospace">{t("format.typographyMonospace")}</option>
         </select>
       </Field>
     );
@@ -58,12 +83,14 @@ export function PresentationFormatFields({ value, onChange }: PresentationFormat
       </summary>
       <div className="mt-3 min-w-0 space-y-5">
         <p className="text-xs leading-5 text-muted-foreground">{t("format.help")}</p>
+        <p className="text-xs leading-5 text-muted-foreground">{t("format.typographyHelp")}</p>
         <fieldset className="min-w-0 space-y-3">
           <legend className="text-sm font-medium">{t("displayName")}</legend>
           <div className="grid min-w-0 gap-4 @min-[22em]/configuration:grid-cols-2">
             {levelField("displayNameLevel", 1)}
             {alignmentField("displayNameAlignment")}
           </div>
+          {typographyField("displayNameTypography")}
         </fieldset>
         <fieldset className="min-w-0 space-y-3">
           <legend className="text-sm font-medium">{t("headline")}</legend>
@@ -71,6 +98,7 @@ export function PresentationFormatFields({ value, onChange }: PresentationFormat
             {levelField("headlineLevel", 2)}
             {alignmentField("headlineAlignment")}
           </div>
+          {typographyField("headlineTypography")}
         </fieldset>
         <div className="grid min-w-0 gap-5 @min-[22em]/configuration:grid-cols-2">
           <fieldset className="min-w-0 space-y-3">
@@ -80,6 +108,11 @@ export function PresentationFormatFields({ value, onChange }: PresentationFormat
           <fieldset className="min-w-0 space-y-3">
             <legend className="text-sm font-medium">{t("location")}</legend>
             {alignmentField("locationAlignment")}
+            {value?.locationPlacement && (
+              <p className="text-xs leading-5 text-muted-foreground">
+                {t("style.inlineAlignment")}
+              </p>
+            )}
           </fieldset>
         </div>
         <Button variant="ghost" size="sm" disabled={!value} onClick={() => onChange(undefined)}>

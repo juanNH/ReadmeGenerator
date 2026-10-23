@@ -10,6 +10,7 @@ import type custom from "@/messages/en/modules/custom.json";
 import type readmeImport from "@/messages/en/readme-import.json";
 import type codeEditor from "@/messages/en/code-editor.json";
 import type project from "@/messages/en/project.json";
+import type privacy from "@/messages/en/privacy.json";
 import type { AppLocale } from "@/i18n/routing";
 
 declare module "next-intl" {
@@ -23,6 +24,7 @@ declare module "next-intl" {
       ReadmeImport: typeof readmeImport;
       CodeEditor: typeof codeEditor;
       Project: typeof project;
+      Privacy: typeof privacy;
       EditorModules: {
         contributions: typeof contributions;
         technologies: typeof technologies;

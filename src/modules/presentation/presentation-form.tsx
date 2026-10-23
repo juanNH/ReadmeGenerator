@@ -1,9 +1,8 @@
-import { useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import type { ProfileModuleData } from "@/core/profile/module-content";
+import type { PresentationFormat, ProfileModuleData } from "@/core/profile/module-content";
 import type { ReadmeIssue } from "@/core/readme";
 import { LocationField } from "./location-field";
 import { PresentationFormatFields } from "./presentation-format-fields";
@@ -16,7 +15,21 @@ type PresentationFormProps = {
 
 export function PresentationForm({ value, onChange, errors = [] }: PresentationFormProps) {
   const t = useTranslations("Editor.presentation");
-  const detailsRef = useRef<HTMLDetailsElement>(null);
+  function updateFormat(format: PresentationFormat | undefined) {
+    if (format && Object.keys(format).length) onChange({ ...value, format });
+    else {
+      const updated = { ...value };
+      delete updated.format;
+      onChange(updated);
+    }
+  }
+  function updateLocationPlacement(placement: string) {
+    const format = { ...value.format };
+    if (placement === "displayName" || placement === "headline")
+      format.locationPlacement = placement;
+    else delete format.locationPlacement;
+    updateFormat(format);
+  }
   function fieldError(field: "displayName" | "headline" | "bio" | "location") {
     return errors.some(
       (error) =>
@@ -29,26 +42,37 @@ export function PresentationForm({ value, onChange, errors = [] }: PresentationF
       ? t("format.invalid")
       : undefined;
   }
-  const detailsHaveErrors = Boolean(fieldError("headline") || fieldError("location"));
-  useEffect(() => {
-    // Reveal errors without closing the fields again when the user corrects their writing.
-    if (detailsHaveErrors && detailsRef.current) detailsRef.current.open = true;
-  }, [detailsHaveErrors]);
-
   return (
     <div className="space-y-5">
       <Field
         htmlFor="profile-display-name"
         label={t("displayName")}
+        description={t("displayNameHelp")}
         error={fieldError("displayName")}
       >
         <Input
+          data-emoji-target="true"
           autoComplete="nickname"
           value={value.displayName}
           placeholder={t("displayNamePlaceholder")}
           onChange={(event) => onChange({ ...value, displayName: event.target.value })}
         />
       </Field>
+      <div className="space-y-2">
+        <Field
+          htmlFor="profile-headline"
+          label={t("headline")}
+          description={t("headlineHelp")}
+          error={fieldError("headline")}
+        >
+          <Input
+            data-emoji-target="true"
+            value={value.headline}
+            placeholder={t("headlinePlaceholder")}
+            onChange={(event) => onChange({ ...value, headline: event.target.value })}
+          />
+        </Field>
+      </div>
       <Field
         htmlFor="profile-bio"
         label={t("bio")}
@@ -56,42 +80,35 @@ export function PresentationForm({ value, onChange, errors = [] }: PresentationF
         error={fieldError("bio")}
       >
         <Textarea
+          data-emoji-target="true"
           value={value.bio}
           placeholder={t("bioPlaceholder")}
           rows={5}
           onChange={(event) => onChange({ ...value, bio: event.target.value })}
         />
       </Field>
-      <details ref={detailsRef} className="group text-sm">
-        <summary className="flex min-h-11 cursor-pointer items-center text-sm font-medium text-muted-foreground underline-offset-4 hover:text-foreground hover:underline focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:outline-none">
-          {t("details")}
-        </summary>
-        <div className="mt-3 space-y-4">
-          <Field htmlFor="profile-headline" label={t("headline")} error={fieldError("headline")}>
-            <Input
-              value={value.headline}
-              placeholder={t("headlinePlaceholder")}
-              onChange={(event) => onChange({ ...value, headline: event.target.value })}
-            />
-          </Field>
-          <LocationField
-            value={value.location}
-            error={fieldError("location")}
-            onChange={(location) => onChange({ ...value, location })}
-          />
-        </div>
-      </details>
-      <PresentationFormatFields
-        value={value.format}
-        onChange={(format) => {
-          if (format) onChange({ ...value, format });
-          else {
-            const updated = { ...value };
-            delete updated.format;
-            onChange(updated);
-          }
-        }}
+      <LocationField
+        value={value.location}
+        error={fieldError("location")}
+        onChange={(location) => onChange({ ...value, location })}
       />
+      <Field
+        htmlFor="presentation-location-placement"
+        label={t("style.locationPlacement")}
+        description={t("style.locationHelp")}
+      >
+        <select
+          id="presentation-location-placement"
+          className="min-h-11 w-full min-w-0 rounded-md border border-border-strong bg-surface px-3 py-2 text-base focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:outline-none sm:text-sm"
+          value={value.format?.locationPlacement ?? ""}
+          onChange={(event) => updateLocationPlacement(event.target.value)}
+        >
+          <option value="">{t("style.locationSeparate")}</option>
+          <option value="displayName">{t("displayName")}</option>
+          <option value="headline">{t("headline")}</option>
+        </select>
+      </Field>
+      <PresentationFormatFields value={value.format} onChange={updateFormat} />
     </div>
   );
 }

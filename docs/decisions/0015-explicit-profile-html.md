@@ -1,22 +1,22 @@
-# ADR 0015: HTML explícito y filtrado para perfiles
+# ADR 0015: Explicit, sanitized HTML for profiles
 
-- Estado: aceptada.
-- Fecha: 2026-10-19.
-- Amplía [ADR 0013](0013-custom-sections.md) y [ADR 0014](0014-custom-visual-blocks.md). Sustituye la prohibición general de HTML únicamente para un bloque personalizado `html`; mantiene texto escapado en los demás campos, las excepciones cerradas de iconos y tarjetas, el documento v2 y su recuperación conservadora.
+- Status: accepted.
+- Date: 2026-10-19.
+- Extends [ADR 0013](0013-custom-sections.md) and [ADR 0014](0014-custom-visual-blocks.md). It replaces the general prohibition on HTML only for a custom `html` block; escaped text remains in all other fields, with closed exceptions for icons and cards, document v2, and conservative recovery.
 
-## Contexto
+## Context
 
-Un README de perfil puede combinar Markdown con encabezados centrados, imágenes enlazadas, tablas y desplegables. Los bloques estructurados cubren la composición habitual; una entrada explícita de HTML permite agregar esas disposiciones sin exigir más información de trayectoria ni modificar los formularios fijos.
+A profile README can combine Markdown with centered headings, linked images, tables, and collapsible sections. Structured blocks cover common compositions; an explicit HTML input makes these layouts possible without asking for more career-history details or changing the fixed forms.
 
-GitHub convierte el marcado y después aplica sanitización y otros filtros. Su repositorio `markup` no implementa toda esa secuencia. La especificación GFM tampoco es una lista de HTML seguro. El código público de HTML Pipeline ofrece una referencia de etiquetas y atributos, pero no permite prometer una réplica de la configuración de producción de GitHub. Ver [GitHub Markup](https://github.com/github/markup), [especificación GFM](https://github.github.com/gfm/) y [sanitización de HTML Pipeline](https://github.com/gjtorikian/html-pipeline/blob/main/lib/html_pipeline/sanitization_filter.rb).
+GitHub converts markup and then applies sanitization and other filters. Its `markup` repository does not implement the entire pipeline. The GFM specification is not a list of safe HTML. The public HTML Pipeline code provides a reference for tags and attributes, but does not let us promise a replica of GitHub's production configuration. See [GitHub Markup](https://github.com/github/markup), the [GFM specification](https://github.github.com/gfm/), and [HTML Pipeline sanitization](https://github.com/gjtorikian/html-pipeline/blob/main/lib/html_pipeline/sanitization_filter.rb).
 
-Los datos locales deben conservar el código escrito, incluso cuando no pueda exportarse. El HTML filtrado y la vista previa son resultados derivados de ese contenido. No se necesita un servicio externo, ejecutar código de la persona ni descargar recursos desde el servidor para producirlos.
+Local data must preserve the code that was written, even when it cannot be exported. Sanitized HTML and the preview are derived from that content. No external service, execution of a person's code, or server-side resource download is needed to produce them.
 
-## Decisión
+## Decision
 
-### Contrato y conservación de datos
+### Contract and data preservation
 
-Agregar a la unión estricta de bloques de `customSections`:
+Add the following to the strict union of `customSections` blocks:
 
 ```ts
 type CustomHtmlBlock = {
@@ -26,81 +26,81 @@ type CustomHtmlBlock = {
 };
 ```
 
-`source` conserva exactamente la fuente original; el análisis no la recorta, normaliza o reemplaza. No se guardan árboles, avisos, errores, HTML filtrado o metadatos de vista previa. Se mantienen `schemaVersion: 2`, las claves de almacenamiento, la migración v1 y la forma de todos los bloques anteriores, sin introducir campos por defecto.
+`source` preserves the original source exactly; analysis does not trim, normalize, or replace it. Trees, notices, errors, sanitized HTML, and preview metadata are not stored. Keep `schemaVersion: 2`, storage keys, the v1 migration, and the shape of every earlier block, without adding default fields.
 
-Las operaciones existentes conservan el orden y las identidades opacas. Duplicar copia la fuente con un ID nuevo y sin compartir objetos modificables; ocultar conserva todo el bloque y excluirlo evita revisar su salida. Eliminar quita únicamente el contenido elegido. Un lector anterior estricto puede rechazar esta variante de v2: debe conservar el valor incompatible, sin sobrescribirlo o recurrir a v1 automáticamente.
+Existing operations preserve order and opaque identities. Duplicating copies the source with a new ID and without sharing mutable objects; hiding preserves the entire block, and excluding it means its output is not reviewed. Deleting removes only the selected content. A strict older reader may reject this v2 variant: it must preserve the incompatible value, without overwriting it or automatically falling back to v1.
 
-### Análisis puro y política de HTML
+### Pure analysis and HTML policy
 
-`analyzeProfileHtml` parsea un fragmento HAST con `hast-util-from-html` 2.0.3, aplica reglas propias y un esquema explícito de `hast-util-sanitize` 5.0.2, y serializa mediante `hast-util-to-html` 9.0.5. Estas bibliotecas trabajan sobre árboles en Node.js y navegador, sin requerir un DOM para el contrato del núcleo. El parser y el serializer no sustituyen la sanitización. Ver [parseo](https://github.com/syntax-tree/hast-util-from-html), [sanitización](https://github.com/syntax-tree/hast-util-sanitize) y [serialización](https://github.com/syntax-tree/hast-util-to-html).
+`analyzeProfileHtml` parses a HAST fragment with `hast-util-from-html` 2.0.3, applies custom rules and an explicit `hast-util-sanitize` 5.0.2 schema, then serializes it with `hast-util-to-html` 9.0.5. These libraries operate on trees in Node.js and the browser, without requiring a DOM for the core contract. The parser and serializer do not replace sanitization. See [parsing](https://github.com/syntax-tree/hast-util-from-html), [sanitization](https://github.com/syntax-tree/hast-util-sanitize), and [serialization](https://github.com/syntax-tree/hast-util-to-html).
 
-La política admite un subconjunto para perfiles:
+The policy allows a profile-oriented subset:
 
-- `h1`–`h6`, `p`, `div`, `span`, `br` y `hr`.
-- `strong`, `b`, `em`, `i`, `del`, `s`, `kbd`, `sub`, `sup`, `blockquote`, `pre` y `code`.
-- `a`, `img`, `ul`, `ol` y `li`.
-- `table`, `thead`, `tbody`, `tfoot`, `tr`, `th`, `td` y `caption`.
-- `details` y `summary`.
+- `h1`–`h6`, `p`, `div`, `span`, `br`, and `hr`.
+- `strong`, `b`, `em`, `i`, `del`, `s`, `kbd`, `sub`, `sup`, `blockquote`, `pre`, and `code`.
+- `a`, `img`, `ul`, `ol`, and `li`.
+- `table`, `thead`, `tbody`, `tfoot`, `tr`, `th`, `td`, and `caption`.
+- `details` and `summary`.
 
-Los atributos se permiten por elemento. `align` acepta izquierda, centro o derecha donde corresponda. Las imágenes admiten dimensiones entre 1 y 2.000 píxeles y `width` de 1 a 100 %. Los spans de celdas, el inicio de listas, los títulos y el estado `open` tienen reglas acotadas. Un enlace necesita nombre accesible; se admite `aria-label` para identificarlo. Un desplegable requiere un único `summary`, primero y con nombre. Se comprueban relaciones estructurales concretas de listas y tablas, sin certificar accesibilidad completa.
+Attributes are allowed per element. Where applicable, `align` accepts left, center, or right. Images allow dimensions from 1 to 2,000 pixels, and `width` from 1 to 100%. Cell spans, list starts, titles, and the `open` state have bounded rules. A link needs an accessible name; `aria-label` is allowed to identify it. A collapsible section requires exactly one named `summary` as its first child. Specific structural relationships in lists and tables are checked, without certifying complete accessibility.
 
-Se retiran atributos no permitidos, eventos, CSS, clases, `id`, `name`, comentarios y declaraciones. Elementos activos o ajenos al formato, como `script`, `style`, formularios, `iframe`, embeds, SVG y MathML inline, se eliminan con su contenido. No se admiten páginas HTML completas, `picture`, `srcset`, JavaScript, React o MDX. Los cambios por filtrado o reparación producen avisos y no se aplican a la fuente guardada.
+Disallowed attributes, events, CSS, classes, `id`, `name`, comments, and declarations are removed. Active or unrelated elements such as `script`, `style`, forms, `iframe`, embeds, SVG, and inline MathML are removed with their contents. Full HTML pages, `picture`, `srcset`, JavaScript, React, and MDX are not accepted. Sanitization or repair changes produce notices and are not applied to the saved source.
 
-### Enlaces e imágenes
+### Links and images
 
-Los enlaces HTML usan HTTP/HTTPS absoluto bajo la política web compartida. `mailto:` permanece reservado al formulario de contacto. Las imágenes usan `normalizePublicImageUrl`: HTTPS con dominio de sintaxis pública, sin IP, hosts locales o privados conocidos, credenciales, fragmentos ni puertos no estándar. Esta comprobación no consulta DNS, comprueba formato real o garantiza disponibilidad. Se admiten queries y direcciones sin extensión. Los recursos se alojan por separado.
+HTML links use absolute HTTP/HTTPS URLs under the shared web policy. `mailto:` remains reserved for the contact form. Images use `normalizePublicImageUrl`: HTTPS with a syntactically public domain, without IP addresses, local or known-private hosts, credentials, fragments, or nonstandard ports. This check does not query DNS, verify the actual format, or guarantee availability. Queries and URLs without an extension are allowed. Resources are hosted separately.
 
-Cada `img` requiere el atributo `alt`. Un valor explícito `alt=""` indica una imagen decorativa; un atributo ausente produce un error. Esta excepción no cambia la obligación de descripción no vacía del bloque estructurado `image`. Un SVG externo dentro de `img` se trata como una imagen y no habilita SVG inline.
+Every `img` requires an `alt` attribute. An explicit `alt=""` means the image is decorative; a missing attribute produces an error. This exception does not change the requirement for non-empty alternative text on the structured `image` block. An external SVG in `img` is treated as an image and does not enable inline SVG.
 
-La comprobación propia se realiza sobre las URLs ya decodificadas del AST. La configuración de protocolos del sanitizer admite relativos y no basta para aplicar la política de la aplicación. Rutas relativas, direcciones locales y `#anclas` requieren adaptación explícita; no se resuelven contra el origen del editor. GitHub sí puede resolver rutas según repositorio, archivo y rama, contexto que este bloque no recibe. Ver [enlaces e imágenes de GitHub](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax).
+The custom check runs on URLs already decoded from the AST. The sanitizer's protocol configuration allows relative URLs and is insufficient for the application's policy. Relative paths, local addresses, and `#anchors` require explicit changes; they are not resolved against the editor's origin. GitHub can resolve paths using repository, file, and branch context, which this block does not receive. See [GitHub links and images](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax).
 
-### Límites y errores de exportación
+### Export limits and errors
 
-El análisis limita cada fuente a 30.000 unidades UTF-16, 1.500 nodos y profundidad 32. El generador comprueba además un máximo agregado de 150.000 unidades de fuente HTML de secciones visibles antes de analizarlas todas. Los datos ocultos no consumen ese presupuesto. Estos límites protegen el trabajo de análisis; no truncarán un borrador recuperado.
+Analysis limits each source to 30,000 UTF-16 code units, 1,500 nodes, and depth 32. The generator also checks a combined maximum of 150,000 UTF-16 code units of HTML source across visible sections before analyzing them. Hidden data does not count against this budget. These limits protect analysis; a recovered draft is never truncated.
 
-Una fuente vacía se omite. Una fuente no vacía con problemas de tamaño, complejidad, URL, atributo alternativo, estructura o que quede sin contenido útil produce `invalid_html` en `customSections/{índice}/blocks/{índice}/source`. Ese error bloquea toda la generación, sin archivo parcial. Los avisos por filtrado o reparación no impiden exportar por sí mismos. La UI explica problemas y avisos a partir del mismo analizador.
+An empty source is omitted. A non-empty source with size, complexity, URL, alternative-text, or structural problems—or with no useful content after sanitization—produces `invalid_html` at `customSections/{index}/blocks/{index}/source`. This error blocks all generation; no partial file is produced. Sanitization or repair notices do not by themselves prevent export. The UI explains issues and notices using the same analyzer.
 
-### Un Markdown y metadatos derivados
+### One Markdown output and derived metadata
 
-El generador emite cada bloque como una unidad de HTML canónico cerrada dentro de un `div`, en el mismo Markdown usado para vista previa, copia y descarga. Conserva sus h1–h6 y no interpreta Markdown dentro de `source`. Los saltos LF/CR se serializan como entidades `&#10;`/`&#13;`: mantienen el contenido y evitan que líneas vacías terminen el bloque HTML y reactiven Markdown. La fuente original no cambia y el árbol conserva los caracteres reales, también dentro de código. No hay una representación alternativa del README.
+The generator emits each block as a closed canonical HTML unit inside a `div` in the same Markdown used for preview, copying, and download. It preserves its `h1`–`h6` levels and does not interpret Markdown inside `source`. LF/CR line breaks serialize as `&#10;`/`&#13;` entities: they preserve content and prevent blank lines from terminating the HTML block and reactivating Markdown. The original source is unchanged, and the tree retains the actual characters, including inside code. There is no alternate representation of the README.
 
-La serialización compensa sobre una copia del árbol la regla HTML que omite el primer salto de línea de `pre`. Si el árbol saneado comienza ese elemento con LF, se agrega un LF de compensación antes de serializar. Volver a interpretar la salida conserva así el contenido de la vista previa, sin modificar la fuente ni el árbol derivado. La compensación no se aplica cuando el primer hijo de `pre` es un elemento como `code`.
+Serialization compensates on a copy of the tree for the HTML rule that drops the first line break in `pre`. If the sanitized tree begins that element with LF, a compensating LF is added before serialization. Parsing the result again therefore preserves preview content without changing the source or derived tree. This compensation is not applied when the first child of `pre` is an element such as `code`.
 
-Un resultado correcto puede contener `customHtml: readonly CustomHtmlFragment[]`, con elementos `{ html, tree, start, end, headingLevel: 3 | 4 }`. `tree` es el árbol HAST permitido equivalente en estructura y contenido al HTML; `toHtml(tree)` puede diferir byte a byte por las entidades de saltos. Se reutiliza en la vista previa sin volver a parsear la cadena serializada, cuyo tamaño puede crecer respecto del límite de fuente. Los rangos `[start, end)` son desplazamientos UTF-16 en el Markdown final y deben coincidir exactamente con `html`. Conservan orden y repeticiones; solo se incluyen cuando existen fragmentos exportables. El nivel de vista previa vale `4` con título de sección o `3` sin él. No se persisten ni se devuelven en errores.
+A successful result may include `customHtml: readonly CustomHtmlFragment[]` with entries `{ html, tree, start, end, headingLevel: 3 | 4 }`. `tree` is the allowed HAST tree equivalent in structure and content to the HTML; `toHtml(tree)` may differ byte-for-byte because of line-break entities. The preview reuses the tree without parsing the serialized string again, whose size may exceed the source limit. The `[start, end)` ranges are UTF-16 offsets in the final Markdown and must match `html` exactly. They preserve order and repetitions and are included only when exportable fragments exist. The preview heading level is `4` when the section has a title and `3` otherwise. These values are not persisted or returned in error results.
 
-`remarkCustomHtml` verifica el contenido y los límites de cada rango para reconocer únicamente unidades completas. El renderer crea elementos React desde el árbol permitido, sin `dangerouslySetInnerHTML`, `rehypeRaw` o interpretación global de HTML. `skipHtml` sigue descartando HTML fuera de esas unidades y las excepciones previas de iconos conservan sus reglas exactas.
+`remarkCustomHtml` verifies the content and limits of each range so it recognizes only complete units. The renderer creates React elements from the allowed tree without `dangerouslySetInnerHTML`, `rehypeRaw`, or global HTML interpretation. `skipHtml` continues to discard HTML outside those units, and existing icon exceptions keep their exact rules.
 
-La vista previa adapta el nivel semántico de los encabezados a su contexto, permite desplazar tablas horizontalmente y conserva el control nativo de los desplegables. Esta adaptación no reescribe el HTML exportado. Las imágenes del bloque se autorizan dentro de `customHtml`; no amplían `customImages`, reservado a los bloques `image`.
+The preview adapts heading semantics to its context, allows horizontal scrolling for tables, and preserves native collapsible-section controls. This adaptation does not rewrite exported HTML. Images in this block are authorized within `customHtml`; they do not extend `customImages`, which is reserved for `image` blocks.
 
-Las imágenes se cargan directamente en el navegador con `loading="lazy"`, `decoding="async"` y `referrerPolicy="no-referrer"`, sin proxy ni optimizador del servidor. Un fallo de carga es estado efímero de presentación y no modifica la fuente ni invalida una URL admitida. El navegador sí contacta al host del recurso al mostrarlo.
+Images load directly in the browser with `loading="lazy"`, `decoding="async"`, and `referrerPolicy="no-referrer"`, without a proxy or server optimizer. A load failure is ephemeral presentation state and does not modify the source or invalidate an accepted URL. The browser does contact the resource host when displaying it.
 
-### Edición y alcance
+### Editing and scope
 
-El selector de contenido ofrece nueve opciones con muestras locales decorativas. El bloque HTML comienza vacío, enfoca su campo de código y no recibe las conversiones automáticas de listas. La guía, el contador, los problemas, los avisos y el HTML exportado inspeccionable tienen textos en inglés y español.
+The content selector offers nine options with local decorative samples. The HTML block starts empty, focuses its code field, and does not receive automatic list conversions. The guide, counter, issues, notices, and inspectable exported HTML have English and Spanish text.
 
-Tres ejemplos de encabezado centrado, tabla y desplegable se insertan únicamente por una acción explícita. Si sustituyen código no vacío, se pide confirmación. Las ayudas no publican recursos, ejecutan HTML o convierten el editor completo en un documento libre. GitHub documenta `details` y `summary`, pero la mezcla de HTML con Markdown requiere reglas de parseo distintas: este bloque interpreta solo HTML. Ver [secciones plegables de GitHub](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/organizing-information-with-collapsed-sections).
+Three examples—a centered heading, a table, and a collapsible section—are inserted only after an explicit action. Replacing non-empty code requires confirmation. Help does not publish resources, execute HTML, or turn the entire editor into a free-form document. GitHub documents `details` and `summary`, but mixing HTML with Markdown requires different parsing rules: this block interprets HTML only. See [GitHub collapsed sections](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/organizing-information-with-collapsed-sections).
 
-La entrega no incorpora un importador de README, asistencia con IA, cuentas, carga de archivos o nuevos servicios. La vista previa es aproximada y no promete paridad con los filtros, el tema o los estilos de GitHub.
+This delivery does not add a README importer, AI assistance, accounts, file uploads, or new services. The preview is approximate and does not promise parity with GitHub's filters, theme, or styles.
 
-## Alternativas consideradas
+## Alternatives considered
 
-| Alternativa                                                         | Ventaja                                           | Motivo de la decisión                                                                                                                    |
-| ------------------------------------------------------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| Interpretar HTML en todos los campos                                | Permite escribir etiquetas en cualquier lugar.    | Cambia el contrato de texto de formularios existentes y oculta dónde se permite formato. El bloque explícito limita esa entrada.         |
-| Conservar únicamente el HTML filtrado                               | Reduce los datos almacenados.                     | Pierde el código original y dificulta corregir filtrados o errores; se conserva la fuente y se deriva la salida.                         |
-| Usar una lista de protocolos del sanitizer sin validación adicional | Simplifica la configuración.                      | Admite relativos y no expresa la política de dominio público de imágenes. Se aplican los normalizadores compartidos.                     |
-| Insertar el HTML como una cadena en el DOM                          | Requiere menos renderizado propio.                | Abre una frontera distinta a la lista de elementos y metadatos verificables; se recorre el AST con React.                                |
-| Habilitar HTML global en ReactMarkdown                              | Resuelve mezclas arbitrarias de HTML y Markdown.  | Amplía el alcance de todos los campos y pierde la distinción entre unidades explícitas y texto. Se verifican rangos del mismo Markdown.  |
-| Cambiar a v3                                                        | Distingue el nuevo formato por número de versión. | La ampliación acordada agrega una variante sin modificar documentos anteriores; se documenta el rechazo por lectores antiguos estrictos. |
+| Alternative                                                  | Advantage                                       | Reason for the decision                                                                                                                   |
+| ------------------------------------------------------------ | ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Interpret HTML in every field                                | Allows tags anywhere.                           | Changes the text contract of existing forms and hides where formatting is allowed. The explicit block limits this input.                  |
+| Store only sanitized HTML                                    | Reduces stored data.                            | Loses the original source and makes it harder to correct sanitization or errors; preserve source and derive output instead.               |
+| Use the sanitizer's protocol list without further validation | Simplifies configuration.                       | Allows relative URLs and does not express the public-domain policy for images. Shared normalizers are applied.                            |
+| Insert HTML as a string into the DOM                         | Requires less custom rendering.                 | Creates a boundary outside the verifiable element and metadata allowlist; the AST is traversed with React.                                |
+| Enable global HTML in ReactMarkdown                          | Handles arbitrary HTML and Markdown mixtures.   | Expands the scope of every field and loses the distinction between explicit units and text. Ranges are verified within the same Markdown. |
+| Move to v3                                                   | Distinguishes the new format by version number. | The agreed expansion adds a variant without changing earlier documents; rejection by strict older readers is documented.                  |
 
-## Consecuencias
+## Consequences
 
-- El perfil admite composiciones HTML concretas y conserva un recorrido breve con bloques estructurados.
-- La fuente escrita sobrevive al filtrado, los errores, las copias, la ocultación, el cambio de idioma y la recuperación.
-- El parser estructural no demuestra que una fuente sea exportable; el generador conserva esa responsabilidad.
-- La política y sus límites se comparten entre formulario, exportación y vista previa, sin solicitudes de red del núcleo.
-- Los rangos exactos requieren conservar los desplazamientos al componer el Markdown, incluido Unicode y contenido repetido.
-- El formato visual final depende de GitHub y los recursos externos; el editor no ofrece alojamiento ni una réplica de su renderer.
-- Los lectores antiguos estrictos deben preservar el documento incompatible, aunque reconozcan el número de versión.
+- Profiles can use specific HTML compositions while retaining a short workflow with structured blocks.
+- Written source survives sanitization, errors, duplication, hiding, language changes, and recovery.
+- Structural parsing does not prove a source is exportable; the generator remains responsible for that decision.
+- The policy and its limits are shared by the form, export, and preview without core network requests.
+- Exact ranges require preserving offsets while composing Markdown, including Unicode and repeated content.
+- Final appearance depends on GitHub and external resources; the editor does not host content or reproduce GitHub's renderer.
+- Strict older readers must preserve incompatible documents even if they recognize the version number.
 
-Ver [editor](../editor.md), [modelo del perfil](../profile-model.md) y [arquitectura](../architecture.md).
+See [editor](../editor.md), [profile model](../profile-model.md), and [architecture](../architecture.md).

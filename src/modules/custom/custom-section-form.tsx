@@ -350,6 +350,7 @@ export function CustomSectionForm({ value, errors, onChange }: CustomSectionForm
         }
       >
         <Input
+          data-emoji-target="true"
           value={value.title}
           placeholder={t("titlePlaceholder")}
           onChange={(event) => onChange({ ...value, title: event.target.value })}
@@ -480,6 +481,7 @@ export function CustomSectionForm({ value, errors, onChange }: CustomSectionForm
                 error={textFormatError ? t("format.tooLong") : undefined}
               >
                 <Textarea
+                  data-emoji-target="true"
                   ref={controlRef(block.id)}
                   value={block.text}
                   placeholder={t("textPlaceholder")}
@@ -522,6 +524,7 @@ export function CustomSectionForm({ value, errors, onChange }: CustomSectionForm
                 error={textFormatError ? t("format.tooLong") : undefined}
               >
                 <Textarea
+                  data-emoji-target="true"
                   ref={controlRef(block.id)}
                   value={block.text}
                   rows={block.type === "heading" ? 2 : 3}
@@ -574,6 +577,7 @@ export function CustomSectionForm({ value, errors, onChange }: CustomSectionForm
                   error={altError ? t("missingImageAlt") : undefined}
                 >
                   <Textarea
+                    data-emoji-target="true"
                     value={block.alt}
                     rows={2}
                     className="min-h-20"
@@ -659,6 +663,7 @@ export function CustomSectionForm({ value, errors, onChange }: CustomSectionForm
                       label={t("item", { number: itemIndex + 1 })}
                     >
                       <Textarea
+                        data-emoji-target="true"
                         ref={itemRef(block.id, item.id, itemIndex === 0)}
                         aria-describedby={`${controlId}-format-help ${controlId}-keyboard-help`}
                         value={item.text}
@@ -744,6 +749,7 @@ export function CustomSectionForm({ value, errors, onChange }: CustomSectionForm
                   description={t("linkTextHelp")}
                 >
                   <Input
+                    data-emoji-target="true"
                     ref={controlRef(block.id)}
                     value={block.label}
                     placeholder={t("linkTextPlaceholder")}

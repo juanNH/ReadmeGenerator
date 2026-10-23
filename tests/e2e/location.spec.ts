@@ -8,8 +8,8 @@ const draftKey = "github-profile-generator.profile.v2";
 const copy = {
   en: {
     section: "About you",
-    details: "Extra details",
     location: "Location",
+    locationLine: "📍 Currently based in",
     suggestions: "Country suggestions",
     preview: "Preview",
     document: "README preview",
@@ -18,8 +18,8 @@ const copy = {
   },
   es: {
     section: "Presentación",
-    details: "Detalles opcionales",
     location: "Ubicación",
+    locationLine: "📍 Actualmente en",
     suggestions: "Sugerencias de países",
     preview: "Vista previa",
     document: "Vista previa del README",
@@ -41,7 +41,6 @@ async function openPresentation(page: Page, locale: Locale) {
   ).toBeVisible();
   await checkbox.check();
   await page.getByRole("button", { name: copy[locale].section, exact: true }).click();
-  await page.getByText(copy[locale].details, { exact: true }).click();
   return page.getByRole("combobox", { name: copy[locale].location, exact: true });
 }
 
@@ -91,7 +90,7 @@ for (const locale of ["en", "es"] as const) {
     await expect(flag).toHaveAttribute("width", "20");
     await expect(flag).toHaveAttribute("height", "15");
     await expect(flag).toHaveAttribute("alt", "");
-    await expect(preview).toContainText(`${copy[locale].location}: ${name}`);
+    await expect(preview).toContainText(`${copy[locale].locationLine} ${name}`);
     const pending = page.waitForEvent("download");
     await page.getByRole("button", { name: copy[locale].download, exact: true }).click();
     const path = await (await pending).path();

@@ -129,12 +129,17 @@ const presentationV1Schema = z.strictObject({
 });
 const presentationAlignmentSchema = z.enum(["left", "center", "right"]);
 const presentationLevelSchema = z.union([z.literal(1), z.literal(2), z.literal(3)]);
+const presentationTypographySchema = z.enum(["italic", "monospace"]);
+export type PresentationTypography = z.infer<typeof presentationTypographySchema>;
 
 export const presentationFormatSchema = z.strictObject({
+  locationPlacement: z.enum(["displayName", "headline"]).optional(),
   displayNameLevel: presentationLevelSchema.optional(),
   displayNameAlignment: presentationAlignmentSchema.optional(),
+  displayNameTypography: presentationTypographySchema.optional(),
   headlineLevel: presentationLevelSchema.optional(),
   headlineAlignment: presentationAlignmentSchema.optional(),
+  headlineTypography: presentationTypographySchema.optional(),
   bioAlignment: presentationAlignmentSchema.optional(),
   locationAlignment: presentationAlignmentSchema.optional(),
 });
@@ -214,6 +219,17 @@ export const moduleContentV1Schemas = Object.freeze({
 export const moduleContentSchemas = Object.freeze({
   ...moduleContentV1Schemas,
   presentation: presentationV1Schema.extend({ format: presentationFormatSchema.optional() }),
+  projects: z.strictObject({
+    items: entriesWithUniqueIds(
+      moduleContentV1Schemas.projects.shape.items.element.extend({
+        titleUrl: z.string().optional(),
+        cover: z.strictObject({ url: z.string(), alt: z.string() }).optional(),
+      }),
+    ),
+  }),
+  technologies: moduleContentV1Schemas.technologies.extend({
+    layout: z.enum(["compact", "grouped"]).optional(),
+  }),
   metrics: z.strictObject({
     username: z.string(),
     cards: uniqueCards(z.enum(metricCardIds)),

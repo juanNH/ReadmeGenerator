@@ -1,26 +1,28 @@
-# ADR 0032: Vercel Hobby con PAT y tarjetas anónimas
+# ADR 0032: Vercel Hobby with a PAT and Anonymous Cards
 
-## Estado
+## Status
 
-Aceptada el 20 de octubre de 2026.
+Accepted on October 20, 2026.
 
-## Contexto
+## Context
 
-Se necesita preparar un despliegue gratuito, conservando las estadísticas actuales y el acceso sin registro. La caché del navegador facilita editar, pero los README exportan URLs de imágenes alojadas por esta aplicación. El usuario establece `main` para producción y `dev` para preproducción. Todavía no existe un proyecto o dominio de Vercel donde comprobar Camo.
+A free deployment is needed while preserving current statistics and access without registration. Browser caching helps with editing, but exported READMEs contain image URLs hosted by this application. The user sets `main` for production and `dev` for preproduction. There is not yet a Vercel project or domain on which to check Camo.
 
-## Decisión
+## Decision
 
-- Conservar el PAT classic actual y sus restricciones públicas. No agregar GitHub App, login ni servicios de almacenamiento.
-- Configurar Next.js, Corepack/pnpm con lockfile inmutable y Fluid en `vercel.json`. Mantener Node 24 en el contrato del proyecto.
-- Acotar funciones a 75 segundos para JSON/perfil y 150 para recursos. El segundo presupuesto permite encadenar recurso y aportes de repositorio; no amplía los límites de los proveedores.
-- Usar Production de Vercel para `main` y Preview para `dev`. La rama de producción y variables por entorno se configuran en el panel. CI verifica ambas ramas y los PR.
-- Conservar `APP_URL` HTTPS explícito, SVG autónomo y rutas públicas anónimas con caché. Excluir archivos privados de subidas CLI mediante `.vercelignore`.
-- Proporcionar un comprobador de URLs de tarjetas y del README descargado. HTTP 200 no alcanza: `unavailable` es fallo. Separar pruebas deterministas/locales de una comprobación pública en GitHub.
+- Keep the current classic PAT and its public-scope restrictions. Do not add a GitHub App, login, or storage services.
+- Configure Next.js, Corepack/pnpm with an immutable lockfile, and Fluid in `vercel.json`. Keep Node 24 as a project requirement.
+- Limit functions to 75 seconds for JSON/profile requests and 150 seconds for resources. The second budget allows chaining a resource and repository contributions; it does not raise provider limits.
+- Use Vercel Production for `main` and Preview for `dev`. Configure the production branch and environment variables in the dashboard. CI checks both branches and pull requests.
+- Keep explicit HTTPS `APP_URL`, standalone SVGs, and anonymous public routes with caching. Exclude private files from CLI uploads through `.vercelignore`.
+- Provide a checker for card URLs and the downloaded README. HTTP 200 is not enough: `unavailable` is a failure. Separate deterministic/local tests from a public check through GitHub.
 
-## Alternativas y consecuencias
+## Alternatives and Consequences
 
-GitHub App requiere verificar consultas e implementar otro proveedor de credenciales; no es un reemplazo directo demostrado para todas las familias actuales. OAuth contradice el acceso anónimo requerido. Exportar una captura estática eliminaría dependencia del servidor para leerla, pero no es el formato entregado.
+A GitHub App would require verifying queries and implementing another credentials provider; it has not been shown to replace every current family directly. OAuth conflicts with the required anonymous access. Exporting a static image would remove server dependency when viewing it, but that is not the delivered format.
 
-El primer despliegue permite medir uso dentro de las condiciones y cuotas Hobby. La caché y los límites RAM siguen siendo por proceso; no garantizan consumo global ni usuarios por hora. El dominio estable, las credenciales y el acceso público deben configurarse antes de considerar verificadas las imágenes dentro de GitHub/Camo. Una compilación local no certifica instalación Linux ni infraestructura de Vercel.
+The initial deployment allows usage to be measured within Hobby's terms and quotas. Cache and RAM limits remain per process; they do not guarantee global consumption or users per hour. The stable domain, credentials, and public access must be configured before images in GitHub/Camo can be considered verified. A local build does not certify Linux installation or Vercel infrastructure.
 
-Ver [guía de despliegue](../vercel-deployment.md) y [API y alojamiento](../github-api-and-hosting.md).
+The `APP_URL` resolution is extended in [ADR 0036](0036-production-card-origin.md): Production may use Vercel's stable domain when the explicit variable is empty. Syntactic validation does not replace checking anonymous access to cards.
+
+See the [deployment guide](../vercel-deployment.md) and [API and hosting guide](../github-api-and-hosting.md).

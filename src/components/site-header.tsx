@@ -1,4 +1,4 @@
-import { CodeXml } from "lucide-react";
+import { CodeXml, Info } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -51,9 +51,31 @@ export async function SiteHeader({ variant = "default" }: { variant?: "default" 
             >
               {t("editor")}
             </Link>
+            <Link
+              href="/about"
+              className="flex min-h-11 max-w-full min-w-0 items-center wrap-anywhere text-muted-foreground transition-colors hover:text-foreground"
+            >
+              {t("about")}
+            </Link>
           </nav>
         )}
-        <div className="flex max-w-full min-w-0 shrink-0 flex-wrap items-center gap-1">
+        <div
+          className={cn(
+            "flex max-w-full min-w-0 shrink-0 flex-wrap items-center justify-end gap-1",
+            isEditor && "ml-auto",
+          )}
+        >
+          {isEditor && (
+            <nav aria-label={t("main")} className="flex items-center">
+              <Link
+                href="/about"
+                className="inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-md px-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-surface-raised hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:min-w-0"
+              >
+                <Info className="size-4" aria-hidden="true" />
+                <span className="sr-only sm:not-sr-only">{t("about")}</span>
+              </Link>
+            </nav>
+          )}
           <LocaleSwitcher />
           <ThemeToggle />
         </div>

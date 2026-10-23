@@ -10,6 +10,10 @@ import { extendedSnapshot } from "./helpers/activity-fixtures";
 const draftKey = "github-profile-generator.profile.v2";
 const activityLabel = "Activity & contributions";
 const cards = ["Contribution calendar", "Activity summary", "Repository languages"];
+const hasPublicOriginConfiguration = Boolean(
+  process.env.APP_URL?.trim() ||
+  (process.env.VERCEL_ENV === "production" && process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim()),
+);
 
 test.beforeEach(async ({ page }) => {
   await page.clock.install({ time: new Date("2026-10-19T12:05:00Z") });
@@ -421,7 +425,7 @@ test("local card previews block export until cards are explicitly excluded, pres
   page,
 }) => {
   test.skip(
-    Boolean(process.env.APP_URL),
+    hasPublicOriginConfiguration,
     "This case covers an instance without a configured public origin.",
   );
   await stubActivity(page);
@@ -433,7 +437,7 @@ test("local card previews block export until cards are explicitly excluded, pres
   const preview = page.getByRole("article", { name: "README preview", exact: true });
   await expect(preview.locator("img")).toHaveCount(1);
   await expect(preview).toContainText("A useful guide for new contributors");
-  const publishing = page.getByText("Publishing cards", { exact: true });
+  const publishing = page.getByText("Cards are available for preview only", { exact: true });
   await expect(publishing).toHaveCount(1);
   const placement = await publishing.evaluate((element) => {
     const toolbar = document.querySelector('[aria-label="Editor controls"]');
@@ -452,7 +456,7 @@ test("local card previews block export until cards are explicitly excluded, pres
   await expect(
     page
       .locator('[data-editor-scroll-panel="configuration"]')
-      .getByText("Publishing cards", { exact: true }),
+      .getByText("Cards are available for preview only", { exact: true }),
   ).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Copy README", exact: true })).toBeDisabled();
   await expect(page.getByRole("button", { name: "Download README", exact: true })).toBeDisabled();
@@ -477,7 +481,7 @@ test("restoring one excluded card does not restore others and hidden sections ke
   page,
 }) => {
   test.skip(
-    Boolean(process.env.APP_URL),
+    hasPublicOriginConfiguration,
     "This case covers the explicit exclusion action on a local preview.",
   );
   await stubActivity(page);
