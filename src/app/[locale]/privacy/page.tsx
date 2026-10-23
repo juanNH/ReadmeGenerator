@@ -77,6 +77,8 @@ export default async function PrivacyPage({ params }: PrivacyPageProps) {
                 <a
                   className="underline underline-offset-4"
                   href="https://github.com/juanNH/ReadmeGenerator"
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
                   {t("links.repository")}
                 </a>
@@ -85,6 +87,8 @@ export default async function PrivacyPage({ params }: PrivacyPageProps) {
                 <a
                   className="underline underline-offset-4"
                   href="https://github.com/juanNH/ReadmeGenerator/issues"
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
                   {t("links.issues")}
                 </a>
@@ -93,6 +97,8 @@ export default async function PrivacyPage({ params }: PrivacyPageProps) {
                 <a
                   className="underline underline-offset-4"
                   href="https://github.com/juanNH/ReadmeGenerator/blob/dev/CONTRIBUTING.md"
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
                   {t("links.contributing")}
                 </a>
@@ -101,6 +107,8 @@ export default async function PrivacyPage({ params }: PrivacyPageProps) {
                 <a
                   className="underline underline-offset-4"
                   href="https://github.com/juanNH/ReadmeGenerator/blob/main/LICENSE"
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
                   {t("links.license")}
                 </a>
@@ -109,6 +117,8 @@ export default async function PrivacyPage({ params }: PrivacyPageProps) {
                 <a
                   className="underline underline-offset-4"
                   href="https://github.com/juanNH/ReadmeGenerator/blob/main/THIRD_PARTY_NOTICES.md"
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
                   {t("links.notices")}
                 </a>

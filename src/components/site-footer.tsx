@@ -61,28 +61,50 @@ export async function SiteFooter() {
             </h2>
             <ul className="mt-3 space-y-1">
               <li>
-                <a href={repositoryUrl} className={footerLinkClassName}>
+                <a
+                  href={repositoryUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={footerLinkClassName}
+                >
                   {t("repository")}
                 </a>
               </li>
               <li>
-                <a href={`${repositoryUrl}/issues`} className={footerLinkClassName}>
+                <a
+                  href={`${repositoryUrl}/issues`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={footerLinkClassName}
+                >
                   {t("issues")}
                 </a>
               </li>
               <li>
-                <a href={contributingGuideUrl} className={footerLinkClassName}>
+                <a
+                  href={contributingGuideUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={footerLinkClassName}
+                >
                   {t("contributing")}
                 </a>
               </li>
               <li>
-                <a href={`${defaultBranchUrl}/LICENSE`} className={footerLinkClassName}>
+                <a
+                  href={`${defaultBranchUrl}/LICENSE`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={footerLinkClassName}
+                >
                   {t("license")}
                 </a>
               </li>
               <li>
                 <a
                   href={`${defaultBranchUrl}/THIRD_PARTY_NOTICES.md`}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className={footerLinkClassName}
                 >
                   {t("notices")}
@@ -98,6 +120,8 @@ export async function SiteFooter() {
             {t("openSource")}{" "}
             <a
               href={`${defaultBranchUrl}/LICENSE`}
+              target="_blank"
+              rel="noopener noreferrer"
               className="font-medium text-foreground underline decoration-border underline-offset-4 hover:decoration-foreground"
             >
               {t("license")}

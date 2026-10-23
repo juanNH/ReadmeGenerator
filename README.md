@@ -8,9 +8,9 @@ Introduce yourself, share your tools and show what you build. Choose your sectio
 
 [How it works](#how-it-works) · [Save and continue later](#save-and-continue-later) · [Run locally](#run-locally) · [Documentation](#documentation) · [Contribute](CONTRIBUTING.md)
 
-![English editor showing the introduction for a fictional profile named Alex Rivera on the left and a live README preview with technologies on the right.](docs/assets/editor-overview.jpg)
+![Current English desktop editor with optional profile sections, project controls, custom content, and a live README preview for fictional profile Alex Rivera.](docs/assets/editor-overview.jpg)
 
-_A real editor screenshot with a fictional profile. Open the [example project](docs/examples/demo-profile.project.json) with **Import project (.json)** to explore it._
+_Current editor screenshot with fictional data. Open the [example project](docs/examples/demo-profile.project.json) with **Import project (.json)** to explore it._
 
 ## What you can create
 
@@ -26,15 +26,6 @@ A short profile can tell a story. Every section is optional: start with a few wo
 | **Public activity, if you choose it** | Ten optional card types with themes and colors; they require the configuration described [below](#optional-activity-and-cards).    |
 
 Reorder sections by dragging, using the keyboard or pressing the arrow buttons. Hide a section while keeping its content. On desktop, editing and preview appear side by side; on smaller screens, switch between them. Light and dark themes are available.
-
-<details>
-<summary>Watch an animated editor tour</summary>
-
-![English editor tour showing the introduction, technology selection and options to save and open a JSON project for a fictional profile.](docs/assets/editor-tour.gif)
-
-The animation shows real editor states using the same fictional profile. It predates the current project import dialog; **Export project (.json)** and **Import project (.json)** now appear in the editor header. The screenshot above offers a still view without opening the animation.
-
-</details>
 
 ## How it works
 
@@ -57,6 +48,10 @@ The app prepares the file; you decide when to publish it. GitHub applies its own
 2. When you return, choose **Import project (.json)** beside it, then select that `.json` file in the dialog.
 3. Review the summary and confirm replacement of the open profile. The app first tries to save a recovery copy of your previous profile.
 
+![Current project import dialog showing local file selection and the review-before-replacement safeguards.](docs/assets/project-files.jpg)
+
+_Project files stay on your device. The dialog explains the supported JSON format and keeps the current profile unchanged until you confirm._
+
 On mobile, the same buttons read **Export JSON** and **Import JSON**. Import accepts only JSON files with this generator’s project structure; generic JSON and GitHub profile or API exports are not compatible.
 
 The project keeps your text, order, categories, formatting and hidden content. You can also save unfinished work, even when the README still needs corrections. Opening a project replaces the whole profile after confirmation; it does not merge two projects. Local files up to **4 MiB** are processed on your device.
@@ -68,6 +63,10 @@ Want to try it first? Download the [example project](docs/examples/demo-profile.
 ## Start with an existing README
 
 Use **Import README** to paste Markdown or open a `.md` file. The editor analyzes it and proposes custom sections that you can review and exclude before confirming.
+
+![README import review showing detected sections and conversion notices before the profile is replaced.](docs/assets/readme-import-review.jpg)
+
+_The review is text-only: images remain unloaded, and nothing replaces your profile until you confirm._
 
 The conversion reports formatting changes and content that needs attention; it does not automatically reconstruct the original fields of a JSON project. Before replacing the profile, the app tries to save both the previous profile and the original Markdown. Images and cards remain inactive during review.
 
@@ -140,6 +139,7 @@ Deploy with a PAT and without sign-in: [Vercel Hobby, main/dev, and card checks]
 | Configure queries and publish cards               | [GitHub API and hosting](docs/github-api-and-hosting.md)                      |
 | Understand the architecture and data format       | [Architecture](docs/architecture.md) · [Profile model](docs/profile-model.md) |
 | Explore the other guides and decisions            | [Documentation index](docs/README.md)                                         |
+| Review the release history                        | [Changelog](CHANGELOG.md)                                                     |
 
 ## License
 

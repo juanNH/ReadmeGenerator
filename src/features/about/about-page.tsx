@@ -111,6 +111,8 @@ export async function AboutPage() {
                       <a
                         className="mt-7 inline-flex min-h-11 w-fit items-center gap-2 rounded-md font-medium text-accent underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                         href={contributingGuideUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
                       >
                         {t(`paths.${key}.action`)}
                         <ArrowRight className="size-4" aria-hidden="true" />
@@ -119,6 +121,8 @@ export async function AboutPage() {
                       <a
                         className="mt-7 inline-flex min-h-11 w-fit items-center gap-2 rounded-md font-medium text-accent underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                         href={`${repositoryUrl}${href === "issues" ? "/issues" : ""}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
                       >
                         {t(`paths.${key}.action`)}
                         <ArrowRight className="size-4" aria-hidden="true" />
@@ -128,6 +132,8 @@ export async function AboutPage() {
                       <div className="mt-5 grid grid-cols-2 gap-2">
                         <a
                           href={`${repositoryUrl}/stargazers`}
+                          target="_blank"
+                          rel="noopener noreferrer"
                           className="flex min-h-12 min-w-0 items-center gap-2 rounded-lg border border-border bg-background/60 px-3 py-2 transition-colors hover:border-accent/40 hover:bg-accent-soft/40 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                         >
                           <Star className="size-4 shrink-0 text-accent" aria-hidden="true" />
@@ -147,6 +153,8 @@ export async function AboutPage() {
                         </a>
                         <a
                           href={`${repositoryUrl}/forks`}
+                          target="_blank"
+                          rel="noopener noreferrer"
                           className="flex min-h-12 min-w-0 items-center gap-2 rounded-lg border border-border bg-background/60 px-3 py-2 transition-colors hover:border-accent/40 hover:bg-accent-soft/40 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                         >
                           <GitFork className="size-4 shrink-0 text-accent" aria-hidden="true" />
