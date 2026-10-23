@@ -92,7 +92,7 @@
         {
           "id": "demo-contribution-docs",
           "title": "Idea Garden contributor guide",
-          "description": "I improved the setup guide and added a visual walkthrough so new contributors can find their first task.",
+          "description": "I improved the setup guide and added a visual walkthrough so new contributors can find their first task.\n\nThe project collects practical web development ideas.",
           "url": "",
           "links": [
             {
@@ -104,6 +104,11 @@
               "id": "demo-contribution-change",
               "label": "Change summary",
               "url": "https://example.com/ideas/guide-update"
+            },
+            {
+              "id": "demo-contribution-repository",
+              "label": "Project repository",
+              "url": "https://github.com/example/idea-garden"
             }
           ],
           "images": [
@@ -112,11 +117,7 @@
               "url": "https://raw.githubusercontent.com/juanNH/ReadmeGenerator/dev/docs/assets/idea-garden-demo.svg",
               "alt": "Idea Garden dashboard with a saved idea card and a short resource list"
             }
-          ],
-          "repository": {
-            "url": "https://github.com/example/idea-garden",
-            "description": "A small collection of practical web development ideas."
-          }
+          ]
         },
         {
           "id": "demo-contribution-community",
