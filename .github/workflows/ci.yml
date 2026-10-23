@@ -132,7 +132,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: [1, 2]
+        shard: [1, 2, 3, 4]
     env:
       NEXT_TELEMETRY_DISABLED: "1"
     steps:
@@ -153,7 +153,7 @@ jobs:
       - name: Build production app
         run: pnpm build
       - name: Check browser interactions and accessibility
-        run: pnpm exec playwright test --shard=${{ matrix.shard }}/2
+        run: pnpm exec playwright test --shard=${{ matrix.shard }}/4
       - name: Check exported public card routes with controlled providers
         if: matrix.shard == 1
         run: pnpm test:e2e:cards
@@ -171,7 +171,7 @@ jobs:
           BROWSER_RESULT: ${{ needs.browser.result }}
         run: |
           if [[ "$FOUNDATION_RESULT" != "success" || "$BROWSER_RESULT" != "success" ]]; then
-            echo "::error::Foundation and both browser shards must pass."
+            echo "::error::Foundation and all four browser shards must pass."
             exit 1
           fi
-          echo "Foundation and both browser shards passed."
+          echo "Foundation and all four browser shards passed."
