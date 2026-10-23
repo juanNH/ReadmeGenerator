@@ -55,6 +55,8 @@ The GitHub Profile Generator documentation describes the product, its available 
 | [Stable card origin](decisions/0036-production-card-origin.md)                                       | `APP_URL` priority and a fallback to the stable domain in Vercel Production only.             |
 | [Project descriptions and links](decisions/0037-project-description-and-links.md)                    | Description text, cover image, and a single URL for the title.                                |
 | [Production indexing](decisions/0038-production-indexing-and-canonicals.md)                          | Environment-based indexing, localized canonicals, and public sitemap routes.                  |
+| [Detailed contributions](decisions/0039-contribution-details-and-order.md)                           | Multiple links, public images, manual repository previews, and explicit contribution order.   |
+| [Activity card columns](decisions/0040-activity-card-columns.md)                                     | Optional one- or two-column card rows and legacy output behavior.                             |
 | [Third-party notices](../THIRD_PARTY_NOTICES.md)                                                     | Provenance and licenses for icons, flags, the code editor, and Extended cards.                |
 | [Contributing](../CONTRIBUTING.md)                                                                   | Workflow, expectations for changes, and pull requests.                                        |
 

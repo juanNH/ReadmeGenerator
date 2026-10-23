@@ -54,6 +54,7 @@ export function createEmptyProfileV1(contentLocale: ContentLocale): ProfileDocum
 export function createEmptyProfile(contentLocale: ContentLocale): ProfileDocument {
   const document = migrateProfileV1(createEmptyProfileV1(contentLocale));
   document.data.technologies.layout = "compact";
+  document.data.metrics.cardColumns = 2;
   return document;
 }
 

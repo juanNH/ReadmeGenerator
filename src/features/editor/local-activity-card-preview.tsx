@@ -71,7 +71,7 @@ export function LocalActivityCardPreview({
       aria-label={alt}
       aria-busy={loading}
       className="block max-w-full min-w-0 space-y-2 rounded-lg border border-dashed border-border p-3"
-      style={{ width }}
+      style={{ width: "100%", maxWidth: width }}
     >
       <span className={loading ? "animate-skeleton block" : "block"}>
         <ActivityCardSample card={card} />

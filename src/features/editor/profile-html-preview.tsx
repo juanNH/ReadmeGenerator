@@ -341,7 +341,7 @@ function elementClassName(node: Element, align: string) {
         : tag === "caption"
           ? "mb-2 text-left font-medium"
           : tag === "kbd"
-            ? "inline-block rounded border border-border bg-surface-raised px-2 py-0.5 align-middle font-sans text-xs leading-6"
+            ? "inline-flex max-w-full items-center rounded border border-border bg-surface-raised px-2 py-0.5 align-middle font-sans text-xs leading-5 [overflow-wrap:anywhere]"
             : tag === "code"
               ? "rounded bg-surface-raised px-1 font-mono text-[0.9em]"
               : "";

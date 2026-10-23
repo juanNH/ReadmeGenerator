@@ -278,6 +278,7 @@ test("cards are independent, retained in v2 and restored without requesting GitH
   expect(stored.data.metrics).toEqual({
     username: "example-dev",
     cards: ["calendar", "languages"],
+    cardColumns: 2,
   });
   expect(stored.visibility.metrics).toBe(true);
   expect(stored.sectionOrder).toHaveLength(9);
@@ -318,7 +319,7 @@ test("featured GitHub contributions are explicitly copied once and remain editab
   const title = page.getByRole("textbox", { name: "Contribution title", exact: true });
   await expect(title).toBeFocused();
   await expect(title).toHaveValue("Clarify setup instructions");
-  await expect(page.getByRole("textbox", { name: "Contribution link", exact: true })).toHaveValue(
+  await expect(page.getByRole("textbox", { name: "Link URL", exact: true })).toHaveValue(
     "https://github.com/example-community/useful-notebook/pull/12",
   );
   await expect(
@@ -334,6 +335,106 @@ test("featured GitHub contributions are explicitly copied once and remain editab
   expect(stored.data.contributions.items[0]?.title).toBe("My documentation contribution");
   expect(stored.data.metrics.cards).toEqual([]);
   await expect(page.getByRole("button", { name: "Download README", exact: true })).toBeEnabled();
+});
+
+test("manual contributions support ordered links, public images, repository previews, and reordering", async ({
+  page,
+}) => {
+  await stubActivity(page);
+  await page.route("https://images.example.com/guide.png", (route) =>
+    route.fulfill({
+      contentType: "image/svg+xml",
+      body: '<svg xmlns="http://www.w3.org/2000/svg" width="320" height="180"><rect width="320" height="180" fill="#d1e9de"/></svg>',
+    }),
+  );
+  const profile = createEmptyProfile("en");
+  profile.visibility.contributions = true;
+  await openEditor(page, profile, "en", false);
+
+  await addManualContribution(page, "Documentation update");
+  await page
+    .getByRole("textbox", { name: "How you contributed", exact: true })
+    .fill("I clarified the setup steps.");
+  await page.getByRole("button", { name: "Add link", exact: true }).click();
+  const linkLabels = page.getByRole("textbox", { name: "Link label", exact: true });
+  await expect(linkLabels).toBeFocused();
+  await linkLabels.fill("Contributor guide");
+  await page
+    .getByRole("textbox", { name: "Link URL", exact: true })
+    .fill("https://example.com/contributing");
+  await page.getByRole("button", { name: "Add link", exact: true }).click();
+  await expect(linkLabels.nth(1)).toBeFocused();
+  await page
+    .getByRole("textbox", { name: "Link label", exact: true })
+    .nth(1)
+    .fill("Temporary link");
+  await page.getByRole("button", { name: "Remove link 2", exact: true }).click();
+  await expect(linkLabels).toBeFocused();
+  await page.getByText("Images", { exact: true }).click();
+  await page.getByRole("button", { name: "Add image", exact: true }).click();
+  const imageUrls = page.getByRole("textbox", { name: "Image URL", exact: true });
+  await expect(imageUrls).toBeFocused();
+  await page
+    .getByRole("textbox", { name: "Image URL", exact: true })
+    .fill("https://images.example.com/guide.png");
+  await page
+    .getByRole("textbox", { name: "Image description (alt text)", exact: true })
+    .fill("Updated contributor guide");
+  await page.getByRole("button", { name: "Add image", exact: true }).click();
+  await expect(imageUrls.nth(1)).toBeFocused();
+  await page.getByRole("button", { name: "Remove image 2", exact: true }).click();
+  await expect(imageUrls).toBeFocused();
+  await page.getByRole("button", { name: "Add repository preview", exact: true }).click();
+  await page
+    .getByRole("textbox", { name: "Repository URL", exact: true })
+    .fill("https://github.com/example/guide");
+  await page
+    .getByRole("textbox", { name: "Repository description", exact: true })
+    .fill("A community guide.");
+  await addManualContribution(page, "Community response");
+  await page.getByRole("button", { name: "Move Community response up", exact: true }).click();
+
+  const saved = await storedProfile(page);
+  expect(saved.data.contributions.items.map((item) => item.title)).toEqual([
+    "Community response",
+    "Documentation update",
+  ]);
+  expect(saved.data.contributions.items[1]?.links).toEqual([
+    {
+      id: expect.any(String),
+      label: "Contributor guide",
+      url: "https://example.com/contributing",
+    },
+  ]);
+  expect(saved.data.contributions.items[1]?.images?.[0]).toMatchObject({
+    url: "https://images.example.com/guide.png",
+    alt: "Updated contributor guide",
+  });
+  expect(saved.data.contributions.items[1]?.repository).toEqual({
+    url: "https://github.com/example/guide",
+    description: "A community guide.",
+  });
+  const preview = page.getByRole("article", { name: "README preview", exact: true });
+  await expect(preview).toContainText("Community response");
+  await expect(preview).toContainText("example/guide");
+  await expect(preview.locator("img")).toHaveCount(1);
+  await expect(page.getByRole("button", { name: "Download README", exact: true })).toBeEnabled();
+});
+
+test("activity card columns preserve the previous layout when the v2 option is absent", async ({
+  page,
+}) => {
+  await stubActivity(page);
+  const profile = createEmptyProfile("en");
+  delete profile.data.metrics.cardColumns;
+  await openEditor(page, profile);
+
+  await expect(page.getByRole("button", { name: "One per row", exact: true })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+  await page.getByRole("button", { name: "Two per row", exact: true }).click();
+  expect((await storedProfile(page)).data.metrics.cardColumns).toBe(2);
 });
 
 test("a delayed response from another username cannot replace the current account or approve cards", async ({
@@ -467,7 +568,11 @@ test("local card previews block export until cards are explicitly excluded, pres
   await expect(preview.getByRole("heading", { name: "Contributions", exact: true })).toBeVisible();
   const saved = await storedProfile(page);
   expect(saved.visibility.metrics).toBe(false);
-  expect(saved.data.metrics).toEqual({ username: "example-dev", cards: ["calendar"] });
+  expect(saved.data.metrics).toEqual({
+    username: "example-dev",
+    cards: ["calendar"],
+    cardColumns: 2,
+  });
   const event = page.waitForEvent("download");
   await page.getByRole("button", { name: "Download README", exact: true }).click();
   const path = await (await event).path();
@@ -673,6 +778,12 @@ test("desktop activity keeps the five-section layout with fictional charts and a
         ),
     )
     .toBe(true);
+  const cardTables = preview.getByRole("group", {
+    name: "Table: scroll horizontally if needed",
+    exact: true,
+  });
+  await expect(cardTables).toHaveCount(2);
+  await expect(cardTables.first()).toHaveAttribute("tabindex", "0");
   await expect(
     page
       .getByRole("navigation", { name: "Your sections", exact: true, includeHidden: true })

@@ -3,27 +3,22 @@ import {
   CalendarDays,
   ChartColumn,
   ChartNoAxesCombined,
-  Check,
   Code2,
   GitPullRequest,
   LayoutDashboard,
   LoaderCircle,
-  Plus,
   Search,
-  Trash2,
 } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { normalizeGitHubUsername } from "@/core/activity";
-import type { ActivityErrorCode, ActivitySnapshot } from "@/core/activity/activity-types";
+import type { ActivityErrorCode } from "@/core/activity/activity-types";
 import type { MetricCardId, ProfileModuleData } from "@/core/profile/module-content";
 import type { ReadmeIssue } from "@/core/readme";
-import { hasUrlError } from "@/modules/shared/has-url-error";
-import { useEntryFocus } from "@/modules/shared/use-entry-focus";
+import { ContributionItemsEditor } from "@/modules/contributions/contribution-items-editor";
 import { ActivityCardSample } from "./activity-card-sample";
 import { CardAppearanceFields } from "./card-appearance-fields";
 import { ExtendedOptionsFields } from "./extended-options-fields";
@@ -96,7 +91,6 @@ export function ContributionsForm({
     () => metrics.username.trim().length > 0 || metrics.cards.length > 0,
   );
   const { state: activity, query } = useGitHubActivity(metrics.username);
-  const { entryRef, addButtonRef, focusNewEntry, focusAfterRemoval } = useEntryFocus(value.items);
   const snapshot =
     activity.status === "success"
       ? activity.data
@@ -123,15 +117,6 @@ export function ContributionsForm({
     onActivityChange({ ...metrics, cards }, cards.length > 0);
   }
 
-  function selectHighlight(item: ActivitySnapshot["highlights"][number]) {
-    if (value.items.some((entry) => entry.url.trim() === item.url)) return;
-    const id = crypto.randomUUID();
-    focusNewEntry(id);
-    onChange({
-      items: [...value.items, { id, title: item.title, description: "", url: item.url }],
-    });
-  }
-
   function displayDate(value: string) {
     return format.dateTime(new Date(value), {
       year: "numeric",
@@ -139,23 +124,6 @@ export function ContributionsForm({
       day: "numeric",
       timeZone: "UTC",
     });
-  }
-
-  function addEntry() {
-    const id = crypto.randomUUID();
-    focusNewEntry(id);
-    onChange({ items: [...value.items, { id, title: "", description: "", url: "" }] });
-  }
-
-  function updateEntry(id: string, key: "title" | "description" | "url", text: string) {
-    onChange({
-      items: value.items.map((item) => (item.id === id ? { ...item, [key]: text } : item)),
-    });
-  }
-
-  function removeEntry(id: string, index: number) {
-    focusAfterRemoval(index);
-    onChange({ items: value.items.filter((item) => item.id !== id) });
   }
 
   return (
@@ -268,6 +236,29 @@ export function ContributionsForm({
         <fieldset className="min-w-0 space-y-4">
           <legend className="pb-2 text-sm font-medium">{t("activity.choose")}</legend>
           <p className="text-xs leading-5 text-muted-foreground">{t("activity.samplesHelp")}</p>
+          <div className="space-y-2 rounded-md border border-border p-3">
+            <div className="space-y-1">
+              <p className="text-sm font-medium">{t("activity.cardColumns.label")}</p>
+              <p className="text-xs leading-5 text-muted-foreground">
+                {t("activity.cardColumns.help")}
+              </p>
+            </div>
+            <div role="group" aria-label={t("activity.cardColumns.label")} className="flex gap-2">
+              {([1, 2] as const).map((columns) => (
+                <Button
+                  key={columns}
+                  type="button"
+                  variant={(metrics.cardColumns ?? 1) === columns ? "primary" : "outline"}
+                  aria-pressed={(metrics.cardColumns ?? 1) === columns}
+                  onClick={() =>
+                    onActivityChange({ ...metrics, cardColumns: columns }, metricsVisible)
+                  }
+                >
+                  {t(columns === 1 ? "activity.cardColumns.one" : "activity.cardColumns.two")}
+                </Button>
+              ))}
+            </div>
+          </div>
           {activityCardGroups.map((group) => (
             <fieldset key={group.id} className="min-w-0 space-y-1">
               <legend className="pb-1 text-xs font-semibold text-muted-foreground">
@@ -438,124 +429,12 @@ export function ContributionsForm({
           </div>
         </details>
       </details>
-      <section aria-labelledby={`${baseId}-highlights-title`} className="space-y-5">
-        <div className="space-y-1">
-          <h3 id={`${baseId}-highlights-title`} className="text-sm font-semibold">
-            {t("highlightsTitle")}
-          </h3>
-          <p className="text-xs leading-5 text-muted-foreground">{t("highlightsHelp")}</p>
-        </div>
-        {snapshot && snapshot.highlights.length > 0 && (
-          <details className="rounded-lg border border-border p-3">
-            <summary className="cursor-pointer rounded-sm text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring">
-              {t("activity.suggestions")}
-            </summary>
-            <ul className="mt-3 space-y-3">
-              {snapshot.highlights.map((item) => {
-                const added = value.items.some((entry) => entry.url.trim() === item.url);
-                return (
-                  <li key={item.id} className="space-y-2 border-t border-border pt-3">
-                    <div className="min-w-0 space-y-1">
-                      <a
-                        href={item.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block text-sm font-medium [overflow-wrap:anywhere] text-accent underline-offset-4 hover:underline"
-                      >
-                        {item.title || item.url}
-                      </a>
-                      <p className="text-xs leading-5 [overflow-wrap:anywhere] text-muted-foreground">
-                        {item.repository} · {t(`activity.kinds.${item.kind}`)}
-                      </p>
-                    </div>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      disabled={added}
-                      aria-label={t(added ? "activity.alreadyAdded" : "activity.addSuggested", {
-                        title: item.title || item.url,
-                      })}
-                      onClick={() => selectHighlight(item)}
-                    >
-                      {added ? <Check aria-hidden="true" /> : <Plus aria-hidden="true" />}
-                      {t(added ? "activity.added" : "activity.add")}
-                    </Button>
-                  </li>
-                );
-              })}
-            </ul>
-          </details>
-        )}
-        {value.items.length === 0 && (
-          <p className="rounded-md border border-dashed border-border bg-surface-raised/40 px-4 py-5 text-sm leading-6 text-muted-foreground">
-            {t("empty")}
-          </p>
-        )}
-        {value.items.map((item, index) => {
-          const controlId = `${baseId}-entry-${index}`;
-          const urlError = hasUrlError(errors, ["data", "contributions", "items", index, "url"]);
-          return (
-            <fieldset key={item.id} className="min-w-0 space-y-4 border-t border-border pt-4">
-              <legend className="px-1 text-sm font-medium">
-                {t("entry", { number: index + 1 })}
-              </legend>
-              <Field htmlFor={`${controlId}-title`} label={t("title")} description={t("titleHelp")}>
-                <Input
-                  data-emoji-target="true"
-                  ref={entryRef(item.id)}
-                  value={item.title}
-                  placeholder={t("titlePlaceholder")}
-                  onChange={(event) => updateEntry(item.id, "title", event.target.value)}
-                />
-              </Field>
-              <Field
-                htmlFor={`${controlId}-description`}
-                label={t("descriptionLabel")}
-                description={t("descriptionHelp")}
-              >
-                <Textarea
-                  data-emoji-target="true"
-                  rows={2}
-                  value={item.description}
-                  placeholder={t("descriptionPlaceholder")}
-                  onChange={(event) => updateEntry(item.id, "description", event.target.value)}
-                />
-              </Field>
-              <Field
-                htmlFor={`${controlId}-url`}
-                label={t("url")}
-                description={t("urlHelp")}
-                error={urlError ? t("invalidUrl") : undefined}
-              >
-                <Input
-                  type="url"
-                  inputMode="url"
-                  autoComplete="url"
-                  spellCheck={false}
-                  value={item.url}
-                  placeholder={t("urlPlaceholder")}
-                  onChange={(event) => updateEntry(item.id, "url", event.target.value)}
-                />
-              </Field>
-              <div className="space-y-1">
-                <Button
-                  variant="ghost"
-                  onClick={() => removeEntry(item.id, index)}
-                  aria-label={t("remove", { number: index + 1 })}
-                >
-                  <Trash2 aria-hidden="true" />
-                  {t("removeVisible")}
-                </Button>
-                <p className="text-xs leading-5 text-muted-foreground">{t("removeHelp")}</p>
-              </div>
-            </fieldset>
-          );
-        })}
-        <Button ref={addButtonRef} variant="outline" onClick={addEntry}>
-          <Plus aria-hidden="true" />
-          {t("add")}
-        </Button>
-      </section>
+      <ContributionItemsEditor
+        value={value}
+        errors={errors}
+        onChange={onChange}
+        suggestions={snapshot?.highlights ?? []}
+      />
     </div>
   );
 }

@@ -227,12 +227,26 @@ export const moduleContentSchemas = Object.freeze({
       }),
     ),
   }),
+  contributions: z.strictObject({
+    items: entriesWithUniqueIds(
+      moduleContentV1Schemas.contributions.shape.items.element.extend({
+        links: entriesWithUniqueIds(linkSchema).max(5).optional(),
+        images: entriesWithUniqueIds(
+          z.strictObject({ id: entryIdSchema, url: z.string(), alt: z.string() }),
+        )
+          .max(3)
+          .optional(),
+        repository: z.strictObject({ url: z.string(), description: z.string() }).optional(),
+      }),
+    ),
+  }),
   technologies: moduleContentV1Schemas.technologies.extend({
     layout: z.enum(["compact", "grouped"]).optional(),
   }),
   metrics: z.strictObject({
     username: z.string(),
     cards: uniqueCards(z.enum(metricCardIds)),
+    cardColumns: z.union([z.literal(1), z.literal(2)]).optional(),
     appearance: cardAppearanceSchema.optional(),
     extended: extendedOptionsSchema.optional(),
   }),

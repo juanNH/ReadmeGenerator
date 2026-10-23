@@ -3,6 +3,7 @@
 import { createContext, createElement, useContext, type ReactNode } from "react";
 import type { Element } from "hast";
 import ReactMarkdown, { type Components } from "react-markdown";
+import remarkGfm from "remark-gfm";
 import Image from "next/image";
 import { FileText, PenLine } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -106,6 +107,7 @@ export function ReadmePreview({
                 [remarkCustomHtml, { fragments: customHtml }],
                 [remarkPreviewHeadings, { fragments: customHtml }],
                 remarkProfileIcons,
+                remarkGfm,
               ]}
               allowedElements={[
                 "h1",
@@ -123,6 +125,12 @@ export function ReadmePreview({
                 "hr",
                 "blockquote",
                 "div",
+                "table",
+                "thead",
+                "tbody",
+                "tr",
+                "th",
+                "td",
                 "pre",
                 "code",
               ]}
@@ -130,6 +138,26 @@ export function ReadmePreview({
                 img: PreviewImage,
                 p: PreviewParagraph,
                 div: PreviewHtmlSlot,
+                table: ({ children }) => (
+                  <div
+                    role="group"
+                    aria-label={t("htmlTable")}
+                    tabIndex={0}
+                    className="my-4 max-w-full min-w-0 overflow-x-auto rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                  >
+                    <table className="w-full table-fixed border-collapse text-left text-sm">
+                      {children}
+                    </table>
+                  </div>
+                ),
+                th: ({ children }) => (
+                  <th className="border border-border bg-surface-raised px-3 py-2 align-top font-semibold">
+                    {children}
+                  </th>
+                ),
+                td: ({ children }) => (
+                  <td className="border border-border px-3 py-2 align-top">{children}</td>
+                ),
                 pre: PreviewCodeBlock,
                 code: ({ children }) => (
                   <code className="rounded bg-surface-raised px-1 font-mono text-[0.9em]">
