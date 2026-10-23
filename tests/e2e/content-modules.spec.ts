@@ -306,7 +306,8 @@ test("contribution web links and contact email links follow their own validation
   await page
     .getByRole("textbox", { name: "How you contributed", exact: true })
     .fill("Helped a study group understand setup instructions");
-  const link = page.getByRole("textbox", { name: "Contribution link", exact: true });
+  await page.getByRole("button", { name: "Add link", exact: true }).click();
+  const link = page.getByRole("textbox", { name: "Link URL", exact: true });
   await expect(page.getByRole("button", { name: "Download README", exact: true })).toBeEnabled();
   await link.fill("mailto:group@example.com");
   await expect(link).toHaveAttribute("aria-invalid", "true");
@@ -490,15 +491,13 @@ test("an inactive section announces link errors and review selects its form at t
     includeHidden: true,
   });
   await expect(contribution).not.toHaveAttribute("aria-current", "step");
-  await expect(page.getByRole("textbox", { name: "Contribution link", exact: true })).toHaveCount(
-    0,
-  );
+  await expect(page.getByRole("textbox", { name: "Link URL", exact: true })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Download README", exact: true })).toBeDisabled();
   await showSectionOrganizer(page);
   await page
     .getByRole("button", { name: "Review fields in Activity & contributions", exact: true })
     .click();
-  const link = page.getByRole("textbox", { name: "Contribution link", exact: true });
+  const link = page.getByRole("textbox", { name: "Link URL", exact: true });
   await expect(contribution).toHaveAttribute("aria-current", "step");
   await expect(link).toBeFocused();
   await expect(link).toHaveAttribute("aria-invalid", "true");

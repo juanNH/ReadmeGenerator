@@ -294,7 +294,14 @@ const PreviewImage: Components["img"] = ({ src, alt }) => {
 };
 
 const PreviewLink: Components["a"] = ({ href, children, node }) => {
-  const { activityCardBaseUrl } = useContext(PreviewImagesContext);
+  const { activityCardBaseUrl, markdown } = useContext(PreviewImagesContext);
+  const sourceStart = node?.position?.start.offset;
+  const sourceEnd = node?.position?.end.offset;
+  // remark-gfm linkifies bare URLs too; only render links explicitly emitted by the README generator.
+  const isExplicitMarkdownLink =
+    sourceStart !== undefined &&
+    sourceEnd !== undefined &&
+    markdown.slice(sourceStart, sourceEnd).startsWith("[");
   const image = node?.children.length === 1 ? node.children[0] : undefined;
   const card =
     href && image?.type === "element" && image.tagName === "img" && image.properties.src === href
@@ -304,6 +311,8 @@ const PreviewLink: Components["a"] = ({ href, children, node }) => {
   // The card owns its image link and retry control; avoid nesting a button inside this link.
   return card ? (
     <span className="block max-w-full min-w-0">{children}</span>
+  ) : !isExplicitMarkdownLink ? (
+    <>{children}</>
   ) : (
     <a href={href} target="_blank" rel="noopener noreferrer">
       {children}
