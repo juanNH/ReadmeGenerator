@@ -172,7 +172,7 @@ test("keyboard dropping a custom section across a built-in preserves hidden slot
   expect(stored.data).toEqual(profile.data);
   expect(stored.visibility).toEqual(profile.visibility);
   expect(stored.customSections).toEqual(profile.customSections);
-  await expect(page.locator("#editor-section-title")).toHaveText("Custom section 3");
+  await expect(page.locator("#editor-section-title")).toHaveText("Exploring");
   await expect(title).toHaveValue("Exploring");
   await expect(
     navigation.getByRole("button", { name: "Exploring", exact: true, includeHidden: true }),
@@ -233,7 +233,7 @@ test("Escape cancels a mixed keyboard drag without persisting its projected orde
     `custom:${exploringId}`,
     "projects",
   ]);
-  await expect(page.locator("#editor-section-title")).toHaveText("Custom section 3");
+  await expect(page.locator("#editor-section-title")).toHaveText("Exploring");
   await expect(page.getByRole("textbox", { name: "Section name", exact: true })).toHaveValue(
     "Exploring",
   );
