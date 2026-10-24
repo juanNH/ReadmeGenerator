@@ -72,7 +72,11 @@ test("C# highlights keywords and classes in editor and preview, with canonical a
   const preview = page.getByRole("article", { name: en.preview.documentLabel, exact: true });
   await expect(preview.locator(".tok-keyword").filter({ hasText: /\bclass\b/ })).toBeVisible();
   await expect(preview.locator("pre code")).toHaveText(source);
-  await page.getByRole("combobox", { name: custom.code.language, exact: true }).fill("C#");
+  const language = page.getByRole("combobox", { name: custom.code.language, exact: true });
+  await language.selectOption({ label: custom.code.customLanguage });
+  await page
+    .getByRole("textbox", { name: custom.code.customLanguageInput, exact: true })
+    .fill("C#");
   await expect
     .poll(async () => (await stored(page)).customSections[0]?.blocks[0])
     .toMatchObject({ language: "C#", source });

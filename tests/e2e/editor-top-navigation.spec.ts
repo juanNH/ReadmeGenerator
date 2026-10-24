@@ -14,7 +14,6 @@ const copy = {
     edit: "Edit",
     preview: "Preview",
     document: "README preview",
-    custom: "Custom section 1",
     addBlock: "Add block",
     addText: "Add text",
   },
@@ -26,7 +25,6 @@ const copy = {
     edit: "Editar",
     preview: "Vista previa",
     document: "Vista previa del README",
-    custom: "Sección personalizada 1",
     addBlock: "Agregar bloque",
     addText: "Agregar texto",
   },
@@ -138,7 +136,9 @@ for (const locale of ["en", "es"] as const) {
         await expect(title).toHaveValue("Notes 1 with a deliberately long personal title");
         await expectWithinInitialViewport(title, page);
         await expectSingleRow(page, locale, true);
-        await expect(page.locator("#editor-section-title")).toHaveText(copy[locale].custom);
+        await expect(page.locator("#editor-section-title")).toHaveText(
+          "Notes 1 with a deliberately long personal title",
+        );
         await expect(
           page.getByRole("button", { name: copy[locale].addBlock, exact: true }),
         ).toHaveAttribute("aria-expanded", "false");

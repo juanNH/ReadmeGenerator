@@ -884,7 +884,7 @@ export function EditorWorkspace({
         >
           <EmojiInserter />
           <Card>
-            <CardHeader className="gap-1 border-b border-border px-4 py-2 sm:gap-2 sm:p-6">
+            <CardHeader className="gap-0 border-b border-border px-4 py-1 sm:gap-2 sm:p-6">
               <div className="flex min-w-0 items-center justify-between gap-2 text-xs text-muted-foreground">
                 <div className="sr-only sm:not-sr-only sm:min-w-0">
                   <span className="hidden items-center gap-2 font-medium sm:flex">
@@ -937,7 +937,7 @@ export function EditorWorkspace({
                   id="editor-section-title"
                   ref={configurationHeadingRef}
                   tabIndex={-1}
-                  className="min-w-0 scroll-mt-[var(--editor-toolbar-offset)] text-base font-semibold tracking-tight wrap-anywhere sm:text-xl"
+                  className="min-w-0 scroll-mt-[var(--editor-toolbar-offset)] text-sm leading-5 font-semibold tracking-tight wrap-anywhere sm:text-xl"
                 >
                   {activeHeading ?? t("settings.chooseTitle")}
                 </h2>
