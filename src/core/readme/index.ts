@@ -1,5 +1,20 @@
 export { generateReadme } from "./generate-readme";
 export {
+  appendReadmeManifest,
+  fingerprintReadmeBody,
+  parseReadmeManifest,
+  README_MANIFEST_FORMAT,
+  README_MANIFEST_MAX_LENGTH,
+  README_MANIFEST_MAX_SOURCE_LENGTH,
+  README_MANIFEST_VERSION,
+} from "./readme-manifest";
+export type {
+  AppendReadmeManifestResult,
+  ReadmeManifest,
+  ReadmeManifestParseResult,
+  ReadmeManifestSection,
+} from "./readme-manifest";
+export {
   analyzeProfileHtml,
   htmlNoticeCodes,
   htmlProblemCodes,

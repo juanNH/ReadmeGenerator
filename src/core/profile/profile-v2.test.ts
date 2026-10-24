@@ -106,7 +106,9 @@ describe("version-one recovery into the current document", () => {
     });
     expect(migrateProfileV1(legacy)).toEqual(migrateProfileV1(legacy));
     expect(createEmptyProfile("es").schemaVersion).toBe(2);
+    expect(createEmptyProfile("es").data.metrics.cardColumns).toBe(2);
     expect(createEmptyProfileV1("es").schemaVersion).toBe(1);
+    expect(migrateProfileV1(legacy).data.metrics).not.toHaveProperty("cardColumns");
   });
 
   it("validates the exact legacy format before migration instead of accepting v2 fields", () => {

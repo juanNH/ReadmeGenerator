@@ -2,6 +2,8 @@
 
 This guide describes how to collaborate on GitHub Profile Generator with a development AI. AI assistance for people using the product is a future feature and is described in [architecture](architecture.md).
 
+Repository-local Codex skills live in .agents/skills/. The security skills there are task-specific guidance for explicit secure-coding, security-review, or threat-modeling requests; they do not add application features or runtime dependencies.
+
 ## Instructions and context
 
 The entry point is [AGENTS.md](../AGENTS.md). The rules for [core](../src/core/AGENTS.md), [modules](../src/modules/AGENTS.md), and the [server](../src/server/AGENTS.md) detail boundaries specific to those areas. Review the instructions that apply to the files you plan to change.
@@ -50,7 +52,7 @@ Project configuration is in [.codex/config.toml](../.codex/config.toml), and rol
 | `reviewer`  | Concrete changes need review before integration.                      | Findings on correctness, accessibility, performance, and coverage, no edits.       |
 | `release`   | The user authorized commits and push for a specific scope.            | Verified commit and remote, without publishing plans, temporary files, or secrets. |
 
-The project enables agents and limits each session to three concurrent subagents in addition to the primary agent. Analysis, implementation, and review roles inherit the session's model and reasoning effort. The `release` role has an explicit exception requested by the user: **GPT-5.6 Luna** (`gpt-5.6-luna`) with `medium` reasoning effort. No role sets providers, MCP servers, sandboxing, or approval policies. Read-only roles are behavioral instructions, not a separate sandbox.
+The project enables agents and allows up to five concurrent subagent threads per session in addition to the primary agent. Analysis, implementation, and review roles inherit the session's model and reasoning effort. The `release` role has an explicit exception requested by the user: **GPT-5.6 Luna** (`gpt-5.6-luna`) with `medium` reasoning effort. No role sets providers, MCP servers, sandboxing, or approval policies. Read-only roles are behavioral instructions, not a separate sandbox.
 
 ### Commit and push with Luna 5.6
 

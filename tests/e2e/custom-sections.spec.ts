@@ -9,6 +9,7 @@ import {
 import type { ProfileDocument } from "../../src/core/profile/profile-schema";
 import type { CustomBlock } from "../../src/core/profile/custom-content";
 import { createCustomExampleProfile } from "../../src/core/profile/fixtures";
+import { parseReadmeManifest } from "../../src/core/readme/readme-manifest";
 
 const draftKey = "github-profile-generator.profile.v2";
 const legacyKey = "github-profile-generator.profile.v1";
@@ -36,17 +37,84 @@ async function storedProfile(page: Page): Promise<ProfileDocument> {
 
 async function addSection(page: Page, title = "How I work") {
   await page.getByRole("button", { name: "Add custom section", exact: true }).click();
-  const input = page.getByRole("textbox", { name: "Section title", exact: true });
+  const input = page.getByRole("textbox", { name: "Section name", exact: true });
   await expect(input).toBeFocused();
   await input.fill(title);
 }
 
-async function downloadReadme(page: Page) {
+async function downloadReadme(page: Page, locale: "en" | "es" = "en") {
   const event = page.waitForEvent("download");
-  await page.getByRole("button", { name: "Download README", exact: true }).click();
+  await page
+    .getByRole("button", {
+      name: locale === "en" ? "Download README" : "Descargar README",
+      exact: true,
+    })
+    .click();
   const path = await (await event).path();
   if (!path) throw new Error("README download missing");
   return readFile(path, "utf8");
+}
+
+for (const locale of ["en", "es"] as const) {
+  test(`custom section ${locale}: keeps an internal name while hiding its README title`, async ({
+    page,
+  }) => {
+    const profile = createEmptyProfile(locale);
+    profile.customSections = [
+      {
+        id: "internal-notes",
+        title: "Workspace notebook",
+        titleLevel: 1,
+        titleAlignment: "center",
+        visible: true,
+        blocks: [{ id: "body", type: "paragraph", text: "Content to share" }],
+      },
+    ];
+    profile.sectionOrder.unshift({ kind: "custom", sectionId: "internal-notes" });
+    await openEditor(page, profile, locale);
+    const preview = page.getByRole("article", {
+      name: locale === "en" ? "README preview" : "Vista previa del README",
+      exact: true,
+    });
+    const name = page.getByRole("textbox", {
+      name: locale === "en" ? "Section name" : "Nombre de la sección",
+      exact: true,
+    });
+    const showTitle = page.getByRole("checkbox", {
+      name: locale === "en" ? "Show title in README" : "Mostrar título en el README",
+      exact: true,
+    });
+    await expect(showTitle).toBeChecked();
+    await expect(preview.getByRole("heading", { name: "Workspace notebook" })).toBeVisible();
+    await showTitle.uncheck();
+    await name.fill("Internal notebook");
+    await expect(page.locator("#editor-section-title")).toHaveText("Internal notebook");
+    await expect(
+      page.getByRole("button", { name: "Internal notebook", exact: true }),
+    ).toBeVisible();
+    await expect(preview.getByRole("heading")).toHaveCount(0);
+    expect(parseReadmeManifest(await downloadReadme(page, locale))).toMatchObject({
+      status: "valid",
+      markdown: "Content to share\n",
+      matchesSource: true,
+    });
+    await expect
+      .poll(async () => (await storedProfile(page)).customSections[0])
+      .toMatchObject({
+        title: "Internal notebook",
+        showTitle: false,
+        titleLevel: 1,
+        titleAlignment: "center",
+      });
+    await page.reload();
+    await expect(showTitle).not.toBeChecked();
+    await expect(name).toHaveValue("Internal notebook");
+    await showTitle.check();
+    await expect(preview.getByRole("heading", { name: "Internal notebook" })).toBeVisible();
+    expect(await downloadReadme(page, locale)).toContain(
+      '<h1 align="center">Internal notebook</h1>',
+    );
+  });
 }
 
 test("custom sections compose, duplicate independently, hide, reorder and recover", async ({
@@ -78,14 +146,14 @@ test("custom sections compose, duplicate independently, hide, reorder and recove
     .toBe(3);
   const original = (await storedProfile(page)).customSections[0]!;
   await page.getByRole("button", { name: "Duplicate section", exact: true }).click();
-  await expect(page.getByRole("textbox", { name: "Section title", exact: true })).toBeFocused();
+  await expect(page.getByRole("textbox", { name: "Section name", exact: true })).toBeFocused();
   await expect(
     page.getByRole("checkbox", { name: "How I work · custom 1", exact: true, includeHidden: true }),
   ).toBeEnabled();
   await expect(
     page.getByRole("checkbox", { name: "How I work · custom 2", exact: true, includeHidden: true }),
   ).toBeEnabled();
-  await page.getByRole("textbox", { name: "Section title", exact: true }).fill("Exploring");
+  await page.getByRole("textbox", { name: "Section name", exact: true }).fill("Exploring");
   await page
     .getByRole("group", { name: "Bullet list 1", exact: true })
     .getByRole("textbox", { name: "List item 1", exact: true })
@@ -211,7 +279,7 @@ test("custom links show exact errors, hiding preserves them and deletion affects
   await expect(url).toHaveAttribute("aria-invalid", "true");
   await expect(page.getByRole("button", { name: "Download README", exact: true })).toBeDisabled();
   await page.getByRole("button", { name: "Duplicate section", exact: true }).click();
-  await page.getByRole("textbox", { name: "Section title", exact: true }).fill("Notes");
+  await page.getByRole("textbox", { name: "Section name", exact: true }).fill("Notes");
   await page.getByRole("textbox", { name: "URL", exact: true }).fill("https://example.com");
   await showSectionOrganizer(page);
   await page
@@ -266,7 +334,7 @@ test("legacy recovery is read only until an edit and preserves the complete v1 b
   await expect(page).toHaveURL(/\/es\/editor$/);
   expect(await page.evaluate((key) => localStorage.getItem(key), draftKey)).toBeNull();
   await page.getByRole("button", { name: "Agregar sección personalizada", exact: true }).click();
-  await page.getByRole("textbox", { name: "Título de la sección", exact: true }).fill("Mis notas");
+  await page.getByRole("textbox", { name: "Nombre de la sección", exact: true }).fill("Mis notas");
   await expect.poll(async () => (await storedProfile(page))?.customSections.length).toBe(1);
   const saved = await storedProfile(page);
   expect(saved.schemaVersion).toBe(2);
@@ -303,7 +371,7 @@ test("an invalid current draft never falls back to a legacy copy", async ({ page
   await page.getByRole("textbox", { name: "Text", exact: true }).fill("Still able to write");
   await page.getByRole("combobox", { name: "Language", exact: true }).selectOption("es");
   await expect(
-    page.getByRole("textbox", { name: "Título de la sección", exact: true }),
+    page.getByRole("textbox", { name: "Nombre de la sección", exact: true }),
   ).toHaveValue("In memory");
   expect(await page.evaluate((key) => localStorage.getItem(key), draftKey)).toBe("invalid current");
 });
@@ -331,7 +399,7 @@ test("custom content stays exportable in memory across languages when the browse
   expect(markdown).toContain("+ My work is still here");
   await page.getByRole("combobox", { name: "Language", exact: true }).selectOption("es");
   await expect(
-    page.getByRole("textbox", { name: "Título de la sección", exact: true }),
+    page.getByRole("textbox", { name: "Nombre de la sección", exact: true }),
   ).toHaveValue("Personal notes");
   await expect(page.getByRole("textbox", { name: "Elemento de lista 1", exact: true })).toHaveValue(
     "My work is still here",
@@ -386,7 +454,7 @@ test("authored titles cannot collide with provisional or disambiguated navigatio
     await expect(checkbox).toHaveCount(1);
     await showSectionOrganizer(page);
     await page.getByRole("button", { name: label, exact: true }).click();
-    await expect(page.getByRole("textbox", { name: "Section title", exact: true })).toHaveValue(
+    await expect(page.getByRole("textbox", { name: "Section name", exact: true })).toHaveValue(
       profile.customSections[index]!.title,
     );
   }
@@ -487,7 +555,7 @@ test("Spanish list choices explain points and automatic numbering before writing
   await page.setViewportSize({ width: 1600, height: 1100 });
   await openEditor(page, undefined, "es");
   await page.getByRole("button", { name: "Agregar sección personalizada", exact: true }).click();
-  await page.getByRole("textbox", { name: "Título de la sección", exact: true }).fill("Mis ideas");
+  await page.getByRole("textbox", { name: "Nombre de la sección", exact: true }).fill("Mis ideas");
   await showCustomBlockPicker(page);
   await page.getByRole("button", { name: "Agregar lista con puntos", exact: true }).click();
   const points = page.getByRole("group", { name: "Lista con puntos 1", exact: true });
@@ -534,7 +602,7 @@ for (const locale of ["en", "es"] as const) {
       await page.getByRole("button", { name: label, exact: true }).click();
       await expect(
         page.getByRole("textbox", {
-          name: locale === "en" ? "Section title" : "Título de la sección",
+          name: locale === "en" ? "Section name" : "Nombre de la sección",
           exact: true,
         }),
       ).toHaveValue(title);

@@ -44,6 +44,26 @@ describe("one optional activity and contributions section", () => {
     expect(result.exportIssues).toEqual([
       { code: "activity_not_configured", path: ["data", "metrics"] },
     ]);
+    expect(result.markdown).not.toContain("| [![");
+  });
+
+  it("keeps selected card order in two-column rows and gives an odd card its own row", () => {
+    const profile = activityProfile();
+    profile.data.metrics.cardColumns = 2;
+    const result = generateReadme(profile, { activityCardBaseUrl: "https://profiles.example.com" });
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+
+    const calendar = result.markdown.indexOf("[![GitHub contribution calendar");
+    const summary = result.markdown.indexOf("[![GitHub activity summary");
+    const languages = result.markdown.indexOf("[![Languages in analyzed repositories");
+    expect(calendar).toBeGreaterThanOrEqual(0);
+    expect(calendar).toBeLessThan(summary);
+    expect(summary).toBeLessThan(languages);
+    expect(result.markdown).toContain("| --- | --- |");
+    expect(result.markdown).toContain("| --- |");
+    expect(result.markdown.match(/^\| \[!\[/gm)).toHaveLength(2);
+    expect(result.markdown.match(/^\| \[!\[.*\| \[!\[/gm)).toHaveLength(1);
   });
 
   it("keeps manual content exportable after excluding cards without deleting choices", () => {
@@ -89,6 +109,36 @@ describe("one optional activity and contributions section", () => {
     const shown = generateReadme(profile);
     expect(shown.success && shown.markdown).toContain("### Aportes destacados");
     expect(shown.success && shown.markdown).toContain("?locale=es");
+  });
+
+  it("places manual contributions before or after activity cards as selected", () => {
+    const profile = activityProfile();
+    profile.visibility.contributions = true;
+    profile.data.contributions.items = [
+      { id: "guide", title: "A useful guide", description: "", url: "" },
+    ];
+    const activityFirst = generateReadme(profile, {
+      activityCardBaseUrl: "https://profiles.example.com",
+    });
+    expect(activityFirst.success).toBe(true);
+    if (!activityFirst.success) return;
+    const activity = activityFirst.markdown.indexOf("[![GitHub contribution calendar");
+    const contribution = activityFirst.markdown.indexOf("### Highlights");
+    expect(activity).toBeGreaterThanOrEqual(0);
+    expect(contribution).toBeGreaterThan(activity);
+
+    profile.data.metrics.contentOrder = "contributions-first";
+    const contributionsFirst = generateReadme(profile, {
+      activityCardBaseUrl: "https://profiles.example.com",
+    });
+    expect(contributionsFirst.success).toBe(true);
+    if (!contributionsFirst.success) return;
+    const reorderedActivity = contributionsFirst.markdown.indexOf(
+      "[![GitHub contribution calendar",
+    );
+    const reorderedContribution = contributionsFirst.markdown.indexOf("### Highlights");
+    expect(reorderedContribution).toBeGreaterThanOrEqual(0);
+    expect(reorderedContribution).toBeLessThan(reorderedActivity);
   });
 
   it("validates a username only for selected visible cards", () => {

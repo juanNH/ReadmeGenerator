@@ -39,6 +39,7 @@ export async function GET(request: Request, context: { params: Promise<{ card: s
   return result.success
     ? activitySvgResponse(
         renderResourceCard(result.data, input.locale, {
+          cardColumns: input.cardColumns,
           appearance: input.appearance,
           stale: result.stale || (profile?.success === true && profile.stale),
           ...input.options,
@@ -48,7 +49,10 @@ export async function GET(request: Request, context: { params: Promise<{ card: s
         result.stale || (profile?.success === true && profile.stale),
       )
     : activitySvgResponse(
-        renderResourceUnavailable(input.kind, input.locale, { appearance: input.appearance }),
+        renderResourceUnavailable(input.kind, input.locale, {
+          appearance: input.appearance,
+          cardColumns: input.cardColumns,
+        }),
         false,
         false,
       );

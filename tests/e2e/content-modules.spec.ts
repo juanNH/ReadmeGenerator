@@ -107,7 +107,7 @@ test("retired sections never return from a saved draft and invalid retired links
   await expect(preview).not.toContainText("Accessible web foundations");
   await expect(preview).not.toContainText("Fictional example: interested in collaborating");
   await expect(page.getByRole("button", { name: "Download README", exact: true })).toBeEnabled();
-  const generated = generateReadme(profile);
+  const generated = generateReadme(profile, { includeReadmeManifest: true });
   if (!generated.success) throw new Error("Retired section links must not affect active output.");
   expect(await downloadReadme(page)).toBe(generated.markdown);
   await page.getByRole("textbox", { name: "Display name", exact: true }).fill("Alex Updated");
@@ -204,15 +204,18 @@ test("active sections share the same preview, copied and downloaded Markdown wit
   if (!project) throw new Error("The example profile must include a project.");
   project.id = "\ud800";
   await openEditor(page, profile);
-  await expect(page.getByRole("checkbox", { checked: true, includeHidden: true })).toHaveCount(5);
-  await expect(page.getByRole("checkbox", { includeHidden: true })).toHaveCount(5);
+  const navigation = page.getByRole("navigation", { name: "Your sections", exact: true });
+  await expect(
+    navigation.getByRole("checkbox", { checked: true, includeHidden: true }),
+  ).toHaveCount(5);
+  await expect(navigation.getByRole("checkbox", { includeHidden: true })).toHaveCount(5);
   await openSection(page, "Projects");
   await page
     .getByRole("textbox", { name: "Project description", exact: true })
     .fill("An accessible notebook for small ideas");
   const stored = await savedProfile(page);
   expect(stored.data.projects.items[0]?.id).toBe("\ud800");
-  const generated = generateReadme(stored);
+  const generated = generateReadme(stored, { includeReadmeManifest: true });
   if (!generated.success) throw new Error("The active profile must be exportable.");
   const preview = page.getByRole("article", { name: "README preview", exact: true });
   await expect(preview).toHaveAttribute("lang", "es");
@@ -306,7 +309,8 @@ test("contribution web links and contact email links follow their own validation
   await page
     .getByRole("textbox", { name: "How you contributed", exact: true })
     .fill("Helped a study group understand setup instructions");
-  const link = page.getByRole("textbox", { name: "Contribution link", exact: true });
+  await page.getByRole("button", { name: "Add link", exact: true }).click();
+  const link = page.getByRole("textbox", { name: "Link URL", exact: true });
   await expect(page.getByRole("button", { name: "Download README", exact: true })).toBeEnabled();
   await link.fill("mailto:group@example.com");
   await expect(link).toHaveAttribute("aria-invalid", "true");
@@ -490,15 +494,13 @@ test("an inactive section announces link errors and review selects its form at t
     includeHidden: true,
   });
   await expect(contribution).not.toHaveAttribute("aria-current", "step");
-  await expect(page.getByRole("textbox", { name: "Contribution link", exact: true })).toHaveCount(
-    0,
-  );
+  await expect(page.getByRole("textbox", { name: "Link URL", exact: true })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Download README", exact: true })).toBeDisabled();
   await showSectionOrganizer(page);
   await page
     .getByRole("button", { name: "Review fields in Activity & contributions", exact: true })
     .click();
-  const link = page.getByRole("textbox", { name: "Contribution link", exact: true });
+  const link = page.getByRole("textbox", { name: "Link URL", exact: true });
   await expect(contribution).toHaveAttribute("aria-current", "step");
   await expect(link).toBeFocused();
   await expect(link).toHaveAttribute("aria-invalid", "true");

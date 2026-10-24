@@ -30,6 +30,18 @@
     "findHighlights": "Opcional: buscar aportes para destacar",
     "findHighlightsHelp": "Hacé una búsqueda separada en GitHub de aportes recientes que podés destacar. No muestra ni actualiza las tarjetas elegidas.",
     "choose": "¿Qué te gustaría incluir?",
+    "cardColumns": {
+      "label": "Tarjetas por fila",
+      "help": "Dos tarjetas ocupan el ancho del README y agrandan el texto para facilitar la lectura.",
+      "one": "Una por fila",
+      "two": "Dos por fila"
+    },
+    "contentOrder": {
+      "label": "Orden de las secciones",
+      "help": "Elegí si aparecen primero las tarjetas de actividad o tus contribuciones.",
+      "activityFirst": "Actividad primero",
+      "contributionsFirst": "Contribuciones primero"
+    },
     "groups": {
       "own": "Tarjetas propias",
       "extended": "Diseños de GitHub Stats Extended"
@@ -318,8 +330,36 @@
   "urlHelp": "Opcional. Usá una dirección completa http:// o https://, sin espacios ni credenciales de acceso.",
   "urlPlaceholder": "https://example.com/guia-comunitaria",
   "invalidUrl": "Ingresá una dirección válida http:// o https:// sin espacios ni credenciales de acceso, o dejá este campo vacío.",
+  "linksTitle": "Enlaces",
+  "linksHelp": "Agregá hasta diez destinos. Si dejás la etiqueta vacía, en el README se muestra «Más información».",
+  "linkLabel": "Etiqueta del enlace",
+  "linkLabelPlaceholder": "Documentación",
+  "linkUrl": "URL del enlace",
+  "linkUrlPlaceholder": "https://example.com/guia",
+  "addLink": "Agregar enlace",
+  "removeLink": "Quitar enlace {number}",
+  "removeLinkVisible": "Quitar enlace",
+  "linkLimit": "Cada contribución puede tener hasta diez enlaces.",
+  "imagesTitle": "Imágenes",
+  "imagesHelp": "Agregá hasta tres imágenes disponibles públicamente. Cada una necesita un texto alternativo descriptivo para exportar.",
+  "imageUrl": "URL de la imagen",
+  "imageUrlPlaceholder": "https://images.example.com/proyecto.png",
+  "imageAlt": "Descripción de la imagen (texto alternativo)",
+  "imageAltHelp": "Describí la imagen para lectores de pantalla. Usá una URL HTTPS pública.",
+  "imageAltPlaceholder": "Captura del panel del proyecto",
+  "invalidImageUrl": "Ingresá una URL HTTPS pública sin credenciales, fragmentos ni puertos no estándar.",
+  "missingImageAlt": "Agregá una descripción breve para la imagen o quitála.",
+  "addImage": "Agregar imagen",
+  "removeImage": "Quitar imagen {number}",
+  "removeImageVisible": "Quitar imagen",
+  "imageLimit": "Cada contribución puede tener hasta tres imágenes.",
+  "moveUp": "Subir {title}",
+  "moveDown": "Bajar {title}",
+  "moveUpVisible": "Subir",
+  "moveDownVisible": "Bajar",
+  "moved": "Se movió {title} a la posición {number} de {total}.",
   "add": "Agregar contribución",
   "remove": "Quitar contribución {number}",
   "removeVisible": "Quitar contribución",
-  "removeHelp": "Quitar esta entrada elimina su título, descripción y enlace del borrador. Para conservarlos, ocultá la sección."
+  "removeHelp": "Quitar esta entrada elimina su título, descripción, enlaces e imágenes. Para conservarlos, ocultá la sección."
 }

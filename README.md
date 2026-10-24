@@ -8,7 +8,7 @@ Introduce yourself, share your tools and show what you build. Choose your sectio
 
 [How it works](#how-it-works) · [Save and continue later](#save-and-continue-later) · [Run locally](#run-locally) · [Documentation](#documentation) · [Contribute](CONTRIBUTING.md)
 
-![Current English desktop editor with optional profile sections, project controls, custom content, and a live README preview for fictional profile Alex Rivera.](docs/assets/editor-overview.jpg)
+![English desktop editor with reordered technology chips and the aligned, compact tags in Alex Rivera's live README preview.](docs/assets/editor-overview.jpg)
 
 _Current editor screenshot with fictional data. Open the [example project](docs/examples/demo-profile.project.json) with **Import project (.json)** to explore it._
 
@@ -16,16 +16,20 @@ _Current editor screenshot with fictional data. Open the [example project](docs/
 
 A short profile can tell a story. Every section is optional: start with a few words, some tools or a link, whether or not you have projects or public activity to share.
 
-| What you want to share                | What the editor offers                                                                                                             |
-| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| **Who you are**                       | A centered intro with writing examples, an optional country line, and italic or monospace title styles.                            |
-| **What you build with**               | A searchable technology catalog with icons, editable categories and custom names.                                                  |
-| **What you do**                       | Projects and contributions to code, documentation, reviews or communities, with context and links.                                 |
-| **Your own content**                  | Repeatable sections with text, lists, links, headings, quotes, dividers, public images, filtered HTML and syntax-highlighted code. |
-| **Where to find you**                 | Social profiles, a portfolio, websites and email.                                                                                  |
-| **Public activity, if you choose it** | Ten optional card types with themes and colors; they require the configuration described [below](#optional-activity-and-cards).    |
+| What you want to share                | What the editor offers                                                                                                                                         |
+| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Who you are**                       | A centered intro with writing examples, an optional country line, and italic or monospace title styles.                                                        |
+| **What you build with**               | A searchable technology catalog with icons, editable categories and custom names.                                                                              |
+| **What you do**                       | Projects and contributions with editable order, up to ten links per contribution, and public images.                                                           |
+| **Your own content**                  | Repeatable sections with text, lists, links, headings, quotes, dividers, public images, filtered HTML and syntax-highlighted code.                             |
+| **Where to find you**                 | Social profiles, a portfolio, websites and email.                                                                                                              |
+| **Public activity, if you choose it** | Ten optional card types with themes, colors and a one- or two-card row layout; they require the configuration described [below](#optional-activity-and-cards). |
 
 Reorder sections by dragging, using the keyboard or pressing the arrow buttons. Hide a section while keeping its content. On desktop, editing and preview appear side by side; on smaller screens, switch between them. Light and dark themes are available.
+
+![English Activity and contributions editor showing manual contribution order and multiple links beside the live README preview.](docs/assets/activity-contributions.jpg)
+
+_Contributions stay manual and editable. Add repository URLs as ordinary links and include any context in the contribution description._
 
 ## How it works
 
@@ -56,7 +60,7 @@ On mobile, the same buttons read **Export JSON** and **Import JSON**. Import acc
 
 The project keeps your text, order, categories, formatting and hidden content. You can also save unfinished work, even when the README still needs corrections. Opening a project replaces the whole profile after confirmation; it does not merge two projects. Local files up to **4 MiB** are processed on your device.
 
-Want to try it first? Download the [example project](docs/examples/demo-profile.project.json) and import it with **Import project (.json)**. It uses fictional data and links to `example.com`.
+Want to try it first? Download the [example project](docs/examples/demo-profile.project.json) and import it with **Import project (.json)**. It uses fictional data with sample destinations on `example.com` and `github.com/example`.
 
 > Browser drafts do not sync across devices and can be lost if you clear browser data. Keep the JSON file to continue editing. See the [editor guide](docs/editor.md#save-and-open-projects) for local backups and recovery.
 
@@ -99,6 +103,10 @@ The [development guide](docs/development.md) covers commands, environment setup 
 Describe your contributions manually without querying an account. If the server operator configures the integration, **Search data** fetches public GitHub data so you can choose which cards to show. All cards start disabled. Searching requires an explicit action, and available data is reused temporarily to avoid repeated requests.
 
 Cards include a calendar, summary, languages, overview and monthly activity, plus five families adapted from GitHub Stats Extended: statistics, languages, repositories, Gists and WakaTime. Charts are rendered by this app with configurable themes and appearance. WakaTime uses a separate username with public statistics.
+
+![The activity editor offers one or two cards per row, and the live README preview arranges selected cards in pairs.](docs/assets/activity-card-layout.jpg)
+
+_The odd final card gets its own row. These examples use local samples and do not query account data._
 
 | Server configuration | When it is needed                                                                                                                     |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |

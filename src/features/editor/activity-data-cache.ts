@@ -342,6 +342,7 @@ export function createActivityDataCache(options: Options = {}) {
           ? { partial: true }
           : {}),
         svg: renderActivityCard(entry.data, card.input.card, card.input.locale, {
+          cardColumns: card.input.cardColumns,
           appearance: card.input.appearance,
           stale,
         }),
@@ -367,6 +368,7 @@ export function createActivityDataCache(options: Options = {}) {
             ? { partial: true }
             : {}),
         svg: renderExtendedProfileCard(data, card.input.card, card.input.locale, {
+          cardColumns: card.input.cardColumns,
           appearance: card.input.appearance,
           extended: card.plan.options,
           stale,
@@ -419,6 +421,7 @@ export function createActivityDataCache(options: Options = {}) {
       ...(supplement ? { supplement } : {}),
       svg: renderResourceCard(resource.data, card.input.locale, {
         ...card.input.options,
+        cardColumns: card.input.cardColumns,
         appearance: card.input.appearance,
         stale,
         ...(contributions ? { contributions } : {}),

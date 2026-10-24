@@ -112,7 +112,12 @@ export function ProfileHtmlPreview({ fragment }: { fragment: CustomHtmlFragment 
   const t = useTranslations("Editor.preview");
   const headingLevels = previewHeadingLevels(fragment.tree, fragment.headingLevel);
 
-  function renderNode(node: RootContent, path: string, insideLink = false): ReactNode {
+  function renderNode(
+    node: RootContent,
+    path: string,
+    insideLink = false,
+    parentTag?: string,
+  ): ReactNode {
     if (node.type === "text") return node.value;
     if (node.type !== "element" || !allowedTags.has(node.tagName)) return null;
     const properties = node.properties;
@@ -127,7 +132,9 @@ export function ProfileHtmlPreview({ fragment }: { fragment: CustomHtmlFragment 
             : "";
     const common = { title };
     const children = (linked = insideLink) =>
-      node.children.map((child, index) => renderNode(child, `${path}.${index}`, linked));
+      node.children.map((child, index) =>
+        renderNode(child, `${path}.${index}`, linked, node.tagName),
+      );
 
     if (node.tagName === "img") {
       const src =
@@ -149,7 +156,7 @@ export function ProfileHtmlPreview({ fragment }: { fragment: CustomHtmlFragment 
             width={20}
             height={20}
             unoptimized
-            className="inline-block size-5 shrink-0 align-middle"
+            className={`inline-block size-5 shrink-0 ${parentTag === "sub" ? "align-baseline" : "align-middle"}`}
           />
         );
       const country = findCountryByIconUrl(src);
@@ -341,7 +348,7 @@ function elementClassName(node: Element, align: string) {
         : tag === "caption"
           ? "mb-2 text-left font-medium"
           : tag === "kbd"
-            ? "inline-block rounded border border-border bg-surface-raised px-2 py-0.5 align-middle font-sans text-xs leading-6"
+            ? "inline-flex max-w-full items-center rounded border border-border bg-surface-raised px-2 py-0.5 align-middle font-sans text-xs leading-5 [overflow-wrap:anywhere]"
             : tag === "code"
               ? "rounded bg-surface-raised px-1 font-mono text-[0.9em]"
               : "";

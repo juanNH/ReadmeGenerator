@@ -5,6 +5,7 @@ import {
   changeCustomTextKind,
   changeCustomTitleAlignment,
   changeCustomTitleLevel,
+  changeCustomTitleVisibility,
   getCustomTextKind,
 } from "./custom-text-formatting";
 
@@ -35,6 +36,7 @@ describe("custom text presentation changes", () => {
   it("reflects legacy heading defaults without changing the recovered block", () => {
     const block = { id: "legacy", type: "heading", text: "Hello" } as const;
     expect(getCustomTextKind(block, "Section title")).toBe("3");
+    expect(getCustomTextKind(block, "")).toBe("2");
     expect(getCustomTextKind(block, " \r\n\t")).toBe("2");
     expect(getCustomTextKind({ ...block, level: 3 }, "")).toBe("3");
     expect(block).not.toHaveProperty("level");
@@ -82,5 +84,14 @@ describe("custom section title presentation", () => {
     const formatted = { ...original, titleLevel: 3, titleAlignment: "right" } as const;
     const restored = changeCustomTitleAlignment(changeCustomTitleLevel(formatted, 2), "left");
     expect(restored).toEqual(original);
+  });
+
+  it("keeps the internal name, formatting and content when hiding and showing the title", () => {
+    const formatted = { ...original, titleLevel: 3, titleAlignment: "right" } as const;
+    const hidden = changeCustomTitleVisibility(formatted, false);
+    expect(hidden).toEqual({ ...formatted, showTitle: false });
+    expect(hidden.blocks).toBe(original.blocks);
+    expect(changeCustomTitleVisibility(hidden, true)).toEqual(formatted);
+    expect(original).not.toHaveProperty("showTitle");
   });
 });

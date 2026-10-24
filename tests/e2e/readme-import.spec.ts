@@ -3,6 +3,9 @@ import { expect, test, type Download, type Page } from "@playwright/test";
 import { readFile } from "node:fs/promises";
 import { createEmptyProfile } from "../../src/core/profile/profile-operations";
 import type { ProfileDocument } from "../../src/core/profile/profile-schema";
+import { parseReadmeManifest } from "../../src/core/readme";
+import editorEn from "../../src/messages/en/editor.json" with { type: "json" };
+import editorEs from "../../src/messages/es/editor.json" with { type: "json" };
 import en from "../../src/messages/en/readme-import.json" with { type: "json" };
 import es from "../../src/messages/es/readme-import.json" with { type: "json" };
 
@@ -10,6 +13,7 @@ const draftKey = "github-profile-generator.profile.v2";
 const legacyKey = "github-profile-generator.profile.v1";
 const backupKey = "github-profile-generator.import-backup.v1";
 const messages = { en, es };
+const editorMessages = { en: editorEn, es: editorEs };
 type Locale = keyof typeof messages;
 const source =
   "## Hello\n\nI make small tools.\n\n## Things I use\n\n- TypeScript\n- PostgreSQL\n\n## Find me\n\n[My notes](https://example.com/notes)\n";
@@ -26,6 +30,41 @@ function previousProfile(locale: Locale = "en"): ProfileDocument {
     blocks: [{ id: "hidden-previous-block", type: "paragraph", text: "Keep this hidden note." }],
   });
   document.sectionOrder.splice(1, 0, { kind: "custom", sectionId: "hidden-previous-section" });
+  return document;
+}
+
+function recoveryProfile(locale: Locale): ProfileDocument {
+  const document = createEmptyProfile(locale);
+  document.customSections.push(
+    {
+      id: "roundtrip-visible-section",
+      title: "A current note",
+      visible: true,
+      blocks: [
+        {
+          id: "roundtrip-visible-block",
+          type: "paragraph",
+          text: "A note that should change.",
+        },
+      ],
+    },
+    {
+      id: "roundtrip-hidden-section",
+      title: "Private editor note",
+      visible: false,
+      blocks: [
+        {
+          id: "roundtrip-hidden-block",
+          type: "paragraph",
+          text: "This hidden editor note is part of the saved profile.",
+        },
+      ],
+    },
+  );
+  document.sectionOrder.push(
+    { kind: "custom", sectionId: "roundtrip-visible-section" },
+    { kind: "custom", sectionId: "roundtrip-hidden-section" },
+  );
   return document;
 }
 
@@ -96,6 +135,166 @@ async function downloaded(download: Download) {
   const path = await download.path();
   if (!path) throw new Error("Expected the local download to be available.");
   return readFile(path, "utf8");
+}
+
+async function downloadReadme(page: Page, locale: Locale) {
+  const downloadEvent = page.waitForEvent("download");
+  await page
+    .getByRole("button", { name: editorMessages[locale].export.download, exact: true })
+    .click();
+  const download = await downloadEvent;
+  expect(download.suggestedFilename()).toBe("README.md");
+  return download;
+}
+
+async function openDownloadedReadme(page: Page, download: Download, locale: Locale) {
+  const markdown = await downloaded(download);
+  await panel(page)
+    .locator('input[type="file"]')
+    .setInputFiles({
+      name: download.suggestedFilename(),
+      mimeType: "text/markdown",
+      buffer: Buffer.from(markdown, "utf8"),
+    });
+  await expect(
+    panel(page).getByRole("textbox", { name: messages[locale].sourceLabel, exact: true }),
+  ).toHaveValue(markdown);
+  return markdown;
+}
+
+for (const locale of ["en", "es"] as const) {
+  test(`README round trip ${locale}: one downloaded file restores the complete profile`, async ({
+    page,
+  }) => {
+    const original = recoveryProfile(locale);
+    const t = messages[locale];
+    const exportText = editorMessages[locale].export;
+    await openEditor(page, locale, { [draftKey]: JSON.stringify(original) });
+    const snapshotToggle = page.getByRole("checkbox", {
+      name: exportText.recoverySnapshotLabel,
+      exact: true,
+    });
+    await expect(snapshotToggle).not.toBeChecked();
+    await expect(page.getByText(exportText.recoverySnapshotWarning, { exact: true })).toHaveCount(
+      0,
+    );
+
+    const structuralDownload = await downloadReadme(page, locale);
+    const structural = parseReadmeManifest(await downloaded(structuralDownload));
+    expect(structural.status).toBe("valid");
+    if (structural.status !== "valid") throw new Error("Expected an app-generated manifest.");
+    expect(structural.manifest.recoverySnapshot).toBeUndefined();
+
+    await snapshotToggle.check();
+    await expect(page.getByText(exportText.recoverySnapshotWarning, { exact: true })).toBeVisible();
+    const fullDownload = await downloadReadme(page, locale);
+    const markdown = await downloaded(fullDownload);
+    const parsed = parseReadmeManifest(markdown);
+    expect(parsed.status).toBe("valid");
+    if (parsed.status !== "valid") throw new Error("Expected a valid full recovery manifest.");
+    expect(parsed.manifest.recoverySnapshot).toEqual(original);
+    expect(markdown).toContain("This hidden editor note is part of the saved profile.");
+
+    await page.evaluate(({ key, value }) => localStorage.setItem(key, value), {
+      key: draftKey,
+      value: JSON.stringify(createEmptyProfile(locale)),
+    });
+    await page.reload();
+    await openImporter(page, locale);
+    await openDownloadedReadme(page, fullDownload, locale);
+    await panel(page).getByRole("button", { name: t.analyze, exact: true }).click();
+    await expect(
+      panel(page).getByRole("heading", { name: t.reviewTitle, exact: true }),
+    ).toBeVisible();
+    await expect(panel(page).getByText(t.recovery.snapshotMatch, { exact: true })).toBeVisible();
+    await expect(
+      panel(page).getByRole("radio", { name: t.recovery.exactOption, exact: true }),
+    ).toBeChecked();
+    await expect(panel(page).locator("ol")).toHaveCount(0);
+    await expect(
+      panel(page).getByRole("button", { name: t.recovery.continueSnapshot, exact: true }),
+    ).toBeEnabled();
+    await panel(page)
+      .getByRole("button", { name: t.recovery.continueSnapshot, exact: true })
+      .click();
+    await expect(
+      panel(page).getByRole("button", { name: t.recovery.confirmSnapshot, exact: true }),
+    ).toBeDisabled();
+    await panel(page)
+      .getByRole("checkbox", { name: t.recovery.confirmSnapshotLabel, exact: true })
+      .check();
+    await panel(page)
+      .getByRole("button", { name: t.recovery.confirmSnapshot, exact: true })
+      .click();
+    await expect(panel(page)).toHaveCount(0);
+    expect(await storedProfile(page)).toEqual(original);
+    expect(JSON.parse((await stored(page, backupKey)) ?? "null").originalSource).toBe(markdown);
+  });
+
+  test(`README round trip ${locale}: edited visible text offers both saved and current content`, async ({
+    page,
+  }) => {
+    const original = recoveryProfile(locale);
+    const t = messages[locale];
+    await openEditor(page, locale, { [draftKey]: JSON.stringify(original) });
+    await page
+      .getByRole("checkbox", {
+        name: editorMessages[locale].export.recoverySnapshotLabel,
+        exact: true,
+      })
+      .check();
+    const download = await downloadReadme(page, locale);
+    const markdown = await downloaded(download);
+    const parsed = parseReadmeManifest(markdown);
+    expect(parsed.status).toBe("valid");
+    if (parsed.status !== "valid") throw new Error("Expected a valid full recovery manifest.");
+    const edited = `${parsed.markdown}\nThis README was edited outside the app.\n${markdown.slice(parsed.markdown.length)}`;
+    expect(parseReadmeManifest(edited)).toMatchObject({ status: "valid", matchesSource: false });
+
+    await page.evaluate(({ key, value }) => localStorage.setItem(key, value), {
+      key: draftKey,
+      value: JSON.stringify(createEmptyProfile(locale)),
+    });
+    await page.reload();
+    await openImporter(page, locale);
+    await panel(page)
+      .locator('input[type="file"]')
+      .setInputFiles({
+        name: download.suggestedFilename(),
+        mimeType: "text/markdown",
+        buffer: Buffer.from(edited, "utf8"),
+      });
+    await expect(
+      panel(page).getByRole("textbox", { name: t.sourceLabel, exact: true }),
+    ).toHaveValue(edited);
+    await panel(page).getByRole("button", { name: t.analyze, exact: true }).click();
+    await expect(panel(page).getByText(t.recovery.snapshotEdited, { exact: true })).toBeVisible();
+    const restoreOption = panel(page).getByRole("radio", {
+      name: t.recovery.exactOption,
+      exact: true,
+    });
+    const markdownOption = panel(page).getByRole("radio", {
+      name: t.recovery.markdownOption,
+      exact: true,
+    });
+    await expect(restoreOption).not.toBeChecked();
+    await expect(markdownOption).toBeChecked();
+    await restoreOption.check();
+    await expect(panel(page).locator("ol")).toHaveCount(0);
+    await markdownOption.check();
+    await expect(panel(page).locator("ol")).toBeVisible();
+    await panel(page).getByRole("button", { name: t.continue, exact: true }).click();
+    await expect(
+      panel(page).getByRole("checkbox", { name: t.confirmLabel, exact: true }),
+    ).not.toBeChecked();
+    await panel(page).getByRole("checkbox", { name: t.confirmLabel, exact: true }).check();
+    await panel(page).getByRole("button", { name: t.confirm, exact: true }).click();
+    await expect(panel(page)).toHaveCount(0);
+    const imported = await storedProfile(page);
+    expect(JSON.stringify(imported)).toContain("This README was edited outside the app.");
+    expect(JSON.stringify(imported)).not.toContain("roundtrip-hidden-section");
+    expect(JSON.parse((await stored(page, backupKey)) ?? "null").originalSource).toBe(edited);
+  });
 }
 
 async function backupFiles(page: Page, locale: Locale) {
@@ -199,8 +398,11 @@ for (const locale of ["en", "es"] as const) {
     await panel(page).getByRole("button", { name: t.confirm, exact: true }).click();
     await expect(panel(page)).toHaveCount(0);
     const imported = await storedProfile(page);
-    expect(imported.customSections.map((section) => section.title)).toEqual(["Café 👋", "Links"]);
-    expect(Object.values(imported.visibility)).not.toContain(true);
+    expect(imported.customSections.map((section) => section.title)).toEqual(["Café 👋"]);
+    expect(imported.visibility.contact).toBe(true);
+    expect(imported.data.contact.links).toEqual([
+      expect.objectContaining({ label: "Notes", url: "https://example.com/notes" }),
+    ]);
     const savedBackup = JSON.parse((await stored(page, backupKey)) ?? "null");
     expect(savedBackup).toEqual({
       schemaVersion: 1,
@@ -381,8 +583,9 @@ test("README import: pending edits are backed up live and cannot overwrite an im
   expect(imported.customSections.map((section) => section.title)).toEqual([
     "Hello",
     "Things I use",
-    "Find me",
   ]);
+  expect(imported.visibility.technologies).toBe(false);
+  expect(imported.visibility.contact).toBe(true);
   expect(
     JSON.parse((await stored(page, backupKey)) ?? "null").previousDocument.data.presentation
       .displayName,
@@ -502,8 +705,8 @@ test("README import: invalid files and oversized or empty text retain the curren
     { name: "wrong.md", buffer: Buffer.from([0xc3, 0x28]), error: en.fileEncodingError },
     {
       name: "large.md",
-      buffer: Buffer.alloc(400_001, 65),
-      error: en.fileSizeError.replace("{limit}", "400"),
+      buffer: Buffer.alloc(800_001, 65),
+      error: en.fileSizeError.replace("{limit}", "800"),
     },
   ]) {
     await panel(page)

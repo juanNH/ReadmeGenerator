@@ -75,7 +75,10 @@ describe("compact technologies", () => {
     const original = structuredClone(data);
     const result = generated(data);
     expect(result.markdown).not.toContain("### Frontend");
-    expect(result.markdown).toContain("<strong>Frontend: </strong><kbd>");
+    expect(result.markdown).toContain("<strong>Frontend: </strong><kbd><img");
+    expect(result.markdown).toContain("<kbd><img");
+    expect(result.markdown).toContain(" React</kbd>");
+    expect(result.markdown).not.toMatch(/\s(?:style|class)=/);
     expect(result.markdown).toContain('alt=""');
     expect(result.markdown).toContain('width="20" height="20"');
     expect(result.markdown).not.toContain('width="32"');
@@ -89,6 +92,18 @@ describe("compact technologies", () => {
     for (const fragment of result.customHtml ?? [])
       expect(result.markdown.slice(fragment.start, fragment.end)).toBe(fragment.html);
     expect(data).toEqual(original);
+  });
+
+  it("uses the manually selected chip order in the generated preview fragment and Markdown", () => {
+    const data: Technologies = { groups: structuredClone(groups), layout: "compact" };
+    const reordered = reorderTechnologyItem(data, "web", "next", -1);
+    const result = generated(reordered);
+    const fragment = result.customHtml![0]!;
+    const visibleText = text(fragment.tree);
+
+    expect(visibleText).toBe("Frontend:  Next.js  React ");
+    expect(fragment.html.indexOf("Next.js")).toBeLessThan(fragment.html.indexOf("React"));
+    expect(result.markdown.slice(fragment.start, fragment.end)).toBe(fragment.html);
   });
 
   it("treats custom names and notes as text while authorizing only catalog image URLs", () => {

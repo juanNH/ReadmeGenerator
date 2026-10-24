@@ -22,6 +22,7 @@ export async function GET(
     return extended.success
       ? activitySvgResponse(
           renderExtendedProfileCard(extended.data, input.card, input.locale, {
+            cardColumns: input.cardColumns,
             appearance: input.appearance,
             extended: cardOptions,
             stale: extended.stale,
@@ -30,7 +31,10 @@ export async function GET(
           extended.stale,
         )
       : activitySvgResponse(
-          renderActivityUnavailable(input.card, input.locale, { appearance: input.appearance }),
+          renderActivityUnavailable(input.card, input.locale, {
+            appearance: input.appearance,
+            cardColumns: input.cardColumns,
+          }),
           false,
           false,
         );
@@ -39,6 +43,7 @@ export async function GET(
   return result.success
     ? activitySvgResponse(
         renderActivityCard(result.data, input.card, input.locale, {
+          cardColumns: input.cardColumns,
           stale: result.stale,
           appearance: input.appearance,
         }),
@@ -46,7 +51,10 @@ export async function GET(
         result.stale,
       )
     : activitySvgResponse(
-        renderActivityUnavailable(input.card, input.locale, { appearance: input.appearance }),
+        renderActivityUnavailable(input.card, input.locale, {
+          appearance: input.appearance,
+          cardColumns: input.cardColumns,
+        }),
         false,
         false,
       );

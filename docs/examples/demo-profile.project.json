@@ -12,6 +12,7 @@
       "items": []
     },
     "technologies": {
+      "layout": "compact",
       "groups": [
         {
           "id": "demo-web",
@@ -87,11 +88,49 @@
       ]
     },
     "contributions": {
-      "items": []
+      "items": [
+        {
+          "id": "demo-contribution-docs",
+          "title": "Idea Garden contributor guide",
+          "description": "I improved the setup guide and added a visual walkthrough so new contributors can find their first task.\n\nThe project collects practical web development ideas.",
+          "url": "",
+          "links": [
+            {
+              "id": "demo-contribution-guide",
+              "label": "Contributor guide",
+              "url": "https://example.com/ideas/contributing"
+            },
+            {
+              "id": "demo-contribution-change",
+              "label": "Change summary",
+              "url": "https://example.com/ideas/guide-update"
+            },
+            {
+              "id": "demo-contribution-repository",
+              "label": "Project repository",
+              "url": "https://github.com/example/idea-garden"
+            }
+          ],
+          "images": [
+            {
+              "id": "demo-contribution-image",
+              "url": "https://raw.githubusercontent.com/juanNH/ReadmeGenerator/dev/docs/assets/idea-garden-demo.svg",
+              "alt": "Idea Garden dashboard with a saved idea card and a short resource list"
+            }
+          ]
+        },
+        {
+          "id": "demo-contribution-community",
+          "title": "Community feedback",
+          "description": "I reviewed early feedback and helped turn common questions into clearer documentation.",
+          "url": "https://example.com/ideas/community-notes"
+        }
+      ]
     },
     "metrics": {
       "username": "",
-      "cards": []
+      "cards": [],
+      "cardColumns": 2
     },
     "contact": {
       "links": [
@@ -110,7 +149,7 @@
     "education": false,
     "current": false,
     "projects": true,
-    "contributions": false,
+    "contributions": true,
     "metrics": false,
     "contact": true
   },

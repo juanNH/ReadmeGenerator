@@ -204,6 +204,7 @@ function validateCardUrl(url) {
     invalid("El README contiene una ruta de tarjeta propia no admitida.");
   const allowed = new Set([
     "locale",
+    "columns",
     ...appearanceKeys,
     ...(resource ? ["target", "options"] : ["stats", "languages"]),
   ]);
@@ -217,6 +218,9 @@ function validateCardUrl(url) {
   const locale = url.searchParams.get("locale");
   if (locale !== null && locale !== "en" && locale !== "es")
     invalid("Una tarjeta contiene un idioma no admitido.");
+  const columns = url.searchParams.get("columns");
+  if (columns !== null && columns !== "1" && columns !== "2")
+    invalid("Una tarjeta contiene una cantidad de columnas no admitida.");
   if (resource) {
     const target = url.searchParams.get("target") ?? "";
     if (

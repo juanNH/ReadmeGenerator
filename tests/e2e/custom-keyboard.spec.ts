@@ -85,7 +85,7 @@ async function openEditor(page: Page, profile: ProfileDocument) {
     value: JSON.stringify(profile),
   });
   await page.goto("/en/editor");
-  await expect(page.getByRole("textbox", { name: "Section title", exact: true })).toHaveValue(
+  await expect(page.getByRole("textbox", { name: "Section name", exact: true })).toHaveValue(
     "Keyboard notes",
   );
 }
@@ -145,7 +145,7 @@ test("keyboard dropping a custom section across a built-in preserves hidden slot
   await navigation
     .getByRole("button", { name: "Exploring", exact: true, includeHidden: true })
     .click();
-  const title = page.getByRole("textbox", { name: "Section title", exact: true });
+  const title = page.getByRole("textbox", { name: "Section name", exact: true });
   await expect(title).toHaveValue("Exploring");
   await showSectionOrganizer(page);
   const handle = navigation.getByRole("button", {
@@ -172,7 +172,7 @@ test("keyboard dropping a custom section across a built-in preserves hidden slot
   expect(stored.data).toEqual(profile.data);
   expect(stored.visibility).toEqual(profile.visibility);
   expect(stored.customSections).toEqual(profile.customSections);
-  await expect(page.locator("#editor-section-title")).toHaveText("Custom section 3");
+  await expect(page.locator("#editor-section-title")).toHaveText("Exploring");
   await expect(title).toHaveValue("Exploring");
   await expect(
     navigation.getByRole("button", { name: "Exploring", exact: true, includeHidden: true }),
@@ -233,8 +233,8 @@ test("Escape cancels a mixed keyboard drag without persisting its projected orde
     `custom:${exploringId}`,
     "projects",
   ]);
-  await expect(page.locator("#editor-section-title")).toHaveText("Custom section 3");
-  await expect(page.getByRole("textbox", { name: "Section title", exact: true })).toHaveValue(
+  await expect(page.locator("#editor-section-title")).toHaveText("Exploring");
+  await expect(page.getByRole("textbox", { name: "Section name", exact: true })).toHaveValue(
     "Exploring",
   );
   expect(await storedProfile(page)).toEqual(profile);

@@ -100,7 +100,11 @@ for (const locale of ["en", "es"] as const) {
     await expectCodeSource(field, "");
     const language = page.getByRole("combobox", { name: t.code.language, exact: true });
     await expect(language).toHaveValue("");
-    await language.fill("toml");
+    await expect(language.locator('option[value="csharp"]')).toHaveText("C#");
+    await language.selectOption("csharp");
+    await expect(language).toHaveValue("csharp");
+    await expect(page.locator("datalist")).toHaveCount(0);
+    await language.selectOption("toml");
     const source =
       'name = "Alex"\n\n[profile]\nlikes = ["building", "sharing"]\n\t# keep this tab\n```\n<img src="https://code-attack.example.com/icon.svg" alt="literal"><script>window.codeExecuted=true</script>';
     await fillCodeSource(field, source);
@@ -122,7 +126,7 @@ for (const locale of ["en", "es"] as const) {
     expect((await page.evaluate(() => navigator.clipboard.readText())).replace(/\r\n/g, "\n")).toBe(
       source,
     );
-    const generated = generateReadme(await stored(page));
+    const generated = generateReadme(await stored(page), { includeReadmeManifest: true });
     if (!generated.success) throw new Error("Expected valid literal code");
     const output = await download(page, locale);
     expect(output).toBe(generated.markdown);
@@ -153,7 +157,7 @@ test("a JSON example is explicit, can be cancelled and keeps focus after replace
   await page.setViewportSize({ width: 1440, height: 1000 });
   await openEditor(
     page,
-    customProfile([{ id: "snippet", type: "code", source: "original", language: "rust" }]),
+    customProfile([{ id: "snippet", type: "code", source: "original", language: "my-dialect" }]),
   );
   const field = codeField(page);
   await enhanced(field);
@@ -163,6 +167,9 @@ test("a JSON example is explicit, can be cancelled and keeps focus after replace
   await use.click();
   await expectCodeSource(field, "original");
   await expect(use).toBeFocused();
+  await expect(
+    page.getByRole("textbox", { name: en.code.customLanguageInput, exact: true }),
+  ).toHaveValue("my-dialect");
   page.once("dialog", (dialog) => dialog.accept());
   await use.click();
   await expectCodeSource(field, en.code.exampleSource);
@@ -170,6 +177,9 @@ test("a JSON example is explicit, can be cancelled and keeps focus after replace
   await expect(page.getByRole("combobox", { name: en.code.language, exact: true })).toHaveValue(
     "json",
   );
+  await expect(
+    page.getByRole("textbox", { name: en.code.customLanguageInput, exact: true }),
+  ).toHaveCount(0);
 });
 
 test("HTML editor closes tags, indents, preserves undo and offers a standard text alternative", async ({
@@ -379,7 +389,7 @@ test("custom title and text formatting keep literal content, survive duplication
   expect(output).toContain('<h1 align="center">Playground</h1>');
   expect(output).toContain('<p align="right">&#x3C;b>Literal words&#x3C;/b></p>');
   await page.getByRole("button", { name: "Duplicate section", exact: true }).click();
-  await page.getByRole("textbox", { name: "Section title", exact: true }).fill("Independent copy");
+  await page.getByRole("textbox", { name: "Section name", exact: true }).fill("Independent copy");
   await page.getByRole("checkbox", { name: "Playground", exact: true }).uncheck();
   await expect.poll(async () => (await stored(page)).customSections.length).toBe(2);
   const saved = await stored(page);
@@ -462,11 +472,16 @@ test("code errors disable export and review reaches the affected source; hidden 
   await fillCodeSource(field, "name = 'fixed'");
   await page.getByRole("checkbox", { name: "Playground", exact: true }).check();
   const language = page.getByRole("combobox", { name: en.code.language, exact: true });
-  await language.fill("bad language");
-  await expect(language).toHaveAttribute("aria-invalid", "true");
+  await language.selectOption({ label: en.code.customLanguage });
+  const customLanguage = page.getByRole("textbox", {
+    name: en.code.customLanguageInput,
+    exact: true,
+  });
+  await customLanguage.fill("bad language");
+  await expect(customLanguage).toHaveAttribute("aria-invalid", "true");
   await expect(page.getByRole("button", { name: "Download README", exact: true })).toBeDisabled();
-  await language.fill("my-dialect");
-  await expect(language).not.toHaveAttribute("aria-invalid", "true");
+  await customLanguage.fill("my-dialect");
+  await expect(customLanguage).not.toHaveAttribute("aria-invalid", "true");
   expect(await download(page)).toContain("```my-dialect");
 });
 

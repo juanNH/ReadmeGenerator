@@ -195,7 +195,10 @@ test("presentation alone can be completed with keyboard and no required identity
   await expect(
     page.getByRole("checkbox", { name: "Contact", exact: true, includeHidden: true }),
   ).not.toBeChecked();
-  expect(await downloadReadme(page)).toBe("Learning accessible interfaces\n");
+  const markdown = await downloadReadme(page);
+  const manifestStart = markdown.indexOf("\n\n<!-- github-profile-generator:manifest:v1");
+  expect(manifestStart).toBeGreaterThan(0);
+  expect(markdown.slice(0, manifestStart)).toBe("Learning accessible interfaces");
 });
 
 test("contact alone supports adding, editing and removing stable links with usable focus", async ({
@@ -393,7 +396,7 @@ test("preview, clipboard and README download use the generator, and clipboard fa
   profile.data.contact.links = [
     { id: "example-link", label: "Portfolio", url: "https://example.com/profile" },
   ];
-  const expected = generateReadme(profile);
+  const expected = generateReadme(profile, { includeReadmeManifest: true });
   if (!expected.success) throw new Error("The reference profile must be exportable.");
   const preview = page.getByRole("article", { name: "README preview", exact: true });
   await expect(preview).toContainText("Sam & Example");

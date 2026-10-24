@@ -21,6 +21,7 @@ import {
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { moduleRegistry } from "@/core/modules/module-registry";
 import {
   addCustomSection,
@@ -54,6 +55,8 @@ import { localActivityCardSources } from "./activity-card-requests";
 import { useActivityData } from "./use-activity-data";
 import { useEditorScroll } from "./use-editor-scroll";
 import { downloadProjectFile } from "./download-project-file";
+import { useActivityExportCheck } from "./use-activity-export-check";
+import { ActivityExportReadiness } from "./activity-export-readiness";
 
 function ImportLoading() {
   const t = useTranslations("Editor");
@@ -136,6 +139,9 @@ export function EditorWorkspace({
     restoreProjectBackup,
   } = useProfileDraft(initialContentLocale);
   const [exportFeedback, setExportFeedback] = useState<ExportFeedback>("idle");
+  const [recoverySnapshotProfile, setRecoverySnapshotProfile] = useState<ProfileDocument | null>(
+    null,
+  );
   const [selectedId, setSelectedId] = useState<EditableSectionId | null>(null);
   const [announcement, setAnnouncement] = useState("");
   const [clearFeedback, setClearFeedback] = useState<"saved" | "memory_only" | null>(null);
@@ -192,11 +198,16 @@ export function EditorWorkspace({
   }
   const activeLabel = activeId ? (sectionLabels.get(activeId) ?? null) : null;
   const activeCustom = getCustomSection(profile, activeId);
-  const activeHeading = activeCustom
-    ? t("custom.untitled", { number: profile.customSections.indexOf(activeCustom) + 1 })
-    : activeLabel;
+  const activeHeading = activeLabel;
   const isLoading = hydration === "loading";
-  const result = generateReadme(profile, { activityCardBaseUrl });
+  const includeRecoverySnapshot = recoverySnapshotProfile === profile;
+  const result = generateReadme(profile, {
+    activityCardBaseUrl,
+    includeReadmeManifest: true,
+    includeRecoverySnapshot,
+  });
+  const exportedCardSources = result.success ? (result.activityCards ?? []) : [];
+  const publicCardCheck = useActivityExportCheck(exportedCardSources);
   const activityCardSources = result.success
     ? localActivityCardSources(result.activityCards ?? [], activityCardBaseUrl)
     : [];
@@ -209,6 +220,12 @@ export function EditorWorkspace({
   const cardsNeedRefresh = activityData.needsSearch;
   const readmeErrors = result.success ? [] : result.errors;
   const isEmpty = readmeErrors.some((error) => error.code === "empty_profile");
+  const hasRecoveryManifestError = readmeErrors.some(
+    (error) => error.code === "recovery_manifest_too_large",
+  );
+  const hasReadmeManifestError = readmeErrors.some(
+    (error) => error.code === "readme_manifest_too_large",
+  );
   const hasUrlErrors = readmeErrors.some((error) => error.code === "invalid_url");
   const hasImageUrlErrors = readmeErrors.some(
     (error) =>
@@ -228,28 +245,40 @@ export function EditorWorkspace({
   const hasHtmlErrors = readmeErrors.some((error) => error.code === "invalid_html");
   const hasCodeErrors = readmeErrors.some((error) => error.code === "invalid_code");
   const hasLocalCards = result.success && Boolean(result.exportIssues?.length);
-  const canExport = !isLoading && result.success && !hasLocalCards;
+  const hasExportedCards = exportedCardSources.length > 0;
+  const canCheckCards = !isLoading && result.success && !hasLocalCards && hasExportedCards;
+  const canExport =
+    !isLoading &&
+    result.success &&
+    !hasLocalCards &&
+    (!hasExportedCards || publicCardCheck.state.status === "ready");
   const exportGuidance = isLoading
     ? t("storage.loading")
     : isEmpty
       ? t("export.empty")
-      : hasInvalidActivityOptions
-        ? t("export.invalidActivityOptions")
-        : hasInvalidUsername
-          ? t("export.invalidUsername")
-          : hasCodeErrors
-            ? t("export.invalidCode")
-            : hasHtmlErrors
-              ? t("export.invalidHtml")
-              : hasImageUrlErrors
-                ? t("export.invalidImages")
-                : hasMissingImageAlt
-                  ? t("export.missingImageDescription")
-                  : hasUrlErrors
-                    ? t("export.invalidLinks")
-                    : hasLocalCards
-                      ? t("export.localCards")
-                      : t("export.ready");
+      : hasRecoveryManifestError
+        ? t("export.recoverySnapshotTooLarge")
+        : hasReadmeManifestError
+          ? t("export.manifestTooLarge")
+          : hasInvalidActivityOptions
+            ? t("export.invalidActivityOptions")
+            : hasInvalidUsername
+              ? t("export.invalidUsername")
+              : hasCodeErrors
+                ? t("export.invalidCode")
+                : hasHtmlErrors
+                  ? t("export.invalidHtml")
+                  : hasImageUrlErrors
+                    ? t("export.invalidImages")
+                    : hasMissingImageAlt
+                      ? t("export.missingImageDescription")
+                      : hasUrlErrors
+                        ? t("export.invalidLinks")
+                        : hasLocalCards
+                          ? t("export.localCards")
+                          : hasExportedCards && publicCardCheck.state.status !== "ready"
+                            ? t("export.cards.required")
+                            : t("export.ready");
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -316,6 +345,7 @@ export function EditorWorkspace({
   }, [profile, activeId, compactView]);
 
   function editDocument(next: ProfileDocument) {
+    setRecoverySnapshotProfile(null);
     setExportFeedback("idle");
     setProjectDownloadFeedback(null);
     setClearFeedback(null);
@@ -472,6 +502,15 @@ export function EditorWorkspace({
     }
   }
 
+  function excludeActivityCards() {
+    const next = setModuleVisibility(profile, "metrics", false);
+    if (next.success) {
+      pendingWorkspaceFocus.current = true;
+      editDocument(next.data);
+      setAnnouncement(t("metrics.hidden"));
+    }
+  }
+
   function downloadReadme() {
     if (!canExport || !result.success) return;
     let objectUrl: string | null = null;
@@ -498,6 +537,7 @@ export function EditorWorkspace({
 
   function recoverWithNewDraft() {
     if (window.confirm(t("storage.resetConfirmation"))) {
+      setRecoverySnapshotProfile(null);
       setClearFeedback(null);
       setExportFeedback("idle");
       setSelectedId(null);
@@ -513,6 +553,7 @@ export function EditorWorkspace({
     if (isLoading || !window.confirm(t("reset.confirmation"))) return;
     const cleared = clearReadme();
     if (cleared.status === "not_ready") return;
+    setRecoverySnapshotProfile(null);
     activityData.reset();
     pendingReadmeImportOpen = false;
     setImportOpen(false);
@@ -529,6 +570,7 @@ export function EditorWorkspace({
   }
 
   function completeImport(next: ProfileDocument) {
+    setRecoverySnapshotProfile(null);
     activityData.reset();
     setClearFeedback(null);
     setExportFeedback("idle");
@@ -591,6 +633,7 @@ export function EditorWorkspace({
   }
 
   function completeProject(next: ProfileDocument) {
+    setRecoverySnapshotProfile(null);
     activityData.reset();
     setClearFeedback(null);
     setExportFeedback("idle");
@@ -865,7 +908,7 @@ export function EditorWorkspace({
         >
           <EmojiInserter />
           <Card>
-            <CardHeader className="gap-1 border-b border-border px-4 py-2 sm:gap-2 sm:p-6">
+            <CardHeader className="gap-0 border-b border-border px-4 py-1 sm:gap-2 sm:p-6">
               <div className="flex min-w-0 items-center justify-between gap-2 text-xs text-muted-foreground">
                 <div className="sr-only sm:not-sr-only sm:min-w-0">
                   <span className="hidden items-center gap-2 font-medium sm:flex">
@@ -918,7 +961,7 @@ export function EditorWorkspace({
                   id="editor-section-title"
                   ref={configurationHeadingRef}
                   tabIndex={-1}
-                  className="min-w-0 scroll-mt-[var(--editor-toolbar-offset)] text-base font-semibold tracking-tight wrap-anywhere sm:text-xl"
+                  className="min-w-0 scroll-mt-[var(--editor-toolbar-offset)] text-sm leading-5 font-semibold tracking-tight wrap-anywhere sm:text-xl"
                 >
                   {activeHeading ?? t("settings.chooseTitle")}
                 </h2>
@@ -1074,18 +1117,23 @@ export function EditorWorkspace({
                   size="sm"
                   className="mt-2 max-w-full text-left whitespace-normal"
                   disabled={isLoading}
-                  onClick={() => {
-                    const next = setModuleVisibility(profile, "metrics", false);
-                    if (next.success) {
-                      pendingWorkspaceFocus.current = true;
-                      editDocument(next.data);
-                      setAnnouncement(t("metrics.hidden"));
-                    }
-                  }}
+                  onClick={excludeActivityCards}
                 >
                   {t("metrics.hide")}
                 </Button>
               </div>
+            )}
+            {canCheckCards && (
+              <ActivityExportReadiness
+                state={publicCardCheck.state}
+                firstSource={exportedCardSources[0]!}
+                disabled={isLoading}
+                onCheck={() => {
+                  setExportFeedback("idle");
+                  void publicCardCheck.check();
+                }}
+                onExclude={excludeActivityCards}
+              />
             )}
             <p
               id="readme-export-guidance"
@@ -1098,6 +1146,45 @@ export function EditorWorkspace({
             >
               {exportGuidance}
             </p>
+            <div className="rounded-md border border-border bg-surface-raised/50 p-3">
+              <div className="flex items-start gap-2">
+                <Checkbox
+                  id="readme-recovery-snapshot"
+                  checked={includeRecoverySnapshot}
+                  disabled={isLoading}
+                  aria-describedby={
+                    includeRecoverySnapshot
+                      ? "readme-recovery-snapshot-help readme-recovery-snapshot-warning"
+                      : "readme-recovery-snapshot-help"
+                  }
+                  onCheckedChange={(checked) =>
+                    setRecoverySnapshotProfile(checked === true ? profile : null)
+                  }
+                />
+                <div className="min-w-0 space-y-1 pt-1">
+                  <label
+                    htmlFor="readme-recovery-snapshot"
+                    className="cursor-pointer text-sm leading-5 font-medium"
+                  >
+                    {t("export.recoverySnapshotLabel")}
+                  </label>
+                  <p
+                    id="readme-recovery-snapshot-help"
+                    className="text-xs leading-5 text-muted-foreground"
+                  >
+                    {t("export.recoverySnapshotHelp")}
+                  </p>
+                  {includeRecoverySnapshot && (
+                    <p
+                      id="readme-recovery-snapshot-warning"
+                      className="rounded-sm bg-warning-soft p-2 text-xs leading-5 text-warning"
+                    >
+                      {t("export.recoverySnapshotWarning")}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
             <div className="flex flex-wrap gap-3">
               <Button
                 onClick={copyReadme}

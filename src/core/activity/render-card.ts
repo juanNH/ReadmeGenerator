@@ -8,6 +8,7 @@ import type { ActivitySnapshot } from "./activity-types";
 import {
   cardBackground,
   resolveCardAppearance,
+  scaleCardTypography,
   type ResolvedCardAppearance,
 } from "./card-appearance";
 import { getMonthlyActivity } from "./render-monthly";
@@ -294,6 +295,7 @@ function renderLanguages(
   snapshot: ActivitySnapshot,
   locale: ContentLocale,
   stale: boolean,
+  cardColumns: 1 | 2,
 ): string {
   const t = labels[locale];
   const allItems = snapshot.languages.items.filter((item) => item.bytes > 0);
@@ -302,7 +304,9 @@ function renderLanguages(
     .slice(0, 10);
   const totalBytes = allItems.reduce((total, item) => total + item.bytes, 0);
   const scope = languageScope(snapshot, t, locale);
-  const rowsHeight = Math.max(items.length, 1) * 28;
+  const rowHeight = cardColumns === 2 ? 36 : 28;
+  const notesStep = cardColumns === 2 ? 22 : 18;
+  const rowsHeight = Math.max(items.length, 1) * rowHeight;
   const notesStart = 100 + rowsHeight;
   const height = notesStart + (snapshot.languages.truncated ? 108 : 88);
   const rows =
@@ -310,7 +314,8 @@ function renderLanguages(
       ? text(24, 97, t.noLanguages, 'font-size="12" fill="#4d6157"')
       : items
           .map((item, index) => {
-            const y = 92 + index * 28;
+            const y = 92 + index * rowHeight;
+            const barY = cardColumns === 2 ? y + 5 : y - 10;
             const fraction = item.bytes / totalBytes;
             const percent = fraction * 100;
             const percentText =
@@ -322,8 +327,15 @@ function renderLanguages(
                   }).format(fraction);
             const color = item.color && /^#[a-f\d]{6}$/i.test(item.color) ? item.color : "#327c50";
             return (
-              text(24, y, Array.from(item.name).slice(0, 28).join(""), 'font-size="12"') +
-              `<rect x="224" y="${y - 10}" width="360" height="10" rx="3" fill="#e8eeea"/><rect x="224" y="${y - 10}" width="${(fraction * 360).toFixed(2)}" height="10" rx="3" fill="${color}" stroke="#4d6157" stroke-width="0.5"/>` +
+              text(
+                24,
+                y,
+                Array.from(item.name)
+                  .slice(0, cardColumns === 2 ? 20 : 28)
+                  .join(""),
+                'font-size="12"',
+              ) +
+              `<rect x="224" y="${barY}" width="360" height="8" rx="3" fill="#e8eeea"/><rect x="224" y="${barY}" width="${(fraction * 360).toFixed(2)}" height="8" rx="3" fill="${color}" stroke="#4d6157" stroke-width="0.5"/>` +
               text(676, y, percentText, 'font-size="12" text-anchor="end" fill="#4d6157"')
             );
           })
@@ -342,9 +354,9 @@ function renderLanguages(
     heading("languages", snapshot, locale) +
       rows +
       text(24, notesStart, scope, 'font-size="11" fill="#4d6157"') +
-      text(24, notesStart + 18, t.languageScope, 'font-size="11" fill="#4d6157"') +
+      text(24, notesStart + notesStep, t.languageScope, 'font-size="11" fill="#4d6157"') +
       (snapshot.languages.truncated
-        ? text(24, notesStart + 36, t.truncated, 'font-size="11" fill="#80541c"')
+        ? text(24, notesStart + notesStep * 2, t.truncated, 'font-size="11" fill="#80541c"')
         : "") +
       footer(snapshot, locale, height, stale, false),
   );
@@ -549,6 +561,7 @@ function languageBlock(
   appearance: ResolvedCardAppearance,
   y: number,
   limit = 10,
+  cardColumns: 1 | 2 = 1,
 ): { body: string; height: number } {
   const t = labels[locale];
   const { items, totalBytes } = sortedLanguages(snapshot, limit);
@@ -558,6 +571,7 @@ function languageBlock(
       height: 42,
     };
   const { width, design } = appearance;
+  const labelLimit = cardColumns === 2 ? 20 : 28;
   if (design === "minimal") {
     let offset = 24;
     const strip = items
@@ -601,7 +615,12 @@ function languageBlock(
       if (design === "panels") {
         return (
           panel(x, top, cellWidth, rowHeight - 8, appearance) +
-          text(x + 12, top + 21, Array.from(item.name).slice(0, 28).join(""), 'font-size="12"') +
+          text(
+            x + 12,
+            top + 21,
+            Array.from(item.name).slice(0, labelLimit).join(""),
+            'font-size="12"',
+          ) +
           text(
             x + cellWidth - 12,
             top + 21,
@@ -614,7 +633,7 @@ function languageBlock(
       const barX = x + Math.min(200, cellWidth * 0.33);
       const barWidth = cellWidth - (barX - x) - 88;
       return (
-        text(x, top + 17, Array.from(item.name).slice(0, 28).join(""), 'font-size="12"') +
+        text(x, top + 17, Array.from(item.name).slice(0, labelLimit).join(""), 'font-size="12"') +
         `<rect x="${barX}" y="${top + 7}" width="${barWidth}" height="10" rx="3" fill="${appearance.panel}"/><rect x="${barX}" y="${top + 7}" width="${(fraction * barWidth).toFixed(2)}" height="10" rx="3" fill="${color}" stroke="${appearance.border}" stroke-width="0.5"/>` +
         text(
           x + cellWidth,
@@ -634,23 +653,25 @@ function languageNotes(
   appearance: ResolvedCardAppearance,
   y: number,
   includePeriod = false,
+  cardColumns: 1 | 2 = 1,
 ): { body: string; height: number } {
   const t = labels[locale];
+  const rowHeight = cardColumns === 2 ? 22 : 18;
   const notes = [languageScope(snapshot, t, locale), t.languageScope];
   if (includePeriod) notes.push(t.languagePeriod);
   let body = notes
     .map((note, index) =>
-      text(24, y + index * 18, note, `font-size="11" fill="${appearance.muted}"`),
+      text(24, y + index * rowHeight, note, `font-size="11" fill="${appearance.muted}"`),
     )
     .join("");
   if (snapshot.languages.truncated)
     body += text(
       24,
-      y + notes.length * 18,
+      y + notes.length * rowHeight,
       t.truncated,
       `font-size="11" fill="${appearance.warning}"`,
     );
-  return { body, height: (notes.length + Number(snapshot.languages.truncated)) * 18 };
+  return { body, height: (notes.length + Number(snapshot.languages.truncated)) * rowHeight };
 }
 
 function languageDescription(snapshot: ActivitySnapshot, locale: ContentLocale): string {
@@ -665,6 +686,7 @@ function renderStyledCard(
   locale: ContentLocale,
   stale: boolean,
   appearance: ResolvedCardAppearance,
+  cardColumns: 1 | 2,
 ): string {
   const t = labels[locale];
   let body = styledHeading(card, snapshot, locale, appearance);
@@ -726,10 +748,18 @@ function renderStyledCard(
       appearance,
       nextY,
       card === "panorama" ? 5 : 10,
+      cardColumns,
     );
     body += languages.body;
     nextY += languages.height + 16;
-    const notes = languageNotes(snapshot, locale, appearance, nextY, card === "panorama");
+    const notes = languageNotes(
+      snapshot,
+      locale,
+      appearance,
+      nextY,
+      card === "panorama",
+      cardColumns,
+    );
     body += notes.body;
     nextY += notes.height + 8;
     contentDescription += languageDescription(snapshot, locale);
@@ -911,27 +941,41 @@ export function renderActivityCard(
   snapshot: ActivitySnapshot,
   card: MetricCardId,
   locale: ContentLocale,
-  options: { stale?: boolean; appearance?: CardAppearance } = {},
+  options: { stale?: boolean; appearance?: CardAppearance; cardColumns?: 1 | 2 } = {},
 ): string {
+  const cardColumns = options.cardColumns ?? 1;
   if (card === "extended-stats" || card === "extended-languages") {
-    return renderExtendedCard(snapshot, card, locale, options);
+    return scaleCardTypography(renderExtendedCard(snapshot, card, locale, options), cardColumns);
   }
   if (options.appearance || card === "panorama" || card === "monthly") {
-    return renderStyledCard(
-      snapshot,
-      card,
-      locale,
-      options.stale === true,
-      resolveCardAppearance(options.appearance),
+    return scaleCardTypography(
+      renderStyledCard(
+        snapshot,
+        card,
+        locale,
+        options.stale === true,
+        resolveCardAppearance(options.appearance),
+        cardColumns,
+      ),
+      cardColumns,
     );
   }
   switch (card) {
     case "calendar":
-      return renderCalendar(snapshot, locale, options.stale === true);
+      return scaleCardTypography(
+        renderCalendar(snapshot, locale, options.stale === true),
+        cardColumns,
+      );
     case "summary":
-      return renderSummary(snapshot, locale, options.stale === true);
+      return scaleCardTypography(
+        renderSummary(snapshot, locale, options.stale === true),
+        cardColumns,
+      );
     case "languages":
-      return renderLanguages(snapshot, locale, options.stale === true);
+      return scaleCardTypography(
+        renderLanguages(snapshot, locale, options.stale === true, cardColumns),
+        cardColumns,
+      );
   }
 }
 
@@ -939,7 +983,7 @@ export function renderActivityCard(
 export function renderActivityUnavailable(
   card: MetricCardId,
   locale: ContentLocale,
-  options: { appearance?: CardAppearance } = {},
+  options: { appearance?: CardAppearance; cardColumns?: 1 | 2 } = {},
 ): string {
   const t = labels[locale];
   if (
@@ -950,24 +994,30 @@ export function renderActivityUnavailable(
     card === "extended-languages"
   ) {
     const appearance = resolveCardAppearance(options.appearance);
-    return styledFrame(
+    return scaleCardTypography(
+      styledFrame(
+        card,
+        locale,
+        154,
+        `${t.unavailable} ${t.unavailableHelp}`,
+        text(24, 32, t[card], 'font-size="18" font-weight="650"') +
+          text(24, 86, t.unavailable, 'font-size="13" font-weight="600"') +
+          text(24, 113, t.unavailableHelp, `font-size="12" fill="${appearance.muted}"`),
+        appearance,
+      ),
+      options.cardColumns,
+    );
+  }
+  return scaleCardTypography(
+    frame(
       card,
       locale,
       154,
       `${t.unavailable} ${t.unavailableHelp}`,
       text(24, 32, t[card], 'font-size="18" font-weight="650"') +
-        text(24, 86, t.unavailable, 'font-size="13" font-weight="600"') +
-        text(24, 113, t.unavailableHelp, `font-size="12" fill="${appearance.muted}"`),
-      appearance,
-    );
-  }
-  return frame(
-    card,
-    locale,
-    154,
-    `${t.unavailable} ${t.unavailableHelp}`,
-    text(24, 32, t[card], 'font-size="18" font-weight="650"') +
-      text(24, 77, t.unavailable, 'font-size="13" font-weight="600"') +
-      text(24, 104, t.unavailableHelp, 'font-size="12" fill="#4d6157"'),
+        text(24, 77, t.unavailable, 'font-size="13" font-weight="600"') +
+        text(24, 104, t.unavailableHelp, 'font-size="12" fill="#4d6157"'),
+    ),
+    options.cardColumns,
   );
 }

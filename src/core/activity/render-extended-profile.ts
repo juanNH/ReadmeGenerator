@@ -13,7 +13,9 @@ import type { ContentLocale } from "../profile/profile-schema";
 import { calculateActivityRank, type ActivityRankValues } from "./activity-rank";
 import {
   cardBackground,
+  cardTypographyScale,
   resolveCardAppearance,
+  scaleCardTypography,
   type ResolvedCardAppearance,
 } from "./card-appearance";
 import {
@@ -123,6 +125,7 @@ const labels = {
 } as const;
 type Labels = (typeof labels)[ContentLocale];
 type RenderOptions = {
+  cardColumns?: 1 | 2;
   appearance?: CardAppearance;
   extended?: { stats?: ExtendedStatsOptions; languages?: ExtendedLanguageOptions };
   stale?: boolean;
@@ -216,8 +219,10 @@ function header(
   snapshot: ExtendedProfileSnapshot,
   title: string,
   style: ResolvedCardAppearance,
+  cardColumns: 1 | 2,
 ): { body: string; next: number } {
-  const maxTitle = Math.floor((style.width - 48) / 10);
+  const scale = cardTypographyScale(cardColumns);
+  const maxTitle = Math.floor((style.width - 48) / (10 * scale));
   const body =
     (style.hideTitle
       ? ""
@@ -232,7 +237,7 @@ function header(
       style.hideTitle ? 32 : 58,
       bounded(
         `${snapshot.displayName} · @${snapshot.username}`,
-        Math.floor((style.width - 48) / 7.6),
+        Math.floor((style.width - 48) / (7.6 * scale)),
       ),
       `font-size="13" fill="${style.muted}"`,
     );
@@ -243,17 +248,20 @@ function footer(
   lines: string[],
   startY: number,
   style: ResolvedCardAppearance,
+  cardColumns: 1 | 2,
 ): { body: string; height: number } {
+  const scale = cardTypographyScale(cardColumns);
+  const lineHeight = cardColumns === 2 ? 22 : 18;
   const wrapped = lines.flatMap((line) =>
-    wrap(line, Math.max(30, Math.floor((style.width - 48) / 6.5))),
+    wrap(line, Math.max(30, Math.floor((style.width - 48) / (6.5 * scale)))),
   );
   return {
     body: wrapped
       .map((line, index) =>
-        text(24, startY + index * 18, line, `font-size="11" fill="${style.muted}"`),
+        text(24, startY + index * lineHeight, line, `font-size="11" fill="${style.muted}"`),
       )
       .join(""),
-    height: startY + Math.max(0, wrapped.length - 1) * 18 + 22,
+    height: startY + Math.max(0, wrapped.length - 1) * lineHeight + 22,
   };
 }
 
@@ -311,9 +319,10 @@ function renderStats(
 ): string {
   const strings = labels[locale];
   const statsOptions = options.extended?.stats ?? {};
+  const textScale = cardTypographyScale(options.cardColumns);
   const items = statsOptions.items ?? defaultExtendedStats;
   const title = style.customTitle?.trim() || strings.stats;
-  const heading = header(snapshot, title, style);
+  const heading = header(snapshot, title, style, options.cardColumns ?? 1);
   const rankInput = statsOptions.showRank ? rankValues(snapshot) : null;
   const rank = rankInput
     ? calculateActivityRank(rankInput, statsOptions.commitsPeriod === "all")
@@ -323,7 +332,7 @@ function renderStats(
   const valueX = rowRight;
   const scopeX = Math.max(270, rowRight - 120);
   const labelX = style.showIcons ? 48 : 24;
-  const maxLabel = Math.max(12, Math.floor((scopeX - labelX - 102) / 7.5));
+  const maxLabel = Math.max(12, Math.floor((scopeX - labelX - 102) / (7.5 * textScale)));
   const rowHeight = Math.max(24, style.lineHeight);
   let body = heading.body;
   const rows = items
@@ -333,7 +342,7 @@ function renderStats(
       const formattedValue = rowValue(id, metric, locale, style);
       const valueSize = Math.min(
         14,
-        (rowRight - scopeX - 12) / Math.max(1, formattedValue.length * 0.65),
+        (rowRight - scopeX - 12) / Math.max(1, formattedValue.length * 0.65 * textScale),
       );
       const background =
         style.design === "panels"
@@ -419,7 +428,7 @@ function renderStats(
       : [strings.allPublic]),
     `${options.stale ? strings.stale : strings.updated}: ${formatDate(snapshot.fetchedAt, locale)} · ${strings.publicOnly}`,
   ];
-  const ending = footer(notes, bodyBottom + 36, style);
+  const ending = footer(notes, bodyBottom + 36, style, options.cardColumns ?? 1);
   const description = [
     title,
     `${snapshot.displayName} (@${snapshot.username})`,
@@ -521,8 +530,9 @@ function renderLanguages(
 ): string {
   const strings = labels[locale];
   const languageOptions = options.extended?.languages ?? {};
+  const textScale = cardTypographyScale(options.cardColumns);
   const title = style.customTitle?.trim() || strings.languages;
-  const heading = header(snapshot, title, style);
+  const heading = header(snapshot, title, style, options.cardColumns ?? 1);
   const { segments, totalBytes, weighted } = languageSegments(
     snapshot,
     languageOptions,
@@ -556,7 +566,10 @@ function renderLanguages(
         text(
           x + 16,
           y,
-          bounded(segment.name, Math.max(10, Math.floor((width - (value ? 140 : 24)) / 8))),
+          bounded(
+            segment.name,
+            Math.max(10, Math.floor((width - (value ? 140 : 24)) / (8 * textScale))),
+          ),
           `font-size="13" font-weight="${style.textBold ? 600 : 400}"`,
         ) +
         (value
@@ -574,7 +587,7 @@ function renderLanguages(
     );
   };
   if (!segments.length) {
-    const note = footer([strings.noLanguages], heading.next, style);
+    const note = footer([strings.noLanguages], heading.next, style, options.cardColumns ?? 1);
     body += note.body;
     bottom = note.height;
   } else if (layout === "normal") {
@@ -633,7 +646,7 @@ function renderLanguages(
     ...(snapshot.languages.truncated ? [strings.truncated] : []),
     `${options.stale ? strings.stale : strings.updated}: ${formatDate(snapshot.fetchedAt, locale)} · ${strings.publicOnly}`,
   ];
-  const ending = footer(notes, bottom + 34, style);
+  const ending = footer(notes, bottom + 34, style, options.cardColumns ?? 1);
   const description = [
     title,
     `${snapshot.displayName} (@${snapshot.username})`,
@@ -652,7 +665,10 @@ export function renderExtendedProfileCard(
   options: RenderOptions = {},
 ): string {
   const style = resolveCardAppearance(options.appearance);
-  return card === "extended-stats"
-    ? renderStats(snapshot, locale, options, style)
-    : renderLanguages(snapshot, locale, options, style);
+  return scaleCardTypography(
+    card === "extended-stats"
+      ? renderStats(snapshot, locale, options, style)
+      : renderLanguages(snapshot, locale, options, style),
+    options.cardColumns,
+  );
 }

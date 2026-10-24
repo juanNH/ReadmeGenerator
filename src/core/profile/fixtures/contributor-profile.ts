@@ -77,6 +77,7 @@ export function createContributorExampleProfile(): ProfileDocument {
   profile.data.metrics = {
     username: "fictional-profile-example",
     cards: ["calendar", "summary", "languages"],
+    cardColumns: 2,
   };
   profile.data.contact.links = [
     {

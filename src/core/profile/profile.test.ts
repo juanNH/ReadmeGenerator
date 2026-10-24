@@ -77,7 +77,7 @@ describe("profile drafts and reference examples", () => {
       bio: "",
       location: "",
     });
-    expect(profile.data.metrics).toEqual({ username: "", cards: [] });
+    expect(profile.data.metrics).toEqual({ username: "", cards: [], cardColumns: 2 });
     expect(profile.data.contact.links).toEqual([]);
     expect(profile.data.projects.items).toEqual([]);
     expect(unwrap(parseProfileDocument(profile))).toEqual(profile);
@@ -92,7 +92,7 @@ describe("profile drafts and reference examples", () => {
     expect(profile.data.education.items.length).toBeGreaterThan(0);
     expect(profile.data.projects.items).toEqual([]);
     expect(profile.data.contact.links).toEqual([]);
-    expect(profile.data.metrics).toEqual({ username: "", cards: [] });
+    expect(profile.data.metrics).toEqual({ username: "", cards: [], cardColumns: 2 });
     expect(profile.visibility.metrics).toBe(false);
     expect(profile.visibility.contact).toBe(false);
     expect(profile.visibility.projects).toBe(false);
@@ -105,6 +105,7 @@ describe("profile drafts and reference examples", () => {
     expect(profile.data.metrics).toEqual({
       username: "fictional-profile-example",
       cards: ["calendar", "summary", "languages"],
+      cardColumns: 2,
     });
     expect(profile.data.projects.items.length).toBeGreaterThan(0);
     expect(profile.data.contributions.items.length).toBeGreaterThan(0);

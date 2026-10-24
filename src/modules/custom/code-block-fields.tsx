@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { CodeEditor, type CodeEditorHandle } from "@/components/ui/code-editor";
@@ -6,12 +7,16 @@ import { Input } from "@/components/ui/input";
 import {
   codeLanguages,
   CODE_MAX_DOCUMENT_LENGTH,
+  CODE_MAX_LANGUAGE_LENGTH,
   CODE_MAX_SOURCE_LENGTH,
   normalizeCodeLanguage,
 } from "@/core/code";
 import type { CustomBlock } from "@/core/profile/custom-content";
 
 type CodeBlock = Extract<CustomBlock, { type: "code" }>;
+const CUSTOM_LANGUAGE = "__custom_language__";
+const languageSelectClassName =
+  "min-h-11 w-full min-w-0 rounded-md border border-border-strong bg-surface px-3 py-2 text-base text-foreground focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:outline-none sm:text-sm";
 
 type CodeBlockFieldsProps = {
   controlId: string;
@@ -19,7 +24,7 @@ type CodeBlockFieldsProps = {
   inputRef: (control: CodeEditorHandle | null) => void;
   hasSourceError: boolean;
   onChange: (value: CodeBlock) => void;
-  onUseExample: (source: string) => void;
+  onUseExample: (source: string) => boolean;
 };
 
 export function CodeBlockFields({
@@ -33,6 +38,11 @@ export function CodeBlockFields({
   const t = useTranslations("EditorModules.custom");
   const language = normalizeCodeLanguage(value.language);
   const hasLocalHighlighting = codeLanguages.some((entry) => entry.id === language);
+  const [customLanguageFor, setCustomLanguageFor] = useState<string | null>(null);
+  const hasCustomLanguage =
+    language === null ||
+    (language !== "" && !hasLocalHighlighting) ||
+    customLanguageFor === value.language;
   const tooLong = value.source.length > CODE_MAX_SOURCE_LENGTH;
   const exampleSource: string = t.raw("code.exampleSource");
   return (
@@ -40,29 +50,59 @@ export function CodeBlockFields({
       <Field
         htmlFor={`${controlId}-language`}
         label={t("code.language")}
-        description={
-          language && !hasLocalHighlighting
-            ? t("code.plainLanguageHelp", { language: value.language.trim() })
-            : t("code.languageHelp")
-        }
-        error={language === null ? t("code.invalidLanguage") : undefined}
+        description={t("code.languageHelp")}
       >
-        <Input
-          value={value.language}
-          list={`${controlId}-languages`}
-          placeholder={t("code.languagePlaceholder")}
-          spellCheck={false}
-          autoCorrect="off"
-          autoCapitalize="off"
-          autoComplete="off"
-          onChange={(event) => onChange({ ...value, language: event.target.value })}
-        />
+        <select
+          value={hasCustomLanguage ? CUSTOM_LANGUAGE : (language ?? "")}
+          onChange={(event) => {
+            const selected = event.target.value;
+            if (selected === CUSTOM_LANGUAGE) {
+              const nextLanguage = language === "" || hasLocalHighlighting ? "" : value.language;
+              setCustomLanguageFor(nextLanguage);
+              if (language === "" || hasLocalHighlighting) {
+                onChange({ ...value, language: nextLanguage });
+              }
+              return;
+            }
+            setCustomLanguageFor(null);
+            onChange({ ...value, language: selected });
+          }}
+          className={languageSelectClassName}
+        >
+          <option value="">{t("code.plainText")}</option>
+          {codeLanguages.map((entry) => (
+            <option key={entry.id} value={entry.id}>
+              {entry.label}
+            </option>
+          ))}
+          <option value={CUSTOM_LANGUAGE}>{t("code.customLanguage")}</option>
+        </select>
       </Field>
-      <datalist id={`${controlId}-languages`}>
-        {codeLanguages.map((entry) => (
-          <option key={entry.id} value={entry.id} label={entry.label} />
-        ))}
-      </datalist>
+      {hasCustomLanguage && (
+        <Field
+          htmlFor={`${controlId}-custom-language`}
+          label={t("code.customLanguageInput")}
+          description={
+            language && !hasLocalHighlighting
+              ? t("code.plainLanguageHelp", { language: value.language.trim() })
+              : t("code.customLanguageHelp", { limit: CODE_MAX_LANGUAGE_LENGTH })
+          }
+          error={language === null ? t("code.invalidLanguage") : undefined}
+        >
+          <Input
+            value={value.language}
+            placeholder={t("code.languagePlaceholder")}
+            spellCheck={false}
+            autoCorrect="off"
+            autoCapitalize="off"
+            autoComplete="off"
+            onChange={(event) => {
+              setCustomLanguageFor(event.target.value);
+              onChange({ ...value, language: event.target.value });
+            }}
+          />
+        </Field>
+      )}
       <Field
         htmlFor={`${controlId}-source`}
         label={t("code.source")}
@@ -105,7 +145,9 @@ export function CodeBlockFields({
             variant="outline"
             size="sm"
             className="max-w-full whitespace-normal"
-            onClick={() => onUseExample(exampleSource)}
+            onClick={() => {
+              if (onUseExample(exampleSource)) setCustomLanguageFor(null);
+            }}
           >
             {t("code.useExample")}
           </Button>
