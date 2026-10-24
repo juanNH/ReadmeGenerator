@@ -131,7 +131,7 @@ test("HTML layouts, linked images, tables and details share one safe preview, cl
   await summary.press("Enter");
   await expect(preview.getByText("**These stars stay literal.**", { exact: true })).toBeVisible();
   await expect(preview.locator("pre")).toHaveText("<div>Hello</div>\nKeep this second line.");
-  const result = generateReadme(await storedProfile(page));
+  const result = generateReadme(await storedProfile(page), { includeReadmeManifest: true });
   if (!result.success) throw new Error("Expected valid HTML README");
   const readme = await downloadReadme(page);
   expect(readme).toBe(result.markdown);

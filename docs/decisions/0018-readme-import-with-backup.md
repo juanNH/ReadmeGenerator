@@ -1,6 +1,6 @@
 # ADR 0018: README Import with Review and Backup
 
-- Status: accepted for the first import increment.
+- Status: accepted for the first import increment; current module mapping is superseded by ADR 0044.
 - Date: 2026-10-20.
 - Complements ADRs 0004, 0013, 0015, and 0017.
 

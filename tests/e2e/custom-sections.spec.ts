@@ -9,6 +9,7 @@ import {
 import type { ProfileDocument } from "../../src/core/profile/profile-schema";
 import type { CustomBlock } from "../../src/core/profile/custom-content";
 import { createCustomExampleProfile } from "../../src/core/profile/fixtures";
+import { parseReadmeManifest } from "../../src/core/readme/readme-manifest";
 
 const draftKey = "github-profile-generator.profile.v2";
 const legacyKey = "github-profile-generator.profile.v1";
@@ -92,7 +93,11 @@ for (const locale of ["en", "es"] as const) {
       page.getByRole("button", { name: "Internal notebook", exact: true }),
     ).toBeVisible();
     await expect(preview.getByRole("heading")).toHaveCount(0);
-    expect(await downloadReadme(page, locale)).toBe("Content to share\n");
+    expect(parseReadmeManifest(await downloadReadme(page, locale))).toMatchObject({
+      status: "valid",
+      markdown: "Content to share\n",
+      matchesSource: true,
+    });
     await expect
       .poll(async () => (await storedProfile(page)).customSections[0])
       .toMatchObject({

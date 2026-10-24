@@ -60,6 +60,7 @@ The GitHub Profile Generator documentation describes the product, its available 
 | [Activity and contribution order](decisions/0041-activity-contribution-order-and-readable-cards.md)  | Choose content order and keep two-column card text readable.                                    |
 | [Internal section names](decisions/0042-custom-section-title-visibility.md)                          | Keep section names in the editor while optionally hiding README headings.                       |
 | [Public card export checks](decisions/0043-public-card-export-check.md)                              | Explicit anonymous image checks, deployment failures, and export readiness.                     |
+| [README round-trip and guided import](decisions/0044-readme-roundtrip-and-guided-import.md)          | Hidden versioned structure, explicit full-profile recovery, and reviewed module suggestions.    |
 | [Third-party notices](../THIRD_PARTY_NOTICES.md)                                                     | Provenance and licenses for icons, flags, the code editor, and Extended cards.                  |
 | [Contributing](../CONTRIBUTING.md)                                                                   | Workflow, expectations for changes, and pull requests.                                          |
 

@@ -14,6 +14,15 @@ import { renderCustomSectionWithListIndex } from "./render-custom";
 import { renderProjects } from "./render-projects";
 import { renderPresentation } from "./render-presentation";
 import { renderTechnologies } from "./render-technologies";
+import { serializeProjectFile } from "../project";
+import type { SectionReference } from "../profile/profile-schema";
+import {
+  appendReadmeManifest,
+  fingerprintReadmeBody,
+  README_MANIFEST_FORMAT,
+  README_MANIFEST_VERSION,
+  type ReadmeManifestSection,
+} from "./readme-manifest";
 
 /**
  * document must be structurally valid (from the factory, parser or domain operations).
@@ -22,7 +31,11 @@ import { renderTechnologies } from "./render-technologies";
  */
 export function generateReadme(
   document: ProfileDocument,
-  options: { readonly activityCardBaseUrl?: string } = {},
+  options: {
+    readonly activityCardBaseUrl?: string;
+    readonly includeReadmeManifest?: boolean;
+    readonly includeRecoverySnapshot?: boolean;
+  } = {},
 ): ReadmeResult {
   const sections: string[] = [];
   const errors: ReadmeIssue[] = [];
@@ -30,6 +43,7 @@ export function generateReadme(
   const customImages: CustomImageSource[] = [];
   const customHtml: CustomHtmlFragment[] = [];
   const activityCards: string[] = [];
+  const manifestSections: ReadmeManifestSection[] = [];
   const labels = readmeLabels[document.contentLocale];
   let customListIndex = 0;
   let cursor = 0;
@@ -70,14 +84,20 @@ export function generateReadme(
     }
   }
 
-  function append(markdown: string, htmlFragments: readonly CustomHtmlFragment[] = []) {
+  function append(
+    markdown: string,
+    reference: SectionReference,
+    htmlFragments: readonly CustomHtmlFragment[] = [],
+  ) {
     if (!markdown) return;
     if (sections.length > 0) cursor += 2;
+    const start = cursor;
     for (const fragment of htmlFragments) {
       customHtml.push({ ...fragment, start: cursor + fragment.start, end: cursor + fragment.end });
     }
     sections.push(markdown);
     cursor += markdown.length;
+    manifestSections.push({ ...reference, start, end: cursor });
   }
 
   for (const reference of document.sectionOrder) {
@@ -96,7 +116,7 @@ export function generateReadme(
           htmlBudget,
         );
         customListIndex = rendered.nextListIndex;
-        append(rendered.markdown, rendered.htmlFragments);
+        append(rendered.markdown, reference, rendered.htmlFragments);
       }
       continue;
     }
@@ -110,7 +130,7 @@ export function generateReadme(
     switch (moduleId) {
       case "presentation": {
         const rendered = renderPresentation(document, errors, htmlBudget);
-        append(rendered.markdown, rendered.htmlFragments);
+        append(rendered.markdown, reference, rendered.htmlFragments);
         continue;
       }
       case "knowledge":
@@ -119,12 +139,12 @@ export function generateReadme(
         continue;
       case "projects": {
         const rendered = renderProjects(document.data.projects, labels, errors, htmlBudget);
-        append(rendered.markdown, rendered.htmlFragments);
+        append(rendered.markdown, reference, rendered.htmlFragments);
         continue;
       }
       case "technologies": {
         const rendered = renderTechnologies(document.data.technologies, labels, errors, htmlBudget);
-        append(rendered.markdown, rendered.htmlFragments);
+        append(rendered.markdown, reference, rendered.htmlFragments);
         continue;
       }
       case "contributions": {
@@ -137,23 +157,61 @@ export function generateReadme(
           activityCards,
           htmlBudget,
         );
-        append(rendered.markdown, rendered.htmlFragments);
+        append(rendered.markdown, reference, rendered.htmlFragments);
         continue;
       }
       case "contact":
         content = renderContact(document.data.contact, labels, errors);
         break;
     }
-    append(content);
+    append(content, reference);
   }
 
   if (errors.length > 0) return { success: false, errors };
   if (sections.length === 0) {
     return { success: false, errors: [{ code: "empty_profile", path: [] }] };
   }
+  let markdown = `${sections.join("\n\n")}\n`;
+  if (options.includeReadmeManifest || options.includeRecoverySnapshot) {
+    let recoverySnapshot: ProfileDocument | undefined;
+    if (options.includeRecoverySnapshot) {
+      const validated = serializeProjectFile(document);
+      if (!validated.success) {
+        return {
+          success: false,
+          errors: [{ code: "recovery_manifest_too_large", path: [] }],
+        };
+      }
+      recoverySnapshot = document;
+    }
+
+    const manifest = appendReadmeManifest(markdown, {
+      format: README_MANIFEST_FORMAT,
+      version: README_MANIFEST_VERSION,
+      bodyLength: markdown.length,
+      bodyFingerprint: fingerprintReadmeBody(markdown),
+      sections: manifestSections,
+      ...(recoverySnapshot ? { recoverySnapshot } : {}),
+    });
+    if (!manifest.success) {
+      return {
+        success: false,
+        errors: [
+          {
+            code: options.includeRecoverySnapshot
+              ? "recovery_manifest_too_large"
+              : "readme_manifest_too_large",
+            path: [],
+          },
+        ],
+      };
+    }
+    markdown = manifest.markdown;
+  }
+
   return {
     success: true,
-    markdown: `${sections.join("\n\n")}\n`,
+    markdown,
     ...(exportIssues.length > 0 ? { exportIssues } : {}),
     ...(customImages.length > 0 ? { customImages } : {}),
     ...(customHtml.length > 0 ? { customHtml } : {}),

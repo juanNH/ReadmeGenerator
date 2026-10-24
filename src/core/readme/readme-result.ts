@@ -10,7 +10,9 @@ export type ReadmeIssue = {
     | "invalid_code"
     | "invalid_username"
     | "invalid_activity_options"
-    | "activity_not_configured";
+    | "activity_not_configured"
+    | "readme_manifest_too_large"
+    | "recovery_manifest_too_large";
   readonly path: readonly (string | number)[];
 };
 
