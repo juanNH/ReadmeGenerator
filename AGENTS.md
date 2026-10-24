@@ -19,6 +19,9 @@ The current release includes the Next.js foundation, a bilingual visual kit, `Pr
 
 ## Architecture and code
 
+- Custom section `title` is the editor name. V2 `showTitle?: boolean` controls only its exported heading; absence/true preserves earlier output and false retains the name and formatting while omitting title validation and HTML budget. Adapt implicit subheadings to the visible title, preserve explicit levels/HTML, and retain the flag through duplication and JSON. Do not add defaults on recovery. See [ADR 0042](docs/decisions/0042-custom-section-title-visibility.md).
+- A working browser card preview does not prove public image access. With configured cards, export requires an explicit anonymous check of the exact canonical URLs, valid for five minutes and invalidated when URLs change. Never query during mounting/recovery/edits, follow redirects, forward cookies/tokens, or accept arbitrary hosts. Keep server concurrency/body/time/rate limits and temporary editor state outside the profile and data cache. See [ADR 0043](docs/decisions/0043-public-card-export-check.md).
+
 - Use the Next.js App Router and strict TypeScript. Keep routes and layouts small; put behavior in the scope that owns it.
 - Keep English as the default language and Spanish as a fully supported option. Use `next-intl`, routes under `src/app/[locale]`, and message namespaces; avoid hard-coded interface text in components. Changing languages preserves the equivalent route, uses language names without flags, and keeps the correct `lang` attribute.
 - Prefer Server Components. Use `"use client"` at the smallest boundary that needs state, events, or browser APIs. Do not convert an entire layout into a client component for convenience.

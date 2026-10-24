@@ -8,7 +8,7 @@ process.env.EXPORTED_ACTIVITY_FIXTURES = "1";
 /** Build first. The isolated server never uses the developer's GitHub credential. */
 export default defineConfig({
   testDir: ".",
-  testMatch: "exported-activity-cards.spec.ts",
+  testMatch: ["exported-activity-cards.spec.ts", "activity-export-check.spec.ts"],
   fullyParallel: false,
   workers: 1,
   retries: 0,

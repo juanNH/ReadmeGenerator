@@ -410,6 +410,37 @@ for (const locale of ["en", "es"] as const) {
   });
 }
 
+test("project replacement refreshes the custom-language editor for a retained block ID", async ({
+  page,
+}) => {
+  const current = currentProfile("en");
+  current.visibility.presentation = false;
+  current.customSections[0]!.visible = true;
+  const currentCode = current.customSections[0]!.blocks.find((block) => block.id === "code");
+  if (currentCode?.type !== "code") throw new Error("Expected the current code block fixture");
+  currentCode.language = "my-dialect";
+  const candidate = structuredClone(current);
+  const code = candidate.customSections[0]!.blocks.find((block) => block.id === "code");
+  if (code?.type !== "code") throw new Error("Expected the current code block fixture");
+  code.language = "python";
+
+  await openEditor(page, "en", preservedRecords(current));
+  await page.getByRole("button", { name: "Unpublished idea", exact: true }).click();
+  const language = page.getByRole("combobox", { name: "Language (optional)", exact: true });
+  const customLanguage = page.getByRole("textbox", { name: "Language identifier", exact: true });
+  await expect(language).toHaveValue("__custom_language__");
+  await expect(customLanguage).toHaveValue("my-dialect");
+
+  await openProject(page);
+  await chooseFile(page, candidate);
+  await replaceProject(page);
+
+  await expect(language).toHaveValue("python");
+  await expect(customLanguage).toHaveCount(0);
+  await expect(page.getByRole("group", { name: "Code block: python" })).toBeVisible();
+  expect(JSON.parse((await stored(page))!).customSections[0].blocks[1].language).toBe("python");
+});
+
 test("project files: a UTF-8 BOM v1 file migrates for review and keeps the existing v1 storage key exact", async ({
   page,
 }) => {

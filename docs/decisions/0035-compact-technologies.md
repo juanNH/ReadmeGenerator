@@ -13,11 +13,11 @@ Add `data.technologies.layout?: "compact" | "grouped"` exclusively to v2. Its ab
 
 The “README layout” selector offers compact tags and category headings. Changing it updates the same Markdown used by preview, copy, and download. It does not regroup, rename, or remove categories, items, identities, or notes. All form edits and organization operations preserve the selected option.
 
-Compact mode displays the category name in bold on the same row as its tools, wrapping to fit the width. Each name is wrapped in `kbd` and, when available, includes the catalog's pinned 20 × 20 decorative icon. Custom names remain text without an inferred brand. Notes keep their order and paragraphs; they are not hidden to reduce height. Groups with no useful content are omitted.
+Compact mode displays the category name in bold on the same row as its tools, wrapping to fit the width. Each catalog tool's pinned 20 × 20 decorative icon and visible name share one `kbd`, so the badge background covers both. Custom names remain text without an inferred brand. Notes keep their order and paragraphs; they are not hidden to reduce height. Groups with no useful content are omitted.
 
 HTML is built from HAST text nodes, filtered with `renderProfileHtml`, and shares its limits and budget with the rest of the document. Exact UTF-16 ranges and allowed trees are provided through `customHtml`, without expanding `customImages`, enabling global HTML, or persisting metadata. `invalid_html` errors identify the affected group; the UI offers to fix it or return to category headings. Hidden technologies do not use the budget.
 
-The preview recognizes only exact catalog URLs, an empty alternative text value, and 20 × 20 dimensions in order to use local SVGs. Compact tags use inline-flex alignment and bounded wrapping in the local preview so the icon and label occupy the available chip area without clipping. The rest of the image and HTML policy remains in place. No third-party badges are requested, no endpoint is created, and `APP_URL` is not required. Colors come from existing icons. GitHub controls the published `kbd` styling, so matching its appearance pixel-for-pixel is not promised.
+The preview recognizes only exact catalog URLs, an empty alternative text value, and 20 × 20 dimensions in order to use local SVGs. It places the icon and label in the same badge, matching the exported HTML rather than relying on preview-only layout. The reader controls badge colors and wrapping; at extreme widths, rendering can differ between Markdown readers. The rest of the image and HTML policy remains in place. No third-party badges are requested, no endpoint is created, and `APP_URL` is not required.
 
 ## Alternatives Considered
 
