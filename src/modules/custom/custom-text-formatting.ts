@@ -9,11 +9,21 @@ import { normalizeInlineText } from "@/core/readme/escape-markdown";
 export type CustomTextBlock = Extract<CustomBlock, { type: "paragraph" | "heading" }>;
 export type CustomTextKind = "paragraph" | "1" | "2" | "3";
 
-/** Older headings adapt to the optional section title until a level is explicitly chosen. */
+/** Older headings adapt to the visible section title until a level is explicitly chosen. */
 export function getCustomTextKind(block: CustomTextBlock, sectionTitle: string): CustomTextKind {
   return block.type === "paragraph"
     ? "paragraph"
     : (String(block.level ?? (normalizeInlineText(sectionTitle) ? 3 : 2)) as "1" | "2" | "3");
+}
+
+/** Keep the editor name and formatting while returning to the absent, visible default. */
+export function changeCustomTitleVisibility(
+  section: CustomSection,
+  showTitle: boolean,
+): CustomSection {
+  const content = { ...section };
+  delete content.showTitle;
+  return showTitle ? content : { ...content, showTitle: false };
 }
 
 /** An explicit heading choice stays stable when the optional section title changes. */

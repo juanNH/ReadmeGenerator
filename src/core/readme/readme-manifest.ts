@@ -224,7 +224,10 @@ export function appendReadmeManifest(
     markdown.length + marker.length > README_MANIFEST_MAX_SOURCE_LENGTH
   )
     return { success: false, code: "too_large" };
-  return { success: true, markdown: `${markdown}${marker}` };
+  // Keep the trailer in its own Markdown block. Without this separator, a
+  // terminal HTML comment can be parsed as part of the final authored HTML
+  // block and invalidate the preview's exact-range check.
+  return { success: true, markdown: `${markdown}\n${marker}` };
 }
 
 /** Parses only the exact terminal manifest. Arbitrary HTML comments are not metadata. */
@@ -261,7 +264,10 @@ export function parseReadmeManifest(source: string): ReadmeManifestParseResult {
   const manifest = parseManifest(value);
   if (!manifest) return { status: "invalid", ...original, reason: "invalid_document" };
 
-  const markdown = source.slice(0, markerIndex);
+  const beforeMarker = source.slice(0, markerIndex);
+  // The current writer inserts one extra newline to isolate the comment from
+  // terminal HTML. Older manifests had only the body's final newline.
+  const markdown = beforeMarker.endsWith("\n\n") ? beforeMarker.slice(0, -1) : beforeMarker;
   return {
     status: "valid",
     markdown,

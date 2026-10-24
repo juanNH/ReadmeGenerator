@@ -37,7 +37,7 @@ async function openEditor(page: Page, profile: ProfileDocument) {
     value: JSON.stringify(profile),
   });
   await page.goto("/en/editor");
-  await expect(page.getByRole("textbox", { name: "Section title", exact: true })).toHaveValue(
+  await expect(page.getByRole("textbox", { name: "Section name", exact: true })).toHaveValue(
     profile.customSections[0]!.title,
   );
 }

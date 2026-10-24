@@ -1,5 +1,7 @@
 # Reglas de `src/core`
 
+- `CustomSection.title` conserva el nombre interno. `showTitle?: boolean` solo en v2 oculta el encabezado exportado con `false`; ausencia/true mantiene la salida anterior, sin defaults al recuperar. Conservar nombre/formato al ocultar, duplicar y abrir JSON; omitir errores/presupuesto del título oculto y ajustar únicamente la jerarquía implícita. El resultado efímero de comprobar tarjetas públicas no pertenece al documento ni al generador. Ver [ADR 0042](../../docs/decisions/0042-custom-section-title-visibility.md) y [ADR 0043](../../docs/decisions/0043-public-card-export-check.md).
+
 Este ámbito contiene `ProfileDocument` v2, sus validaciones, operaciones puras, contratos de actividad y generación de README para cinco secciones fijas y secciones personalizadas repetibles. `sectionOrder` combina referencias a nueve IDs fijos heredados con referencias a `customSections`. Conocimientos, formación y actualidad están retirados; métricas aporta tarjetas a contribuciones sin sección separada. Los límites están definidos en [arquitectura](../../docs/architecture.md) y [editor](../../docs/editor.md).
 
 - Mantener TypeScript puro: sin React, Next.js, DOM, `window`, `localStorage`, `fetch`, variables de entorno ni SDKs de proveedores.

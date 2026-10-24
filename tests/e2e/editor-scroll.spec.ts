@@ -5,9 +5,9 @@ import { mobileTest } from "./mobile-test";
 
 const draftKey = "github-profile-generator.profile.v2";
 const copy = {
-  en: { title: "Section title", text: "Text", preview: "Preview", document: "README preview" },
+  en: { title: "Section name", text: "Text", preview: "Preview", document: "README preview" },
   es: {
-    title: "Título de la sección",
+    title: "Nombre de la sección",
     text: "Texto",
     preview: "Vista previa",
     document: "Vista previa del README",

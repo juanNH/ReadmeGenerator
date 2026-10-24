@@ -52,24 +52,23 @@ export function renderTechnologies(
       if (!name && !context) continue;
       hasContent = true;
       if (name) {
+        const chipChildren: ElementContent[] = [];
+        if (technology)
+          chipChildren.push(
+            {
+              type: "element",
+              tagName: "img",
+              properties: { width: 20, height: 20, src: technology.iconUrl, alt: "" },
+              children: [],
+            },
+            { type: "text", value: " " },
+          );
+        chipChildren.push({ type: "text", value: name });
         const chip: Element = {
           type: "element",
           tagName: "kbd",
           properties: {},
-          children: [
-            ...(technology
-              ? [
-                  {
-                    type: "element" as const,
-                    tagName: "img",
-                    properties: { width: 20, height: 20, src: technology.iconUrl, alt: "" },
-                    children: [],
-                  },
-                  { type: "text" as const, value: " " },
-                ]
-              : []),
-            { type: "text", value: name },
-          ],
+          children: chipChildren,
         };
         paragraph.push(chip);
       }

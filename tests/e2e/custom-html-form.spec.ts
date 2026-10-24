@@ -147,7 +147,7 @@ test("HTML original and filtered output stay distinct across duplication, hiding
 }) => {
   await openEditor(page);
   await page.getByRole("button", { name: "Add custom section", exact: true }).click();
-  await page.getByRole("textbox", { name: "Section title", exact: true }).fill("HTML notes");
+  await page.getByRole("textbox", { name: "Section name", exact: true }).fill("HTML notes");
   await showCustomBlockPicker(page);
   await page.getByRole("button", { name: "Add HTML", exact: true }).click();
   const source = '<p class="note">My original text</p>\n<!-- keep my original -->';
@@ -171,7 +171,7 @@ test("HTML original and filtered output stay distinct across duplication, hiding
   const original = (await storedProfile(page))!.customSections[0]!;
   await page.getByRole("button", { name: "Duplicate section", exact: true }).click();
   await expectCodeSource(field, source);
-  await page.getByRole("textbox", { name: "Section title", exact: true }).fill("HTML copy");
+  await page.getByRole("textbox", { name: "Section name", exact: true }).fill("HTML copy");
   const copiedSource = "<p>Independent HTML copy</p>";
   await fillCodeSource(field, copiedSource);
   await showSectionOrganizer(page);

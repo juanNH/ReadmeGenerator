@@ -89,6 +89,7 @@ export const customBlockSchema = z.discriminatedUnion("type", [
 export const customSectionSchema = z.strictObject({
   id: customEntryIdSchema,
   title: z.string(),
+  showTitle: z.boolean().optional(),
   titleLevel: customHeadingLevelSchema.optional(),
   titleAlignment: customTextAlignmentSchema.optional(),
   visible: z.boolean(),

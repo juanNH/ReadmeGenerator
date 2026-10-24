@@ -15,12 +15,13 @@ const publicOrigin = "https://profiles.example.com";
 const title = "Local <fixture> & public";
 const targets = ["fixture-dev/sample", "abcdef1234567890", "fixture-coder"] as const;
 
-function exportedCards(locale: ContentLocale) {
+function exportedCards(locale: ContentLocale, columns: 1 | 2 = 1) {
   const document = createEmptyProfile(locale);
   document.visibility.metrics = true;
   document.data.metrics = {
     username: "@Fixture-Dev",
     cards: [...metricCardIds],
+    cardColumns: columns,
     appearance: {
       theme: "dark",
       palette: "violet",
@@ -202,6 +203,24 @@ test.describe("anonymous real /cards routes with local-only provider fixtures", 
     process.env.EXPORTED_ACTIVITY_FIXTURES !== "1",
     "Requires the isolated, guarded provider fixture server; never use real credentials.",
   );
+
+  test("checks the exact two-column exported images through the real export endpoint", async ({
+    request,
+  }) => {
+    const sources = exportedCards("en", 2).urls.filter((value) =>
+      /\/(extended-stats|extended-languages)\.svg\?/.test(value),
+    );
+    expect(sources).toHaveLength(2);
+    const response = await request.post("/api/cards/export-check", { data: { sources } });
+    expect(response.status()).toBe(200);
+    expect(await response.json()).toEqual({ status: "ready", stale: false });
+    expect(response.headers()["cache-control"]).toBe("no-store");
+    const invalid = await request.post("/api/cards/export-check", {
+      data: { sources: [sources[0]!.replace(publicOrigin, "https://other.example.com")] },
+    });
+    expect(invalid.status()).toBe(400);
+    expect(await invalid.json()).toEqual({ status: "failed", reason: "invalid_request" });
+  });
 
   for (const locale of ["en", "es"] as const) {
     test(`serves ten passive XML SVG families anonymously and decodes them as images in ${locale}`, async ({

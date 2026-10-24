@@ -36,7 +36,7 @@ export function renderCustomSectionWithListIndex(
 ): CustomSectionRenderResult {
   let nextListIndex = initialListIndex;
   if (!section.visible) return { markdown: "", nextListIndex };
-  const title = escapeInlineText(section.title);
+  const title = section.showTitle === false ? "" : escapeInlineText(section.title);
   const htmlBlocks = new Map<number, Root>();
   function html(source: string, path: readonly (string | number)[], blockIndex: number): string {
     const rendered = renderProfileHtml(source, path, errors, htmlBudget);

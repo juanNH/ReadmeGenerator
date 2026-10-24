@@ -1,5 +1,7 @@
 # Reglas de `src/server`
 
+- La comprobación explícita de tarjetas públicas valida URLs canónicas exactas contra el origen configurado, sin admitir hosts/rutas arbitrarios. Hacer solo HEAD anónimo, sin cookies/Authorization ni redirects, con MIME SVG y estado ready/stale. Mantener límites de cuerpo/tiempo, 32 URLs, 4 solicitudes activas, 1 comprobación simultánea, 12 comprobaciones y 60 HEAD por minuto por proceso; cancelar ante fallo o aborto y no devolver cuerpos/Location. Diferenciar protección, incompatibilidad, datos y fallos temporales. No cambiar hosting ni credenciales para encubrir el fallo. Ver [ADR 0043](../../docs/decisions/0043-public-card-export-check.md).
+
 Este ámbito implementa lecturas opcionales de GitHub y estadísticas públicas WakaTime, y reserva la asistencia con IA para una feature posterior. GitHub requiere configuración exclusiva del servidor; WakaTime usa una cuenta pública independiente sin credenciales. No presentar datos ficticios ni una integración GitHub sin configurar como una consulta real completada.
 
 - Marcar las implementaciones exclusivas del servidor con `import "server-only"`. No importar este ámbito desde componentes o utilidades que llegan al navegador.

@@ -49,6 +49,20 @@ describe("README import manifests", () => {
     });
   });
 
+  it("separates the terminal comment from authored HTML and restores its exact body", () => {
+    const body = "<div><p>Profile content</p></div>\n";
+    const appended = appendReadmeManifest(body, manifestFor(body));
+
+    expect(appended.success).toBe(true);
+    if (!appended.success) return;
+    expect(appended.markdown).toContain("</div>\n\n<!-- github-profile-generator:manifest:v1\n");
+    expect(parseReadmeManifest(appended.markdown)).toMatchObject({
+      status: "valid",
+      markdown: body,
+      matchesSource: true,
+    });
+  });
+
   it("retains a valid snapshot when the visible README body has been edited", () => {
     const body = "## Contact\n\n- [Website](<https://example.com/>)\n";
     const appended = appendReadmeManifest(body, manifestFor(body));

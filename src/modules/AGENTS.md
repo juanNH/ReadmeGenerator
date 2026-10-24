@@ -1,5 +1,7 @@
 # Reglas de `src/modules`
 
+- La sección personalizada permite un nombre interno mediante `title` y una casilla independiente «Mostrar título en el README». `showTitle: false` conserva nombre y formato; reactivar quita el override sin borrar las opciones. Mantener el nombre en navegación y encabezado del editor aunque no se exporte. Los subtítulos implícitos consideran únicamente el título visible. Ver [ADR 0042](../../docs/decisions/0042-custom-section-title-visibility.md).
+
 En Presentación, los ejemplos completos de saludo y titular con emojis se muestran como placeholders y ayuda. Los controles de tipografía por campo ofrecen predeterminado de GitHub, cursiva y monoespaciado; no prometer familias de fuentes que GitHub no admite. Elegir predeterminado elimina esa opción, sin modificar texto, alineación ni tamaño.
 
 Este ámbito contiene los cinco formularios fijos de presentación, tecnologías, proyectos, actividad y contribuciones, y contacto, además del formulario para instancias personalizadas. Conocimientos, formación y actualidad siguen retirados, también en borradores anteriores. Métricas se configura dentro de contribuciones y no tiene navegación separada. Consultar [arquitectura](../../docs/architecture.md), [editor](../../docs/editor.md) y el alcance autorizado antes de ampliar sus funciones.

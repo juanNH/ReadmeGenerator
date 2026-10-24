@@ -111,6 +111,36 @@ describe("one optional activity and contributions section", () => {
     expect(shown.success && shown.markdown).toContain("?locale=es");
   });
 
+  it("places manual contributions before or after activity cards as selected", () => {
+    const profile = activityProfile();
+    profile.visibility.contributions = true;
+    profile.data.contributions.items = [
+      { id: "guide", title: "A useful guide", description: "", url: "" },
+    ];
+    const activityFirst = generateReadme(profile, {
+      activityCardBaseUrl: "https://profiles.example.com",
+    });
+    expect(activityFirst.success).toBe(true);
+    if (!activityFirst.success) return;
+    const activity = activityFirst.markdown.indexOf("[![GitHub contribution calendar");
+    const contribution = activityFirst.markdown.indexOf("### Highlights");
+    expect(activity).toBeGreaterThanOrEqual(0);
+    expect(contribution).toBeGreaterThan(activity);
+
+    profile.data.metrics.contentOrder = "contributions-first";
+    const contributionsFirst = generateReadme(profile, {
+      activityCardBaseUrl: "https://profiles.example.com",
+    });
+    expect(contributionsFirst.success).toBe(true);
+    if (!contributionsFirst.success) return;
+    const reorderedActivity = contributionsFirst.markdown.indexOf(
+      "[![GitHub contribution calendar",
+    );
+    const reorderedContribution = contributionsFirst.markdown.indexOf("### Highlights");
+    expect(reorderedContribution).toBeGreaterThanOrEqual(0);
+    expect(reorderedContribution).toBeLessThan(reorderedActivity);
+  });
+
   it("validates a username only for selected visible cards", () => {
     const profile = activityProfile();
     profile.data.metrics.username = "https://example.com/";

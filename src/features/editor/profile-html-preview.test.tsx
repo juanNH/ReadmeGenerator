@@ -3,12 +3,29 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import type { CustomHtmlFragment } from "@/core/readme";
 import { findTechnology } from "@/core/technologies";
+import { createEmptyProfile } from "@/core/profile/profile-operations";
+import { generateReadme } from "@/core/readme";
 
 vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key }));
 
 import { ProfileHtmlPreview } from "./profile-html-preview";
 
 describe("profile HTML technology chips", () => {
+  it("keeps catalog icons and visible names inside the same exported badge", () => {
+    const document = createEmptyProfile("en");
+    document.visibility.technologies = true;
+    document.data.technologies.groups = [
+      { id: "web", name: "Frontend", items: [{ id: "react", name: "React", context: "" }] },
+    ];
+    const result = generateReadme(document);
+    if (!result.success || !result.customHtml?.[0]) throw new Error("Expected compact HTML");
+    const html = renderToStaticMarkup(
+      createElement(ProfileHtmlPreview, { fragment: result.customHtml[0] }),
+    );
+    expect(html).toMatch(/<kbd[^>]*><img[^>]*class="[^"]*align-middle[^"]*"[^>]*\/?> React<\/kbd>/);
+    expect(html).not.toContain("<sub");
+  });
+
   it("centers the catalog icon and label in a content-sized chip", () => {
     const technology = findTechnology("React")!;
     const fragment: CustomHtmlFragment = {

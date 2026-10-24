@@ -216,6 +216,15 @@ globalThis.fetch = async (input, init) => {
   const headers = new Headers(
     init?.headers ?? (input instanceof Request ? input.headers : undefined),
   );
+  if (
+    url.origin === "https://profiles.example.com" &&
+    (url.pathname.startsWith("/cards/github/") || url.pathname.startsWith("/cards/extended/"))
+  ) {
+    const method = init?.method ?? (input instanceof Request ? input.method : "GET");
+    if (method !== "HEAD" || headers.has("authorization") || headers.has("cookie"))
+      throw new Error("The export check must use anonymous HEAD requests in local fixtures.");
+    return originalFetch(new URL(`${url.pathname}${url.search}`, "http://127.0.0.1:3200"), init);
+  }
   if (url.hostname === "api.github.com") {
     if (headers.get("authorization") !== "Bearer fixture-public-token")
       throw new Error("The local fixture server accepts only its explicit non-secret token.");

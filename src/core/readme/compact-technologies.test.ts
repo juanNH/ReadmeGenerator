@@ -75,7 +75,10 @@ describe("compact technologies", () => {
     const original = structuredClone(data);
     const result = generated(data);
     expect(result.markdown).not.toContain("### Frontend");
-    expect(result.markdown).toContain("<strong>Frontend: </strong><kbd>");
+    expect(result.markdown).toContain("<strong>Frontend: </strong><kbd><img");
+    expect(result.markdown).toContain("<kbd><img");
+    expect(result.markdown).toContain(" React</kbd>");
+    expect(result.markdown).not.toMatch(/\s(?:style|class)=/);
     expect(result.markdown).toContain('alt=""');
     expect(result.markdown).toContain('width="20" height="20"');
     expect(result.markdown).not.toContain('width="32"');

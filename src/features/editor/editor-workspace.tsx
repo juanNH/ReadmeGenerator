@@ -55,6 +55,8 @@ import { localActivityCardSources } from "./activity-card-requests";
 import { useActivityData } from "./use-activity-data";
 import { useEditorScroll } from "./use-editor-scroll";
 import { downloadProjectFile } from "./download-project-file";
+import { useActivityExportCheck } from "./use-activity-export-check";
+import { ActivityExportReadiness } from "./activity-export-readiness";
 
 function ImportLoading() {
   const t = useTranslations("Editor");
@@ -196,9 +198,7 @@ export function EditorWorkspace({
   }
   const activeLabel = activeId ? (sectionLabels.get(activeId) ?? null) : null;
   const activeCustom = getCustomSection(profile, activeId);
-  const activeHeading = activeCustom
-    ? t("custom.untitled", { number: profile.customSections.indexOf(activeCustom) + 1 })
-    : activeLabel;
+  const activeHeading = activeLabel;
   const isLoading = hydration === "loading";
   const includeRecoverySnapshot = recoverySnapshotProfile === profile;
   const result = generateReadme(profile, {
@@ -206,6 +206,8 @@ export function EditorWorkspace({
     includeReadmeManifest: true,
     includeRecoverySnapshot,
   });
+  const exportedCardSources = result.success ? (result.activityCards ?? []) : [];
+  const publicCardCheck = useActivityExportCheck(exportedCardSources);
   const activityCardSources = result.success
     ? localActivityCardSources(result.activityCards ?? [], activityCardBaseUrl)
     : [];
@@ -243,7 +245,13 @@ export function EditorWorkspace({
   const hasHtmlErrors = readmeErrors.some((error) => error.code === "invalid_html");
   const hasCodeErrors = readmeErrors.some((error) => error.code === "invalid_code");
   const hasLocalCards = result.success && Boolean(result.exportIssues?.length);
-  const canExport = !isLoading && result.success && !hasLocalCards;
+  const hasExportedCards = exportedCardSources.length > 0;
+  const canCheckCards = !isLoading && result.success && !hasLocalCards && hasExportedCards;
+  const canExport =
+    !isLoading &&
+    result.success &&
+    !hasLocalCards &&
+    (!hasExportedCards || publicCardCheck.state.status === "ready");
   const exportGuidance = isLoading
     ? t("storage.loading")
     : isEmpty
@@ -268,7 +276,9 @@ export function EditorWorkspace({
                         ? t("export.invalidLinks")
                         : hasLocalCards
                           ? t("export.localCards")
-                          : t("export.ready");
+                          : hasExportedCards && publicCardCheck.state.status !== "ready"
+                            ? t("export.cards.required")
+                            : t("export.ready");
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -489,6 +499,15 @@ export function EditorWorkspace({
       setExportFeedback("copied");
     } catch {
       setExportFeedback("copyError");
+    }
+  }
+
+  function excludeActivityCards() {
+    const next = setModuleVisibility(profile, "metrics", false);
+    if (next.success) {
+      pendingWorkspaceFocus.current = true;
+      editDocument(next.data);
+      setAnnouncement(t("metrics.hidden"));
     }
   }
 
@@ -889,7 +908,7 @@ export function EditorWorkspace({
         >
           <EmojiInserter />
           <Card>
-            <CardHeader className="gap-1 border-b border-border px-4 py-2 sm:gap-2 sm:p-6">
+            <CardHeader className="gap-0 border-b border-border px-4 py-1 sm:gap-2 sm:p-6">
               <div className="flex min-w-0 items-center justify-between gap-2 text-xs text-muted-foreground">
                 <div className="sr-only sm:not-sr-only sm:min-w-0">
                   <span className="hidden items-center gap-2 font-medium sm:flex">
@@ -942,7 +961,7 @@ export function EditorWorkspace({
                   id="editor-section-title"
                   ref={configurationHeadingRef}
                   tabIndex={-1}
-                  className="min-w-0 scroll-mt-[var(--editor-toolbar-offset)] text-base font-semibold tracking-tight wrap-anywhere sm:text-xl"
+                  className="min-w-0 scroll-mt-[var(--editor-toolbar-offset)] text-sm leading-5 font-semibold tracking-tight wrap-anywhere sm:text-xl"
                 >
                   {activeHeading ?? t("settings.chooseTitle")}
                 </h2>
@@ -1098,18 +1117,23 @@ export function EditorWorkspace({
                   size="sm"
                   className="mt-2 max-w-full text-left whitespace-normal"
                   disabled={isLoading}
-                  onClick={() => {
-                    const next = setModuleVisibility(profile, "metrics", false);
-                    if (next.success) {
-                      pendingWorkspaceFocus.current = true;
-                      editDocument(next.data);
-                      setAnnouncement(t("metrics.hidden"));
-                    }
-                  }}
+                  onClick={excludeActivityCards}
                 >
                   {t("metrics.hide")}
                 </Button>
               </div>
+            )}
+            {canCheckCards && (
+              <ActivityExportReadiness
+                state={publicCardCheck.state}
+                firstSource={exportedCardSources[0]!}
+                disabled={isLoading}
+                onCheck={() => {
+                  setExportFeedback("idle");
+                  void publicCardCheck.check();
+                }}
+                onExclude={excludeActivityCards}
+              />
             )}
             <p
               id="readme-export-guidance"

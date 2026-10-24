@@ -2,6 +2,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 import { readFile } from "node:fs/promises";
 import { createEmptyProfile } from "../../src/core/profile/profile-operations";
+import { generateReadme } from "../../src/core/readme";
 import { mobileTest } from "./mobile-test";
 import { findTechnology } from "../../src/core/technologies";
 
@@ -86,11 +87,106 @@ test("named technology icons share a compact row and export readable labels with
     markdown.match(/<kbd><img width="20" height="20"[^>]+alt=""[^>]*> [^<]+<\/kbd>/g),
   ).toHaveLength(toolNames.length);
   expect(markdown).not.toContain('width="32"');
-  for (const name of toolNames) expect(markdown).toContain(`> ${name}</kbd>`);
+  for (const name of toolNames) expect(markdown).toContain(` ${name}</kbd>`);
   await page.screenshot({
     path: "work/previews/expanded-technologies-desktop.png",
     fullPage: true,
   });
+});
+
+test("exported technology labels align without application CSS in an unstyled browser", async ({
+  page,
+}) => {
+  const document = createEmptyProfile("en");
+  document.visibility.technologies = true;
+  const names = ["React", "Next.js", "Python"];
+  document.data.technologies.groups = [
+    {
+      id: "tools",
+      name: "Technologies",
+      items: names.map((name, index) => ({ id: `tool-${index}`, name, context: "" })),
+    },
+  ];
+  const result = generateReadme(document);
+  if (!result.success || !result.customHtml?.[0]) throw new Error("Expected exported HTML");
+  for (const name of names) {
+    const technology = findTechnology(name)!;
+    await page.route(technology.iconUrl, async (route) =>
+      route.fulfill({
+        contentType: "image/svg+xml",
+        body: await readFile(`public${technology.iconPath}`),
+      }),
+    );
+  }
+  // Use only the exported HTML: no application CSS or layout correction for kbd.
+  await page.setContent(`<!doctype html><html><body>${result.customHtml[0].html}</body></html>`);
+  await expect(page.locator("kbd img")).toHaveCount(names.length);
+  await expect(page.locator("img")).toHaveCount(names.length);
+  await expect
+    .poll(() =>
+      page
+        .locator("img")
+        .evaluateAll((images) =>
+          images.every(
+            (image) =>
+              image instanceof HTMLImageElement &&
+              image.complete &&
+              image.naturalWidth > 0 &&
+              image.closest("kbd") !== null,
+          ),
+        ),
+    )
+    .toBe(true);
+  expect(
+    await page
+      .locator("kbd")
+      .first()
+      .evaluate((element) => getComputedStyle(element).display),
+  ).toBe("inline");
+  for (const width of [360, 1000]) {
+    await page.setViewportSize({ width, height: 360 });
+    const bounds = await page.locator("p").evaluate((element) =>
+      [...element.querySelectorAll("img")].map((image) => {
+        const label = image.nextSibling;
+        const badge = image.closest("kbd");
+        if (!(label instanceof Text) || !badge) throw new Error("Expected the complete badge");
+        const labelRange = window.document.createRange();
+        labelRange.setStart(label, 1);
+        labelRange.setEnd(label, label.length);
+        const iconBox = image.getBoundingClientRect();
+        const labelBox = labelRange.getBoundingClientRect();
+        const badgeBox = badge.getBoundingClientRect();
+        return {
+          width: iconBox.width,
+          height: iconBox.height,
+          iconRight: iconBox.right,
+          badgeLeft: badgeBox.left,
+          badgeRight: badgeBox.right,
+          labelLeft: labelBox.left,
+          labelRight: labelBox.right,
+          centerDistance: Math.abs(
+            iconBox.y + iconBox.height / 2 - labelBox.y - labelBox.height / 2,
+          ),
+        };
+      }),
+    );
+    for (const bound of bounds) {
+      expect(bound.width).toBe(20);
+      expect(bound.height).toBe(20);
+      expect(bound.badgeLeft).toBeLessThanOrEqual(bound.iconRight);
+      expect(bound.badgeRight).toBeGreaterThanOrEqual(bound.labelRight);
+      expect(bound.labelLeft).toBeGreaterThan(bound.iconRight);
+      expect(bound.centerDistance).toBeLessThanOrEqual(6);
+    }
+  }
+  // An external reader controls wrapping at extreme widths; all complete labels remain readable.
+  await page.setViewportSize({ width: 120, height: 360 });
+  for (const name of names) await expect(page.locator("kbd", { hasText: name })).toBeVisible();
+  expect(
+    await page.evaluate(() => window.document.documentElement.scrollWidth),
+  ).toBeLessThanOrEqual(120);
+  await page.setViewportSize({ width: 360, height: 180 });
+  await page.screenshot({ path: "work/previews/exported-technology-labels-native.png" });
 });
 
 for (const locale of ["en", "es"] as const) {
