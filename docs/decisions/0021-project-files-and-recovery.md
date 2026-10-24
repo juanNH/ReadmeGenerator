@@ -1,6 +1,6 @@
 # ADR 0021: Project Files and Independent Recovery
 
-- Status: accepted.
+- Status: accepted; README recovery metadata is superseded by ADR 0044.
 - Date: 2026-10-20.
 
 ## Context

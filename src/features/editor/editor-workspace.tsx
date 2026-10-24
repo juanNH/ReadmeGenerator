@@ -21,6 +21,7 @@ import {
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { moduleRegistry } from "@/core/modules/module-registry";
 import {
   addCustomSection,
@@ -136,6 +137,9 @@ export function EditorWorkspace({
     restoreProjectBackup,
   } = useProfileDraft(initialContentLocale);
   const [exportFeedback, setExportFeedback] = useState<ExportFeedback>("idle");
+  const [recoverySnapshotProfile, setRecoverySnapshotProfile] = useState<ProfileDocument | null>(
+    null,
+  );
   const [selectedId, setSelectedId] = useState<EditableSectionId | null>(null);
   const [announcement, setAnnouncement] = useState("");
   const [clearFeedback, setClearFeedback] = useState<"saved" | "memory_only" | null>(null);
@@ -196,7 +200,12 @@ export function EditorWorkspace({
     ? t("custom.untitled", { number: profile.customSections.indexOf(activeCustom) + 1 })
     : activeLabel;
   const isLoading = hydration === "loading";
-  const result = generateReadme(profile, { activityCardBaseUrl });
+  const includeRecoverySnapshot = recoverySnapshotProfile === profile;
+  const result = generateReadme(profile, {
+    activityCardBaseUrl,
+    includeReadmeManifest: true,
+    includeRecoverySnapshot,
+  });
   const activityCardSources = result.success
     ? localActivityCardSources(result.activityCards ?? [], activityCardBaseUrl)
     : [];
@@ -209,6 +218,12 @@ export function EditorWorkspace({
   const cardsNeedRefresh = activityData.needsSearch;
   const readmeErrors = result.success ? [] : result.errors;
   const isEmpty = readmeErrors.some((error) => error.code === "empty_profile");
+  const hasRecoveryManifestError = readmeErrors.some(
+    (error) => error.code === "recovery_manifest_too_large",
+  );
+  const hasReadmeManifestError = readmeErrors.some(
+    (error) => error.code === "readme_manifest_too_large",
+  );
   const hasUrlErrors = readmeErrors.some((error) => error.code === "invalid_url");
   const hasImageUrlErrors = readmeErrors.some(
     (error) =>
@@ -233,23 +248,27 @@ export function EditorWorkspace({
     ? t("storage.loading")
     : isEmpty
       ? t("export.empty")
-      : hasInvalidActivityOptions
-        ? t("export.invalidActivityOptions")
-        : hasInvalidUsername
-          ? t("export.invalidUsername")
-          : hasCodeErrors
-            ? t("export.invalidCode")
-            : hasHtmlErrors
-              ? t("export.invalidHtml")
-              : hasImageUrlErrors
-                ? t("export.invalidImages")
-                : hasMissingImageAlt
-                  ? t("export.missingImageDescription")
-                  : hasUrlErrors
-                    ? t("export.invalidLinks")
-                    : hasLocalCards
-                      ? t("export.localCards")
-                      : t("export.ready");
+      : hasRecoveryManifestError
+        ? t("export.recoverySnapshotTooLarge")
+        : hasReadmeManifestError
+          ? t("export.manifestTooLarge")
+          : hasInvalidActivityOptions
+            ? t("export.invalidActivityOptions")
+            : hasInvalidUsername
+              ? t("export.invalidUsername")
+              : hasCodeErrors
+                ? t("export.invalidCode")
+                : hasHtmlErrors
+                  ? t("export.invalidHtml")
+                  : hasImageUrlErrors
+                    ? t("export.invalidImages")
+                    : hasMissingImageAlt
+                      ? t("export.missingImageDescription")
+                      : hasUrlErrors
+                        ? t("export.invalidLinks")
+                        : hasLocalCards
+                          ? t("export.localCards")
+                          : t("export.ready");
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -316,6 +335,7 @@ export function EditorWorkspace({
   }, [profile, activeId, compactView]);
 
   function editDocument(next: ProfileDocument) {
+    setRecoverySnapshotProfile(null);
     setExportFeedback("idle");
     setProjectDownloadFeedback(null);
     setClearFeedback(null);
@@ -498,6 +518,7 @@ export function EditorWorkspace({
 
   function recoverWithNewDraft() {
     if (window.confirm(t("storage.resetConfirmation"))) {
+      setRecoverySnapshotProfile(null);
       setClearFeedback(null);
       setExportFeedback("idle");
       setSelectedId(null);
@@ -513,6 +534,7 @@ export function EditorWorkspace({
     if (isLoading || !window.confirm(t("reset.confirmation"))) return;
     const cleared = clearReadme();
     if (cleared.status === "not_ready") return;
+    setRecoverySnapshotProfile(null);
     activityData.reset();
     pendingReadmeImportOpen = false;
     setImportOpen(false);
@@ -529,6 +551,7 @@ export function EditorWorkspace({
   }
 
   function completeImport(next: ProfileDocument) {
+    setRecoverySnapshotProfile(null);
     activityData.reset();
     setClearFeedback(null);
     setExportFeedback("idle");
@@ -591,6 +614,7 @@ export function EditorWorkspace({
   }
 
   function completeProject(next: ProfileDocument) {
+    setRecoverySnapshotProfile(null);
     activityData.reset();
     setClearFeedback(null);
     setExportFeedback("idle");
@@ -1098,6 +1122,45 @@ export function EditorWorkspace({
             >
               {exportGuidance}
             </p>
+            <div className="rounded-md border border-border bg-surface-raised/50 p-3">
+              <div className="flex items-start gap-2">
+                <Checkbox
+                  id="readme-recovery-snapshot"
+                  checked={includeRecoverySnapshot}
+                  disabled={isLoading}
+                  aria-describedby={
+                    includeRecoverySnapshot
+                      ? "readme-recovery-snapshot-help readme-recovery-snapshot-warning"
+                      : "readme-recovery-snapshot-help"
+                  }
+                  onCheckedChange={(checked) =>
+                    setRecoverySnapshotProfile(checked === true ? profile : null)
+                  }
+                />
+                <div className="min-w-0 space-y-1 pt-1">
+                  <label
+                    htmlFor="readme-recovery-snapshot"
+                    className="cursor-pointer text-sm leading-5 font-medium"
+                  >
+                    {t("export.recoverySnapshotLabel")}
+                  </label>
+                  <p
+                    id="readme-recovery-snapshot-help"
+                    className="text-xs leading-5 text-muted-foreground"
+                  >
+                    {t("export.recoverySnapshotHelp")}
+                  </p>
+                  {includeRecoverySnapshot && (
+                    <p
+                      id="readme-recovery-snapshot-warning"
+                      className="rounded-sm bg-warning-soft p-2 text-xs leading-5 text-warning"
+                    >
+                      {t("export.recoverySnapshotWarning")}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
             <div className="flex flex-wrap gap-3">
               <Button
                 onClick={copyReadme}

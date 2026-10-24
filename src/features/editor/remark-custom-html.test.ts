@@ -49,6 +49,26 @@ function render(markdown: string, fragments: readonly CustomHtmlFragment[] = [])
 }
 
 describe("controlled HTML preview ranges", () => {
+  it("keeps the app recovery manifest out of rendered README preview", () => {
+    const profile = createEmptyProfile("en");
+    profile.customSections.push({
+      id: "note",
+      title: "Visible note",
+      visible: true,
+      blocks: [{ id: "paragraph", type: "paragraph", text: "Visible README content" }],
+    });
+    profile.sectionOrder.push({ kind: "custom", sectionId: "note" });
+    const result = generateReadme(profile, { includeRecoverySnapshot: true });
+    if (!result.success) throw new Error(JSON.stringify(result.errors));
+
+    expect(result.markdown).toContain("<!-- github-profile-generator:manifest:v1");
+    expect(result.markdown).toContain("Visible README content");
+    const output = render(result.markdown, result.customHtml);
+    expect(output).toContain("Visible README content");
+    expect(output).not.toContain("github-profile-generator:manifest");
+    expect(output).not.toContain("recoverySnapshot");
+  });
+
   it("authorizes generated project covers only through their exact HTML fragment", () => {
     const profile = createEmptyProfile("en");
     profile.visibility.projects = true;

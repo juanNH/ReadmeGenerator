@@ -12,7 +12,9 @@ import {
   analyzeReadmeImport,
   buildImportedProfile,
   README_IMPORT_MAX_LENGTH,
+  README_IMPORT_MAX_SOURCE_LENGTH,
   type ReadmeImportAnalysis,
+  type ReadmeImportMode,
   type ReadmeImportNotice,
   type ReadmeImportProblem,
 } from "@/core/import";
@@ -25,6 +27,8 @@ type ImportSession = {
   source: string;
   analysis: ReadmeImportAnalysis | null;
   selectedIds: readonly string[];
+  importMode: ReadmeImportMode;
+  destinationOverrides: Readonly<Record<string, "custom">>;
   step: "source" | "review";
 };
 
@@ -52,7 +56,7 @@ export type ReadmeImportPanelProps = {
   onImported: (document: ProfileDocument) => void;
 };
 
-const MAX_FILE_BYTES = README_IMPORT_MAX_LENGTH * 4;
+const MAX_FILE_BYTES = README_IMPORT_MAX_SOURCE_LENGTH * 4;
 const detailsSummaryClass =
   "flex min-h-11 cursor-pointer items-center rounded-md px-2 py-2 text-sm font-medium text-accent-soft-foreground focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:outline-none";
 
@@ -101,6 +105,7 @@ export function ReadmeImportPanel({
   onImported,
 }: ReadmeImportPanelProps) {
   const t = useTranslations("ReadmeImport");
+  const moduleText = useTranslations("Modules");
   const baseId = useId();
   const [source, setSource] = useState(() => inMemoryImportSession?.source ?? "");
   const [analysis, setAnalysis] = useState<ReadmeImportAnalysis | null>(
@@ -109,6 +114,12 @@ export function ReadmeImportPanel({
   const [selectedIds, setSelectedIds] = useState<readonly string[]>(
     () => inMemoryImportSession?.selectedIds ?? [],
   );
+  const [importMode, setImportMode] = useState<ReadmeImportMode>(
+    () => inMemoryImportSession?.importMode ?? "markdown",
+  );
+  const [destinationOverrides, setDestinationOverrides] = useState<
+    Readonly<Record<string, "custom">>
+  >(() => inMemoryImportSession?.destinationOverrides ?? {});
   const [step, setStep] = useState<ImportStep>(() => inMemoryImportSession?.step ?? "source");
   const [inputError, setInputError] = useState<string | null>(null);
   const [operationError, setOperationError] = useState<string | null>(null);
@@ -127,17 +138,22 @@ export function ReadmeImportPanel({
 
   const analysisCurrent =
     analysis !== null && analysis.source === source && analysis.contentLocale === currentLocale;
-  const proposal = analysisCurrent ? buildImportedProfile(analysis, selectedIds) : null;
-  const excludedCount = analysis ? analysis.sections.length - selectedIds.length : 0;
+  const proposal = analysisCurrent
+    ? buildImportedProfile(analysis, selectedIds, { mode: importMode, destinationOverrides })
+    : null;
+  const excludedCount =
+    analysis && importMode !== "snapshot" ? analysis.sections.length - selectedIds.length : 0;
 
   useEffect(() => {
     inMemoryImportSession = {
       source,
       analysis,
       selectedIds,
+      importMode,
+      destinationOverrides,
       step: step === "review" || step === "confirm" ? "review" : "source",
     };
-  }, [source, analysis, selectedIds, step]);
+  }, [source, analysis, selectedIds, importMode, destinationOverrides, step]);
 
   useEffect(() => {
     if (open) headingRef.current?.focus();
@@ -193,6 +209,8 @@ export function ReadmeImportPanel({
     setSource(next);
     setAnalysis(null);
     setSelectedIds([]);
+    setImportMode("markdown");
+    setDestinationOverrides({});
     setAcknowledged(false);
     setMemoryOperation(null);
     setInputError(null);
@@ -227,13 +245,15 @@ export function ReadmeImportPanel({
         const next = new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(
           reader.result,
         );
-        if (next.length > README_IMPORT_MAX_LENGTH) {
+        if (next.length > README_IMPORT_MAX_SOURCE_LENGTH) {
           setInputError(t("problems.source_too_large"));
           return;
         }
         setSource(next);
         setAnalysis(null);
         setSelectedIds([]);
+        setImportMode("markdown");
+        setDestinationOverrides({});
         setAcknowledged(false);
         setMemoryOperation(null);
         setAnnouncement(t("fileLoaded", { name: file.name }));
@@ -270,7 +290,11 @@ export function ReadmeImportPanel({
     const next = analyzeReadmeImport(source, currentLocale);
     setAnalysis(next);
     setSelectedIds(next.sections.map((section) => section.id));
-    if (next.errors.length > 0) {
+    setImportMode(
+      next.recovery.kind === "snapshot" && next.recovery.matchesSource ? "snapshot" : "markdown",
+    );
+    setDestinationOverrides({});
+    if (next.errors.length > 0 && next.recovery.kind !== "snapshot") {
       focusRequest.current = "source";
       setAnnouncement(next.errors.map((error) => t(`problems.${error.code}`)).join(" "));
       return;
@@ -288,6 +312,21 @@ export function ReadmeImportPanel({
     focusRequest.current = next === "source" ? "source" : "step";
   }
 
+  function chooseImportMode(next: ReadmeImportMode) {
+    setImportMode(next);
+    setAcknowledged(false);
+  }
+
+  function keepAsCustom(sectionId: string, checked: boolean) {
+    setDestinationOverrides((current) => {
+      const next = { ...current };
+      if (checked) next[sectionId] = "custom";
+      else delete next[sectionId];
+      return next;
+    });
+    setAcknowledged(false);
+  }
+
   function finish(document: ProfileDocument) {
     // The parent closes and unmounts this panel in the same batch, before effects can run.
     clearImportSession();
@@ -295,6 +334,8 @@ export function ReadmeImportPanel({
     setSource("");
     setAnalysis(null);
     setSelectedIds([]);
+    setImportMode("markdown");
+    setDestinationOverrides({});
     setStep("source");
     setAcknowledged(false);
     setMemoryOperation(null);
@@ -507,7 +548,10 @@ export function ReadmeImportPanel({
                 />
               </Field>
               <p id={`${baseId}-limit`} className="text-xs leading-5 text-muted-foreground">
-                {t("sourceLimit", { limit: README_IMPORT_MAX_LENGTH })}
+                {t("sourceLimit", {
+                  bodyLimit: README_IMPORT_MAX_LENGTH,
+                  sourceLimit: README_IMPORT_MAX_SOURCE_LENGTH,
+                })}
               </p>
               {readingFile && (
                 <p role="status" className="text-sm text-muted-foreground">
@@ -528,59 +572,168 @@ export function ReadmeImportPanel({
 
           {step === "review" && analysis && (
             <>
-              <p className="text-sm leading-6 text-muted-foreground">{t("reviewHelp")}</p>
+              <p className="text-sm leading-6 text-muted-foreground">
+                {t(importMode === "snapshot" ? "recovery.snapshotReviewHelp" : "reviewHelp")}
+              </p>
+              <p
+                role="status"
+                className="rounded-md border border-border bg-surface-raised p-3 text-sm leading-6"
+              >
+                {analysis.recovery.kind === "snapshot"
+                  ? t(
+                      analysis.recovery.matchesSource
+                        ? "recovery.snapshotMatch"
+                        : "recovery.snapshotEdited",
+                    )
+                  : analysis.recovery.kind === "structural"
+                    ? t(
+                        analysis.recovery.matchesSource
+                          ? "recovery.structural"
+                          : "recovery.structuralEdited",
+                      )
+                    : analysis.recovery.kind === "invalid"
+                      ? t("recovery.invalid")
+                      : analysis.recovery.kind === "unsupported"
+                        ? t("recovery.unsupported")
+                        : t("recovery.bestEffort")}
+              </p>
+              {analysis.recovery.kind === "snapshot" && (
+                <fieldset className="space-y-2 rounded-md border border-border p-3">
+                  <legend className="px-1 text-sm font-medium">{t("recovery.modeLabel")}</legend>
+                  <label className="flex min-h-11 items-start gap-2 py-1 text-sm leading-6">
+                    <input
+                      type="radio"
+                      name={`${baseId}-import-mode`}
+                      value="snapshot"
+                      className="mt-1 size-4 accent-accent focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:outline-none"
+                      checked={importMode === "snapshot"}
+                      disabled={disabled || !analysisCurrent}
+                      onChange={() => chooseImportMode("snapshot")}
+                    />
+                    <span>{t("recovery.exactOption")}</span>
+                  </label>
+                  <label className="flex min-h-11 items-start gap-2 py-1 text-sm leading-6">
+                    <input
+                      type="radio"
+                      name={`${baseId}-import-mode`}
+                      value="markdown"
+                      className="mt-1 size-4 accent-accent focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:outline-none"
+                      checked={importMode === "markdown"}
+                      disabled={disabled || !analysisCurrent}
+                      onChange={() => chooseImportMode("markdown")}
+                    />
+                    <span>{t("recovery.markdownOption")}</span>
+                  </label>
+                </fieldset>
+              )}
               {!analysisCurrent && (
                 <p role="alert" className="text-sm text-destructive">
                   {t("stale")}
                 </p>
               )}
               <p className="text-sm font-medium" aria-live="polite" aria-atomic="true">
-                {t("reviewCount", { count: selectedIds.length, total: analysis.sections.length })}
+                {importMode === "snapshot"
+                  ? t("recovery.snapshotReady")
+                  : t("reviewCount", {
+                      count: selectedIds.length,
+                      total: analysis.sections.length,
+                    })}
               </p>
               {diagnostics(analysis.notices, "notices")}
-              <ol className="space-y-3">
-                {analysis.sections.map((section, index) => {
-                  const checked = selectedIds.includes(section.id);
-                  const id = `${baseId}-section-${index}`;
-                  return (
-                    <li
-                      key={section.id}
-                      className="min-w-0 rounded-md border border-border p-3 sm:p-4"
-                    >
-                      <div className="flex min-w-0 items-start gap-2">
-                        <Checkbox
-                          id={id}
-                          checked={checked}
-                          disabled={disabled || !analysisCurrent}
-                          aria-label={t("includeSection", { name: section.label })}
-                          onCheckedChange={(next) => {
-                            setSelectedIds((current) =>
-                              next === true
-                                ? [...current, section.id]
-                                : current.filter((entry) => entry !== section.id),
-                            );
-                            setAcknowledged(false);
-                          }}
-                        />
-                        <div className="min-w-0 flex-1 space-y-1 pt-2">
-                          <h4 className="text-sm font-semibold">
-                            <label htmlFor={id}>{section.label}</label>
-                          </h4>
-                          <p className="text-xs leading-5 text-muted-foreground">
-                            {t("sectionNumber", { number: index + 1 })} ·{" "}
-                            {t(section.representation)}
-                          </p>
+              {importMode === "markdown" && (
+                <ol className="space-y-3">
+                  {analysis.sections.map((section, index) => {
+                    const checked = selectedIds.includes(section.id);
+                    const id = `${baseId}-section-${index}`;
+                    return (
+                      <li
+                        key={section.id}
+                        className="min-w-0 rounded-md border border-border p-3 sm:p-4"
+                      >
+                        <div className="flex min-w-0 items-start gap-2">
+                          <Checkbox
+                            id={id}
+                            checked={checked}
+                            disabled={disabled || !analysisCurrent}
+                            aria-label={t("includeSection", { name: section.label })}
+                            onCheckedChange={(next) => {
+                              setSelectedIds((current) =>
+                                next === true
+                                  ? [...current, section.id]
+                                  : current.filter((entry) => entry !== section.id),
+                              );
+                              setAcknowledged(false);
+                            }}
+                          />
+                          <div className="min-w-0 flex-1 space-y-1 pt-2">
+                            <h4 className="text-sm font-semibold">
+                              <label htmlFor={id}>{section.label}</label>
+                            </h4>
+                            <p className="text-xs leading-5 text-muted-foreground">
+                              {t("sectionNumber", { number: index + 1 })} ·{" "}
+                              {t(section.representation)}
+                            </p>
+                            {section.moduleProposal ? (
+                              <div className="space-y-1 pt-1">
+                                <p className="text-xs leading-5 text-accent-soft-foreground">
+                                  {destinationOverrides[section.id] === "custom"
+                                    ? t("customDestination")
+                                    : t("moduleDestination", {
+                                        module: moduleText(section.moduleProposal.moduleId),
+                                      })}
+                                </p>
+                                <p className="text-xs leading-5 text-muted-foreground">
+                                  {t(`moduleProposalReasons.${section.moduleProposal.reason}`)}
+                                </p>
+                              </div>
+                            ) : section.moduleHint ? (
+                              <div className="space-y-1 pt-1">
+                                <p className="text-xs leading-5 text-accent-soft-foreground">
+                                  {t("moduleHint", {
+                                    module: moduleText(section.moduleHint.moduleId),
+                                  })}
+                                </p>
+                                <p className="text-xs leading-5 text-muted-foreground">
+                                  {t(`moduleHintReasons.${section.moduleHint.reason}`, {
+                                    module: moduleText(section.moduleHint.moduleId),
+                                  })}
+                                </p>
+                              </div>
+                            ) : (
+                              <p className="pt-1 text-xs leading-5 text-muted-foreground">
+                                {t("customDestination")}
+                              </p>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                      <div className="mt-3 space-y-3">
-                        {diagnostics(section.notices, "notices")}
-                        {diagnostics(section.errors, "problems")}
-                        <SourceDetails label={t("sourceDetails")} source={section.source} />
-                      </div>
-                    </li>
-                  );
-                })}
-              </ol>
+                        <div className="mt-3 space-y-3">
+                          {section.moduleProposal && (
+                            <div className="flex items-start gap-2">
+                              <Checkbox
+                                id={`${baseId}-custom-${index}`}
+                                checked={destinationOverrides[section.id] === "custom"}
+                                disabled={disabled || !analysisCurrent}
+                                onCheckedChange={(checked) =>
+                                  keepAsCustom(section.id, checked === true)
+                                }
+                              />
+                              <label
+                                htmlFor={`${baseId}-custom-${index}`}
+                                className="min-h-11 py-2 text-sm leading-6"
+                              >
+                                {t("keepAsCustom")}
+                              </label>
+                            </div>
+                          )}
+                          {diagnostics(section.notices, "notices")}
+                          {diagnostics(section.errors, "problems")}
+                          <SourceDetails label={t("sourceDetails")} source={section.source} />
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ol>
+              )}
               {excludedCount > 0 && (
                 <p className="rounded-md border border-border bg-surface-raised p-3 text-sm leading-6">
                   {t("excluded", { count: excludedCount })}
@@ -595,14 +748,21 @@ export function ReadmeImportPanel({
               {proposal?.success && (
                 <SourceDetails label={t("resultDetails")} source={proposal.readme.markdown} />
               )}
-              <SourceDetails label={t("originalDetails")} source={source} />
+              {proposal?.success && importMode === "snapshot" && proposal.readmeErrors && (
+                <p className="rounded-md border border-border bg-surface-raised p-3 text-sm leading-6">
+                  {t("recovery.snapshotValidButExportNeedsAttention")}
+                </p>
+              )}
+              {importMode === "markdown" && analysis.recovery.kind !== "snapshot" && (
+                <SourceDetails label={t("originalDetails")} source={source} />
+              )}
               <p className="text-xs leading-5 text-muted-foreground">{t("noRemotePreview")}</p>
               <div className="flex flex-wrap gap-2">
                 <Button
                   onClick={() => goTo("confirm")}
                   disabled={disabled || !analysisCurrent || !proposal?.success}
                 >
-                  {t("continue")}
+                  {t(importMode === "snapshot" ? "recovery.continueSnapshot" : "continue")}
                 </Button>
                 <Button variant="outline" onClick={() => goTo("source")}>
                   <ArrowLeft aria-hidden="true" />
@@ -618,7 +778,13 @@ export function ReadmeImportPanel({
           {(step === "confirm" || step === "restore") && (
             <>
               <p className="text-sm leading-6">
-                {t(step === "restore" ? "restoreHelp" : "confirmHelp")}
+                {t(
+                  step === "restore"
+                    ? "restoreHelp"
+                    : importMode === "snapshot"
+                      ? "recovery.confirmSnapshotHelp"
+                      : "confirmHelp",
+                )}
               </p>
               {step === "confirm" && (
                 <>
@@ -652,7 +818,13 @@ export function ReadmeImportPanel({
                   disabled={disabled}
                 />
                 <label htmlFor={`${baseId}-confirm`} className="min-h-11 py-2 text-sm leading-6">
-                  {t(step === "restore" ? "restoreLabel" : "confirmLabel")}
+                  {t(
+                    step === "restore"
+                      ? "restoreLabel"
+                      : importMode === "snapshot"
+                        ? "recovery.confirmSnapshotLabel"
+                        : "confirmLabel",
+                  )}
                 </label>
               </div>
               {operationError && (
@@ -694,7 +866,13 @@ export function ReadmeImportPanel({
                     }
                   >
                     <Check aria-hidden="true" />
-                    {t(step === "restore" ? "confirmRestore" : "confirm")}
+                    {t(
+                      step === "restore"
+                        ? "confirmRestore"
+                        : importMode === "snapshot"
+                          ? "recovery.confirmSnapshot"
+                          : "confirm",
+                    )}
                   </Button>
                   <Button
                     variant="outline"

@@ -6,7 +6,7 @@
   "sourceTitle": "1. Paste or open your Markdown",
   "sourceLabel": "README Markdown",
   "sourceHelp": "Paste the complete README, including any HTML. Nothing changes in your draft until you confirm.",
-  "sourceLimit": "Up to {limit} characters. Some emoji count as two characters.",
+  "sourceLimit": "Up to {bodyLimit} characters for ordinary Markdown or {sourceLimit} for a README with app recovery data. Some emoji count as two characters.",
   "openFile": "Open a .md file",
   "fileHelp": "Choose a UTF-8 .md file, up to {limit} KB. It is read locally and never uploaded.",
   "readingFile": "Reading your file…",
@@ -18,7 +18,41 @@
   "analyze": "Detect sections",
   "cancel": "Cancel import",
   "reviewTitle": "2. Review detected sections",
-  "reviewHelp": "Sections become independent custom sections in the same order. Names do not automatically turn them into built-in modules. Check every conversion before continuing.",
+  "reviewHelp": "Review each proposed module destination and conversion. Sections without a clear match remain custom. Nothing changes until you confirm.",
+  "moduleDestination": "Proposed destination: {module}",
+  "moduleHint": "Possible match: {module} (review only)",
+  "customDestination": "This content will be kept as a custom section.",
+  "keepAsCustom": "Keep this content as a custom section instead",
+  "moduleProposalReasons": {
+    "profile_header": "The opening name and introduction match the profile header structure.",
+    "technology_catalog_list": "The list matches known technologies and tools.",
+    "project_link_list": "The linked entries match the project format.",
+    "contribution_link_list": "The linked entries match the contribution format.",
+    "contact_links": "These links match common contact destinations."
+  },
+  "moduleHintReasons": {
+    "manifest_reference": "The app's section marker identifies this as {module}, but its content cannot be mapped to those fixed fields without losing information. It will stay a custom section.",
+    "heading_alias": "The heading resembles {module}, but this content cannot be mapped to its fields safely. It will stay a custom section."
+  },
+  "recovery": {
+    "snapshotMatch": "This README contains a validated copy of the full profile, and its visible Markdown is unchanged. Exact restore is selected by default.",
+    "snapshotEdited": "A saved profile is available, but this README's visible Markdown has changed. Choose whether to restore the saved profile or import the edited text.",
+    "structural": "This README has app-generated section markers, so supported sections can return to their original modules. It does not contain a full profile copy.",
+    "structuralEdited": "This README has app-generated markers, but its text has changed. The old section positions will not be used; review the best-effort module suggestions instead.",
+    "invalid": "A recovery marker was found but could not be validated. The original source is preserved; review the Markdown as a best-effort import.",
+    "unsupported": "This README uses a newer recovery format. Its original source is preserved; review the Markdown as a best-effort import.",
+    "bestEffort": "No valid app recovery marker was found. Suggestions use headings and content structure; review each destination and notice.",
+    "modeLabel": "Choose what to import",
+    "exactOption": "Restore the full saved profile, including hidden sections.",
+    "markdownOption": "Import the visible Markdown into modules and custom sections.",
+    "snapshotReady": "Exact saved profile selected. It replaces the current draft as a whole after confirmation; section selections do not apply.",
+    "snapshotReviewHelp": "Review whether to restore the saved profile or import the visible Markdown content.",
+    "snapshotValidButExportNeedsAttention": "The saved profile is valid and can be restored. Some README export settings may need review afterward.",
+    "continueSnapshot": "Continue to exact restore",
+    "confirmSnapshotHelp": "This restores the profile captured when the README was exported. It replaces your current profile and does not merge. The current profile and exact imported .md will be backed up first.",
+    "confirmSnapshotLabel": "I want to restore the full saved profile from this README.",
+    "confirmSnapshot": "Back up draft and restore profile"
+  },
   "reviewCount": "{count, plural, one {# section selected} other {# sections selected}} of {total}",
   "reviewReady": "Sections detected. Review their conversion and any notices before continuing.",
   "includeSection": "Include {name}",
@@ -79,7 +113,8 @@
     "no_sections_selected": "Select at least one section to import.",
     "invalid_selection": "The section selection is no longer valid. Detect sections again.",
     "invalid_document": "The converted profile does not meet the document rules. Review the source before trying again.",
-    "generation_failed": "The converted profile cannot generate a valid README yet. Correct or exclude the sections with problems."
+    "generation_failed": "The converted profile cannot generate a valid README yet. Correct or exclude the sections with problems.",
+    "snapshot_unavailable": "The saved profile snapshot is unavailable or did not pass validation. Import the Markdown instead or use a project JSON file."
   },
   "notices": {
     "markdown_normalized": "Markdown spacing or syntax is normalized. Compare the resulting text before importing.",
@@ -91,6 +126,11 @@
     "html_unsupported_elements": "Unsupported HTML elements are filtered from the result. Review what remains before importing.",
     "html_unsupported_attributes": "Unsupported HTML attributes, including styling, are removed from the result.",
     "html_comments_removed": "HTML comments are removed from the resulting README; the original keeps them.",
-    "html_repaired_html": "Malformed HTML is repaired. Review the resulting structure before importing."
+    "html_repaired_html": "Malformed HTML is repaired. Review the resulting structure before importing.",
+    "module_mapping_not_confirmed": "A possible module match is uncertain, so this content remains a custom section.",
+    "module_mapping_conflict": "Several sections match the same module. They remain separate custom sections instead of being merged silently.",
+    "manifest_invalid": "The app recovery data could not be validated and will not be used.",
+    "manifest_unsupported": "The app recovery data uses a format this version cannot read.",
+    "manifest_stale": "The visible README has changed since its saved profile snapshot was created."
   }
 }

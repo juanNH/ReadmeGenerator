@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { createEmptyProfile } from "../profile/profile-operations";
+import {
+  addCustomSection,
+  createEmptyProfile,
+  updateCustomSection,
+} from "../profile/profile-operations";
 import { parseProfileDocument } from "../profile/profile-validation";
 import { generateReadme } from "../readme/generate-readme";
 import {
@@ -26,7 +30,7 @@ function imported(source: string) {
 }
 
 describe("local README import analysis", () => {
-  it("creates an ordered proposal without assuming the fixed identity of headings", () => {
+  it("maps fixed modules only when heading and content shape both agree", () => {
     const source =
       "# Hi, I am Alex\n\nI build useful tools.\n\n## Technologies\n\nReact and Rust.\n\n## Contact\n\n[Portfolio](https://alex.dev)";
     const { analysis, result } = imported(source);
@@ -36,15 +40,182 @@ describe("local README import analysis", () => {
       "Contact",
     ]);
     expect(analysis.sections.map((section) => section.source).join("")).toBe(source);
-    expect(result.document.customSections).toHaveLength(3);
-    expect(Object.values(result.document.visibility).every((visible) => !visible)).toBe(true);
+    expect(result.document.customSections).toHaveLength(1);
+    expect(result.document.customSections[0]?.title).toBe("Technologies");
+    expect(result.document.visibility.presentation).toBe(true);
+    expect(result.document.visibility.contact).toBe(true);
+    expect(result.document.visibility.technologies).toBe(false);
     expect(result.document.data.metrics.cards).toEqual([]);
     expect(
       result.document.sectionOrder.filter((section) => section.kind === "module"),
     ).toHaveLength(9);
     expect(parseProfileDocument(result.document).success).toBe(true);
-    expect(result.readme.markdown).toContain("<h1>Hi, I am Alex</h1>");
+    expect(result.document.data.presentation).toMatchObject({
+      displayName: "Alex",
+      bio: "I build useful tools.",
+    });
+    expect(result.document.data.contact.links).toMatchObject([
+      { label: "Portfolio", url: "https://alex.dev/" },
+    ]);
+    expect(result.readme.markdown).toContain("Alex");
     expect(result.document.data.technologies).toEqual(createEmptyProfile("en").data.technologies);
+  });
+
+  it("does not map a fixed-looking title without compatible content", () => {
+    const { analysis, result } = imported("## Contact\n\nWays to get in touch are coming soon.");
+    expect(analysis.sections[0]?.moduleProposal).toBeUndefined();
+    expect(analysis.sections[0]?.notices).toContainEqual(
+      expect.objectContaining({ code: "module_mapping_not_confirmed" }),
+    );
+    expect(result.document.visibility.contact).toBe(false);
+    expect(result.document.customSections[0]?.title).toBe("Contact");
+  });
+
+  it("maps a complete project link list and keeps repeated module candidates custom", () => {
+    const source =
+      "## Projects\n\n- [Widget](https://github.com/alex/widget) — A small tool\n\n## Projects\n\n- [Parser](https://github.com/alex/parser) — A parser";
+    const analysis = analyzeReadmeImport(source, "en");
+    expect(analysis.sections.map((section) => section.moduleProposal)).toEqual([
+      undefined,
+      undefined,
+    ]);
+    expect(
+      analysis.sections.every((section) =>
+        section.notices.some((notice) => notice.code === "module_mapping_conflict"),
+      ),
+    ).toBe(true);
+    expect(analysis.sections.map((section) => section.moduleHint?.moduleId)).toEqual([
+      "projects",
+      "projects",
+    ]);
+    const result = buildAll(analysis);
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.document.visibility.projects).toBe(false);
+    expect(result.document.customSections).toHaveLength(2);
+  });
+
+  it("supports keeping a strong module proposal as a custom section", () => {
+    const analysis = analyzeReadmeImport("## Contact\n\n[Portfolio](https://alex.dev)", "en");
+    expect(analysis.sections[0]?.moduleProposal?.moduleId).toBe("contact");
+    const result = buildImportedProfile(analysis, [analysis.sections[0]!.id], {
+      destinationOverrides: { [analysis.sections[0]!.id]: "custom" },
+    });
+    expect(result).toMatchObject({
+      success: true,
+      document: { visibility: { contact: false }, customSections: [{ title: "Contact" }] },
+    });
+  });
+
+  it("uses current structural references for app-authored Markdown", () => {
+    const contact = createEmptyProfile("en");
+    contact.visibility.contact = true;
+    contact.data.contact.links = [
+      { id: "contact-link", label: "Portfolio", url: "https://alex.dev" },
+    ];
+    const generatedModule = generateReadme(contact, { includeReadmeManifest: true });
+    expect(generatedModule.success).toBe(true);
+    if (!generatedModule.success) return;
+
+    const moduleAnalysis = analyzeReadmeImport(generatedModule.markdown, "en");
+    expect(moduleAnalysis.recovery).toEqual({ kind: "structural", matchesSource: true });
+    expect(moduleAnalysis.sections[0]?.manifestReference).toEqual({
+      kind: "module",
+      moduleId: "contact",
+    });
+    expect(moduleAnalysis.sections[0]?.moduleProposal?.moduleId).toBe("contact");
+
+    const presentation = createEmptyProfile("en");
+    presentation.visibility.presentation = true;
+    presentation.data.presentation.displayName = "Alex";
+    const generatedPresentation = generateReadme(presentation, { includeReadmeManifest: true });
+    expect(generatedPresentation.success).toBe(true);
+    if (!generatedPresentation.success) return;
+    const presentationAnalysis = analyzeReadmeImport(generatedPresentation.markdown, "en");
+    expect(presentationAnalysis.sections[0]?.moduleProposal).toBeUndefined();
+    expect(presentationAnalysis.sections[0]?.moduleHint).toEqual({
+      moduleId: "presentation",
+      confidence: "review",
+      reason: "manifest_reference",
+    });
+    expect(presentationAnalysis.sections[0]?.notices).toContainEqual(
+      expect.objectContaining({ code: "module_mapping_not_confirmed" }),
+    );
+
+    const added = addCustomSection(createEmptyProfile("en"), () => "custom-contact");
+    expect(added.success).toBe(true);
+    if (!added.success) return;
+    const updated = updateCustomSection(added.data, "custom-contact", {
+      id: "custom-contact",
+      title: "Contact",
+      visible: true,
+      blocks: [{ id: "contact-copy", type: "paragraph", text: "Reach me here." }],
+    });
+    expect(updated.success).toBe(true);
+    if (!updated.success) return;
+    const generatedCustom = generateReadme(updated.data, { includeReadmeManifest: true });
+    expect(generatedCustom.success).toBe(true);
+    if (!generatedCustom.success) return;
+
+    const customAnalysis = analyzeReadmeImport(generatedCustom.markdown, "en");
+    expect(customAnalysis.sections[0]?.manifestReference).toEqual({
+      kind: "custom",
+      sectionId: "custom-contact",
+    });
+    expect(customAnalysis.sections[0]?.moduleProposal).toBeUndefined();
+  });
+
+  it("ignores stale structural ranges and offers a valid snapshot past the Markdown cap", () => {
+    const profile = createEmptyProfile("en");
+    profile.visibility.presentation = true;
+    profile.data.presentation.displayName = "Alex";
+    const generated = generateReadme(profile, {
+      includeReadmeManifest: true,
+      includeRecoverySnapshot: true,
+    });
+    expect(generated.success).toBe(true);
+    if (!generated.success) return;
+
+    const markerIndex = generated.markdown.indexOf("<!-- github-profile-generator:manifest:v1\n");
+    const editedBody = `${"x".repeat(README_IMPORT_MAX_LENGTH + 1)}\n`;
+    const source = `${editedBody}${generated.markdown.slice(markerIndex)}`;
+    const analysis = analyzeReadmeImport(source, "en");
+    expect(analysis.errors).toEqual([{ code: "source_too_large" }]);
+    expect(analysis.recovery).toMatchObject({ kind: "snapshot", matchesSource: false });
+    expect(analysis.sections).toEqual([]);
+
+    const restored = buildImportedProfile(analysis, [], { mode: "snapshot" });
+    expect(restored).toMatchObject({
+      success: true,
+      mode: "snapshot",
+      document: {
+        visibility: { presentation: true },
+        data: { presentation: { displayName: "Alex" } },
+      },
+    });
+  });
+
+  it("does not apply stale structural offsets after edits", () => {
+    const contact = createEmptyProfile("en");
+    contact.visibility.contact = true;
+    contact.data.contact.links = [
+      { id: "contact-link", label: "Portfolio", url: "https://alex.dev" },
+    ];
+    const generated = generateReadme(contact, { includeReadmeManifest: true });
+    expect(generated.success).toBe(true);
+    if (!generated.success) return;
+
+    const edited = generated.markdown.replace("Contact", "My links");
+    const analysis = analyzeReadmeImport(edited, "en");
+    expect(analysis.recovery).toEqual({ kind: "structural", matchesSource: false });
+    expect(analysis.sections[0]?.manifestReference).toBeUndefined();
+    expect(analysis.sections[0]?.moduleProposal).toBeUndefined();
+    const result = buildAll(analysis);
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.document.visibility.contact).toBe(false);
+    expect(result.document.customSections).toHaveLength(1);
+    expect(result.document.customSections[0]?.title).toBe("My links");
   });
 
   it("keeps retired heading names as personal custom content", () => {

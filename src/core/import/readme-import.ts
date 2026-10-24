@@ -5,9 +5,9 @@ import remarkGfm from "remark-gfm";
 import { normalizeCodeLanguage } from "../code";
 import type { CustomBlock, CustomSection } from "../profile/custom-content";
 import { createEmptyProfile } from "../profile/profile-operations";
-import type { ContentLocale, ProfileDocument } from "../profile/profile-schema";
+import type { ContentLocale, ProfileDocument, SectionReference } from "../profile/profile-schema";
 import { parseProfileDocument } from "../profile/profile-validation";
-import { generateReadme } from "../readme/generate-readme";
+import { generateReadme, parseReadmeManifest } from "../readme";
 import { normalizeInlineText } from "../readme/escape-markdown";
 import { analyzeProfileHtml } from "../readme/profile-html";
 import { normalizePublicImageUrl } from "../readme/public-image";
@@ -26,7 +26,13 @@ import {
 } from "./readme-import-ast";
 import {
   README_IMPORT_MAX_LENGTH,
+  README_IMPORT_MAX_SOURCE_LENGTH,
   type ImportedProfileResult,
+  type ReadmeImportBuildOptions,
+  type ReadmeImportModuleHint,
+  type ReadmeImportModuleProposal,
+  type ReadmeImportMode,
+  type ReadmeImportRecovery,
   type ReadmeImportAnalysis,
   type ReadmeImportNotice,
   type ReadmeImportNoticeCode,
@@ -34,6 +40,11 @@ import {
   type ReadmeImportProblemCode,
   type ReadmeImportSection,
 } from "./readme-import-types";
+import {
+  proposeReadmeModule,
+  suggestedReadmeModule,
+  type ReadmeImportModuleId,
+} from "./readme-module-proposals";
 
 const parser = unified().use(remarkParse).use(remarkGfm).freeze();
 
@@ -43,16 +54,87 @@ function sourceRange(node: Nodes): { start?: number; end?: number } {
 
 function makeDocument(
   contentLocale: ContentLocale,
-  sections: readonly CustomSection[],
+  sections: readonly ReadmeImportSection[],
+  destinationOverrides: Readonly<Record<string, ReadmeImportModuleId | "custom">> = {},
+): ProfileDocument {
+  const empty = createEmptyProfile(contentLocale);
+  const data = { ...empty.data };
+  const visibility = { ...empty.visibility };
+  const customSections: CustomSection[] = [];
+  const sectionOrder: SectionReference[] = [];
+  const includedModules = new Set<ReadmeImportModuleId>();
+  const includedCustomIds = new Set<string>();
+
+  for (const section of sections) {
+    const proposal = section.moduleProposal;
+    const destination = destinationOverrides[section.id] ?? proposal?.moduleId ?? "custom";
+    if (proposal && destination === proposal.moduleId && !includedModules.has(proposal.moduleId)) {
+      includedModules.add(proposal.moduleId);
+      switch (proposal.moduleId) {
+        case "presentation":
+          data.presentation = proposal.data;
+          break;
+        case "technologies":
+          data.technologies = proposal.data;
+          break;
+        case "projects":
+          data.projects = proposal.data;
+          break;
+        case "contributions":
+          data.contributions = proposal.data;
+          break;
+        case "contact":
+          data.contact = proposal.data;
+          break;
+      }
+      visibility[proposal.moduleId] = true;
+      sectionOrder.push({ kind: "module", moduleId: proposal.moduleId });
+      continue;
+    }
+
+    const preferredId =
+      section.manifestReference?.kind === "custom"
+        ? section.manifestReference.sectionId
+        : section.id;
+    const id = !includedCustomIds.has(preferredId)
+      ? preferredId
+      : !includedCustomIds.has(section.id)
+        ? section.id
+        : `import-custom-${customSections.length + 1}`;
+    includedCustomIds.add(id);
+    customSections.push({
+      id,
+      title: section.title,
+      visible: true,
+      blocks: section.blocks.map((block) =>
+        block.type === "list"
+          ? { ...block, items: block.items.map((item) => ({ ...item })) }
+          : { ...block },
+      ),
+    });
+    sectionOrder.push({ kind: "custom", sectionId: id });
+  }
+
+  for (const reference of empty.sectionOrder) {
+    if (
+      reference.kind !== "module" ||
+      !includedModules.has(reference.moduleId as ReadmeImportModuleId)
+    )
+      sectionOrder.push(reference);
+  }
+
+  return { ...empty, data, visibility, customSections, sectionOrder };
+}
+
+function makeCustomValidationDocument(
+  contentLocale: ContentLocale,
+  section: CustomSection,
 ): ProfileDocument {
   const empty = createEmptyProfile(contentLocale);
   return {
     ...empty,
-    customSections: [...sections],
-    sectionOrder: [
-      ...empty.sectionOrder,
-      ...sections.map((section) => ({ kind: "custom" as const, sectionId: section.id })),
-    ],
+    customSections: [section],
+    sectionOrder: [...empty.sectionOrder, { kind: "custom", sectionId: section.id }],
   };
 }
 
@@ -78,6 +160,8 @@ function analyzeSegment(
   contentLocale: ContentLocale,
   definitions: ReadonlyMap<string, Definition>,
   groupedHtml: boolean,
+  manifestReference: SectionReference | undefined,
+  structuralManifest: boolean,
   nextBlockId: () => string,
 ): ReadmeImportSection {
   const id = `import-section-${index + 1}`;
@@ -323,7 +407,7 @@ function analyzeSegment(
   if (blocks.some((block) => block.type !== "html")) notice("markdown_normalized");
   if (errors.length === 0) {
     const output = generateReadme(
-      makeDocument(contentLocale, [{ id, title, visible: true, blocks }]),
+      makeCustomValidationDocument(contentLocale, { id, title, visible: true, blocks }),
     );
     if (!output.success) {
       for (const issue of output.errors) {
@@ -336,6 +420,50 @@ function analyzeSegment(
     }
   }
   const htmlCount = blocks.filter((block) => block.type === "html").length;
+  const activeImportModules = new Set<string>([
+    "presentation",
+    "technologies",
+    "projects",
+    "contributions",
+    "contact",
+  ]);
+  const hintedModule =
+    manifestReference?.kind === "module" && activeImportModules.has(manifestReference.moduleId)
+      ? (manifestReference.moduleId as ReadmeImportModuleId)
+      : undefined;
+  const headingModule =
+    !structuralManifest || manifestReference?.kind === "module"
+      ? suggestedReadmeModule(title || label)
+      : undefined;
+  const mapping =
+    structuralManifest && manifestReference?.kind !== "module"
+      ? {}
+      : proposeReadmeModule({ id, label, title }, content, definitions, hintedModule);
+  const moduleProposal: ReadmeImportModuleProposal | undefined =
+    errors.length === 0 ? mapping.proposal : undefined;
+  const unconfirmedModule = moduleProposal
+    ? undefined
+    : (hintedModule ?? mapping.attemptedModule ?? headingModule);
+  const moduleHint: ReadmeImportModuleHint | undefined = unconfirmedModule
+    ? {
+        moduleId: unconfirmedModule,
+        confidence: "review",
+        reason: hintedModule ? "manifest_reference" : "heading_alias",
+      }
+    : undefined;
+  if (
+    !moduleProposal &&
+    (mapping.attemptedModule ||
+      hintedModule ||
+      (!structuralManifest && suggestedReadmeModule(title || label)))
+  ) {
+    const rangeNode = content[0] ?? segment.nodes[0];
+    notices.push({
+      code: "module_mapping_not_confirmed",
+      sectionId: id,
+      ...(rangeNode ? sourceRange(rangeNode) : {}),
+    });
+  }
   return {
     id,
     label,
@@ -354,7 +482,80 @@ function analyzeSegment(
             : "mixed",
     notices,
     errors,
+    ...(moduleProposal ? { moduleProposal } : {}),
+    ...(moduleHint ? { moduleHint } : {}),
+    ...(manifestReference ? { manifestReference } : {}),
   };
+}
+
+function recoveryFromManifest(
+  parsed: ReturnType<typeof parseReadmeManifest>,
+): ReadmeImportRecovery {
+  if (parsed.status === "absent") return { kind: "none" };
+  if (parsed.status === "invalid") return { kind: "invalid" };
+  if (parsed.status === "unsupported") return { kind: "unsupported", version: parsed.version };
+  if (parsed.manifest.recoverySnapshot) {
+    return {
+      kind: "snapshot",
+      snapshot: parsed.manifest.recoverySnapshot,
+      matchesSource: parsed.matchesSource,
+    };
+  }
+  return { kind: "structural", matchesSource: parsed.matchesSource };
+}
+
+function manifestReferenceForSegment(
+  segment: ImportSegment,
+  references: readonly (SectionReference & { readonly start: number; readonly end: number })[],
+): SectionReference | undefined {
+  const contained = references.filter(
+    (reference) => reference.start >= segment.start && reference.end <= segment.end,
+  );
+  if (contained.length !== 1) return undefined;
+  const reference = contained[0]!;
+  return reference.kind === "module"
+    ? { kind: "module", moduleId: reference.moduleId }
+    : { kind: "custom", sectionId: reference.sectionId };
+}
+
+function removeRepeatedModuleProposals(
+  sections: readonly ReadmeImportSection[],
+): ReadmeImportSection[] {
+  const counts = new Map<ReadmeImportModuleId, number>();
+  for (const section of sections) {
+    const moduleId = section.moduleProposal?.moduleId;
+    if (moduleId) counts.set(moduleId, (counts.get(moduleId) ?? 0) + 1);
+  }
+  return sections.map((section) => {
+    const moduleId = section.moduleProposal?.moduleId;
+    if (!moduleId || (counts.get(moduleId) ?? 0) < 2) return section;
+    return {
+      id: section.id,
+      label: section.label,
+      title: section.title,
+      source: section.source,
+      start: section.start,
+      end: section.end,
+      blocks: section.blocks,
+      representation: section.representation,
+      errors: section.errors,
+      moduleHint: section.moduleHint ?? {
+        moduleId,
+        confidence: "review",
+        reason: "heading_alias",
+      },
+      ...(section.manifestReference ? { manifestReference: section.manifestReference } : {}),
+      notices: [...section.notices, { code: "module_mapping_conflict", sectionId: section.id }],
+    };
+  });
+}
+
+function manifestNotices(parsed: ReturnType<typeof parseReadmeManifest>): ReadmeImportNotice[] {
+  if (parsed.status === "invalid") return [{ code: "manifest_invalid", detail: parsed.reason }];
+  if (parsed.status === "unsupported")
+    return [{ code: "manifest_unsupported", detail: String(parsed.version) }];
+  if (parsed.status === "valid" && !parsed.matchesSource) return [{ code: "manifest_stale" }];
+  return [];
 }
 
 /** Parses the complete source locally. It never renders, loads a URL or mutates a profile. */
@@ -362,17 +563,30 @@ export function analyzeReadmeImport(
   source: string,
   contentLocale: ContentLocale,
 ): ReadmeImportAnalysis {
-  const empty = { source, contentLocale, sections: [], notices: [] };
+  const manifest = parseReadmeManifest(source);
+  const recovery = recoveryFromManifest(manifest);
+  const sourceForParsing = manifest.status === "valid" ? manifest.markdown : source;
+  const initialNotices = manifestNotices(manifest);
+  const empty = {
+    source,
+    contentLocale,
+    sections: [],
+    notices: initialNotices,
+    recovery,
+  } as const;
   if (!source.trim()) return { ...empty, errors: [{ code: "empty_source" }] };
-  if (source.length > README_IMPORT_MAX_LENGTH) {
+  if (source.length > README_IMPORT_MAX_SOURCE_LENGTH) {
+    return { ...empty, errors: [{ code: "source_too_large" }] };
+  }
+  if (sourceForParsing.length > README_IMPORT_MAX_LENGTH) {
     return { ...empty, errors: [{ code: "source_too_large" }] };
   }
   let root: Root;
-  const initialBom = source.startsWith("\uFEFF");
+  const initialBom = sourceForParsing.startsWith("\uFEFF");
   try {
     // remark skips a leading BOM without including it in source offsets. Parse it
     // explicitly and map every position back before slicing the untouched original.
-    root = parser.parse(initialBom ? source.slice(1) : source) as Root;
+    root = parser.parse(initialBom ? sourceForParsing.slice(1) : sourceForParsing) as Root;
   } catch (error) {
     return {
       ...empty,
@@ -393,18 +607,29 @@ export function analyzeReadmeImport(
   const groupedHtml = hasCrossNodeHtmlContext(root.children);
   let blockIndex = 0;
   try {
-    const sections = splitSegments(root, source, groupedHtml).map((segment, index) =>
+    const canUseManifestRanges = manifest.status === "valid" && manifest.matchesSource;
+    const ranges = canUseManifestRanges ? manifest.manifest.sections : [];
+    const sections = splitSegments(root, sourceForParsing, groupedHtml).map((segment, index) =>
       analyzeSegment(
         segment,
         index,
-        source,
+        sourceForParsing,
         contentLocale,
         definitions,
         hasCrossNodeHtmlContext(segment.nodes),
+        manifestReferenceForSegment(segment, ranges),
+        canUseManifestRanges,
         () => `import-block-${++blockIndex}`,
       ),
     );
-    return { source, contentLocale, sections, notices: [], errors: [] };
+    return {
+      source,
+      contentLocale,
+      sections: removeRepeatedModuleProposals(sections),
+      notices: initialNotices,
+      errors: [],
+      recovery,
+    };
   } catch {
     // Unsupported converter/parser input remains available as the original source, never partial output.
     return { ...empty, errors: [{ code: "parse_failed" }] };
@@ -415,7 +640,31 @@ export function analyzeReadmeImport(
 export function buildImportedProfile(
   analysis: ReadmeImportAnalysis,
   selectedSectionIds: readonly string[],
+  options: ReadmeImportBuildOptions = {},
 ): ImportedProfileResult {
+  const mode: ReadmeImportMode = options.mode ?? "markdown";
+  if (mode === "snapshot") {
+    if (analysis.recovery.kind !== "snapshot")
+      return { success: false, errors: [{ code: "snapshot_unavailable" }] };
+    const parsedSnapshot = parseProfileDocument(analysis.recovery.snapshot);
+    if (!parsedSnapshot.success) return { success: false, errors: [{ code: "invalid_document" }] };
+    const readme = generateReadme(parsedSnapshot.data);
+    const originalManifest = parseReadmeManifest(analysis.source);
+    return {
+      success: true,
+      mode,
+      document: parsedSnapshot.data,
+      readme: readme.success
+        ? readme
+        : {
+            success: true,
+            markdown:
+              originalManifest.status === "valid" ? originalManifest.markdown : analysis.source,
+          },
+      ...(!readme.success ? { readmeErrors: readme.errors } : {}),
+      excludedSectionIds: [],
+    };
+  }
   if (analysis.errors.length > 0) return { success: false, errors: analysis.errors };
   if (selectedSectionIds.length === 0)
     return { success: false, errors: [{ code: "no_sections_selected" }] };
@@ -428,21 +677,18 @@ export function buildImportedProfile(
     return { success: false, errors: [{ code: "invalid_selection" }] };
   }
   const sections = analysis.sections.filter((section) => selected.has(section.id));
+  for (const [sectionId, destination] of Object.entries(options.destinationOverrides ?? {})) {
+    const section = sections.find((entry) => entry.id === sectionId);
+    if (
+      !section?.moduleProposal ||
+      (destination !== "custom" && destination !== section.moduleProposal.moduleId)
+    ) {
+      return { success: false, errors: [{ code: "invalid_selection" }] };
+    }
+  }
   const errors = sections.flatMap((section) => section.errors);
   if (errors.length > 0) return { success: false, errors };
-  const candidate = makeDocument(
-    analysis.contentLocale,
-    sections.map((section) => ({
-      id: section.id,
-      title: section.title,
-      visible: true,
-      blocks: section.blocks.map((block) =>
-        block.type === "list"
-          ? { ...block, items: block.items.map((item) => ({ ...item })) }
-          : { ...block },
-      ),
-    })),
-  );
+  const candidate = makeDocument(analysis.contentLocale, sections, options.destinationOverrides);
   const parsed = parseProfileDocument(candidate);
   if (!parsed.success) return { success: false, errors: [{ code: "invalid_document" }] };
   const readme = generateReadme(parsed.data);
@@ -451,6 +697,7 @@ export function buildImportedProfile(
   }
   return {
     success: true,
+    mode,
     document: parsed.data,
     readme,
     excludedSectionIds: analysis.sections
