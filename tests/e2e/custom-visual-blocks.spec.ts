@@ -177,7 +177,7 @@ test("image, subtitle, quote and divider share the preview and exported README a
     .toBe(4);
   const original = (await storedProfile(page)).customSections[0]!;
   const readme = await downloadReadme(page);
-  const result = generateReadme(await storedProfile(page));
+  const result = generateReadme(await storedProfile(page), { includeReadmeManifest: true });
   expect(result.success).toBe(true);
   if (!result.success) throw new Error("Expected valid visual README");
   expect(readme).toBe(result.markdown);

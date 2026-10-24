@@ -126,7 +126,7 @@ for (const locale of ["en", "es"] as const) {
     expect((await page.evaluate(() => navigator.clipboard.readText())).replace(/\r\n/g, "\n")).toBe(
       source,
     );
-    const generated = generateReadme(await stored(page));
+    const generated = generateReadme(await stored(page), { includeReadmeManifest: true });
     if (!generated.success) throw new Error("Expected valid literal code");
     const output = await download(page, locale);
     expect(output).toBe(generated.markdown);

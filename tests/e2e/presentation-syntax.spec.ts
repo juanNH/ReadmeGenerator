@@ -133,7 +133,7 @@ for (const locale of ["en", "es"] as const) {
       path: `work/previews/presentation-location-${locale}.png`,
       fullPage: true,
     });
-    const result = generateReadme(await stored(page));
+    const result = generateReadme(await stored(page), { includeReadmeManifest: true });
     if (!result.success) throw new Error("Expected a valid presentation");
     const pending = page.waitForEvent("download");
     await page.getByRole("button", { name: t.export.download, exact: true }).click();
@@ -194,7 +194,7 @@ for (const locale of ["en", "es"] as const) {
     );
     await expect(preview.locator("b,script")).toHaveCount(0);
     await expect(preview.locator("img")).toHaveAttribute("src", "/country-flags/ar.svg");
-    const result = generateReadme(await stored(page));
+    const result = generateReadme(await stored(page), { includeReadmeManifest: true });
     if (!result.success) throw new Error("Expected a valid formatted presentation");
     const pending = page.waitForEvent("download");
     await page.getByRole("button", { name: t.export.download, exact: true }).click();

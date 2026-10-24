@@ -6,7 +6,7 @@
   "sourceTitle": "1. Pegá o abrí tu Markdown",
   "sourceLabel": "Markdown del README",
   "sourceHelp": "Pegá el README completo, incluido su HTML. Tu borrador no cambia hasta que confirmes.",
-  "sourceLimit": "Hasta {limit} caracteres. Algunos emojis cuentan como dos caracteres.",
+  "sourceLimit": "Hasta {bodyLimit} caracteres para Markdown común o {sourceLimit} para un README con datos de recuperación de la app. Algunos emojis cuentan como dos caracteres.",
   "openFile": "Abrir archivo .md",
   "fileHelp": "Elegí un .md con codificación UTF-8, de hasta {limit} KB. Se lee localmente y no se sube.",
   "readingFile": "Leyendo tu archivo…",
@@ -18,7 +18,41 @@
   "analyze": "Detectar secciones",
   "cancel": "Cancelar importación",
   "reviewTitle": "2. Revisá las secciones detectadas",
-  "reviewHelp": "Las secciones pasan a ser secciones personalizadas independientes, en el mismo orden. Sus nombres no las convierten automáticamente en módulos fijos. Revisá cada conversión antes de seguir.",
+  "reviewHelp": "Revisá el módulo propuesto y la conversión de cada sección. El contenido sin una coincidencia clara queda como sección personalizada. Nada cambia hasta que confirmes.",
+  "moduleDestination": "Destino propuesto: {module}",
+  "moduleHint": "Posible coincidencia: {module} (requiere revisión)",
+  "customDestination": "Este contenido se conservará como una sección personalizada.",
+  "keepAsCustom": "Conservar este contenido como una sección personalizada",
+  "moduleProposalReasons": {
+    "profile_header": "El nombre inicial y la introducción coinciden con la estructura del encabezado del perfil.",
+    "technology_catalog_list": "La lista coincide con tecnologías y herramientas conocidas.",
+    "project_link_list": "Los enlaces coinciden con el formato de proyectos.",
+    "contribution_link_list": "Los enlaces coinciden con el formato de aportes.",
+    "contact_links": "Estos enlaces coinciden con destinos de contacto habituales."
+  },
+  "moduleHintReasons": {
+    "manifest_reference": "La marca de sección de la app identifica este contenido como {module}, pero no se puede asignar a esos campos fijos sin perder información. Se conservará como sección personalizada.",
+    "heading_alias": "El título se parece a {module}, pero este contenido no se puede asignar a sus campos de forma segura. Se conservará como sección personalizada."
+  },
+  "recovery": {
+    "snapshotMatch": "Este README contiene una copia validada del perfil completo y el Markdown visible no cambió. La restauración exacta está seleccionada.",
+    "snapshotEdited": "Hay un perfil guardado, pero cambió el Markdown visible de este README. Elegí si querés restaurar el perfil guardado o importar el texto editado.",
+    "structural": "Este README tiene marcas de estructura de la app, así que las secciones compatibles pueden volver a sus módulos. No incluye una copia completa del perfil.",
+    "structuralEdited": "Este README tiene marcas de la app, pero cambió su texto. No se usarán las posiciones anteriores; revisá las sugerencias aproximadas de módulos.",
+    "invalid": "Se encontró una marca de recuperación, pero no se pudo validar. Se conserva el original; revisá el Markdown como una importación aproximada.",
+    "unsupported": "Este README usa un formato de recuperación más nuevo. Se conserva el original; revisá el Markdown como una importación aproximada.",
+    "bestEffort": "No se encontró una marca de recuperación válida de la app. Las sugerencias usan los títulos y la estructura del contenido; revisá cada destino y aviso.",
+    "modeLabel": "Elegí qué querés importar",
+    "exactOption": "Restaurar el perfil completo guardado, incluidas las secciones ocultas.",
+    "markdownOption": "Importar el Markdown visible en módulos y secciones personalizadas.",
+    "snapshotReady": "Está seleccionado el perfil guardado exacto. Reemplazará el borrador completo después de confirmar; la selección de secciones no se aplica.",
+    "snapshotReviewHelp": "Revisá si querés restaurar el perfil guardado o importar el contenido visible del Markdown.",
+    "snapshotValidButExportNeedsAttention": "El perfil guardado es válido y se puede restaurar. Después quizá debas revisar la configuración de exportación del README.",
+    "continueSnapshot": "Continuar a la restauración exacta",
+    "confirmSnapshotHelp": "Esto restaura el perfil capturado al exportar el README. Reemplaza el perfil actual y no lo combina. Primero se respaldarán el perfil actual y el archivo .md importado exacto.",
+    "confirmSnapshotLabel": "Quiero restaurar desde este README el perfil completo guardado.",
+    "confirmSnapshot": "Respaldar borrador y restaurar perfil"
+  },
   "reviewCount": "{count, plural, one {# sección seleccionada} other {# secciones seleccionadas}} de {total}",
   "reviewReady": "Secciones detectadas. Revisá la conversión y sus avisos antes de continuar.",
   "includeSection": "Incluir {name}",
@@ -79,7 +113,8 @@
     "no_sections_selected": "Seleccioná al menos una sección para importar.",
     "invalid_selection": "La selección de secciones ya no es válida. Volvé a detectarlas.",
     "invalid_document": "El perfil convertido no cumple las reglas del documento. Revisá el original antes de intentar de nuevo.",
-    "generation_failed": "El perfil convertido todavía no puede generar un README válido. Corregí o excluí las secciones con problemas."
+    "generation_failed": "El perfil convertido todavía no puede generar un README válido. Corregí o excluí las secciones con problemas.",
+    "snapshot_unavailable": "La copia guardada del perfil no está disponible o no pasó la validación. Importá el Markdown o usá un archivo JSON del proyecto."
   },
   "notices": {
     "markdown_normalized": "Se normalizan espacios o sintaxis Markdown. Compará el texto resultante antes de importar.",
@@ -91,6 +126,11 @@
     "html_unsupported_elements": "Se filtran elementos HTML no admitidos. Revisá qué queda antes de importar.",
     "html_unsupported_attributes": "Se retiran los atributos HTML no admitidos, incluidos los estilos.",
     "html_comments_removed": "Los comentarios HTML no aparecen en el README resultante; quedan en el original.",
-    "html_repaired_html": "Se repara HTML mal formado. Revisá la estructura resultante antes de importar."
+    "html_repaired_html": "Se repara HTML mal formado. Revisá la estructura resultante antes de importar.",
+    "module_mapping_not_confirmed": "La posible coincidencia con un módulo no es clara, así que el contenido queda como una sección personalizada.",
+    "module_mapping_conflict": "Varias secciones coinciden con el mismo módulo. Quedan como secciones personalizadas separadas en lugar de combinarse sin avisar.",
+    "manifest_invalid": "No se pudieron validar los datos de recuperación de la app y no se usarán.",
+    "manifest_unsupported": "Los datos de recuperación de la app usan un formato que esta versión no puede leer.",
+    "manifest_stale": "El README visible cambió desde que se creó la copia guardada del perfil."
   }
 }
