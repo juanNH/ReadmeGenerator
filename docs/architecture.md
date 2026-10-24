@@ -128,6 +128,12 @@ The contact renderer adds a decorative 20 × 20 icon inside a recognized link an
 
 Icons identify tools and services without inferring skills or integrating providers. Some entries share a family brand, such as JetBrains AI or ChatGPT/OpenAI; these mappings are documented in attribution. See [ADR 0009](decisions/0009-profile-icons.md).
 
+## Internal Section Names and Exported Titles
+
+Custom sections keep an authored editor name in `title`. The optional v2 `showTitle` flag defaults to visible only by interpretation, without adding a property during parsing. `false` omits the generated title and its HTML budget/errors while retaining the internal name and formatting. Implicit subheadings use the untitled hierarchy; explicit HTML is unchanged. Navigation and the configuration heading use the internal name regardless of export visibility. See [ADR 0042](decisions/0042-custom-section-title-visibility.md).
+
+Public card availability remains outside the pure generator. A small explicit-check endpoint validates the generated URLs against the configured origin and checks their anonymous HEAD responses. Its bounded network service is in `server/activity-export-check`; temporary readiness and cancellation live in the editor. No token, provider data or new profile field is part of this check. See [ADR 0043](decisions/0043-public-card-export-check.md).
+
 ## Custom images in custom sections
 
 The document retains `image` as `{ id, type: "image", url, alt }`. `normalizePublicImageUrl` is a pure function that accepts syntactically public-domain HTTPS, without an IP address, local host or known private suffix, credentials, fragments, or non-standard port. It does not require a file extension and allows a query string. It does not query DNS, network, or availability; an accepted URL does not prove that the response is an image or will remain published. The application does not upload files or turn local, relative, `blob:`, or `data:` paths into public resources.

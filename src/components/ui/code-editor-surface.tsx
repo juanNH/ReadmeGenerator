@@ -151,6 +151,7 @@ export function CodeEditorSurface(props: CodeEditorSurfaceProps) {
   const { ref, value, language = "", wrap } = props;
   const parentRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
+  const detachedView = useRef<{ state: EditorState; focused: boolean } | null>(null);
   const latestProps = useRef(props);
   const compartments = useRef({ language: new Compartment(), options: new Compartment() });
 
@@ -161,72 +162,88 @@ export function CodeEditorSurface(props: CodeEditorSurfaceProps) {
   useEffect(() => {
     if (!parentRef.current) return;
     const current = latestProps.current;
+    const previousView = detachedView.current;
+    detachedView.current = null;
     const initialHistory = recordCodeEditorHistory(current.getInitialHistory(), current.value);
     const initialSource = initialHistory.entries[0] ?? current.value;
     const view = new EditorView({
       parent: parentRef.current,
-      state: restoreEditorSourceHistory(
-        EditorState.create({
-          doc: normalizeEditorLineBreaks(initialSource),
-          extensions: [
-            ...editorSourceTracking(initialSource),
-            history(),
-            lineNumbers(),
-            drawSelection(),
-            indentOnInput(),
-            indentUnit.of("  "),
-            bracketMatching(),
-            sourceHighlighting,
-            editorTheme,
-            keymap.of([
-              ...defaultKeymap.filter(
-                (binding) => binding.key !== "Tab" && binding.key !== "Shift-Tab",
-              ),
-              ...historyKeymap,
-            ]),
-            compartments.current.language.of([]),
-            compartments.current.options.of(editorOptions(current)),
-            EditorView.updateListener.of((update) => {
-              const source = update.state.field(editorSourceField);
-              if (source === update.startState.field(editorSourceField)) return;
-              if (source !== latestProps.current.value) latestProps.current.onChange(source);
-            }),
-            EditorView.domEventHandlers({
-              paste(event, editor) {
-                if (latestProps.current.disabled || latestProps.current.readOnly) return false;
-                const source = event.clipboardData?.getData("text/plain");
-                if (!source) return false;
-                const range = editor.state.selection.main;
-                editor.dispatch({
-                  changes: {
-                    from: range.from,
-                    to: range.to,
-                    insert: normalizeEditorLineBreaks(source),
-                  },
-                  selection: EditorSelection.cursor(
-                    range.from + normalizeEditorLineBreaks(source).length,
-                  ),
-                  annotations: [
-                    exactSourceChanges.of([{ from: range.from, to: range.to, insert: source }]),
-                    Transaction.userEvent.of("input.paste"),
-                  ],
-                  scrollIntoView: true,
-                });
-                event.preventDefault();
-                return true;
-              },
-            }),
-          ],
-        }),
-        initialHistory,
-      ),
+      state:
+        previousView?.state ??
+        restoreEditorSourceHistory(
+          EditorState.create({
+            doc: normalizeEditorLineBreaks(initialSource),
+            extensions: [
+              ...editorSourceTracking(initialSource),
+              history(),
+              lineNumbers(),
+              drawSelection(),
+              indentOnInput(),
+              indentUnit.of("  "),
+              bracketMatching(),
+              sourceHighlighting,
+              editorTheme,
+              keymap.of([
+                ...defaultKeymap.filter(
+                  (binding) => binding.key !== "Tab" && binding.key !== "Shift-Tab",
+                ),
+                ...historyKeymap,
+              ]),
+              compartments.current.language.of([]),
+              compartments.current.options.of(editorOptions(current)),
+              EditorView.updateListener.of((update) => {
+                const source = update.state.field(editorSourceField);
+                if (source === update.startState.field(editorSourceField)) return;
+                if (source !== latestProps.current.value) latestProps.current.onChange(source);
+              }),
+              EditorView.domEventHandlers({
+                paste(event, editor) {
+                  if (latestProps.current.disabled || latestProps.current.readOnly) return false;
+                  const source = event.clipboardData?.getData("text/plain");
+                  if (!source) return false;
+                  const range = editor.state.selection.main;
+                  editor.dispatch({
+                    changes: {
+                      from: range.from,
+                      to: range.to,
+                      insert: normalizeEditorLineBreaks(source),
+                    },
+                    selection: EditorSelection.cursor(
+                      range.from + normalizeEditorLineBreaks(source).length,
+                    ),
+                    annotations: [
+                      exactSourceChanges.of([{ from: range.from, to: range.to, insert: source }]),
+                      Transaction.userEvent.of("input.paste"),
+                    ],
+                    scrollIntoView: true,
+                  });
+                  event.preventDefault();
+                  return true;
+                },
+              }),
+            ],
+          }),
+          initialHistory,
+        ),
     });
     view.setTabFocusMode(true);
     view.scrollDOM.tabIndex = current.disabled ? -1 : 0;
     view.scrollDOM.setAttribute("role", "group");
     view.scrollDOM.setAttribute("aria-label", current.scrollLabel);
     viewRef.current = view;
+    const ownerDocument = view.contentDOM.ownerDocument;
+    if (
+      previousView?.focused &&
+      current.active &&
+      !current.disabled &&
+      (!ownerDocument.activeElement || ownerDocument.activeElement === ownerDocument.body)
+    ) {
+      view.focus();
+    }
     return () => {
+      // Strict Mode reconnects effects after the shell has already handed focus to this view.
+      // Preserve the exact editor state, but only restore focus if nothing else received it.
+      detachedView.current = { state: view.state, focused: view.hasFocus };
       viewRef.current = null;
       view.destroy();
     };

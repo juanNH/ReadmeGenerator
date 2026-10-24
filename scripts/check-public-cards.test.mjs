@@ -134,6 +134,22 @@ test("README: incluye Gist y WakaTime sin usuario GitHub", () => {
   assert.equal(urls.length, 2);
 });
 
+test("README: admite una o dos columnas de perfil y recursos, sin valores libres", () => {
+  for (const columns of ["1", "2"]) {
+    const profile = `${url}&columns=${columns}`;
+    const resource = `${origin}/cards/extended/repository.svg?locale=en&target=alex%2Frepo&columns=${columns}`;
+    assert.deepEqual(
+      collectCardUrls({ origin, source: `![Perfil](${profile})\n![Repo](${resource})` }),
+      [profile, resource],
+    );
+  }
+  for (const columns of ["0", "3", "02", "", "two", "2&columns=1"]) {
+    assert.throws(() =>
+      collectCardUrls({ origin, source: `![Perfil](${url}&columns=${columns})` }),
+    );
+  }
+});
+
 test("README: ignora hosts ajenos, prefijos engañosos, enlaces y código literal", () => {
   const source = `![Real](${url})
 ![Externo](https://outside.example.com/cards/github/alex/summary.svg?locale=es)

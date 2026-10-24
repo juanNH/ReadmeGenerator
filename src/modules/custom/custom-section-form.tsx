@@ -4,6 +4,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { AlignLeft, ArrowDown, ArrowUp, ChevronDown, Plus, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { CodeEditor, type CodeEditorHandle } from "@/components/ui/code-editor";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -25,6 +26,7 @@ import {
   changeCustomTextKind,
   changeCustomTitleAlignment,
   changeCustomTitleLevel,
+  changeCustomTitleVisibility,
   getCustomTextKind,
 } from "./custom-text-formatting";
 
@@ -339,6 +341,7 @@ export function CustomSectionForm({ value, errors, onChange }: CustomSectionForm
         label={t("title")}
         description={t("titleHelp")}
         error={
+          value.showTitle !== false &&
           errors.some(
             (error) =>
               error.code === "invalid_html" &&
@@ -356,14 +359,40 @@ export function CustomSectionForm({ value, errors, onChange }: CustomSectionForm
           onChange={(event) => onChange({ ...value, title: event.target.value })}
         />
       </Field>
-      <CustomFormatFields
-        id={`${baseId}-title-format`}
-        target="title"
-        level={value.titleLevel ?? 2}
-        alignment={value.titleAlignment ?? "left"}
-        onLevelChange={(level) => onChange(changeCustomTitleLevel(value, level))}
-        onAlignmentChange={(alignment) => onChange(changeCustomTitleAlignment(value, alignment))}
-      />
+      <div className="flex min-w-0 items-start gap-1">
+        <Checkbox
+          id={`${baseId}-show-title`}
+          checked={value.showTitle !== false}
+          aria-describedby={`${baseId}-show-title-help`}
+          onCheckedChange={(checked) =>
+            onChange(changeCustomTitleVisibility(value, checked === true))
+          }
+        />
+        <div className="min-w-0 flex-1 py-2.5">
+          <label
+            htmlFor={`${baseId}-show-title`}
+            className="block cursor-pointer text-sm leading-5"
+          >
+            {t("showTitle")}
+          </label>
+          <p
+            id={`${baseId}-show-title-help`}
+            className="mt-1 block text-xs leading-5 text-muted-foreground"
+          >
+            {t("showTitleHelp")}
+          </p>
+        </div>
+      </div>
+      {value.showTitle !== false && (
+        <CustomFormatFields
+          id={`${baseId}-title-format`}
+          target="title"
+          level={value.titleLevel ?? 2}
+          alignment={value.titleAlignment ?? "left"}
+          onLevelChange={(level) => onChange(changeCustomTitleLevel(value, level))}
+          onAlignmentChange={(alignment) => onChange(changeCustomTitleAlignment(value, alignment))}
+        />
+      )}
       <div className="min-w-0 space-y-3">
         <Button
           ref={addBlockRef}
@@ -537,7 +566,7 @@ export function CustomSectionForm({ value, errors, onChange }: CustomSectionForm
               <CustomFormatFields
                 id={`${controlId}-format`}
                 target="text"
-                kind={getCustomTextKind(block, value.title)}
+                kind={getCustomTextKind(block, value.showTitle === false ? "" : value.title)}
                 alignment={block.alignment ?? "left"}
                 onKindChange={(kind) => replaceBlock(changeCustomTextKind(block, kind))}
                 onAlignmentChange={(alignment) =>
@@ -627,7 +656,7 @@ export function CustomSectionForm({ value, errors, onChange }: CustomSectionForm
                 )}
                 onChange={replaceBlock}
                 onUseExample={(source) => {
-                  if (block.source && !window.confirm(t("code.replaceConfirmation"))) return;
+                  if (block.source && !window.confirm(t("code.replaceConfirmation"))) return false;
                   pendingFocus.current = {
                     kind: "block",
                     blockId: block.id,
@@ -635,6 +664,7 @@ export function CustomSectionForm({ value, errors, onChange }: CustomSectionForm
                   };
                   replaceBlock({ ...block, source, language: "json" });
                   setAnnouncement(t("code.exampleApplied"));
+                  return true;
                 }}
               />
             )}

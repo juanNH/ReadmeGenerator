@@ -8,7 +8,7 @@ const draftKey = "github-profile-generator.profile.v2";
 const copy = {
   en: {
     navigation: "Your sections",
-    title: "Section title",
+    title: "Section name",
     text: "Text",
     add: "Add custom section",
     edit: "Edit",
@@ -20,7 +20,7 @@ const copy = {
   },
   es: {
     navigation: "Tus secciones",
-    title: "Título de la sección",
+    title: "Nombre de la sección",
     text: "Texto",
     add: "Agregar sección personalizada",
     edit: "Editar",

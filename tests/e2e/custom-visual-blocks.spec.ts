@@ -136,7 +136,7 @@ test("image, subtitle, quote and divider share the preview and exported README a
   });
   await openEditor(page);
   await page.getByRole("button", { name: "Add custom section", exact: true }).click();
-  await page.getByRole("textbox", { name: "Section title", exact: true }).fill("My corner");
+  await page.getByRole("textbox", { name: "Section name", exact: true }).fill("My corner");
   await showCustomBlockPicker(page);
   await page.getByRole("button", { name: "Add image / banner", exact: true }).click();
   await page.getByRole("textbox", { name: "Public image URL", exact: true }).fill(imageUrl);
@@ -193,7 +193,7 @@ test("image, subtitle, quote and divider share the preview and exported README a
   expect(imageRequests.every((request) => request.referer === undefined)).toBe(true);
   expect(optimizerRequests).toEqual([]);
   await page.getByRole("button", { name: "Duplicate section", exact: true }).click();
-  await page.getByRole("textbox", { name: "Section title", exact: true }).fill("My experiments");
+  await page.getByRole("textbox", { name: "Section name", exact: true }).fill("My experiments");
   await page
     .getByRole("textbox", { name: "Image description", exact: true })
     .fill("An independent cover description");
@@ -218,7 +218,7 @@ test("image, subtitle, quote and divider share the preview and exported README a
   );
   expect(saved).not.toHaveProperty("customImages");
   await page.reload();
-  await expect(page.getByRole("textbox", { name: "Section title", exact: true })).toHaveValue(
+  await expect(page.getByRole("textbox", { name: "Section name", exact: true })).toHaveValue(
     "My experiments",
   );
   await expect(page.getByRole("textbox", { name: "Image description", exact: true })).toHaveValue(
