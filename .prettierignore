@@ -11,3 +11,7 @@ playwright-report
 test-results
 blob-report
 *.tsbuildinfo
+
+# Preserve the official Codex skill copies byte-for-byte.
+.agents/skills/security-best-practices/
+.agents/skills/security-threat-model/
