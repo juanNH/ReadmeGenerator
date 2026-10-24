@@ -249,7 +249,11 @@ test("accessibility: the simple Spanish editor fits 360px with autocomplete, pro
 }) => {
   await page.setViewportSize({ width: 360, height: 800 });
   await openEditor(page, "es");
-  await expect(page.getByRole("checkbox", { includeHidden: true })).toHaveCount(5);
+  await expect(
+    page
+      .getByRole("navigation", { name: "Tus secciones", exact: true })
+      .getByRole("checkbox", { includeHidden: true }),
+  ).toHaveCount(5);
   await addSection(page, "Presentación");
   await page.getByRole("textbox", { name: "Nombre para mostrar", exact: true }).fill("Sol Ejemplo");
   await page
